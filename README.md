@@ -246,7 +246,18 @@ Twelve build from a single expiry: `long_call`, `long_put`,
 `long_call_butterfly`. Two more need a second expiry and build from a
 pair of snapshots: `calendar_spread` and `diagonal_spread`, through
 `--far-snapshot`, or by letting the command find the next expiry on disk
-itself. Fourteen in all.
+itself.
+
+Three more are asymmetric by design: `ratio_spread`, financed by selling
+more than you buy and therefore uncapped on the short side;
+`broken_wing_butterfly`, whose unequal wings remove the risk on one side
+and often open for a credit; and `jade_lizard`, a short put against a short
+call spread, which carries no upside risk when the credit collected exceeds
+the width of that spread. The jade lizard reports whether that condition
+actually holds for the legs it selected rather than claiming it
+structurally.
+
+Seventeen in all.
 
 Each is tagged with which of the five directions it needs, which is what
 `--recommend` ranks against:
@@ -457,7 +468,7 @@ flowchart LR
 ```
 
 Capabilities: `option_chain`, `underlying_quote`, `risk_free_rate`,
-`underlying_history`. Yahoo supplies all four with no key. Alpha Vantage
+`underlying_history`, `dividend_yield`. Yahoo supplies all four with no key. Alpha Vantage
 ships as well and covers underlying history and quotes, sitting below
 Yahoo in the priority for both because its free tier allows roughly
 twenty-five requests a day. A provider whose key is absent is skipped
@@ -474,6 +485,69 @@ written, never logged and never copied into an artifact.
 
 A licence on this software grants no rights over the data it retrieves.
 Each provider's terms govern that.
+
+---
+
+## Asset classes
+
+Every class below works today through the same pipeline. Nothing needed
+adding for them; what was missing was anyone saying so, and a dividend
+yield that was wrong for the ones that pay.
+
+| Class | Reach it through | Chain size measured 2026-08-30 |
+|---|---|---|
+| Index options | `^SPX`, European and cash settled | 843 contracts |
+| Equity and ETF | `SPY`, `AAPL`, any listed name | 492 |
+| Rates and bonds | `TLT`, `IEF`, `SHY` | 43 |
+| Metals | `GLD`, `SLV` | 145 |
+| Energy | `USO`, `UNG` | 71 |
+| Crypto | `BITO`, `IBIT` | 35 |
+| FX | `FXE`, `FXY`, `FXB` | 56 |
+
+Two limits worth stating rather than discovering. The free provider carries
+no option chains for futures or FX spot: `ES=F`, `CL=F`, `GC=F`,
+`EURUSD=X` and `^TNX` all return price history and zero expiries, which is
+why the exchange-traded proxies are the route. And the engine prices
+European exercise, which is exact for index options and an approximation
+for the American-style ETF options above, understating the value of a deep
+in-the-money put most.
+
+### The dividend yield is fetched, and it matters more than it looks
+
+`--dividend-yield` used to default to zero. For an underlying that pays,
+that is not a conservative assumption, it is a wrong number. Measured on a
+real 173-day TLT chain against its actual 4.7 percent trailing yield:
+
+| | assumed zero | real yield |
+|---|---|---|
+| at-the-money implied volatility | 0.0737 | 0.1133 |
+| delta | 0.635 | 0.491 |
+
+Understated by 54 percent and overstated by 23 percent respectively, and
+every Greek, probability and structure built on it inherits that.
+
+The yield now comes from dividends actually paid over the trailing year,
+divided by spot, with the provider's own published figure as a cross-check.
+When the two disagree by more than a quarter, neither is used: BITO's
+option-income distributions compute to 38.8 percent against a published
+61.7, and picking a side there would be a guess wearing a number's
+clothing. A cash index is refused too, because it carries no dividend
+series of its own and reporting zero would be indistinguishable from gold,
+which genuinely pays nothing. In both cases the artifact is degraded, the
+reason says so, and `--dividend-yield` remains the override.
+
+### Futures and FX pricing, with no data behind it
+
+`engine/pricing/forwards.py` has Black-76 for options on futures and
+Garman-Kohlhagen for currency options, both as substitutions into the same
+Black-Scholes-Merton core so they inherit its guards and its numerics. They
+are tested against the published formulae written out independently, on put
+call parity, and on the identity that a currency option equals a futures
+option on the forward those rates imply.
+
+No command calls them, because no provider here can feed them. They are
+capability for someone bringing their own quotes, and the module says so in
+its first paragraph rather than looking like part of a working pipeline.
 
 ---
 
@@ -583,8 +657,8 @@ the project looked broken when it was not.
 Or one suite at a time:
 
 ```
-./shell/.venv/bin/python -m pytest engine/tests -q    # 200 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 290 tests
+./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 320 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -605,7 +679,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           twenty-two mutations, killed or survived
+python3 scripts/mutate.py           forty-one mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -637,8 +711,8 @@ differentiate, with relative tolerances and no absolute floor: an earlier
 version scaled by `max(1, |expected|)`, which silently left three Greeks
 untested, and mutation testing found fourteen surviving defects.
 That harness is in the tree as `scripts/mutate.py` rather than being
-a claim about the past: it breaks the code twenty-two ways and reports
-which breakages the tests notice. Run it. Its current result is twenty-one
+a claim about the past: it breaks the code forty-one ways and reports
+which breakages the tests notice. Run it. Its current result is forty
 killed and one proven equivalent, and getting there closed two real holes
 it found, the inner vega guard in the implied volatility solver and the
 ranking of a non-finite expectation. Every defect fixed since then has a

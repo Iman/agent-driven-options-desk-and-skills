@@ -37,6 +37,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 ENGINE = "engine/src/optiondesk_engine"
+DASHBOARD = "shell/src/optiondesk/dashboard/data.py"
+PAGE = "shell/src/optiondesk/dashboard/page.py"
 
 # name, file, what to find, what to replace it with, which tests must fail
 MUTATIONS = [
@@ -132,6 +134,40 @@ MUTATIONS = [
      "        return None\n",
      "",
      "shell/tests/test_documented_evidence.py"),
+    ("black76-carry-dropped", ENGINE + "/pricing/forwards.py",
+     "    return bs_price(future, strike, t, sigma, kind, r, r)",
+     "    return bs_price(future, strike, t, sigma, kind, r, 0.0)",
+     "engine/tests/test_forwards.py"),
+    ("fx-foreign-rate-dropped", ENGINE + "/pricing/forwards.py",
+     "    return bs_price(spot, strike, t, sigma, kind, r_domestic, "
+     "r_foreign)",
+     "    return bs_price(spot, strike, t, sigma, kind, r_domestic, 0.0)",
+     "engine/tests/test_forwards.py"),
+    ("dividend-not-fetched", "shell/src/optiondesk/cli/chain.py",
+     "            yield_provider, _ = resolve(CAP_DIVIDEND_YIELD, "
+     "args.provider)\n"
+     "            fetched_q = yield_provider.dividend_yield(args.symbol, "
+     "spot=spot)",
+     "            fetched_q = {\"dividend_yield\": None, \"note\": None}",
+     "shell/tests/test_dividend_yield.py"),
+    ("dividend-unit-guessed", "shell/src/optiondesk/providers/yahoo.py",
+     "                published = float(raw) / 100.0",
+     "                published = (float(raw) / 100.0 if raw > 1.0 "
+     "else float(raw))",
+     "shell/tests/test_dividend_yield.py"),
+    ("band-fabricated", ENGINE + "/strategies/playbook.py",
+     '    plan = _plan("iron_condor", legs, chain, band)',
+     '    plan = _plan("iron_condor", legs, chain, reference)',
+     "engine/tests/test_audit_regressions.py"),
+    ("backtest-note-blames-trade-count",
+     "shell/src/optiondesk/cli/backtest.py",
+     "    if entered and not measurable:",
+     "    if False:",
+     "shell/tests/test_backtest_unbounded.py"),
+    ("dashboard-counts-unguarded", "docs/CAPABILITIES.md",
+     "Thirty-nine panels and, at most, thirty-two chart canvases",
+     "Thirty-five panels and, at most, twenty-eight chart canvases",
+     "shell/tests/test_documented_counts.py"),
     ("strategy-not-built-degraded", "shell/src/optiondesk/cli/strategy.py",
      '            "built": False,\n'
      '            "degraded": bool(source_meta.get("degraded")),\n'
@@ -140,6 +176,62 @@ MUTATIONS = [
      '            "built": False,\n'
      '            "reason": ("no viable structure on this chain',
      "shell/tests/test_summary_degraded_contract.py"),
+    # The cross-expiry collectors behind the surface, the premium and the
+    # condor scatter. Each reaches past the selected group, which is
+    # exactly where a per-group collector goes wrong quietly.
+    ("surface-wrong-side", DASHBOARD,
+     'if contract.get("type") != ("put" if strike < spot else "call"):',
+     'if contract.get("type") != ("call" if strike < spot else "put"):',
+     "shell/tests/test_dashboard_data.py"),
+    ("surface-from-one-expiry", DASHBOARD,
+     "    if len(expiries) < 2:\n        return None",
+     "    if len(expiries) < 1:\n        return None",
+     "shell/tests/test_dashboard_data.py"),
+    ("premium-without-realised", DASHBOARD,
+     "    if not simulation:\n        return None",
+     "    if False:\n        return None",
+     "shell/tests/test_dashboard_data.py"),
+    ("premium-gap-inverted", DASHBOARD,
+     '"gap": implied - realised})',
+     '"gap": realised - implied})',
+     "shell/tests/test_dashboard_data.py"),
+    ("condor-width-from-wings", DASHBOARD,
+     "            width = shorts[-1] - shorts[0]",
+     "            width = longs[-1] - longs[0]",
+     "shell/tests/test_dashboard_data.py"),
+    ("condor-scored-across-expiries", DASHBOARD,
+     '        comparison = group["artifacts"].get("comparison")',
+     '        comparison = next(\n'
+     '            (g["artifacts"].get("comparison") for g in groups\n'
+     '             if g["artifacts"].get("comparison")), None)',
+     "shell/tests/test_dashboard_data.py"),
+    ("condor-one-short-admitted", DASHBOARD,
+     "            if len(shorts) < 2:\n                continue",
+     "            if len(shorts) < 1:\n                continue",
+     "shell/tests/test_dashboard_data.py"),
+    # And the markup side of the same four panels: a canvas emitted with no
+    # artifact behind it, or an artifact with no canvas, are both invisible
+    # in a page that renders perfectly well either way.
+    ("surface-panel-dropped", PAGE,
+     'sections.append(_surface_section(payload.get("surface")))',
+     'sections.append("")',
+     "shell/tests/test_dashboard_page.py"),
+    ("premium-panel-dropped", PAGE,
+     'sections.append(_premium_section(payload.get("variance_premium")))',
+     'sections.append("")',
+     "shell/tests/test_dashboard_page.py"),
+    ("condor-panel-dropped", PAGE,
+     'sections.append(_condor_section(payload.get("condors")))',
+     'sections.append("")',
+     "shell/tests/test_dashboard_page.py"),
+    ("gamma-panel-without-an-overlay", PAGE,
+     '    if not has_gamma and not plans:\n        return ""',
+     '    if False:\n        return ""',
+     "shell/tests/test_dashboard_page.py"),
+    ("surface-missing-from-the-blob", PAGE,
+     '        "surface": payload.get("surface"),',
+     '        "surface": None,',
+     "shell/tests/test_dashboard_page.py"),
 ]
 
 

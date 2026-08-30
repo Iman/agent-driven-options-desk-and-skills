@@ -97,9 +97,29 @@ def run(args):
                            args.lookback, engine_backtest)
 
     notes = []
-    if len(returns) < 30:
+    # `returns` holds return on capital at risk, and a trade only appears in
+    # it when that capital is definable. A structure with an unbounded loss,
+    # such as a ratio spread, produces trades with no denominator, so the
+    # two counts diverge. Reporting the shorter one as the trade count said
+    # "only 0 trades" about a run that entered 52, which names the wrong
+    # problem and sends the reader looking for missing data.
+    entered = len(result["trades"])
+    measurable = len(returns)
+    if entered and not measurable:
+        notes.append(
+            "{} trades were entered and none has a definable capital at "
+            "risk, because this structure's maximum loss is unbounded. "
+            "Return on risk has no denominator, so no statistic here can be "
+            "computed. Every entry and exit is still in the trade list, and "
+            "profit in cash terms is still there to read.".format(entered))
+    elif measurable < entered:
+        notes.append(
+            "{} of {} trades have no definable capital at risk and are "
+            "excluded from every statistic below".format(
+                entered - measurable, entered))
+    if measurable and measurable < 30:
         notes.append("only {} trades: too few for any statistic here to "
-                     "carry weight".format(len(returns)))
+                     "carry weight".format(measurable))
     if result["skipped"]:
         notes.append("{} entries skipped, mostly where no viable structure "
                      "existed at that volatility".format(
@@ -148,6 +168,7 @@ def run(args):
         "degraded": bool(choice["degraded"]),
         "degraded_reason": "; ".join(choice["skipped"]) or None,
         "trades": (statistics or {}).get("trades", 0),
+        "trades_entered": len(result["trades"]),
         "win_rate": (statistics or {}).get("win_rate"),
         "mean_return_on_risk": (statistics or {}).get("mean_return"),
         "total_return_on_risk": (statistics or {}).get(

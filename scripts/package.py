@@ -36,7 +36,7 @@ VERSION = "0.1.0"
 AUTHOR = {"name": "Iman Samizadeh"}
 DESCRIPTION = (
     "Option analytics an agent can drive: chains, the full Greek ladder, "
-    "dealer positioning, fourteen structures with ranking, a GARCH-t "
+    "dealer positioning, seventeen structures with ranking, a GARCH-t "
     "simulation, backtests with modelled premiums, and a paper forward "
     "test. Research software, not investment advice."
 )

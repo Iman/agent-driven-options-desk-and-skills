@@ -65,5 +65,5 @@ the artifact.
 
 ## Going deeper
 
-- `reference.md`: all fourteen structures in a table with what each needs and when it pays, the five direction framework, the friction verdicts, and the fields that are not numbers.
+- `reference.md`: all seventeen structures in a table with what each needs and when it pays, the five direction framework, the friction verdicts, and the fields that are not numbers.
 - `workflows/choose-a-structure.md`: turning a view into a structure, and the rules for reporting one.

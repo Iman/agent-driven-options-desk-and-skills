@@ -88,7 +88,13 @@ instead of the newest.
 
 ### 4.1 Pricing and implied volatility
 
-Black-Scholes-Merton with a continuous dividend yield. Implied volatility
+Black-Scholes-Merton with a continuous dividend yield, plus Black-76 for
+options on futures and Garman-Kohlhagen for currency options. The latter
+two are substitutions into the same core, so they inherit its guards and
+numerics, and they are tested against the published formulae written out
+independently rather than against the module itself. Nothing feeds them:
+no provider here carries futures or FX option chains, and the module says
+so in its first paragraph. Implied volatility
 is solved by Newton-Raphson with a bisection fallback.
 
 The part that matters is what it refuses. A contract whose price is
@@ -118,7 +124,7 @@ Net position Greeks are reported with a `complete` flag and a `missing`
 list, because a position Greek summed over legs where one leg had no
 volatility is not a smaller number, it is a wrong one.
 
-### 4.3 Fourteen structures
+### 4.3 Seventeen structures
 
 | structure | when it is the right shape |
 |---|---|
@@ -136,6 +142,9 @@ volatility is not a smaller number, it is a wrong one.
 | long call butterfly | a cheap bet on pinning near a strike |
 | calendar spread | sell near, buy far, same strike, collect the decay difference |
 | diagonal spread | a calendar with a directional lean |
+| ratio spread | financed by selling more than you buy, and uncapped on the short side |
+| broken wing butterfly | a butterfly with unequal wings, no risk on one side, often a credit |
+| jade lizard | short put plus short call spread, no upside risk when the credit exceeds the call width |
 
 Each plan carries legs, breakevens, maximum gain and loss, reward to risk,
 model probability of profit, net Greeks, and a friction estimate of what
@@ -231,8 +240,24 @@ marked at its entry price.
 
 | provider | needs a key | covers |
 |---|---|---|
-| Yahoo | no | option chains, underlying history, quotes, a risk-free proxy |
+| Yahoo | no | option chains, underlying history, quotes, a risk-free proxy, dividend yield |
 | Alpha Vantage | yes | underlying history and quotes, as a fallback |
+
+Seven asset classes reach the desk through this one provider: index
+options through `^SPX`, equity and ETF, rates through `TLT`, metals
+through `GLD`, energy through `USO`, crypto through `BITO` and FX through
+`FXE`. All were measured pulling real chains on 2026-08-30. Futures and FX
+spot are the exception and carry no chains at all here, which is why the
+exchange-traded proxies are the route rather than a preference.
+
+The dividend yield is computed from payments actually made over the
+trailing year rather than read from the provider's published field, whose
+units have changed between library versions and would be a hundredfold
+error waiting for an upgrade. The published figure is kept as a
+cross-check, and when the two disagree by more than a quarter neither is
+used. Assuming zero was measurably wrong: on a 173-day TLT chain it
+understated at-the-money implied volatility by 54 percent and overstated
+delta by 23 percent.
 
 Providers are registered per capability with a priority order. A provider
 whose key is absent is skipped rather than failing. A provider named
@@ -304,7 +329,7 @@ flag, and it was verified by removing one and watching it go red.
 ECharts from a vendored copy so a viewer's browser makes no third-party
 request.
 
-Thirty-five panels and, at most, twenty-eight chart canvases: sixteen with
+Thirty-nine panels and, at most, thirty-two chart canvases: twenty with
 fixed identities, six Greek profiles and up to six per-structure outcome
 distributions. Each renders only when the artifact behind it exists, rather
 than being drawn empty:
@@ -318,6 +343,10 @@ than being drawn empty:
 - posterior predictive fan, terminal distribution, up to six per-structure outcome distributions
 - realised volatility against implied
 - backtest equity, drawdown from peak, per-trade outcome distribution
+- the volatility surface, strike against expiry, assembled from every chain on disk for that underlying
+- the variance risk premium, implied against realised, on an axis of days to expiry rather than calendar time, because the history block carries one realised figure and not a series
+- the condors that exist as artifacts, short width against expected return, which is not the same as every condor the chain admits
+- gamma scalping levels from the simulation fan, with the reference levels driven by whichever structure is selected
 
 Conventions hold across every panel so a reader learns them once: spot is a
 dotted grey line, breakevens are dashed amber, the expected move is a
@@ -602,14 +631,14 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is exactly the unverifiable claim this
-project is supposed to refuse. It applies twenty-two breakages to a copy of
+project is supposed to refuse. It applies forty-one breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
-suite, or survived. The current result is eighteen, three and zero, plus
+suite, or survived. The current result is twenty-two, three and zero, plus
 one mutant proven equivalent and recorded as such with the argument for why
 it cannot be killed.
 
-Ten of the twenty-two exist because of defects found and fixed on one day:
+Fourteen of the twenty-six exist because of defects found and fixed on one day:
 an MCP server that answered notifications, one that never enforced its own
 required arguments, one that returned an internal error for a malformed
 call, a house-rules scan whose key pattern could be weakened without
@@ -679,14 +708,20 @@ options with the two-currency convention. The engine's pricing module takes
 a continuous yield already, which is most of what a futures or FX option
 needs.
 
-More structures: ratio spreads, broken-wing butterflies, jade lizards, and
-the rest of the flexible-wing family that the payoff engine can already
-express but the playbook does not name.
+More structures still: the payoff engine expresses more than the playbook
+names. Ratio spreads, broken wing butterflies and jade lizards are in as of
+this pass; put ratios, condors with unequal wings and the rest of the
+flexible-wing family are not.
 
-More charts, toward the hundred that were asked for: a volatility surface
-heatmap, the variance risk premium through time, a scored search across
-every condor the chain admits, and gamma-scalping paths from the
-simulation.
+More charts still. The surface, the variance risk premium, a condor panel
+and gamma scalping levels shipped in this pass, taking the dashboard from
+28 canvases to 32. Two of them are narrower than they sound, and the panels
+say so themselves rather than leaving it to be discovered: the condor panel
+plots the condors that exist as artifacts, because nothing in the engine
+enumerates every condor a chain admits, and the gamma panel plots levels
+rather than paths, because the simulation artifact stores the fan as
+quantiles per day and not as individual paths. Both would need engine work
+to become what their names suggest.
 
 Each of those is additive. Nothing in this project has ever been removed to
 make room for something else, and nothing should be.

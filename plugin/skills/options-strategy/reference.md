@@ -1,4 +1,4 @@
-# Reference: the fourteen structures and what each needs
+# Reference: the seventeen structures and what each needs
 
 ## Single expiry
 
@@ -16,6 +16,9 @@
 | iron_condor | credit | range bound | the price staying inside the wings |
 | iron_butterfly | credit | pinned | the price finishing near one strike |
 | long_call_butterfly | debit | pinned | the price finishing near the body |
+| ratio_spread | credit | a rise that stops short of the short strikes | the price ending near the short strike, and it loses without limit above |
+| broken_wing_butterfly | credit | pinned, with one side you do not fear | the price finishing near the body, with no loss on the unfeared side |
+| jade_lizard | credit | neutral to mildly bullish, volatility rich | the price staying above the short put, with no upside risk when the credit exceeds the call width |
 
 ## Two expiries
 

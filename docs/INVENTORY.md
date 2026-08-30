@@ -103,6 +103,20 @@ European Black-Scholes-Merton pricing and implied volatility.
 - **intrinsic()** (line 127): Discounted intrinsic value, the no-arbitrage floor for a European
 - **implied_vol()** (line 137): Implied volatility from an option price, or None
 
+### `engine/src/optiondesk_engine/pricing/forwards.py`
+
+Options on futures and on foreign exchange.
+
+174 lines.
+
+- **black76_price()** (line 77): Price an option on a futures contract
+- **black76_greeks()** (line 95): The full Greek ladder for an option on a future
+- **black76_implied_vol()** (line 107): Solve volatility from a futures option price
+- **garman_kohlhagen_price()** (line 120): Price a currency option
+- **garman_kohlhagen_greeks()** (line 142): The full Greek ladder for a currency option
+- **garman_kohlhagen_implied_vol()** (line 156): Solve volatility from a currency option price
+- **forward_from_spot()** (line 164): The forward price implied by a spot and two rates
+
 ### `engine/src/optiondesk_engine/pricing/greeks_full.py`
 
 Complete analytic Black-Scholes-Merton Greek ladder, first to third order.
@@ -188,24 +202,27 @@ Expiry payoff engine for multi-leg option strategies.
 
 Strategy constructors and the playbook registry.
 
-661 lines.
+915 lines.
 
-- **split_chain()** (line 35): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
-- **long_call()** (line 133): Stock replacement. Uncapped upside, risk capped at the premium
-- **long_put()** (line 141): Alternative to shorting. Bearish, risk capped at the premium
-- **bull_call_spread()** (line 149): Buy the lower strike call, sell a higher one against it
-- **bear_put_spread()** (line 189): Mirror of the bull call spread: buy the higher put, sell a lower
-- **cash_secured_put()** (line 225): Sell a put below the lower band edge
-- **covered_call()** (line 247): Own the underlying and sell a call above the upper band edge
-- **protective_put()** (line 268): Long underlying plus a long at-the-money put. Insurance
-- **straddle()** (line 284): Buy the at-the-money call and put. A storm, direction unknown
-- **strangle()** (line 297): The cheaper cousin: an out of the money call and put
-- **iron_condor()** (line 319): A put credit spread and a call credit spread together
-- **iron_butterfly()** (line 357): Sell the at-the-money straddle, buy wings to cap it
-- **long_call_butterfly()** (line 393): Buy one lower call, sell two at the money, buy one higher
-- **recommend()** (line 575): Rank the playbook for a view. Returns (name, score, meta), best first
-- **build()** (line 618): Build one plan by name. chain must come from split_chain
-- **describe()** (line 637): A readable block for logs and reports
+- **split_chain()** (line 40): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
+- **long_call()** (line 138): Stock replacement. Uncapped upside, risk capped at the premium
+- **long_put()** (line 146): Alternative to shorting. Bearish, risk capped at the premium
+- **bull_call_spread()** (line 154): Buy the lower strike call, sell a higher one against it
+- **bear_put_spread()** (line 194): Mirror of the bull call spread: buy the higher put, sell a lower
+- **cash_secured_put()** (line 230): Sell a put below the lower band edge
+- **covered_call()** (line 252): Own the underlying and sell a call above the upper band edge
+- **protective_put()** (line 273): Long underlying plus a long at-the-money put. Insurance
+- **straddle()** (line 289): Buy the at-the-money call and put. A storm, direction unknown
+- **strangle()** (line 302): The cheaper cousin: an out of the money call and put
+- **iron_condor()** (line 324): A put credit spread and a call credit spread together
+- **iron_butterfly()** (line 367): Sell the at-the-money straddle, buy wings to cap it
+- **long_call_butterfly()** (line 408): Buy one lower call, sell two at the money, buy one higher
+- **ratio_spread()** (line 451): Buy one call near the money, sell more than one further out
+- **broken_wing_butterfly()** (line 498): A call butterfly with the far wing wider than the near one
+- **jade_lizard()** (line 560): A short put below the range plus a short call spread above it
+- **recommend()** (line 824): Rank the playbook for a view. Returns (name, score, meta), best first
+- **build()** (line 867): Build one plan by name. chain must come from split_chain
+- **describe()** (line 886): A readable block for logs and reports
 
 ### `engine/src/optiondesk_engine/strategies/timespread.py`
 
@@ -267,21 +284,21 @@ optiondesk command dispatcher.
 
 optiondesk backtest: a structure entered repeatedly across real history.
 
-178 lines.
+199 lines.
 
 - **add_arguments()** (line 23): Register the window and cadence: holding days, entry interval, lookback,
 - **run()** (line 73): Enter one structure repeatedly across real history and write a backtest
-- **main()** (line 170): Parse argv for this command alone and run it, so the command works when
+- **main()** (line 191): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/chain.py`
 
 optiondesk chain: retrieve one option chain and write a snapshot.
 
-194 lines.
+230 lines.
 
-- **add_arguments()** (line 22): Register the pull options: expiry, provider, risk free rate, dividend
-- **run()** (line 55): Pull one option chain, solve implied volatility per contract where the
-- **main()** (line 186): Parse argv for this command alone and run it, so the command works when
+- **add_arguments()** (line 27): Register the pull options: expiry, provider, risk free rate, dividend
+- **run()** (line 61): Pull one option chain, solve implied volatility per contract where the
+- **main()** (line 222): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/compare.py`
 
@@ -410,28 +427,31 @@ Local dashboard over the artifacts on disk.
 
 The dashboard's client-side chart code.
 
-746 lines.
+1090 lines.
 
 
 ### `shell/src/optiondesk/dashboard/data.py`
 
 Collect artifacts from disk into the shape the dashboard page needs.
 
-223 lines.
+375 lines.
 
 - **index()** (line 34): Every (underlying, expiry) group on disk, newest group first
 - **select()** (line 91): The requested group, or the most recently touched one
 - **collect()** (line 112): Everything the page needs, for one selected group
-- **chain_series()** (line 184): Volume and open interest by strike, straight from the snapshot
-- **ladder_series()** (line 207): Split a ladder into call and put series for plotting
+- **volatility_surface()** (line 190): Implied volatility by strike and expiry, from every chain on disk
+- **variance_premium()** (line 241): At-the-money implied volatility against the volatility shown
+- **condor_candidates()** (line 277): Structures with two short strikes, with the width between them
+- **chain_series()** (line 336): Volume and open interest by strike, straight from the snapshot
+- **ladder_series()** (line 359): Split a ladder into call and put series for plotting
 
 ### `shell/src/optiondesk/dashboard/page.py`
 
 The dashboard page: markup, tiles and tables.
 
-789 lines.
+949 lines.
 
-- **render()** (line 574): Render the complete dashboard document from one payload
+- **render()** (line 725): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -469,12 +489,12 @@ Model Context Protocol server over stdio, standard library only.
 
 Provider registry: capability in, provider out.
 
-139 lines.
+142 lines.
 
-- **register()** (line 29): Add a provider to the registry under its own name
-- **get()** (line 51): Return a provider by name, or raise listing the names that do exist
-- **resolve()** (line 59): Return the provider that will answer, and why it was chosen
-- **describe_all()** (line 119): Inventory for status reporting
+- **register()** (line 30): Add a provider to the registry under its own name
+- **get()** (line 53): Return a provider by name, or raise listing the names that do exist
+- **resolve()** (line 61): Return the provider that will answer, and why it was chosen
+- **describe_all()** (line 121): Inventory for status reporting
 
 ### `shell/src/optiondesk/providers/alphavantage.py`
 
@@ -489,22 +509,22 @@ Alpha Vantage provider: daily history behind a user-supplied key.
 
 Provider interface.
 
-75 lines.
+77 lines.
 
-- class **ProviderError** (line 23): Base class for provider failures
-- class **ProviderUnavailable** (line 27): The provider cannot run: missing dependency, missing key, no network
-- class **ProviderDataError** (line 35): The provider ran and returned something unusable
-- class **Provider** (line 39): Base class. Subclasses set the attributes and implement what they
+- class **ProviderError** (line 25): Base class for provider failures
+- class **ProviderUnavailable** (line 29): The provider cannot run: missing dependency, missing key, no network
+- class **ProviderDataError** (line 37): The provider ran and returned something unusable
+- class **Provider** (line 41): Base class. Subclasses set the attributes and implement what they
   - methods: `available`, `describe`, `option_chain`, `underlying_quote`, `risk_free_rate`, `underlying_history`
 
 ### `shell/src/optiondesk/providers/yahoo.py`
 
 Yahoo Finance provider, through yfinance. Free, no key, delayed.
 
-255 lines.
+367 lines.
 
-- class **YahooProvider** (line 55): The free default, with no key and no signup
-  - methods: `__init__`, `available`, `underlying_quote`, `risk_free_rate`, `underlying_history`, `expiries`, `option_chain`
+- class **YahooProvider** (line 56): The free default, with no key and no signup
+  - methods: `__init__`, `available`, `underlying_quote`, `risk_free_rate`, `underlying_history`, `dividend_yield`, `expiries`, `option_chain`
 
 ## Package: agent (MIT)
 
@@ -602,32 +622,36 @@ Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-str
 
 ## Tests
 
-### engine/tests (136 test functions)
+### engine/tests (177 test functions)
 
-- `engine/tests/test_audit_regressions.py`: 18
+- `engine/tests/test_asymmetric_structures.py`: 28
+- `engine/tests/test_audit_regressions.py`: 20
 - `engine/tests/test_backtest.py`: 15
 - `engine/tests/test_compare.py`: 10
 - `engine/tests/test_exposure.py`: 11
 - `engine/tests/test_forward.py`: 8
+- `engine/tests/test_forwards.py`: 11
 - `engine/tests/test_greeks_full.py`: 14
 - `engine/tests/test_simulation.py`: 12
 - `engine/tests/test_smile.py`: 8
 - `engine/tests/test_strategies.py`: 25
 - `engine/tests/test_timespread.py`: 15
 
-### shell/tests (269 test functions)
+### shell/tests (299 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
 - `shell/tests/test_artifacts.py`: 4
+- `shell/tests/test_backtest_unbounded.py`: 3
 - `shell/tests/test_chain_cli.py`: 16
 - `shell/tests/test_compare_cli.py`: 7
 - `shell/tests/test_contracts.py`: 8
 - `shell/tests/test_dashboard_app.py`: 9
-- `shell/tests/test_dashboard_data.py`: 17
-- `shell/tests/test_dashboard_page.py`: 14
+- `shell/tests/test_dashboard_data.py`: 25
+- `shell/tests/test_dashboard_page.py`: 23
 - `shell/tests/test_dashboard_server.py`: 6
-- `shell/tests/test_documented_counts.py`: 10
+- `shell/tests/test_dividend_yield.py`: 9
+- `shell/tests/test_documented_counts.py`: 11
 - `shell/tests/test_documented_evidence.py`: 6
 - `shell/tests/test_expiries_cli.py`: 10
 - `shell/tests/test_exposure_cli.py`: 8
@@ -653,7 +677,7 @@ Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-str
 
 ## Totals
 
-54 modules, 11261 lines of source, 137 public functions, 14 public classes, 519 test functions.
+55 modules, 12519 lines of source, 150 public functions, 14 public classes, 590 test functions.
 
 Every public name carries a docstring.
 

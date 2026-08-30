@@ -48,6 +48,28 @@ Because it is. JSON has no infinity. Writing null would erase the
 difference between an unbounded risk and an unknown one, and writing a
 large number would invent a floor that does not exist.
 
+**Does this work on anything other than stocks?**
+
+Yes, on seven classes through one provider: index options via `^SPX`,
+equity and ETF directly, rates via `TLT`, metals via `GLD`, energy via
+`USO`, crypto via `BITO`, FX via `FXE`. All measured pulling real chains.
+Futures and FX spot carry no option chains from the free provider, so the
+exchange-traded proxies are the route rather than a shortcut.
+
+**Why did my TLT Greeks change?**
+
+Because the dividend yield is now fetched instead of assumed to be zero,
+and TLT pays about 4.7 percent. On a 173-day chain that moved at-the-money
+implied volatility from 0.0737 to 0.1133 and delta from 0.635 to 0.491.
+The old numbers were the wrong ones. Pass `--dividend-yield` to override.
+
+**Why does BITO refuse to give a dividend yield?**
+
+Because its two sources disagree by 23 percentage points: 38.8 percent
+computed from distributions actually paid against 61.7 percent published.
+Funds distributing option income do that. Picking a side would be a guess
+presented as a measurement, so the artifact is degraded and says why.
+
 ## Trusting the numbers
 
 **Are these real prices?**

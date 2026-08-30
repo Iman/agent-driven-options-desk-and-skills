@@ -26,11 +26,41 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 SHELL = ROOT / "shell"
 
-WORDS = {
-    2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
-    8: "Eight", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Twelve",
-    14: "Fourteen", 16: "Sixteen",
-}
+# Numbers are written out in the documentation, so the test has to know how
+# to spell them. This was a hand-maintained dictionary and it needed
+# extending four times in one afternoon, each time as a test failure saying
+# "add 17 to the number words", which is friction with no information in it.
+_UNITS = ("zero one two three four five six seven eight nine ten eleven "
+          "twelve thirteen fourteen fifteen sixteen seventeen eighteen "
+          "nineteen").split()
+_TENS = ("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+         "eighty", "ninety")
+
+
+def spell(number):
+    """A whole number under one hundred, as the documentation writes it."""
+    if not 0 <= number < 100:
+        raise ValueError("no spelling for {}".format(number))
+    if number < 20:
+        return _UNITS[number]
+    tens, unit = divmod(number, 10)
+    return _TENS[tens] + ("-" + _UNITS[unit] if unit else "")
+
+
+class _Words(dict):
+    """Reads like the dictionary it replaced, capitalised as prose needs."""
+
+    def __missing__(self, key):
+        return spell(key).capitalize()
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except ValueError:
+            return default
+
+
+WORDS = _Words()
 
 
 def read(relative):
@@ -204,17 +234,66 @@ def count_mutations():
 def test_the_mutation_count_is_written_correctly():
     """The harness grows with every fix, so its documented size moves."""
     n = count_mutations()
-    words = dict(WORDS)
-    words.update({13: "thirteen", 15: "fifteen", 16: "sixteen",
-                  17: "seventeen", 18: "eighteen", 19: "nineteen",
-                  21: "twenty-one", 22: "twenty-two"})
-    word = words.get(n)
-    assert word, "add {} to the number words in this test".format(n)
+    word = spell(n)
     readme = read("README.md")
     assert "{} mutations".format(word) in readme, (
         "README does not say the harness has {} mutations".format(n))
     assert "{} breakages".format(word) in read("docs/CAPABILITIES.md"), (
         "CAPABILITIES does not say the harness has {} breakages".format(n))
+
+
+def _rendered_dashboard():
+    """The page as a viewer gets it, from whatever artifacts are on disk."""
+    from optiondesk.dashboard import app
+
+    return app.render_index()
+
+
+def test_the_dashboard_counts_are_written_correctly():
+    """Panels and canvases, counted from the rendered page.
+
+    These went stale silently once already: four charts shipped and the
+    documented figures still said twenty-eight canvases across thirty-five
+    panels, with nothing to catch it because no test looked at the page at
+    all. The count is a ceiling, so a machine holding fewer artifacts than
+    the documented maximum is not a failure; a page rendering MORE than the
+    documentation claims is.
+    """
+    html = _rendered_dashboard()
+    canvases = len(re.findall(r"id='[a-zA-Z0-9_-]+' class='chart", html))
+    panels = len(re.findall(r"class='panel", html))
+    capabilities = read("docs/CAPABILITIES.md")
+
+    documented = re.search(
+        r"([A-Za-z-]+) panels and, at most, ([a-z-]+) chart canvases",
+        capabilities)
+    assert documented, (
+        "docs/CAPABILITIES.md no longer states the panel and canvas counts")
+    said_panels, said_canvases = documented.group(1), documented.group(2)
+
+    assert canvases <= _number(said_canvases), (
+        "the page rendered {} canvases and the documentation claims at most "
+        "{}".format(canvases, said_canvases))
+    assert panels <= _number(said_panels), (
+        "the page rendered {} panels and the documentation claims {}".format(
+            panels, said_panels))
+
+    # And the ceiling must not drift far above what anything can reach, or
+    # it stops being a statement about the software.
+    if canvases:
+        assert _number(said_canvases) - canvases <= 6, (
+            "the documented ceiling of {} is well above the {} this desk "
+            "can render; one of the two is wrong".format(
+                said_canvases, canvases))
+
+
+def _number(word):
+    """Turn a written number back into an integer, for reading prose."""
+    word = word.lower().strip()
+    for value in range(0, 100):
+        if spell(value) == word:
+            return value
+    raise AssertionError("cannot read the number {!r}".format(word))
 
 
 def test_the_marketplace_manifest_matches_what_is_packaged():

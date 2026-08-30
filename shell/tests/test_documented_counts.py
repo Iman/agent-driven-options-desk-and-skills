@@ -342,3 +342,30 @@ def test_the_plugin_is_not_stale_against_its_sources():
     assert not stale, (
         "the plugin is out of date. Run python3 scripts/package.py. "
         + "; ".join(stale[:5]))
+
+
+def test_the_install_path_count_matches_the_numbered_sections():
+    """INSTALL.md is numbered by hand, so the count and the sections drift.
+
+    Adding the skills CLI as a path renumbered four sections and left three
+    cross references pointing at the wrong ones. The count in the opening
+    line, in the README's documentation map and in CAPABILITIES all have to
+    agree with how many numbered sections the file actually has.
+    """
+    install = read("INSTALL.md")
+    sections = re.findall(r"^## (\d+)\. ", install, re.M)
+    assert sections, "INSTALL.md has no numbered sections"
+    assert [int(s) for s in sections] == list(range(1, len(sections) + 1)), (
+        "the numbered sections are {} rather than consecutive from 1".format(
+            sections))
+
+    n = len(sections)
+    word = spell(n)
+    assert "{} ways in".format(word.capitalize()) in install, (
+        "INSTALL.md opens claiming a different number than its {} "
+        "sections".format(n))
+    assert "{} install paths".format(word) in read("README.md"), (
+        "the README documentation map disagrees with INSTALL.md")
+    assert "{} paths, each verified".format(word.capitalize()) in read(
+        "docs/CAPABILITIES.md"), (
+        "docs/CAPABILITIES.md disagrees with INSTALL.md")

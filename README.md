@@ -36,29 +36,119 @@ solicitation. Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
 
 ## Install
 
+Pick by what you want. The first gives you the whole desk; the second and
+third give you the skills alone, which work as knowledge with no Python
+installed at all.
+
+### Everything: the CLI, the skills, the dashboard, the MCP server
+
 ```
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-skills/main/install.sh | bash
 ```
 
-That creates a virtualenv under `~/.optiondesk`, installs the MIT shell and
-the AGPL engine, links `optiondesk` and `optiondesk-mcp` into
-`~/.local/bin`, copies the skills into `~/.claude/skills`, and registers the
-MCP server with every agent runtime CLI it finds. Re-running is safe.
-`./install.sh --uninstall` reverses it and removes only what it created.
+Or from a checkout, `./install.sh`. Either way it creates a virtualenv
+under `~/.optiondesk`, installs the MIT shell and the AGPL engine, links
+`optiondesk` and `optiondesk-mcp` into `~/.local/bin`, copies the skills
+into `~/.claude/skills`, and registers the MCP server with every agent
+runtime CLI it finds. Re-running is safe. `./install.sh --uninstall`
+reverses it and removes only what it created.
 
 Useful flags: `--dry-run` to see the plan and change nothing, `--no-engine`
-for the MIT shell alone, `--no-mcp` to leave runtime configs untouched,
-`--prefix` to install elsewhere.
+for the MIT shell alone, `--skills-only` for no Python at all, `--no-mcp`
+to leave runtime configs untouched, `--prefix` to install elsewhere.
 
-Manual install:
+### Skills only, through the skills CLI
 
 ```
+npx skills add Iman/agent-driven-options-desk-and-skills
+
+npx skills add Iman/agent-driven-options-desk-and-skills --skill options-greeks options-strategy
+
+npx skills add Iman/agent-driven-options-desk-and-skills --list
+```
+
+The CLI detects which agents you have and asks where to install. Claude
+Code reads `.claude/skills/`; universal agents share `.agents/skills/`.
+
+If you run that from inside an agent session, by asking Claude Code to
+install them for you, the CLI runs non-interactively and may install only
+to `.agents/skills/`, which Claude Code does not read. Name the agent:
+
+```
+npx skills add Iman/agent-driven-options-desk-and-skills -a claude-code
+```
+
+### As a Claude Code plugin, which also brings the commands and agents
+
+```
+/plugin marketplace add Iman/agent-driven-options-desk-and-skills
+/plugin install option-desk@option-desk
+```
+
+That adds the five skills, six commands, two agents and the MCP server
+declaration in one step. The commands and agents come only through this
+path; the skills CLI installs skills.
+
+### From a checkout, by hand
+
+```
+git clone https://github.com/Iman/agent-driven-options-desk-and-skills.git
+cd agent-driven-options-desk-and-skills
 python -m venv .venv && . .venv/bin/activate
 pip install -e "shell[yahoo,dev]" -e engine
 optiondesk doctor
 ```
 
-No API key is needed. Python 3.11 or newer.
+Add `-e agent` for the LangChain bindings and the graph.
+
+`INSTALL.md` covers two more paths, zip upload for claude.ai in the browser
+and the MCP server on its own, along with the flags in full.
+
+No API key is needed for any of them. Python 3.11 or newer, and the skills
+paths need no Python at all.
+
+---
+
+## Usage
+
+Ask for what you want. The skill that fits loads itself.
+
+```
+"What are the Greeks on SPY for the September expiry?"       options-greeks
+"Where are the gamma walls on QQQ?"                          options-positioning
+"What would an iron condor on TLT pay?"                      options-strategy
+"What is the downside on SPY over the next month?"           options-simulation
+"Has selling condors on SPY actually worked?"                options-backtest
+```
+
+Or drive it directly, either as a command in an agent runtime or on the
+terminal:
+
+```
+/desk-open SPY                    a chain, a ladder, positioning, every structure ranked
+/desk-risk SPY 30                 project forward, then hand it to the risk reviewer
+/desk-test SPY iron_condor        backtest and forward test, with the benchmark
+/desk-watch SPY                   report only what materially changed
+/desk-complete SPY                drive the artifact set to completeness
+
+optiondesk expiries SPY           what is listed, and what you already hold
+optiondesk chain SPY              pull it
+optiondesk compare                every structure, ranked
+optiondesk dashboard              serve the charts at 127.0.0.1:8799
+```
+
+The five skills, and when each one fires:
+
+| Skill | Covers |
+|---|---|
+| `options-greeks` | chains, implied volatility by strike, the sixteen Greeks per contract |
+| `options-positioning` | dealer gamma, the walls, the flip, max pain, put-call ratios, skew |
+| `options-strategy` | seventeen structures, built, priced and ranked side by side |
+| `options-simulation` | GARCH-t Monte Carlo, the fan, value at risk, expected shortfall |
+| `options-backtest` | real history with modelled premiums, significance, and paper forward tests |
+
+Every one of them reports what it cannot establish rather than filling it
+in, and none of them will recommend a trade.
 
 ---
 
@@ -83,7 +173,8 @@ reads artifacts and writes nothing.
 
 ## Architecture
 
-Three packages under two licences, joined by one adapter. Six ways in, one
+Three packages under two licences, joined by one adapter. Seven ways in,
+one
 set of artifacts out.
 
 ```mermaid
@@ -657,7 +748,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 326 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 327 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -772,7 +863,7 @@ gone, replaced by the test above, which anyone can run.
 | `docs/INVENTORY.md` | every public function and class, generated from the source |
 | `scripts/refresh.py` | rebuild everything generated, then prove it holds |
 | `scripts/mutate.py` | break the code on purpose and check the tests notice |
-| `INSTALL.md` | six install paths, each verified |
+| `INSTALL.md` | seven install paths, each verified |
 | `LOOPS.md` | the four loop kinds, and what makes a good loop here |
 | `FAQ.md` | the questions people actually ask |
 | `AGENTS.md`, `GEMINI.md` | runtime instructions for Codex and Gemini CLI, generated from the skills, written to both the repository root and `shell/` because a runtime looks upward from where it was opened |

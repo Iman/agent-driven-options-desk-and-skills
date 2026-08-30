@@ -1,11 +1,11 @@
 # Installing
 
-Six ways in, depending on what you want and which runtime you use. Every
+Seven ways in, depending on what you want and which runtime you use. Every
 one of them has been run and verified; none is written from memory.
 
-If you only want to try it, use the first. If you only want the knowledge
-and not the tools, use the fourth. If you use claude.ai in the browser
-rather than a terminal, use the fifth.
+If you only want to try it, use the first. If you only want the skills and
+not the tools, use the second, which needs no Python. If you use claude.ai
+in the browser rather than a terminal, use the sixth.
 
 ---
 
@@ -43,7 +43,37 @@ Flags:
 | `--version`, `--help` | print and exit |
 | `--uninstall` | remove exactly what it created, and nothing else |
 
-## 2. As a Claude Code plugin, which also brings the commands and agents
+## 2. Skills only, through the skills CLI
+
+```
+npx skills add Iman/agent-driven-options-desk-and-skills
+```
+
+Installs the five skills and nothing else, with no Python involved. Add
+`--list` to see them first, or `--skill options-greeks options-strategy` to
+take a subset.
+
+The CLI finds them through `.claude-plugin/marketplace.json`, which this
+repository generates, so the skills stay in `shell/skills` where the rest
+of the build expects them.
+
+It detects which agents you have installed and asks where to put them.
+Claude Code reads `.claude/skills/`; universal agents share
+`.agents/skills/`. Asking an agent to run the command for you is the case
+that goes wrong: the CLI then runs non-interactively and may install only
+to `.agents/skills/`, which Claude Code does not read. Name the agent when
+that happens:
+
+```
+npx skills add Iman/agent-driven-options-desk-and-skills -a claude-code
+```
+
+One caveat worth knowing. This path gives you the skills as knowledge, not
+the tools they describe, the same as option 5 below. An agent holding them
+can explain the desk and its conventions and cannot run anything until the
+CLI is installed too.
+
+## 3. As a Claude Code plugin, which also brings the commands and agents
 
 ```
 /plugin marketplace add /path/to/option-desk
@@ -70,7 +100,7 @@ or `.claude/agents`, then run `python3 scripts/refresh.py` to rebuild it
 along with everything else generated, or `python3 scripts/package.py` for
 the installable forms alone.
 
-## 3. From a checkout, by hand
+## 4. From a checkout, by hand
 
 ```
 python -m venv .venv && . .venv/bin/activate
@@ -81,7 +111,7 @@ optiondesk doctor
 Add `-e agent` for the LangChain bindings, which are optional and pull in
 `langchain-core`.
 
-## 4. Skills only, no Python
+## 5. Skills only, no Python
 
 ```
 ./install.sh --skills-only
@@ -96,7 +126,7 @@ conventions and the reporting rules. It cannot run anything, because the
 commands the skills describe are not there. Using them as domain knowledge
 without the automation is a legitimate choice.
 
-## 5. claude.ai, in the browser
+## 6. claude.ai, in the browser
 
 Upload the zips from `dist/skills/`:
 
@@ -110,10 +140,10 @@ one per skill, plus `dist/option-desk-skills.zip` with all five.
 Two things to know before you do. Custom skills on claude.ai are per user:
 each person on a team uploads their own, and an admin cannot distribute
 them centrally. And the runtime there has no access to your machine, so the
-skills work as knowledge and instructions rather than as tools, exactly as
-in option 4.
+skills work as knowledge and instructions rather than as tools, the same
+as options 2 and 5.
 
-## 6. MCP only, without skills
+## 7. MCP only, without skills
 
 If you want the tools in a runtime and nothing else:
 

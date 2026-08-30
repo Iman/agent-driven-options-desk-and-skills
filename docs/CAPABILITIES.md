@@ -655,7 +655,8 @@ non-finite expectation stays out of the ranking. Both are now covered.
 
 ## 16. Installing
 
-Six paths, each verified rather than written from memory. See `INSTALL.md`.
+Seven paths, each verified rather than written from memory. See
+`INSTALL.md`.
 
 One command for everything (`./install.sh`), as a Claude Code plugin with
 the commands and agents, from a checkout by hand, skills only with no

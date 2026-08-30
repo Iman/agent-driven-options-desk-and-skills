@@ -26,6 +26,12 @@ DAYS_PER_YEAR = 365.0
 
 
 class Outlook(IntEnum):
+    """The five directional views a structure can express.
+
+    Ordered from -2 to +2 so the distance between two views is arithmetic
+    rather than a lookup, which is what lets a structure be scored against a
+    view instead of matched to one.
+    """
     STRONG_BEARISH = -2
     MILD_BEARISH = -1
     NEUTRAL = 0

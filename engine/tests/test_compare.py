@@ -91,3 +91,35 @@ def test_score_plan_survives_a_plan_missing_everything():
     assert row["strategy"] == "sparse"
     assert row["rankable"] is False
     assert row["capital_at_risk"] is None
+
+
+# The finite check on the expectation itself was untested: mutation testing
+# replaced it with a plain None check and the whole engine suite still
+# passed. A NaN expectation then reaches the sort key, where comparisons
+# are all false and the winner becomes whichever structure the list
+# happened to start with.
+
+def test_a_non_finite_expectation_is_not_rankable():
+    for value in (float("nan"), float("inf"), float("-inf")):
+        row = score_plan(_plan("odd", expected=value))
+        assert not row["rankable"], (
+            "an expectation of {} was ranked".format(value))
+        assert any("finite" in reason for reason in row["excluded_because"]), (
+            "nothing said why {} was excluded".format(value))
+
+
+def test_a_nan_expectation_cannot_decide_the_winner():
+    """Order dependence is the symptom that makes this worth a test.
+
+    With NaN in the sort key every comparison is false, so the leader
+    depends on the order the structures arrived in. The same set in a
+    different order must give the same answer.
+    """
+    good = _plan("real", expected=1.0, max_loss=-10.0)
+    broken = _plan("broken", expected=float("nan"), max_loss=-4.0)
+    first = rank_strategies([broken, good])
+    second = rank_strategies([good, broken])
+    assert first["leader"]["strategy"] == "real"
+    assert second["leader"]["strategy"] == "real"
+    assert first["rankable_count"] == second["rankable_count"] == 1
+    assert first["excluded_count"] == second["excluded_count"] == 1

@@ -147,6 +147,13 @@ def test_all_greeks_against_finite_difference(case, kind):
     _close(g["charm"], -_fd(delta_of_time, t, ht) / DAYS, 1e-4,
            "charm")
 
+    # veta and color were both shipped with the wrong sign, and this
+    # comparison is what caught them: veta came back as the positive
+    # derivative of vega with respect to time rather than the negative, and
+    # color the same for gamma. Nothing else would have found it. Both read
+    # plausibly, both have the right magnitude, and a sign error in a
+    # second-order Greek does not look wrong until it is differenced
+    # against the price function it claims to differentiate.
     vega_of_time = lambda tt: _fd(
         lambda v: bs_price(spot, strike, tt, v, kind, r, q), sigma, hv)
     _close(g["veta"], -_fd(vega_of_time, t, ht) / DAYS, 1e-4, "veta")

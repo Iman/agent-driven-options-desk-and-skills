@@ -105,6 +105,12 @@ def score_plan(plan):
     if (plan.get("meta") or {}).get("degraded"):
         reasons.append("built from a degraded snapshot")
 
+    # Redundant today, kept on purpose. rankable below also demands a
+    # finite expected_return, and expected_return is this expectation over
+    # a finite risk, so a NaN here is caught there whatever this line says.
+    # Mutation testing confirms it: removing the isfinite call changes no
+    # observable behaviour. It stays because the second test depends on how
+    # expected_return happens to be derived, and this one does not.
     finite_expectation = (expected is not None
                           and math.isfinite(float(expected)))
     return {

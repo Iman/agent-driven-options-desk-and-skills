@@ -14,6 +14,7 @@ import random
 import pytest
 
 from optiondesk_engine.analytics.compare import rank_strategies, score_plan
+from optiondesk_engine.pricing.black_scholes import implied_vol
 from optiondesk_engine.analytics.exposure import chain_exposure, max_pain
 from optiondesk_engine.analytics.smile import smile_metrics
 from optiondesk_engine.simulation.garch import _ess, _split_rhat
@@ -255,3 +256,52 @@ def test_risk_levels_do_not_collide_in_their_keys():
     risk = terminal_risk(simulation, levels=(0.99, 0.999, 0.9999))
     keys = {key for key in risk if key.startswith("var_")}
     assert keys == {"var_99", "var_99_9", "var_99_99"}
+
+
+# ------------------------------------------------------- the second guard
+
+# implied_vol has two identifiability guards, one before the iteration and
+# one inside it, and only the first was tested. Mutation testing removed
+# the inner one and the entire engine suite still passed. Without it, 39 of
+# 450 sampled inputs raise ZeroDivisionError and 94 return a volatility for
+# a price that identifies none: a one cent deep out of the money put comes
+# back at 254 percent, and a call trading at intrinsic at 386 percent.
+
+CRASHES_WITHOUT_THE_INNER_GUARD = [
+    # spot, strike, years, kind, price
+    (100.0, 10.0, 0.002, "call", 90.01),
+    (100.0, 10.0, 0.002, "call", 90.05),
+    (100.0, 10.0, 0.002, "put", 0.000001),
+    (100.0, 10.0, 0.002, "put", 0.0001),
+    (100.0, 10.0, 0.002, "put", 0.01),
+]
+
+INVENTS_A_NUMBER_WITHOUT_THE_INNER_GUARD = [
+    (100.0, 10.0, 0.05, "call", 90.05),
+    (100.0, 10.0, 0.05, "put", 0.0001),
+    (100.0, 10.0, 0.05, "put", 0.01),
+    (100.0, 10.0, 0.25, "put", 0.0001),
+]
+
+
+def test_the_inner_vega_guard_refuses_rather_than_dividing_by_zero():
+    """Newton's step divides by vega, and vega reaches zero on these.
+
+    The guard has to sit inside the loop as well as before it, because a
+    price whose vega is usable at the seed can still drive the iteration
+    into a region where the curve is flat.
+    """
+    for spot, strike, t, kind, price in CRASHES_WITHOUT_THE_INNER_GUARD:
+        assert implied_vol(price, spot, strike, t, kind) is None, (
+            "{} {} at {} should be refused".format(kind, strike, price))
+
+
+def test_the_inner_vega_guard_refuses_rather_than_inventing_a_volatility():
+    """A flat curve gives bisection an arbitrary point to land on.
+
+    Each of these returned a plausible looking volatility, between 114 and
+    409 percent, from a price that identifies no volatility at all.
+    """
+    for spot, strike, t, kind, price in INVENTS_A_NUMBER_WITHOUT_THE_INNER_GUARD:
+        assert implied_vol(price, spot, strike, t, kind) is None, (
+            "{} {} at {} should be refused".format(kind, strike, price))

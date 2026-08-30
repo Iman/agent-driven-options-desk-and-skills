@@ -1,0 +1,60 @@
+{
+ "note": "Figures quoted in the documentation, with the artifact each came from. Derived numbers only: no provider data is reproduced here. Written by scripts/evidence.py.",
+ "figures": {
+  "readme_chain_contracts": {
+   "value": 607,
+   "about": "contracts in the chain the data-flow diagram walks through",
+   "artifact": "chain_SPY_2026-09-18_20260830T141217Z.json",
+   "generated_utc": "2026-08-30T14:12:17+00:00",
+   "provider_used": "yahoo",
+   "degraded": false,
+   "documents": {
+    "README.md": "607 contracts, spot, listed expiries"
+   }
+  },
+  "readme_chain_solved": {
+   "value": 595,
+   "about": "contracts whose price identified a volatility",
+   "artifact": "chain_SPY_2026-09-18_20260830T141217Z.json",
+   "generated_utc": "2026-08-30T14:12:17+00:00",
+   "provider_used": "yahoo",
+   "degraded": false,
+   "documents": {
+    "README.md": "595 solved, 12 refused as unidentified"
+   }
+  },
+  "readme_chain_refused": {
+   "value": 12,
+   "about": "contracts refused because the price identifies no volatility",
+   "artifact": "chain_SPY_2026-09-18_20260830T141217Z.json",
+   "generated_utc": "2026-08-30T14:12:17+00:00",
+   "provider_used": "yahoo",
+   "degraded": false,
+   "documents": {
+    "README.md": "595 solved, 12 refused as unidentified"
+   }
+  },
+  "faq_backtest_mean_return": {
+   "value": 0.4742067427205202,
+   "about": "mean return on capital at risk per trade",
+   "artifact": "backtest_SPY_bull_call_spread_30d.json",
+   "generated_utc": "2026-08-30T16:18:49+00:00",
+   "provider_used": "yahoo",
+   "degraded": false,
+   "documents": {
+    "FAQ.md": "made 47 percent per trade"
+   }
+  },
+  "faq_benchmark_mean_return": {
+   "value": 0.015574387022520756,
+   "about": "buy and hold over the same windows",
+   "artifact": "backtest_SPY_bull_call_spread_30d.json",
+   "generated_utc": "2026-08-30T16:18:49+00:00",
+   "provider_used": "yahoo",
+   "degraded": false,
+   "documents": {
+    "FAQ.md": "about 1.6 percent per window"
+   }
+  }
+ }
+}

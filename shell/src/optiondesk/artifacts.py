@@ -34,6 +34,11 @@ LICENSE_NOTE = (
 
 
 def utc_now():
+    """Current UTC time as an ISO-8601 string ending in Z.
+
+    Every artifact carries one, so timestamps written on different machines
+    still order correctly.
+    """
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
@@ -71,12 +76,78 @@ def envelope(schema, tool, provider_used, degraded=False,
     }
 
 
+ARCHIVE_DIRNAME = "archive"
+
+
+def _archive_stamp(path):
+    """The time the outgoing artifact was generated, for its archived name.
+
+    Its own `meta.generated_utc` is preferred over the file's mtime,
+    because the mtime is when the bytes landed and the envelope is when the
+    measurement was taken. They differ whenever a file is copied.
+    """
+    try:
+        with open(path, encoding="utf-8") as handle:
+            stamp = json.load(handle).get("meta", {}).get("generated_utc")
+    except (ValueError, OSError, AttributeError):
+        stamp = None
+    if not isinstance(stamp, str) or not stamp:
+        try:
+            stamp = datetime.fromtimestamp(
+                path.stat().st_mtime, timezone.utc).isoformat()
+        except OSError:
+            stamp = utc_now()
+    # Colons are legal on this filesystem and a nuisance on others.
+    return stamp.replace(":", "").replace("-", "").replace("+0000", "Z")
+
+
+def archive_existing(path):
+    """Move an artifact about to be replaced into the archive.
+
+    WHY THE LIVE NAME DOES NOT CHANGE. Filenames are keyed by underlying
+    and expiry, so re-pulling the same chain replaced the previous one
+    outright and no measurement quoted from it could be produced again.
+    Timestamping the live file would fix that and break every consumer
+    that resolves the newest artifact by name: the dashboard, `expiries`,
+    the plan reuse in `compare`, and the graph's stage check. So the
+    timestamp goes on the outgoing copy instead, and the live name is
+    exactly what it was.
+
+    Identical content is not archived. Re-running a command that produces
+    the same bytes is not a new measurement, and archiving it would fill
+    the directory with copies of one answer.
+
+    Returns the archived path, or None if there was nothing to archive.
+    Never raises: losing the archive is worse than nothing, but losing the
+    write because the archive failed would be worse still.
+    """
+    if os.environ.get("OPTIONDESK_ARCHIVE", "1") == "0":
+        return None
+    try:
+        if not path.exists():
+            return None
+        archive_dir = path.parent / ARCHIVE_DIRNAME / utc_now()[:10]
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        target = archive_dir / "{}_{}{}".format(
+            path.stem, _archive_stamp(path), path.suffix)
+        if target.exists():
+            return None
+        os.replace(path, target)
+        return target
+    except OSError:
+        return None
+
+
 def write_json(payload, filename, directory=None):
     """Write one artifact atomically. Returns the path written.
 
     Raises ValueError if the payload contains a NaN or an infinity, which
     is deliberate: those are not representable in strict JSON, and an
     artifact that only Python can read is not an interchange format.
+
+    An artifact this replaces is moved into `archive/<date>/` first, under
+    a name carrying the time it was generated. Set OPTIONDESK_ARCHIVE=0 to
+    turn that off.
     """
     target_dir = Path(directory) if directory else artifact_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
@@ -91,11 +162,21 @@ def write_json(payload, filename, directory=None):
         json.dump(payload, handle, indent=1, sort_keys=False,
                   allow_nan=False)
         handle.write("\n")
+    # After the temporary file is written, so a serialisation failure
+    # cannot archive the old artifact and then leave nothing in its place.
+    if path.exists() and path.read_bytes() != tmp.read_bytes():
+        archive_existing(path)
     os.replace(tmp, path)
     return path
 
 
 def read_json(path):
+    """Read one artifact from disk.
+
+    Raises rather than returning an empty default, because a caller that
+    silently reads nothing goes on to report on an empty desk as though it were
+    a quiet one.
+    """
     with open(path, "r", encoding="utf-8") as handle:
         return json.load(handle)
 

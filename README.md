@@ -658,7 +658,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 320 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 321 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 

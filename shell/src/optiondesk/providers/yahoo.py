@@ -22,9 +22,10 @@ granted by this project's licence. See DISCLAIMER.md section 5.
 """
 
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from optiondesk.providers.base import (
+    CAP_DIVIDEND_YIELD,
     CAP_OPTION_CHAIN,
     CAP_RISK_FREE_RATE,
     CAP_UNDERLYING_HISTORY,
@@ -64,7 +65,8 @@ class YahooProvider(Provider):
     tier = "free"
     requires_key = False
     capabilities = (CAP_OPTION_CHAIN, CAP_UNDERLYING_QUOTE,
-                    CAP_RISK_FREE_RATE, CAP_UNDERLYING_HISTORY)
+                    CAP_RISK_FREE_RATE, CAP_UNDERLYING_HISTORY,
+                    CAP_DIVIDEND_YIELD)
     terms_url = "https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html"
     notes = ("Delayed and indicative. Personal use under Yahoo's terms; "
              "this project grants no data redistribution rights.")
@@ -167,6 +169,116 @@ class YahooProvider(Provider):
             "first": dates[0],
             "last": dates[-1],
             "last_close": prices[-1],
+        }
+
+    def dividend_yield(self, symbol, spot=None):
+        """Continuous dividend yield, computed from payments actually made.
+
+        WHY THIS IS COMPUTED RATHER THAN READ. The provider publishes a
+        yield field, and its units have changed between library versions:
+        it currently returns 4.75 for a 4.75 percent yield, where it once
+        returned 0.0475. Reading it directly is a hundredfold error waiting
+        for a library upgrade. Summing the dividends actually paid over the
+        last year and dividing by spot has no unit to get wrong.
+
+        The published field is still fetched, as a cross-check. When the
+        two disagree by more than a quarter of the larger, neither is
+        returned: BITO pays variable option-income distributions and the
+        two sources differ by 23 percentage points, which is not a number
+        to pick a side on. The caller is told, and decides.
+
+        Returns a dict with the yield, its source, the date, the
+        cross-check, and whether the sources agreed. A yield of zero is
+        returned as zero when the underlying genuinely pays nothing, and as
+        None when it could not be established, because those are different
+        facts and a cash index reports the same zero as gold does.
+        """
+        client = self._client()
+        ticker = client.Ticker(symbol)
+
+        paid = None
+        asof = None
+        try:
+            series = ticker.dividends
+            if series is not None and len(series):
+                index = series.index
+                if getattr(index, "tz", None) is None:
+                    index = index.tz_localize("UTC")
+                cutoff = datetime.now(timezone.utc) - timedelta(days=365)
+                recent = series[index >= cutoff]
+                paid = float(recent.sum()) if len(recent) else 0.0
+                asof = str(series.index[-1].date())
+            else:
+                paid = 0.0
+        except Exception:
+            paid = None
+
+        if spot is None:
+            try:
+                spot = self.underlying_quote(symbol)["spot"]
+            except Exception:
+                spot = None
+
+        computed = None
+        if paid is not None and spot:
+            computed = paid / float(spot)
+
+        published = None
+        try:
+            raw = ticker.info.get("dividendYield")
+            if isinstance(raw, (int, float)):
+                # Percent, always, in this library version: TLT 4.75, SPY
+                # 1.01, AAPL 0.34, FXE 0.74, BITO 61.68, all measured
+                # against dividends actually paid. An earlier attempt here
+                # guessed the unit by size, converting only values above
+                # one, and that read FXE's 0.74 as 74 percent and refused a
+                # correct number. Guessing per value is worse than
+                # committing: if a future version returns fractions instead,
+                # TLT reads as 0.0475 percent against 4.7 computed, the
+                # cross-check disagrees, and the yield is refused loudly
+                # rather than being quietly wrong by a hundred.
+                published = float(raw) / 100.0
+        except Exception:
+            published = None
+
+        # A cash index has no dividend series of its own, so the sum is
+        # zero and looks like gold, which genuinely pays nothing. The two
+        # are not the same fact: SPX has a dividend yield near 1.2 percent
+        # and pricing its options at zero shifts the forward. Refuse, and
+        # say what to pass instead.
+        if str(symbol).startswith("^") and not paid:
+            return {
+                "symbol": symbol,
+                "dividend_yield": None,
+                "source": None,
+                "asof": asof,
+                "trailing_12m_paid": paid,
+                "published": None,
+                "sources_agree": True,
+                "note": ("a cash index carries no dividend series here, and "
+                         "its constituents' yield is not zero. Pass "
+                         "--dividend-yield for {}".format(symbol)),
+            }
+
+        agree = True
+        note = None
+        if computed is not None and published is not None:
+            larger = max(abs(computed), abs(published))
+            if larger > 0 and abs(computed - published) / larger > 0.25:
+                agree = False
+                note = ("two dividend sources disagree, {:.1%} computed "
+                        "from payments against {:.1%} published"
+                        .format(computed, published))
+
+        return {
+            "symbol": symbol,
+            "dividend_yield": computed if agree else None,
+            "source": "trailing_12m_payments" if agree else None,
+            "asof": asof,
+            "trailing_12m_paid": paid,
+            "published": published,
+            "sources_agree": agree,
+            "note": note,
         }
 
     def expiries(self, symbol):

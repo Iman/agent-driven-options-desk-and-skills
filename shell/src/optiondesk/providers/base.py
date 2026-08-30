@@ -15,9 +15,11 @@ CAP_OPTION_CHAIN = "option_chain"
 CAP_UNDERLYING_QUOTE = "underlying_quote"
 CAP_RISK_FREE_RATE = "risk_free_rate"
 CAP_UNDERLYING_HISTORY = "underlying_history"
+CAP_DIVIDEND_YIELD = "dividend_yield"
 
 ALL_CAPABILITIES = (CAP_OPTION_CHAIN, CAP_UNDERLYING_QUOTE,
-                    CAP_RISK_FREE_RATE, CAP_UNDERLYING_HISTORY)
+                    CAP_RISK_FREE_RATE, CAP_UNDERLYING_HISTORY,
+                    CAP_DIVIDEND_YIELD)
 
 
 class ProviderError(RuntimeError):

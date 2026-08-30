@@ -4,72 +4,238 @@
   "title": "Option chain snapshot",
   "description": "One underlying, one expiry, as retrieved from a data provider. Prices are provider quotes and may be delayed. Implied volatility is solved from the mid price where possible; a contract with no usable volatility carries iv null and must be skipped by consumers rather than defaulted.",
   "type": "object",
-  "required": ["meta", "underlying", "spot", "expiry", "days_to_expiry", "contracts"],
+  "required": [
+    "meta",
+    "underlying",
+    "spot",
+    "expiry",
+    "days_to_expiry",
+    "contracts"
+  ],
   "properties": {
-    "meta": { "$ref": "#/$defs/meta" },
-    "underlying": { "type": "string", "minLength": 1 },
-    "spot": { "type": "number", "exclusiveMinimum": 0 },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "underlying": {
+      "type": "string",
+      "minLength": 1
+    },
+    "spot": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
     "spot_asof": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Session the spot price is from. Not always today: a provider may serve a partial bar with no close."
     },
-    "risk_free_rate": { "type": "number" },
-    "dividend_yield": { "type": "number" },
-    "expiry": { "type": "string" },
-    "days_to_expiry": { "type": "number", "minimum": 0 },
-    "contracts": { "type": "array", "items": { "$ref": "#/$defs/contract" } },
+    "risk_free_rate": {
+      "type": "number"
+    },
+    "dividend_yield": {
+      "type": "number"
+    },
+    "expiry": {
+      "type": "string"
+    },
+    "days_to_expiry": {
+      "type": "number",
+      "minimum": 0
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
     "counts": {
       "type": "object",
       "properties": {
-        "calls": { "type": "integer", "minimum": 0 },
-        "puts": { "type": "integer", "minimum": 0 },
-        "with_iv": { "type": "integer", "minimum": 0 },
-        "without_iv": { "type": "integer", "minimum": 0 }
+        "calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "puts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "with_iv": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "without_iv": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
+    },
+    "dividend_yield_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "How the dividend yield was established: user when it was passed on the command line, trailing_12m_payments when computed from dividends actually paid, null when none could be established and zero was assumed, which also sets degraded."
+    },
+    "dividend_yield_note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Why the yield is what it is, when that needs saying: sources disagreeing, or a cash index carrying no dividend series of its own."
     }
   },
   "$defs": {
     "meta": {
       "type": "object",
-      "required": ["schema", "generated_utc", "tool", "provider_used", "degraded", "disclaimer"],
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
       "properties": {
-        "schema": { "type": "string" },
-        "generated_utc": { "type": "string" },
-        "tool": { "type": "string" },
-        "shell_version": { "type": ["string", "null"] },
-        "engine_version": { "type": ["string", "null"] },
-        "provider_used": { "type": ["string", "null"] },
-        "degraded": { "type": "boolean" },
-        "degraded_reason": { "type": ["string", "null"] },
-        "notes": { "type": "array", "items": { "type": "string" }, "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation." },
-        "inputs": { "type": "object" },
-        "disclaimer": { "type": "string" },
-        "license": { "type": "string" }
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
       }
     },
     "contract": {
       "type": "object",
-      "required": ["symbol", "type", "strike", "iv"],
+      "required": [
+        "symbol",
+        "type",
+        "strike",
+        "iv"
+      ],
       "properties": {
-        "symbol": { "type": "string" },
-        "type": { "type": "string", "enum": ["call", "put"] },
-        "strike": { "type": "number", "exclusiveMinimum": 0 },
-        "bid": { "type": ["number", "null"] },
-        "ask": { "type": ["number", "null"] },
-        "mid": { "type": ["number", "null"] },
-        "last": { "type": ["number", "null"] },
-        "volume": { "type": ["integer", "null"] },
-        "open_interest": { "type": ["integer", "null"] },
+        "symbol": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "call",
+            "put"
+          ]
+        },
+        "strike": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "bid": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ask": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "mid": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "last": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "volume": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "open_interest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
         "iv": {
-          "type": ["number", "null"],
+          "type": [
+            "number",
+            "null"
+          ],
           "description": "Volatility per 1.00, so 0.20 is 20 percent. Null means no usable volatility could be established, and the contract must be skipped, never defaulted."
         },
         "iv_source": {
-          "type": ["string", "null"],
-          "enum": ["solved_mid", "provider", null],
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "solved_mid",
+            "provider",
+            null
+          ],
           "description": "solved_mid: Newton-Raphson or bisection on the mid price. provider: taken from the data provider as supplied."
         },
-        "iv_provider": { "type": ["number", "null"] }
+        "iv_provider": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
       }
     }
   }

@@ -11,6 +11,7 @@ No caller changes.
 
 from optiondesk.providers.base import (
     ALL_CAPABILITIES,
+    CAP_DIVIDEND_YIELD,
     CAP_OPTION_CHAIN,
     CAP_RISK_FREE_RATE,
     CAP_UNDERLYING_HISTORY,
@@ -45,6 +46,7 @@ PRIORITY = {
     # them on a routine pull would leave nothing for the day it is needed.
     CAP_UNDERLYING_HISTORY: ["yahoo", "alphavantage"],
     CAP_UNDERLYING_QUOTE: ["yahoo", "alphavantage"],
+    CAP_DIVIDEND_YIELD: ["yahoo"],
 }
 
 
@@ -136,4 +138,5 @@ __all__ = ["register", "get", "resolve", "describe_all", "PRIORITY",
            "Provider", "ProviderError", "ProviderUnavailable",
            "ProviderDataError", "CAP_OPTION_CHAIN", "CAP_UNDERLYING_QUOTE",
            "CAP_RISK_FREE_RATE", "CAP_UNDERLYING_HISTORY",
+           "CAP_DIVIDEND_YIELD",
            "ALL_CAPABILITIES"]

@@ -17,3 +17,8 @@ credentials.json
 .gemini/
 artifacts/
 .tmp/
+
+# CodeGraph index: machine-local, rebuilt by scripts/refresh.py
+.codegraph/
+.coverage
+htmlcov/

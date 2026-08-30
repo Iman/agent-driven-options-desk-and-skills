@@ -8,7 +8,7 @@ from optiondesk.artifacts import write_json
 from optiondesk.cli import expiries as expiries_cmd
 from optiondesk.providers.base import ProviderDataError
 
-from conftest import needs_engine
+from marks import needs_engine
 
 
 def expiries_args(args_factory, tmp_path, **overrides):

@@ -9,7 +9,7 @@ from optiondesk import __version__
 from optiondesk.artifacts import write_json
 from optiondesk.cli import __main__ as main_module
 
-from conftest import needs_engine
+from marks import needs_engine
 
 
 def subcommands(parser):

@@ -41,6 +41,7 @@ WITH_ENGINE=1
 WITH_SKILLS=1
 WITH_MCP=1
 WITH_KEYS=1
+SKILLS_ONLY=0
 DRY_RUN=0
 UNINSTALL=0
 ASSUME_YES=0
@@ -75,6 +76,8 @@ Options:
                         Greeks are unavailable; the shell says so and keeps
                         working
   --no-skills           do not copy skills into the Claude skills directory
+  --skills-only         install just the skills, with no Python, no engine,
+                        no commands linked and no MCP registration
   --no-mcp              do not register the MCP server with any runtime
   --no-keys             skip the optional provider key prompt
   --uninstall           remove everything this installer created
@@ -97,6 +100,7 @@ while [ $# -gt 0 ]; do
     --ref) REF="${2:?--ref needs a ref}"; shift 2 ;;
     --no-engine) WITH_ENGINE=0; shift ;;
     --no-skills) WITH_SKILLS=0; shift ;;
+    --skills-only) SKILLS_ONLY=1; WITH_MCP=0; WITH_KEYS=0; shift ;;
     --no-mcp) WITH_MCP=0; shift ;;
     --no-keys) WITH_KEYS=0; shift ;;
     --uninstall) UNINSTALL=1; shift ;;
@@ -307,11 +311,22 @@ link_commands() {
     # -n matters: without it, a symlink to a directory is followed and the
     # new link lands inside that directory, outside the declared bin dir.
     run ln -sfn "$VENV/bin/$name" "$target"
-    say "  linked $target"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      say "  would link $target"
+    else
+      say "  linked $target"
+    fi
   done
   case ":${PATH}:" in
     *":$BIN_DIR:"*) ;;
-    *) warn "$BIN_DIR is not on your PATH. Add it, or call $VENV/bin/optiondesk directly." ;;
+    *)
+      warn "$BIN_DIR is not on your PATH."
+      warn "  Add this line to your shell profile:"
+      warn "    export PATH=\"$BIN_DIR:\$PATH\""
+      warn "  Until then, call $VENV/bin/optiondesk directly."
+      warn "  This matters for the Claude Code plugin: its MCP entry names"
+      warn "  the bare command optiondesk-mcp and resolves it through PATH."
+      ;;
   esac
 }
 
@@ -331,7 +346,11 @@ install_skills() {
     run rm -rf "$target"
     run cp -R "$skill" "$target"
     run touch "$target/.installed-by-optiondesk"
-    say "  installed skill $name"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      say "  would install skill $name"
+    else
+      say "  installed skill $name"
+    fi
     count=$((count + 1))
   done
   if [ "$count" -eq 0 ]; then
@@ -456,6 +475,20 @@ main() {
   say "Option desk installer $VERSION"
   [ "$DRY_RUN" -eq 1 ] && say "Dry run: nothing will change."
   resolve_source
+
+  if [ "$SKILLS_ONLY" -eq 1 ]; then
+    # The skills are plain markdown and are useful on their own: they
+    # describe the commands, the conventions and the reporting rules. An
+    # agent that has them but not the tools can still explain the desk, it
+    # simply cannot run it.
+    say "Installing the skills only: no virtualenv, no engine, no tools."
+    install_skills
+    say ""
+    say "Done. The commands the skills describe are not installed, so run"
+    say "the installer without --skills-only when you want them."
+    exit 0
+  fi
+
   install_packages
   link_commands
   install_skills

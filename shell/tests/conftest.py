@@ -80,9 +80,9 @@ from optiondesk.providers.base import (
     Provider,
 )
 
-needs_engine = pytest.mark.skipif(
-    not engine_bridge.AVAILABLE,
-    reason="analytics engine not installed")
+# Defined in marks.py and re-exported here, so that importing it from
+# either place keeps working. See marks.py for why it moved.
+from marks import needs_engine  # noqa: E402,F401
 
 
 class StubProvider(Provider):

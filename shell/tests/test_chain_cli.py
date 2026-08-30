@@ -14,7 +14,7 @@ from optiondesk.cli import chain as chain_cmd
 from optiondesk.contracts import CHAIN_SNAPSHOT, SCHEMA_FILES, validate
 from optiondesk.providers.base import ProviderDataError
 
-from conftest import needs_engine
+from marks import needs_engine
 
 WIDE = tuple(float(s) for s in range(75, 130, 5))  # 11 strikes, 22 contracts
 

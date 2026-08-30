@@ -14,7 +14,7 @@ from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.contracts import SCHEMA_FILES, SIMULATION, validate
 from optiondesk.providers.base import ProviderDataError
 
-from conftest import needs_engine
+from marks import needs_engine
 
 TINY = {"horizon": 3, "paths": 200, "draws": 40, "burn": 20, "chains": 2}
 

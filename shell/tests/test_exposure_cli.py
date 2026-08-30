@@ -6,7 +6,7 @@ from optiondesk.artifacts import read_json, write_json
 from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.contracts import EXPOSURE, SCHEMA_FILES, validate
 
-from conftest import needs_engine
+from marks import needs_engine
 
 pytestmark = needs_engine
 

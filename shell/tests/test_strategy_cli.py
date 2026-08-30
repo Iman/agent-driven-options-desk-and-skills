@@ -8,7 +8,7 @@ from optiondesk.artifacts import read_json, write_json
 from optiondesk.cli import strategy as strategy_cmd
 from optiondesk.contracts import SCHEMA_FILES, STRATEGY_PLAN, validate
 
-from conftest import needs_engine
+from marks import needs_engine
 
 pytestmark = needs_engine
 

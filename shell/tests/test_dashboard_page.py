@@ -1,6 +1,7 @@
 """The dashboard page: what appears, what is escaped, what is not claimed."""
 
 import json
+import re
 
 import pytest
 
@@ -283,3 +284,219 @@ def test_positioning_and_volatility_tiles_render_from_an_exposure():
     assert "At-the-money IV" in html and "30.00%" in html
     assert "Expected range" in html and "91.40 to 108.60" in html
     assert "dealers are long calls and short puts" in html
+
+
+# --------------------------------------------------------------------------
+# The four cross-expiry panels. Each canvas must appear only when the
+# artifact behind it is on disk, and each must carry its own assumption
+# where the reader can see it, the way the exposure panels carry the
+# dealer sign convention.
+# --------------------------------------------------------------------------
+
+
+def canvases(html):
+    """Every chart container on the page, in the order they appear."""
+    return re.findall(r"<div id='([^']+)' class='chart", html)
+
+
+SURFACE = {"points": [[95.0, 20.0, 0.30, "2026-09-18"],
+                      [105.0, 20.0, 0.22, "2026-09-18"],
+                      [95.0, 47.0, 0.28, "2026-10-16"],
+                      [105.0, 47.0, 0.24, "2026-10-16"]],
+           "expiries": [{"expiry": "2026-09-18", "days": 20.0, "spot": 100.0,
+                         "strikes": 2},
+                        {"expiry": "2026-10-16", "days": 47.0, "spot": 100.0,
+                         "strikes": 2}]}
+
+PREMIUM = {"rows": [{"expiry": "2026-09-18", "days": 20.0, "implied": 0.20,
+                     "realised": 0.30, "gap": -0.10},
+                    {"expiry": "2026-10-16", "days": 47.0, "implied": 0.25,
+                     "realised": 0.30, "gap": -0.05}],
+           "realised": 0.30,
+           "history": {"observations": 500, "first": "2024-08-29",
+                       "last": "2026-08-28", "period": "2y"}}
+
+CONDORS = [{"strategy": "iron_condor", "expiry": "2026-09-18", "days": 20.0,
+            "short_low": 90.0, "short_high": 110.0, "width": 20.0,
+            "wing": 5.0, "expected_return_on_risk": 0.12,
+            "probability_of_profit": 0.7, "capital_at_risk": 8.0,
+            "net_cash": 2.0, "max_loss": -8.0, "friction_verdict": "ok",
+            "rank": 1}]
+
+SIMULATION = {
+    "spot": 100.0,
+    "history": {"annualised_volatility": 0.30, "observations": 500,
+                "first": "2024-08-29", "last": "2026-08-28", "period": "2y"},
+    "posterior": {"converged": True,
+                  "parameters": {name: {"p5": 0.1, "p50": 0.2, "p95": 0.3,
+                                        "rhat": 1.0, "ess": 400.0}
+                                 for name in ("mu", "omega", "alpha", "beta",
+                                              "nu")},
+                  "diagnostics": {"rhat": {"mu": 1.0}, "ess": {"mu": 400.0},
+                                  "note": ""}},
+    "simulation": {"horizon_days": 14, "paths": 2000,
+                   "fan": [{"day": 1, "p5": 97.0, "p25": 99.0, "p50": 100.0,
+                            "p75": 101.0, "p95": 103.0}],
+                   "terminal_histogram": []},
+    "risk": {"var_95": 0.03, "es_95": 0.05, "var_99": 0.06},
+    "structures": [],
+}
+
+
+def test_the_surface_canvas_appears_only_with_more_than_one_chain():
+    """Catches a surface panel drawn over a single expiry, or none at all.
+
+    The collector returns None below two expiries. If the page drew the
+    canvas anyway the script would mount an empty chart, and if it refused
+    a real surface the whole panel would silently vanish.
+    """
+    without = page_module.render(payload(ladder=ladder()))
+    assert "id='surface'" not in without
+    assert "Volatility surface" not in without
+
+    with_it = page_module.render(payload(ladder=ladder(), surface=SURFACE))
+    assert "id='surface'" in with_it
+    assert "surface" in canvases(with_it)
+
+
+def test_the_surface_states_which_side_of_the_strike_it_drew():
+    """Catches the out-of-the-money rule going unstated.
+
+    A call and a put at one strike quote different volatilities. A reader
+    who does not know which was taken cannot read the panel at all.
+    """
+    html = page_module.render(payload(ladder=ladder(), surface=SURFACE))
+
+    assert "Out-of-the-money side only" in html
+    assert "puts below spot, calls at or above it" in html
+    assert "Nothing is interpolated" in html
+    # The expiries it actually drew, so a missing chain is visible as one.
+    assert "2026-09-18 at 20.0 days (2 strikes)" in html
+
+
+def test_the_premium_canvas_appears_only_with_a_realised_figure():
+    """Catches a premium panel drawn with nothing to measure the gap from."""
+    without = page_module.render(payload(ladder=ladder()))
+    assert "id='vrp'" not in without
+
+    with_it = page_module.render(payload(ladder=ladder(),
+                                         variance_premium=PREMIUM))
+    assert "id='vrp'" in with_it
+    assert "Variance risk premium" in with_it
+
+
+def test_the_premium_is_labelled_a_disagreement_and_not_an_edge():
+    """Catches the gap being presented as something to trade.
+
+    The simulation skill's rule: the gap between implied and realised is a
+    disagreement between the market's forecast and the recent past. A
+    panel that implies otherwise is the failure this assertion exists for.
+    """
+    html = page_module.render(payload(ladder=ladder(),
+                                      variance_premium=PREMIUM))
+
+    # Apostrophe-free fragments: the panel text is escaped on the way out,
+    # so asserting on "market's" would be asserting on the escaping.
+    assert "not an edge and not a signal" in html
+    assert "disagreement between the market" in html
+    assert "and the recent past" in html
+    # And the window the realised figure came from, not just the figure.
+    assert "500 closes from 2024-08-29 to 2026-08-28" in html
+    # And that the axis is tenor, not calendar time.
+    assert "days to expiry, not calendar time" in html
+
+
+def test_the_condor_panel_says_it_is_not_a_search_across_the_chain():
+    """Catches the scatter being read as every condor the chain admits.
+
+    Nothing on disk enumerates them and the playbook builds one per
+    expiry, so a panel titled as a search would overstate what it shows by
+    orders of magnitude.
+    """
+    without = page_module.render(payload(ladder=ladder()))
+    assert "id='condors'" not in without
+
+    html = page_module.render(payload(ladder=ladder(), condors=CONDORS))
+    assert "id='condors'" in html
+    assert "This is not a search across the chain" in html
+    assert "builds exactly one condor per expiry" in html
+
+
+def test_the_gamma_panel_needs_a_simulation_and_something_to_overlay():
+    """Catches the panel appearing with nothing to draw on the corridor.
+
+    Without a ladder or a plan there are no strikes and no gamma profile,
+    which leaves a chart that repeats the fan panel above it.
+    """
+    # An exposure, so the page gets past the empty-desk branch and the
+    # guard is actually reached. Written with ladder=None and plans=[] and
+    # no exposure, this assertion passed because the whole page was the
+    # "nothing to show yet" one, and the mutation harness proved it could
+    # not fail.
+    bare = {"underlying": "TEST", "expiry": "2026-09-18", "spot": 100.0,
+            "meta": {}, "exposure": {"rows": [], "net_gex": 0.0,
+                                     "assumption": "stated"}}
+    alone = page_module.render(payload(ladder=None, exposure=bare,
+                                       plans=[], simulation=SIMULATION))
+    assert "id='gex'" in alone, "the page must have rendered for real"
+    assert "id='gammascalp'" not in alone
+
+    with_ladder = page_module.render(payload(ladder=ladder(),
+                                             simulation=SIMULATION))
+    assert "id='gammascalp'" in with_ladder
+
+
+def test_the_gamma_panel_refuses_to_call_the_fan_a_set_of_paths():
+    """Catches quantiles being presented as individual simulated paths.
+
+    The artifact stores p5 to p95 per day and nothing else. Five
+    trajectories labelled as paths would be five claims about paths that
+    were never recorded.
+    """
+    html = page_module.render(payload(ladder=ladder(), simulation=SIMULATION))
+
+    assert "not five individual paths" in html
+    assert "individual paths cannot be drawn from it" in html
+    # And that the gamma shown is the chain's, not the position's.
+    assert "gamma across price, which no artifact carries" in html
+
+
+def test_none_of_the_four_panels_appear_on_an_empty_desk():
+    """Catches a new install showing four empty canvases.
+
+    Every canvas on this page renders only when its artifact exists, and
+    the empty-desk branch embeds its own payload, so a key the script
+    reads unguardedly would throw on the very first page.
+    """
+    html = page_module.render(payload())
+
+    assert canvases(html) == []
+    for missing in ("id='surface'", "id='vrp'", "id='condors'",
+                    "id='gammascalp'"):
+        assert missing not in html
+    start = html.index("window.__OPTIONDESK__ = ") + len(
+        "window.__OPTIONDESK__ = ")
+    embedded = json.loads(html[start:html.index("};</script>", start) + 1])
+    assert embedded["surface"] is None
+    assert embedded["variance_premium"] is None
+    assert embedded["condors"] == []
+
+
+def test_the_four_new_payload_keys_reach_the_script():
+    """Catches a panel being drawn over a blob that does not carry its data.
+
+    The markup and the data are wired separately. A canvas with no entry
+    in the embedded payload is a permanently blank chart, and it looks
+    exactly like a chart whose artifact is missing.
+    """
+    html = page_module.render(payload(
+        ladder=ladder(), surface=SURFACE, variance_premium=PREMIUM,
+        condors=CONDORS, simulation=SIMULATION))
+    start = html.index("window.__OPTIONDESK__ = ") + len(
+        "window.__OPTIONDESK__ = ")
+    embedded = json.loads(html[start:html.index("};</script>", start) + 1])
+
+    assert len(embedded["surface"]["points"]) == 4
+    assert embedded["variance_premium"]["realised"] == 0.30
+    assert embedded["condors"][0]["width"] == 20.0
+    assert embedded["simulation"]["simulation"]["fan"][0]["p50"] == 100.0

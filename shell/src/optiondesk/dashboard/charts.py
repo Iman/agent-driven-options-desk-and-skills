@@ -115,6 +115,27 @@ function refLines(marks) {
   };
 }
 
+// The same idea on the other axis, for charts whose reference levels are
+// prices rather than strikes. Labels alternate between the left and the
+// right end of the line instead of the top and bottom of the plot, which
+// is where two horizontal lines a few points apart would otherwise
+// overprint each other.
+function hRefLines(marks) {
+  return {
+    symbol: 'none', silent: true,
+    data: marks.map(function (m, i) {
+      return {
+        yAxis: m.y,
+        lineStyle: { color: m.color || muted, type: m.type || 'dotted',
+                     width: 1.3 },
+        label: { formatter: m.label, color: m.color || muted, fontSize: 10,
+                 position: i % 2 === 0 ? 'insideEndTop' : 'insideStartTop',
+                 distance: 3 }
+      };
+    })
+  };
+}
+
 function fmt(v, d) {
   if (v === null || v === undefined) return 'n/a';
   if (typeof v === 'string') return v;
@@ -676,6 +697,321 @@ function backtestDetail() {
   }));
 }
 
+/* ------------------------------------------- the surface across expiries */
+
+function pctAxisLabel(digits) {
+  return { color: muted, fontSize: 10.5,
+           formatter: function (v) {
+             return (v * 100).toFixed(digits === undefined ? 0 : digits)
+                    + '%'; } };
+}
+
+// One square per listed contract, at its own strike and its own expiry's
+// days. Not a gridded heatmap: the listed strikes differ between expiries,
+// a near-dated chain quotes every point where a far one quotes every fifth,
+// and a category grid would either hide that or invite an interpolation
+// that would be an invented number.
+function surfaceChart() {
+  const s = D.surface;
+  if (!s || !s.points.length || s.expiries.length < 2) return;
+  const W = 0.16;
+  // Scaled on the strikes the default view actually shows. Taken over the
+  // whole strike range instead, the far wings of the nearest expiry set
+  // the top of the range on their own and every other expiry collapses
+  // into one hue: measured here at 115 percent against a median of 18.
+  const near = s.points.filter(
+    p => D.spot && Math.abs(p[0] - D.spot) <= D.spot * W);
+  const scale = (near.length > 20 ? near : s.points)
+    .map(p => p[2]).slice().sort((a, b) => a - b);
+  const lo = scale[Math.floor(scale.length * 0.02)];
+  const hi = scale[Math.floor(scale.length * 0.75)];
+  const ramp = dark
+    ? ['#1e40af', '#2f6feb', '#22d3ee', '#fbbf24', '#ff6b6b']
+    : ['#1e3a8a', '#2f6feb', '#0891b2', '#b45309', '#d43a3a'];
+
+  mount('surface', frame({
+    legend: { show: false },
+    grid: { left: 68, right: 96, top: 26, bottom: 62 },
+    dataZoom: zoom(W),
+    xAxis: xAxis('strike'),
+    yAxis: yAxis('days to expiry', { nameGap: 40 }),
+    visualMap: {
+      type: 'continuous', dimension: 2, min: lo, max: hi,
+      calculable: false, orient: 'vertical', right: 8, top: 'middle',
+      itemWidth: 11, itemHeight: 132, hoverLink: false,
+      text: [(hi * 100).toFixed(0) + '%', (lo * 100).toFixed(0) + '%'],
+      textStyle: { color: muted, fontSize: 10 },
+      inRange: { color: ramp },
+      // Clamped rather than greyed: a volatility above the clip is still a
+      // volatility above the clip, and the scale says where the clip is.
+      outOfRange: { color: [ramp[0], ramp[ramp.length - 1]] }
+    },
+    tooltip: { trigger: 'item', backgroundColor: panel, borderColor: line,
+      textStyle: { color: ink, fontSize: 11.5 },
+      formatter: function (p) {
+        return 'strike ' + fmt(p.data[0]) + '<br/>' + p.data[3] + ', ' +
+               fmt(p.data[1], 1) + ' days<br/>iv ' +
+               (p.data[2] * 100).toFixed(2) + '%';
+      } },
+    series: [{
+      type: 'scatter', symbol: 'rect', symbolSize: [7, 15],
+      itemStyle: { opacity: 0.92 },
+      data: s.points,
+      markLine: refLines([{ x: D.spot, label: 'spot ' + fmt(D.spot) }])
+    }]
+  }));
+}
+
+/* -------------------------------------------- implied against realised */
+
+function premiumChart() {
+  const p = D.variance_premium;
+  if (!p || p.rows.length < 2) return;
+  const rows = p.rows;
+  const realised = p.realised;
+  // The gap axis has to contain zero, whatever sign the gaps have. Left to
+  // scale itself it ran from -5.5 to -2.5 points, and bars that hang from
+  // the top of their own axis rather than from zero read as magnitudes
+  // measured from nothing.
+  const gaps = rows.map(r => r.gap);
+  const pad = Math.max.apply(null, gaps.map(Math.abs)) * 0.18 || 0.01;
+  const gapLo = Math.min.apply(null, gaps.concat([0])) - pad;
+  const gapHi = Math.max.apply(null, gaps.concat([0])) + pad;
+  // The volatility axis has to contain the realised level as well as the
+  // implied ones. Scaled to the implied series alone it stopped at 14.5
+  // percent while realised sat at 16.6, so the amber line the panel says
+  // the gap is measured from was off the top of the plot and invisible.
+  const levels = rows.map(r => r.implied).concat([realised]);
+  const vLo = Math.min.apply(null, levels);
+  const vHi = Math.max.apply(null, levels);
+  const vPad = (vHi - vLo) * 0.15 || 0.01;
+
+  mount('vrp', frame({
+    grid: { left: 70, right: 66, top: 32, bottom: 48 },
+    xAxis: xAxis('days to expiry', { min: null, max: null }),
+    yAxis: [
+      yAxis('annualised volatility', { min: vLo - vPad, max: vHi + vPad,
+        axisLabel: pctAxisLabel(1) }),
+      Object.assign({}, axis, { type: 'value', name: 'gap, vol points',
+        nameGap: 44, position: 'right', min: gapLo, max: gapHi,
+        splitLine: { show: false },
+        axisLabel: { color: muted, fontSize: 10.5,
+          formatter: function (v) { return (v * 100).toFixed(1); } } })
+    ],
+    tooltip: { trigger: 'axis', backgroundColor: panel, borderColor: line,
+      textStyle: { color: ink, fontSize: 11.5 },
+      formatter: function (ps) {
+        const row = rows.find(r => r.days === ps[0].axisValue);
+        if (!row) return '';
+        return row.expiry + '<br/>' + fmt(row.days, 1) + ' days' +
+          '<br/>implied ' + (row.implied * 100).toFixed(2) + '%' +
+          '<br/>realised ' + (row.realised * 100).toFixed(2) + '%' +
+          '<br/>gap ' + (row.gap >= 0 ? '+' : '') +
+          (row.gap * 100).toFixed(2) + ' vol points';
+      } },
+    series: [
+      // Deliberately not green and red. The gap is a disagreement between
+      // two estimates and neither side of it is the truth, so colouring
+      // one direction as profit would be a claim the data does not make.
+      { name: 'gap, implied minus realised', type: 'bar', yAxisIndex: 1,
+        barMaxWidth: 22, z: 1,
+        data: rows.map(r => [r.days, r.gap]),
+        itemStyle: { opacity: 0.55,
+          color: function (b) { return b.data[1] >= 0 ? CALL : PUT; } },
+        markLine: { symbol: 'none', silent: true,
+          label: { show: false },
+          data: [{ yAxis: 0, lineStyle: { color: muted, type: 'solid',
+                                          width: 1 } }] } },
+      { name: 'implied, at the money', type: 'line', smooth: true,
+        symbol: 'circle', symbolSize: 7, z: 3,
+        data: rows.map(r => [r.days, r.implied]),
+        lineStyle: { width: 2.2, color: CALL }, itemStyle: { color: CALL },
+        markLine: { symbol: 'none', silent: true, data: [
+          { yAxis: realised,
+            lineStyle: { color: AMBER, type: 'dashed', width: 1.4 },
+            label: { formatter: 'realised ' + (realised * 100).toFixed(1) +
+                     '%', color: AMBER, fontSize: 10,
+                     position: 'insideEndTop' } }] } }
+    ]
+  }));
+}
+
+/* ------------------------------------------------ condors, side by side */
+
+function condorChart() {
+  const rows = D.condors || [];
+  if (!rows.length) return;
+  const risks = rows.map(r => r.capital_at_risk || 0);
+  const maxRisk = Math.max.apply(null, risks) || 1;
+  const pops = rows.map(r => r.probability_of_profit)
+                   .filter(v => v !== null && v !== undefined);
+  // Explicit padding, so a point at zero width and a point at the widest
+  // both sit inside the plot with room for their labels rather than half
+  // under the axis.
+  // Rounded, because 1.14 times 120 is 136.79999999999998 in binary
+  // floating point and that is what the axis tick printed.
+  const widest = Math.max.apply(null, rows.map(r => r.width)) || 1;
+  const xLo = -Math.ceil(0.10 * widest);
+  const xHi = Math.ceil(1.14 * widest);
+  const option = {
+    legend: { show: false },
+    grid: { left: 84, right: pops.length ? 104 : 40, top: 44, bottom: 52 },
+    xAxis: xAxis('distance between the short strikes',
+                 { min: xLo, max: xHi }),
+    yAxis: yAxis('expected return on risk',
+                 { axisLabel: pctAxisLabel(0) }),
+    tooltip: { trigger: 'item', backgroundColor: panel, borderColor: line,
+      textStyle: { color: ink, fontSize: 11.5 },
+      formatter: function (p) {
+        const r = p.data[4];
+        return '<strong>' + r.strategy.replace(/_/g, ' ') + '</strong><br/>' +
+          r.expiry + ', ' + fmt(r.days, 1) + ' days<br/>' +
+          'shorts ' + fmt(r.short_low) + ' and ' + fmt(r.short_high) +
+          ', ' + fmt(r.width) + ' apart<br/>' +
+          (r.wing === null || r.wing === undefined ? '' :
+            'wings ' + fmt(r.wing) + ' beyond each short<br/>') +
+          'return on risk ' +
+          (r.expected_return_on_risk * 100).toFixed(1) + '%<br/>' +
+          'P(profit) ' + (r.probability_of_profit === null ? 'n/a' :
+            (r.probability_of_profit * 100).toFixed(1) + '%') + '<br/>' +
+          'capital at risk ' + fmt(r.capital_at_risk) + '<br/>' +
+          'friction ' + r.friction_verdict;
+      } },
+    series: [{
+      type: 'scatter',
+      symbolSize: function (d) {
+        return 14 + 26 * Math.sqrt((d[3] || 0) / maxRisk);
+      },
+      itemStyle: pops.length ? { opacity: 0.85 }
+                             : { color: CALL, opacity: 0.8 },
+      label: { show: true, position: 'top', color: muted, fontSize: 10,
+        formatter: function (p) {
+          return p.data[4].strategy.replace(/_/g, ' ') + ' ' +
+                 p.data[4].expiry;
+        } },
+      data: rows.map(r => [r.width, r.expected_return_on_risk,
+                           r.probability_of_profit, r.capital_at_risk, r]),
+      markLine: { symbol: 'none', silent: true, label: { show: false },
+        lineStyle: { color: muted, type: 'dashed', width: 1 },
+        data: [{ yAxis: 0 }] }
+    }]
+  };
+  if (pops.length) {
+    option.visualMap = {
+      type: 'continuous', dimension: 2,
+      min: Math.min.apply(null, pops), max: Math.max.apply(null, pops),
+      calculable: false, orient: 'vertical', right: 8, top: 'middle',
+      itemWidth: 11, itemHeight: 110, hoverLink: false,
+      text: [(Math.max.apply(null, pops) * 100).toFixed(0) + '%',
+             (Math.min.apply(null, pops) * 100).toFixed(0) + '%'],
+      textStyle: { color: muted, fontSize: 10 },
+      inRange: { color: dark ? ['#939aa6', '#6ea0ff', '#3ddc84']
+                             : ['#8d94a1', '#2f6feb', '#12a150'] }
+    };
+  }
+  mount('condors', frame(option));
+}
+
+/* ---------------------------------------------------- gamma scalping */
+
+// The fan carries quantiles of the path distribution, not individual
+// paths: the artifact stores p5 to p95 per day and nothing else, so the
+// five trajectories are what there is to draw and they are labelled as
+// quantiles rather than as paths.
+function gammaScalpChart(plan) {
+  const sim = D.simulation;
+  if (!sim || !document.getElementById('gammascalp')) return;
+  const fan = (sim.simulation && sim.simulation.fan) || [];
+  if (!fan.length) return;
+
+  const s = D.series || { calls: [], puts: [] };
+  const pick = rows => rows.filter(r => r.gamma !== null &&
+    r.gamma !== undefined).map(r => [r.gamma, r.strike]);
+  const gCalls = pick(s.calls), gPuts = pick(s.puts);
+  let maxGamma = 0;
+  gCalls.concat(gPuts).forEach(function (p) {
+    if (p[0] > maxGamma) maxGamma = p[0];
+  });
+
+  const levels = [{ y: sim.spot, label: 'spot ' + fmt(sim.spot),
+                    type: 'dotted' }];
+  if (plan) {
+    (plan.legs || []).forEach(function (leg) {
+      if (leg.strike === null || leg.strike === undefined) return;
+      levels.push({
+        y: leg.strike,
+        label: leg.side + ' ' + leg.kind + ' ' + fmt(leg.strike),
+        type: leg.side === 'short' ? 'dashed' : 'dotted',
+        color: leg.side === 'short' ? AMBER : muted
+      });
+    });
+  }
+
+  // The corridor is drawn in grey and the gamma profile keeps the call and
+  // put colours it has on every other Greek panel. Drawn the other way
+  // round, the call-gamma curve is the same blue as the quantiles and
+  // reads as a sixth trajectory.
+  const quantile = (key, width, type, opacity) => ({
+    name: key, type: 'line', showSymbol: false, xAxisIndex: 0,
+    data: fan.map(r => [r.day, r[key]]),
+    // itemStyle as well as lineStyle: the legend swatch takes its colour
+    // from the series, not from the line, so setting only lineStyle drew
+    // five grey lines under five differently coloured legend keys.
+    itemStyle: { color: muted },
+    lineStyle: { width: width, color: muted, type: type, opacity: opacity }
+  });
+
+  const series = [
+    quantile('p5', 1.2, 'dashed', 0.55),
+    quantile('p25', 1.5, 'solid', 0.75),
+    quantile('p50', 2.2, 'solid', 1),
+    quantile('p75', 1.5, 'solid', 0.75),
+    quantile('p95', 1.2, 'dashed', 0.55)
+  ];
+  series[2].markLine = hRefLines(levels);
+
+  if (maxGamma > 0) {
+    // Against the top axis, whose range is set wide so the profile sits in
+    // the left of the plot and leaves the corridor readable. The axis
+    // labels carry the true values.
+    const gamma = (data, colour, name) => ({
+      name: name, type: 'line', showSymbol: false, smooth: true,
+      xAxisIndex: 1, data: data, itemStyle: { color: colour },
+      lineStyle: { width: 1.8, color: colour, opacity: 0.85 }
+    });
+    series.push(gamma(gCalls, CALL, 'call gamma by strike'));
+    series.push(gamma(gPuts, PUT, 'put gamma by strike'));
+  }
+
+  mount('gammascalp', frame({
+    legend: { top: 0, right: 0, type: 'scroll',
+      textStyle: { color: muted, fontSize: 10 }, itemWidth: 13,
+      itemHeight: 7, icon: 'roundRect' },
+    grid: { left: 70, right: 26, top: 56, bottom: 46 },
+    xAxis: [
+      xAxis('business days ahead', { min: null, max: null }),
+      Object.assign({}, axis, { type: 'value', position: 'top',
+        name: 'gamma per contract, from the ladder', nameGap: 22,
+        min: 0, max: maxGamma > 0 ? maxGamma * 2.6 : 1,
+        splitLine: { show: false },
+        axisLabel: { color: muted, fontSize: 10,
+          formatter: function (v) { return v.toFixed(3); } } })
+    ],
+    yAxis: yAxis('price'),
+    tooltip: { trigger: 'axis', backgroundColor: panel, borderColor: line,
+      textStyle: { color: ink, fontSize: 11.5 },
+      formatter: function (ps) {
+        const point = ps.find(z => z.seriesName === 'p50');
+        if (!point) return '';
+        const row = fan[point.dataIndex];
+        return 'day ' + row.day + '<br/>p95 ' + fmt(row.p95) + '<br/>p75 ' +
+               fmt(row.p75) + '<br/>median ' + fmt(row.p50) + '<br/>p25 ' +
+               fmt(row.p25) + '<br/>p5 ' + fmt(row.p5);
+      } },
+    series: series
+  }));
+}
+
 /* ------------------------------------------------------------- strategies */
 
 function renderPlan(index) {
@@ -718,12 +1054,16 @@ function renderPlan(index) {
     '</td><td>' + (l.open_interest == null ? 'n/a' : l.open_interest) +
     '</td></tr>').join('');
   payoffChart(plan);
+  gammaScalpChart(plan);
 }
 
 /* ------------------------------------------------------------------ start */
 
 exposureCharts();
 termCharts();
+surfaceChart();
+premiumChart();
+condorChart();
 depthCharts();
 structureOverlay();
 riskRewardScatter();
@@ -742,5 +1082,9 @@ if (D.plans.length) {
   document.querySelectorAll('.picker button').forEach((b, i) =>
     b.addEventListener('click', () => renderPlan(i)));
   renderPlan(0);
+} else {
+  // No structure to overlay, but the corridor and the chain's own gamma
+  // profile are still there to draw.
+  gammaScalpChart(null);
 }
 """

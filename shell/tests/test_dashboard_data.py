@@ -257,3 +257,200 @@ def test_another_symbols_simulation_is_not_borrowed(tmp_path):
     collected = data_module.collect(tmp_path, "TEST")
     assert collected["selected"]["underlying"] == "TEST"
     assert collected["simulation"] is None
+
+
+# --------------------------------------------------------------------------
+# The surface, the premium and the condor set. Each reaches across every
+# expiry on disk, which is the part that a per-group collector gets wrong.
+# --------------------------------------------------------------------------
+
+
+def chain_with(spot, days, quotes):
+    """A chain artifact carrying one contract per (strike, type) in quotes."""
+    contracts = []
+    for strike, kind, iv in quotes:
+        contracts.append({"symbol": "X", "type": kind, "strike": strike,
+                          "bid": 1.0, "ask": 1.2, "mid": 1.1, "volume": 1,
+                          "open_interest": 1, "iv": iv})
+    return {"spot": spot, "days_to_expiry": days, "contracts": contracts}
+
+
+def test_the_surface_takes_the_out_of_the_money_side_at_each_strike(tmp_path):
+    """Catches both sides of a strike landing in the same cell.
+
+    A call and a put at one strike quote different volatilities. Plotting
+    both puts two values at one coordinate, and whichever is drawn second
+    silently wins. The rule is puts below spot and calls at or above it,
+    and this pins it.
+    """
+    quotes = [(90.0, "put", 0.30), (90.0, "call", 0.99),
+              (110.0, "call", 0.20), (110.0, "put", 0.88)]
+    put(tmp_path, "chain", "TEST", "2026-09-18",
+        **chain_with(100.0, 20.0, quotes))
+    put(tmp_path, "chain", "TEST", "2026-10-16",
+        **chain_with(100.0, 47.0, quotes))
+
+    surface = data_module.collect(tmp_path, "TEST")["surface"]
+    chosen = {(row[0], row[1]): row[2] for row in surface["points"]}
+    assert chosen[(90.0, 20.0)] == 0.30, "below spot must be the put"
+    assert chosen[(110.0, 20.0)] == 0.20, "above spot must be the call"
+    assert 0.99 not in chosen.values() and 0.88 not in chosen.values()
+
+
+def test_the_surface_needs_more_than_one_expiry(tmp_path):
+    """Catches a single chain being offered as a surface.
+
+    One expiry is a smile, and the smile already has its own panel. The
+    page uses this None to decide whether to emit the canvas at all.
+    """
+    put(tmp_path, "chain", "TEST", "2026-09-18",
+        **chain_with(100.0, 20.0, [(100.0, "call", 0.2)]))
+
+    assert data_module.collect(tmp_path, "TEST")["surface"] is None
+
+
+def test_the_surface_reaches_every_expiry_and_nothing_is_interpolated(
+        tmp_path):
+    """Catches the surface being filled out between listed strikes.
+
+    Expiries list different strikes. A gap is a strike that is not listed,
+    and inventing a volatility to square the grid would be inventing a
+    number.
+    """
+    put(tmp_path, "chain", "TEST", "2026-09-18",
+        **chain_with(100.0, 20.0,
+                     [(99.0, "put", 0.31), (100.0, "call", 0.22),
+                      (101.0, "call", 0.23)]))
+    put(tmp_path, "chain", "TEST", "2026-10-16",
+        **chain_with(100.0, 47.0, [(100.0, "call", 0.25)]))
+
+    surface = data_module.collect(tmp_path, "TEST")["surface"]
+    assert [row["days"] for row in surface["expiries"]] == [20.0, 47.0]
+    # Three points for the near expiry, one for the far one. Not four each.
+    assert len(surface["points"]) == 4
+    far = [row for row in surface["points"] if row[1] == 47.0]
+    assert [row[0] for row in far] == [100.0]
+
+
+def simulation_artifact(realised, **extra):
+    payload = {
+        "underlying": "TEST", "expiry": None, "spot": 100.0,
+        "history": {"annualised_volatility": realised, "observations": 500,
+                    "first": "2024-08-29", "last": "2026-08-28",
+                    "period": "2y"},
+        "simulation": {"horizon_days": 14, "paths": 20000,
+                       "fan": [{"day": 1, "p5": 97.0, "p25": 99.0,
+                                "p50": 100.0, "p75": 101.0, "p95": 103.0}]},
+    }
+    payload.update(extra)
+    return payload
+
+
+def exposure_with_smile(atm_iv, days):
+    return {"days_to_expiry": days,
+            "smile": {"atm_iv": atm_iv, "risk_reversal": 0.01,
+                      "butterfly": 0.005, "expected_move": 5.0}}
+
+
+def test_the_premium_is_the_gap_between_two_recorded_numbers(tmp_path):
+    """Catches the gap being computed from anything but the artifacts.
+
+    Implied is each expiry's own at-the-money volatility, realised is the
+    one figure the simulation recorded. The difference is arithmetic on
+    two numbers that are both on disk, and nothing else.
+    """
+    put(tmp_path, "exposure", "TEST", "2026-09-18",
+        **exposure_with_smile(0.20, 19.0))
+    put(tmp_path, "exposure", "TEST", "2026-10-16",
+        **exposure_with_smile(0.25, 47.0))
+    write_json(simulation_artifact(0.30), "simulation_TEST_14d.json",
+               tmp_path)
+
+    premium = data_module.collect(tmp_path, "TEST")["variance_premium"]
+    assert premium["realised"] == 0.30
+    gaps = {row["days"]: row["gap"] for row in premium["rows"]}
+    assert gaps[19.0] == pytest.approx(0.20 - 0.30)
+    assert gaps[47.0] == pytest.approx(0.25 - 0.30)
+    assert premium["history"]["period"] == "2y"
+
+
+def test_there_is_no_premium_without_a_realised_figure(tmp_path):
+    """Catches a premium drawn against a realised volatility that is absent.
+
+    Without the simulation there is no realised number anywhere on disk,
+    and the honest answer is no panel rather than a substitute.
+    """
+    put(tmp_path, "exposure", "TEST", "2026-09-18",
+        **exposure_with_smile(0.20, 19.0))
+    put(tmp_path, "exposure", "TEST", "2026-10-16",
+        **exposure_with_smile(0.25, 47.0))
+
+    assert data_module.collect(tmp_path, "TEST")["variance_premium"] is None
+
+
+def condor_plan(shorts, longs):
+    legs = [{"kind": "put", "side": "short", "strike": shorts[0]},
+            {"kind": "call", "side": "short", "strike": shorts[1]},
+            {"kind": "put", "side": "long", "strike": longs[0]},
+            {"kind": "call", "side": "long", "strike": longs[1]}]
+    return {"legs": legs, "days_to_expiry": 19.0}
+
+
+def comparison_with(strategy, ror, pop):
+    return {"rows": [{"strategy": strategy, "expected_return_on_risk": ror,
+                      "probability_of_profit": pop, "capital_at_risk": 8.0,
+                      "net_cash": 2.0, "max_loss": -8.0,
+                      "friction_verdict": "ok", "rank": 1}]}
+
+
+def test_condor_width_is_measured_off_the_plans_own_legs(tmp_path):
+    """Catches the width being taken from anywhere but the strikes.
+
+    The distance between the shorts, and the wing distance beyond each of
+    them, are properties of the four strikes in the artifact. Nothing else
+    on disk records them.
+    """
+    put(tmp_path, "strategy", "TEST", "2026-09-18", strategy="iron_condor",
+        **condor_plan((90.0, 110.0), (85.0, 115.0)))
+    put(tmp_path, "comparison", "TEST", "2026-09-18",
+        **comparison_with("iron_condor", 0.12, 0.7))
+
+    condors = data_module.collect(tmp_path, "TEST")["condors"]
+    assert len(condors) == 1
+    assert condors[0]["width"] == 20.0
+    assert condors[0]["wing"] == 5.0
+    assert condors[0]["expected_return_on_risk"] == 0.12
+
+
+def test_a_condor_is_never_scored_against_another_expirys_comparison(
+        tmp_path):
+    """Catches a plan borrowing the ordering of a different expiry.
+
+    Two expiries are two different chains. A September condor scored by
+    October's comparison would look entirely plausible and be wrong, which
+    is the same failure the group keying exists to prevent.
+    """
+    put(tmp_path, "strategy", "TEST", "2026-09-18", strategy="iron_condor",
+        **condor_plan((90.0, 110.0), (85.0, 115.0)))
+    put(tmp_path, "comparison", "TEST", "2026-10-16",
+        **comparison_with("iron_condor", 0.12, 0.7))
+
+    assert data_module.collect(tmp_path, "TEST")["condors"] == []
+
+
+def test_a_structure_with_one_short_strike_has_no_width_and_is_left_out(
+        tmp_path):
+    """Catches a vertical spread being drawn at zero width.
+
+    Zero width means the shorts sit on one strike, which is a butterfly. A
+    structure with a single short leg has no distance between shorts at
+    all, and putting it at zero would say something untrue about it.
+    """
+    legs = [{"kind": "put", "side": "short", "strike": 95.0},
+            {"kind": "put", "side": "long", "strike": 90.0}]
+    put(tmp_path, "strategy", "TEST", "2026-09-18",
+        strategy="bear_put_spread", legs=legs, days_to_expiry=19.0)
+    put(tmp_path, "comparison", "TEST", "2026-09-18",
+        **comparison_with("bear_put_spread", 0.2, 0.4))
+
+    assert data_module.collect(tmp_path, "TEST")["condors"] == []

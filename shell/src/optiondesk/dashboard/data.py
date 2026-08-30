@@ -118,7 +118,8 @@ def collect(directory, underlying=None, expiry=None):
                 "ladder_path": None, "exposure": None, "exposure_path": None,
                 "comparison": None, "plans": [], "groups": [],
                 "selected": None, "simulation": None, "backtests": [],
-                "term_structure": []}
+                "term_structure": [], "surface": None,
+                "variance_premium": None, "condors": []}
 
     # A simulation or a backtest belongs to the underlying, not to one
     # expiry, so it is looked up across every group for that symbol rather
@@ -158,6 +159,11 @@ def collect(directory, underlying=None, expiry=None):
     return {
         "artifact_dir": str(directory),
         "term_structure": term_structure,
+        # Across every expiry for this underlying, like the term structure
+        # above and for the same reason: one chain cannot show either.
+        "surface": volatility_surface(groups, symbol),
+        "variance_premium": variance_premium(term_structure, simulation),
+        "condors": condor_candidates(groups, symbol),
         "simulation": simulation,
         "backtests": backtests,
         "ladder": chosen["artifacts"].get("greeks"),
@@ -179,6 +185,152 @@ def collect(directory, underlying=None, expiry=None):
             for g in groups if g.get("selectable")
         ],
     }
+
+
+def volatility_surface(groups, symbol):
+    """Implied volatility by strike and expiry, from every chain on disk.
+
+    One point per listed contract, placed at its own strike and its own
+    chain's days to expiry. Nothing is interpolated between listed strikes
+    or between expiries: a gap in the grid is a strike that is not listed,
+    and a far expiry quoting every fifth strike looks sparser than a near
+    one quoting every strike because it is.
+
+    The out-of-the-money side is taken at each strike, puts below that
+    chain's spot and calls at or above it. Both sides quote a volatility at
+    the same strike and they disagree; plotting both would put two values
+    in one cell, and the out-of-the-money side is the one that is traded.
+    """
+    expiries = []
+    points = []
+    for group in groups:
+        if (group["underlying"] or "").upper() != symbol:
+            continue
+        chain = group["artifacts"].get("chain")
+        if not chain:
+            continue
+        days = chain.get("days_to_expiry")
+        spot = chain.get("spot")
+        if not days or not spot:
+            continue
+        taken = {}
+        for contract in chain.get("contracts", []):
+            strike = contract.get("strike")
+            iv = contract.get("iv")
+            if strike is None or not iv:
+                continue
+            if contract.get("type") != ("put" if strike < spot else "call"):
+                continue
+            taken[strike] = iv
+        if not taken:
+            continue
+        expiry = chain.get("expiry")
+        expiries.append({"expiry": expiry, "days": days, "spot": spot,
+                         "strikes": len(taken)})
+        for strike in sorted(taken):
+            points.append([strike, days, taken[strike], expiry])
+
+    # One expiry is a smile, not a surface, and the smile already has its
+    # own panel. Two is the least that shows a term dimension at all.
+    if len(expiries) < 2:
+        return None
+    expiries.sort(key=lambda row: row["days"])
+    return {"points": points, "expiries": expiries}
+
+
+def variance_premium(term_structure, simulation):
+    """At-the-money implied volatility against the volatility shown.
+
+    Implied comes from each expiry's smile, realised from the simulation's
+    history block. Both are annualised, so the difference is in volatility
+    points and needs no conversion.
+
+    The axis is days to expiry, not calendar time. No artifact on disk
+    carries a realised-volatility series through time: the simulation
+    records one figure over one window, so a premium through calendar time
+    cannot be drawn from what is here and is not drawn.
+    """
+    if not simulation:
+        return None
+    history = simulation.get("history") or {}
+    realised = history.get("annualised_volatility")
+    if realised is None:
+        return None
+    rows = []
+    for row in term_structure or []:
+        implied = row.get("atm_iv")
+        if implied is None or not row.get("days"):
+            continue
+        rows.append({"expiry": row.get("expiry"), "days": row["days"],
+                     "implied": implied, "realised": realised,
+                     "gap": implied - realised})
+    if len(rows) < 2:
+        return None
+    rows.sort(key=lambda row: row["days"])
+    return {"rows": rows, "realised": realised,
+            "history": {"observations": history.get("observations"),
+                        "first": history.get("first"),
+                        "last": history.get("last"),
+                        "period": history.get("period")}}
+
+
+def condor_candidates(groups, symbol):
+    """Structures with two short strikes, with the width between them.
+
+    The width and the wing distance are measured off the plan's own legs.
+    The scores come from the comparison artifact of the same group, so a
+    plan whose expiry has never been compared carries no score and is left
+    out rather than scored against another expiry's ordering.
+
+    This is not a search across the chain. Nothing on disk enumerates the
+    condors a chain admits and no engine function builds more than the one
+    the playbook picks, so what is here is the structures that exist as
+    artifacts, across every expiry on file for this underlying.
+    """
+    out = []
+    for group in groups:
+        if (group["underlying"] or "").upper() != symbol:
+            continue
+        comparison = group["artifacts"].get("comparison")
+        scored = {}
+        for row in ((comparison or {}).get("rows") or []):
+            scored[row.get("strategy")] = row
+        for plan in group.get("plans") or []:
+            legs = plan.get("legs") or []
+            shorts = sorted(leg["strike"] for leg in legs
+                            if leg.get("side") == "short"
+                            and leg.get("strike") is not None)
+            if len(shorts) < 2:
+                continue
+            row = scored.get(plan.get("strategy"))
+            if not row or row.get("expected_return_on_risk") is None:
+                continue
+            longs = sorted(leg["strike"] for leg in legs
+                           if leg.get("side") == "long"
+                           and leg.get("strike") is not None)
+            width = shorts[-1] - shorts[0]
+            wing = None
+            if len(longs) >= 2:
+                wing = (longs[-1] - longs[0] - width) / 2.0
+            out.append({
+                "strategy": plan.get("strategy"),
+                "expiry": plan.get("expiry"),
+                "days": plan.get("days_to_expiry"),
+                "short_low": shorts[0],
+                "short_high": shorts[-1],
+                "width": width,
+                "wing": wing,
+                "expected_return_on_risk": row.get("expected_return_on_risk"),
+                "probability_of_profit": row.get("probability_of_profit"),
+                "capital_at_risk": row.get("capital_at_risk"),
+                "net_cash": row.get("net_cash"),
+                "max_loss": row.get("max_loss"),
+                "friction_verdict": row.get("friction_verdict"),
+                "rank": row.get("rank"),
+            })
+    out.sort(key=lambda row: (row["width"], row["expiry"] or "",
+                              row["strategy"] or ""))
+    return out
 
 
 def chain_series(chain):

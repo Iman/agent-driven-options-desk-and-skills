@@ -498,6 +498,157 @@ def _term_section(term_structure):
                  "<tbody>" + "".join(rows) + "</tbody></table></div>"))
 
 
+def _surface_section(surface):
+    """Implied volatility by strike and expiry, from every chain on disk."""
+    if not surface or len(surface.get("expiries") or []) < 2:
+        return ""
+    expiries = surface["expiries"]
+    listed = ", ".join(
+        "{} at {} days ({} strikes)".format(
+            row.get("expiry"), _num(row.get("days"), 1), row.get("strikes"))
+        for row in expiries)
+    return (
+        "<h2 class='section'>Volatility surface</h2>"
+        + _panel(
+            "Implied volatility by strike and expiry",
+            "One square per listed contract, at its own strike and its own "
+            "expiry's days. Colour is the contract's implied volatility. "
+            "Spot is the dotted line; drag to zoom the strike axis.",
+            "<div id='surface' class='chart tall'></div>"
+            "<p class='assume'>{}</p>".format(html.escape(
+                "Out-of-the-money side only: puts below spot, calls at or "
+                "above it. Both sides quote a volatility at the same strike "
+                "and they disagree, so one had to be chosen and this is the "
+                "side that trades. Nothing is interpolated, between strikes "
+                "or between expiries: a gap is a strike that is not listed, "
+                "and a far expiry looks sparser than a near one because it "
+                "quotes fewer strikes. The colour scale runs from the 2nd "
+                "to the 75th percentile of the volatilities within the "
+                "strike window the view opens on, so that the wings and "
+                "the nearest expiry do not take the whole range on their "
+                "own; anything above the top of the scale is drawn at the "
+                "top colour rather than greyed out, which is why a "
+                "short-dated row can saturate. On file: {}.".format(
+                    listed)))))
+
+
+def _premium_section(premium):
+    """Implied volatility against the volatility the underlying has shown."""
+    if not premium or len(premium.get("rows") or []) < 2:
+        return ""
+    history = premium.get("history") or {}
+    rows = []
+    for row in premium["rows"]:
+        gap = row.get("gap")
+        rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{}</td></tr>".format(
+                html.escape(str(row.get("expiry"))),
+                _num(row.get("days"), 1),
+                _percent(row.get("implied"), 2),
+                _percent(row.get("realised"), 2),
+                ("{:+.2f} pts".format(gap * 100)
+                 if gap is not None else "n/a")))
+    window = "{} closes from {} to {}".format(
+        history.get("observations"), history.get("first"),
+        history.get("last"))
+    return (
+        "<h2 class='section'>Variance risk premium</h2>"
+        + _panel(
+            "What the options are priced at, against what the underlying "
+            "has done",
+            "At-the-money implied volatility per expiry on the left axis, "
+            "the gap to realised volatility as bars on the right. The "
+            "amber line is the realised figure the gap is measured from.",
+            "<div id='vrp' class='chart short'></div>"
+            "<div class='scroll'><table><thead><tr><th>expiry</th>"
+            "<th>days</th><th>implied at the money</th><th>realised</th>"
+            "<th>gap</th></tr></thead><tbody>" + "".join(rows)
+            + "</tbody></table></div>"
+            + "<p class='assume'>{}</p>".format(html.escape(
+                "The gap is a disagreement between the market's forecast "
+                "and the recent past, not an edge and not a signal. It is "
+                "not coloured as profit and loss for that reason. Implied "
+                "is the at-the-money volatility of each expiry's own smile; "
+                "realised is one annualised figure over {}, from the "
+                "simulation's history block, so it is the same number "
+                "against every expiry rather than a matched-horizon "
+                "estimate.".format(window)))
+            + "<p class='caveat'>{}</p>".format(html.escape(
+                "The axis is days to expiry, not calendar time. No artifact "
+                "on disk carries realised volatility through time: the "
+                "simulation records one figure over one window, so the "
+                "premium cannot be plotted through calendar time from what "
+                "is here, and it is not."))))
+
+
+def _condor_section(condors):
+    """Structures with two short strikes, scored, across every expiry."""
+    if not condors:
+        return ""
+    families = sorted({row["strategy"] for row in condors})
+    expiries = sorted({row["expiry"] for row in condors if row.get("expiry")})
+    return (
+        "<h2 class='section'>Condor search</h2>"
+        + _panel(
+            "Every condor on file, by the distance between its shorts",
+            "Each structure with two short strikes, placed by how far apart "
+            "those shorts are and by its expected return on capital at "
+            "risk. Size is the capital at risk, colour is the model "
+            "probability of profit. The dashed line is zero expectation. A "
+            "butterfly sits at zero width: it is a condor whose shorts have "
+            "been pulled together.",
+            "<div id='condors' class='chart'></div>"
+            "<p class='assume'>{}</p>".format(html.escape(
+                "This is not a search across the chain. Nothing on disk "
+                "enumerates the condors a chain admits, and the engine's "
+                "playbook builds exactly one condor per expiry, at the "
+                "edges of the expected-move band, so the alternatives it "
+                "did not build were never priced and are not here. What is "
+                "plotted is the {} structures that exist as artifacts, "
+                "across {}: {}. Widths and wing distances are measured off "
+                "each plan's own legs; the scores are that expiry's own "
+                "comparison artifact, so no structure is ranked against "
+                "another expiry's ordering. Adding an expiry adds "
+                "points.".format(len(condors), ", ".join(expiries) or "no "
+                                 "expiry", ", ".join(families))))))
+
+
+def _gamma_scalp_section(simulation, ladder, plans, expiry):
+    """The simulated corridor with the gamma that sits across it."""
+    if not simulation:
+        return ""
+    fan = (simulation.get("simulation") or {}).get("fan") or []
+    if not fan:
+        return ""
+    has_gamma = any(row.get("gamma") is not None
+                    for row in ((ladder or {}).get("rows") or []))
+    if not has_gamma and not plans:
+        return ""
+    horizon = (simulation.get("simulation") or {}).get("horizon_days")
+    return _panel(
+        "Where a delta hedge would be working",
+        "The simulated corridor with the structure's own strikes drawn "
+        "across it, short strikes dashed amber and long strikes dotted. "
+        "Delta moves fastest where gamma is largest, so a delta-hedged "
+        "position rebalances most often where the corridor crosses those "
+        "levels. Use the structure picker above to change the position.",
+        "<div id='gammascalp' class='chart tall'></div>"
+        "<p class='assume'>{}</p>".format(html.escape(
+            "The five lines are the 5th, 25th, 50th, 75th and 95th "
+            "percentiles of the simulated distribution over {} business "
+            "days, not five individual paths. The artifact stores the "
+            "quantiles per day and no individual path, so individual paths "
+            "cannot be drawn from it. The gamma profile on the top axis is "
+            "per-contract gamma by strike from the {} ladder, evaluated at "
+            "today's spot: it shows where gamma sits in the chain, and it "
+            "is not the position's gamma across price, which no artifact "
+            "carries. The position's net gamma at spot is the figure in "
+            "the structure tiles above.".format(
+                horizon if horizon is not None else "the simulated",
+                expiry or "graded"))))
+
+
 def _depth_section(chain_series):
     if not chain_series or not (chain_series.get("calls")
                                 or chain_series.get("puts")):
@@ -613,7 +764,8 @@ def render(payload):
             html.escape(payload["disclaimer"]),
             json.dumps({"series": {"calls": [], "puts": []}, "plans": [],
                         "spot": None, "exposure": None, "simulation": None,
-                        "backtests": []}), SCRIPT)
+                        "backtests": [], "surface": None,
+                        "variance_premium": None, "condors": []}), SCRIPT)
 
     meta = (ladder or exposure or {}).get("meta", {})
     spot = ((ladder or {}).get("spot") or (exposure or {}).get("spot")
@@ -701,6 +853,8 @@ def render(payload):
                         + _volatility_tiles(exposure))
 
     sections.append(_term_section(payload.get("term_structure")))
+    sections.append(_surface_section(payload.get("surface")))
+    sections.append(_premium_section(payload.get("variance_premium")))
 
     if series["calls"] or series["puts"]:
         sections.append(_panel(
@@ -762,8 +916,11 @@ def render(payload):
                 _table(ladder["rows"], columns)))
 
     sections.append(_overlay_section(plans, comparison))
+    sections.append(_condor_section(payload.get("condors")))
     sections.append(_simulation_section(payload.get("simulation")))
     sections.append(_distribution_section(payload.get("simulation")))
+    sections.append(_gamma_scalp_section(payload.get("simulation"), ladder,
+                                         plans, expiry))
     sections.append(_backtest_section(payload.get("backtests")))
     sections.append(_backtest_detail_section(payload.get("backtests")))
     sections.append("<h2 class='section'>Adding data</h2>"
@@ -774,6 +931,9 @@ def render(payload):
         "chain_series": payload.get("chain_series")
         or {"calls": [], "puts": []},
         "term_structure": payload.get("term_structure") or [],
+        "surface": payload.get("surface"),
+        "variance_premium": payload.get("variance_premium"),
+        "condors": payload.get("condors") or [],
         "comparison": comparison,
         "spot": spot,
         "plans": plans,

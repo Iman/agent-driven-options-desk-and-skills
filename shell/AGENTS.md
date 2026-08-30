@@ -8,7 +8,7 @@ The same capabilities are also exposed over MCP by `optiondesk-mcp`, which is th
 
 ## Skill: options-backtest
 
-Test an option structure against real price history with modelled premiums, and run a paper forward test that records positions before their outcome is known and marks them against later chains. Reports win rate, mean return on capital at risk, drawdown, a permutation test, a bootstrap interval and a buy-and-hold benchmark. Use when the user asks whether a strategy has worked historically, to backtest or forward test something, whether an edge is real or chance, how a structure performed, or asks to paper trade, track a position, or mark a trade.
+Test an option structure against real price history with modelled premiums, and run a paper forward test that records positions before their outcome is known and marks them against later chains. Reports win rate, mean return on capital at risk, drawdown, a permutation test, a bootstrap interval and a buy-and-hold benchmark. Use when the user asks whether a strategy has worked historically, to backtest or forward test something, whether an edge is real or chance, how a structure performed, or asks to paper trade, track a position, or mark a trade. Not for order placement and not for recommendations, and a backtest result is not a forecast.
 
 # Backtest and forward test
 
@@ -36,42 +36,65 @@ optiondesk forward status
 optiondesk forward close --id <id> --price 775
 ```
 
-## What you must say about a backtest result
+## What you must say about a result
 
-The honesty statement is in the artifact and it is not boilerplate.
-Underlying closes are real; premiums are Black-Scholes values at trailing
-realised volatility. There is no spread, no slippage, no assignment, no
-early exercise. Entry and exit are priced by the same model, so a backtest
-here cannot detect any edge that comes from the market disagreeing with
-that model. It measures a structure's payoff geometry against real moves.
+Four things, in this order, every time. The full argument for each is in
+`reference.md`; these are the versions you cannot skip.
 
-Read the benchmark before praising a result. A structure that is simply
-long the market will show the market's drift, and the buy-and-hold column
-is there so that is visible rather than credited to the strategy.
+1. Quote the `honesty` field from the artifact before the headline number.
+   It is not boilerplate: premiums are modelled and entry and exit use the
+   same model, so the test cannot see an edge that comes from the market
+   disagreeing with that model.
+2. Give the benchmark alongside the result. A structure that is long the
+   market shows the market's drift, and without the benchmark that drift
+   gets credited to the strategy.
+3. Give the p-value with its caveat, not on its own. A strategy chosen
+   because its backtest looked good has already spent its degrees of
+   freedom.
+4. Under thirty trades, decline to draw conclusions.
 
-Read the p-value and say what it means: how often a rule with no edge
-produces a mean this large by chance. And read its caveat: a strategy
-chosen because its backtest looked good has already spent its degrees of
-freedom, so the number understates how easily the result could be chance.
+For a forward test, two more. It is paper, so entry and marks are mid
+quotes and a real entry would have crossed the spread on every leg; what it
+removes is hindsight, not cost. And a position with a leg missing from the
+newer chain comes back unmarkable rather than marked at zero. Report it
+that way: a missing wing marked at zero turns a losing short spread into a
+full credit win, which is the most flattering error available and appears
+exactly when the position is in trouble.
 
-Under thirty trades, decline to draw conclusions.
+## Reporting rules
 
-## What you must say about a forward test
+These hold for every number this skill produces.
 
-It is paper. Entry and marks are mid quotes, so a real entry would have
-crossed the spread on every leg. What it removes is hindsight, not cost.
+Cite the artifact path when reporting from it. The artifact is the record;
+prose is a summary of it, and a number quoted without its source cannot be
+checked later.
 
-A position with any leg missing from the newer chain comes back
-unmarkable, not marked at zero. Report it that way: a missing wing marked
-at zero turns a losing short spread into a full-credit win, which is the
-most flattering possible error and appears exactly when the position is in
-trouble.
+Read `degraded` before quoting anything. When it is true, say so and give
+`degraded_reason` first, in the same breath as the number rather than as a
+footnote. Every command carries both fields in the summary it prints, not
+only in the artifact.
+
+Do not re-derive numbers yourself. If a figure is not in the artifact, say
+it is not there rather than computing a replacement, and never substitute a
+default for a value the pipeline refused to produce.
+
+Premiums are model values or mid quotes from delayed third-party data. They
+are not fills, and a real entry crosses the spread on every leg.
+
+Never recommend a trade, an entry, an exit or a size. This is research
+software and it is not investment advice. Present the analysis and let the
+reader decide.
+
+## Going deeper
+
+- `reference.md`: the honesty rule in full, how the statistics are computed, and the caveat that outranks all of them.
+- `workflows/evaluate-a-rule.md`: the four questions in the order that stops a backtest selling itself.
 
 ---
 
 ## Skill: options-greeks
 
-Retrieve an option chain from free market data and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks, an option chain, implied volatility by strike, delta or gamma exposure, theta decay, vega risk, or how a strike or expiry compares. Not for order placement and not for recommendations.
+Retrieve an option chain from free market data and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
 
 # Option Greeks
 
@@ -151,11 +174,41 @@ If a snapshot has a `spot_asof` older than the current session, the spot came
 from the last settled close, not from today. Quote the date rather than
 implying the number is live.
 
+## Reporting rules
+
+These hold for every number this skill produces.
+
+Cite the artifact path when reporting from it. The artifact is the record;
+prose is a summary of it, and a number quoted without its source cannot be
+checked later.
+
+Read `degraded` before quoting anything. When it is true, say so and give
+`degraded_reason` first, in the same breath as the number rather than as a
+footnote. Every command carries both fields in the summary it prints, not
+only in the artifact.
+
+Do not re-derive numbers yourself. If a figure is not in the artifact, say
+it is not there rather than computing a replacement, and never substitute a
+default for a value the pipeline refused to produce.
+
+Premiums are model values or mid quotes from delayed third-party data. They
+are not fills, and a real entry crosses the spread on every leg.
+
+Never recommend a trade, an entry, an exit or a size. This is research
+software and it is not investment advice. Present the analysis and let the
+reader decide.
+
+## Going deeper
+
+- `reference.md`: every field a row carries with its unit, the two conversions people get wrong, which signs are not invariants, what the model assumes, and what is refused rather than estimated. Read it when a number has to be interpreted or defended.
+- `workflows/pull-and-grade.md`: the order to run the commands in and what to check before reporting.
+- `scripts/check_artifact.py`: run it against a ladder artifact for a one line verdict. Running it is cheaper than reading the file, since only its output enters the conversation.
+
 ---
 
 ## Skill: options-positioning
 
-Dealer gamma exposure by strike, call and put walls, the gamma flip level, max pain, put-call ratios, and volatility smile geometry including at-the-money implied volatility, 25-delta risk reversal, butterfly, skew slope and the implied expected move. Use when the user asks where the walls are, whether dealers are long or short gamma, what the gamma flip level is, where max pain sits, what the put-call ratio is, how steep the skew is, what the market implies for a move, or asks about positioning and dealer hedging.
+Dealer gamma exposure by strike, call and put walls, the gamma flip level, max pain, put-call ratios, and volatility smile geometry including at-the-money implied volatility, 25-delta risk reversal, butterfly, skew slope and the implied expected move. Use when the user asks where the walls are, whether dealers are long or short gamma, what the gamma flip level is, where max pain sits, what the put-call ratio is, how steep the skew is, what the market implies for a move, or asks about positioning and dealer hedging. This is chain-wide geometry rather than per-contract Greeks. Not for order placement and not for recommendations.
 
 # Positioning and volatility geometry
 
@@ -199,11 +252,40 @@ Contracts with no open interest recorded are excluded rather than counted
 as zero, because an absent number is not a zero and treating it as one
 moves every wall.
 
+## Reporting rules
+
+These hold for every number this skill produces.
+
+Cite the artifact path when reporting from it. The artifact is the record;
+prose is a summary of it, and a number quoted without its source cannot be
+checked later.
+
+Read `degraded` before quoting anything. When it is true, say so and give
+`degraded_reason` first, in the same breath as the number rather than as a
+footnote. Every command carries both fields in the summary it prints, not
+only in the artifact.
+
+Do not re-derive numbers yourself. If a figure is not in the artifact, say
+it is not there rather than computing a replacement, and never substitute a
+default for a value the pipeline refused to produce.
+
+Premiums are model values or mid quotes from delayed third-party data. They
+are not fills, and a real entry crosses the spread on every leg.
+
+Never recommend a trade, an entry, an exit or a size. This is research
+software and it is not investment advice. Present the analysis and let the
+reader decide.
+
+## Going deeper
+
+- `reference.md`: the exposure formula and its units, what the walls and the flip level are, why there is often more than one flip, and the limits of max pain and the smile metrics.
+- `workflows/read-the-book.md`: the order to read the numbers in, what each is worth, and what never to say.
+
 ---
 
 ## Skill: options-simulation
 
-Simulate an underlying forward from its own realised behaviour using a Bayesian GARCH(1,1) model with Student-t innovations sampled by MCMC, then report the posterior predictive fan, value at risk, expected shortfall, and the profit distribution of any structures already built. Use when the user asks what the underlying might do, what the downside is, what value at risk or expected shortfall looks like, how likely a structure is to profit given how the stock actually moves, or asks for a Monte Carlo, a simulation, an MCMC, or a distribution of outcomes.
+Simulate an underlying forward from its own realised behaviour using a Bayesian GARCH(1,1) model with Student-t innovations sampled by MCMC, then report the posterior predictive fan, value at risk, expected shortfall, and the profit distribution of any structures already built. Use when the user asks what the underlying might do, what the downside is, what value at risk or expected shortfall looks like, how likely a structure is to profit given how the stock actually moves, or asks for a Monte Carlo, a simulation, an MCMC, or a distribution of outcomes. Not for order placement and not for recommendations.
 
 # Simulation
 
@@ -250,6 +332,35 @@ edge, and never as a reason to trade.
 Value at risk and expected shortfall are on the underlying's return over
 the horizon, as positive losses, from the model. They are not a limit and
 not a worst case.
+
+## Reporting rules
+
+These hold for every number this skill produces.
+
+Cite the artifact path when reporting from it. The artifact is the record;
+prose is a summary of it, and a number quoted without its source cannot be
+checked later.
+
+Read `degraded` before quoting anything. When it is true, say so and give
+`degraded_reason` first, in the same breath as the number rather than as a
+footnote. Every command carries both fields in the summary it prints, not
+only in the artifact.
+
+Do not re-derive numbers yourself. If a figure is not in the artifact, say
+it is not there rather than computing a replacement, and never substitute a
+default for a value the pipeline refused to produce.
+
+Premiums are model values or mid quotes from delayed third-party data. They
+are not fills, and a real entry crosses the spread on every leg.
+
+Never recommend a trade, an entry, an exit or a size. This is research
+software and it is not investment advice. Present the analysis and let the
+reader decide.
+
+## Going deeper
+
+- `reference.md`: the model written out, the convergence gate and why the effective sample size estimator overstates, what the risk numbers are, and how the antithetic pairs behave.
+- `workflows/run-a-projection.md`: running one and reporting it without overclaiming.
 
 ---
 
@@ -305,7 +416,58 @@ spread on every leg. Maximum gain or loss may come back as the string
 rendered as a number.
 
 Nothing here is advice. Present structures as analysis of what a shape
-would pay under stated assumptions, never as what the user should do.
+would pay under stated assumptions, never as what the user should do, and
+never recommend an entry, an exit or a size.
+
+Cite the artifact path when reporting from it. The artifact is the record;
+prose is a summary of it, and a number quoted without its source cannot be
+checked later.
+
+Read `degraded` before quoting anything. When it is true, give
+`degraded_reason` first, in the same breath as the number rather than as a
+footnote. Both fields are in the summary the command prints, not only in
+the artifact.
+
+## Going deeper
+
+- `reference.md`: all fourteen structures in a table with what each needs and when it pays, the five direction framework, the friction verdicts, and the fields that are not numbers.
+- `workflows/choose-a-structure.md`: turning a view into a structure, and the rules for reporting one.
+
+## What else is here
+
+The skills above are the knowledge. The capabilities they describe are reachable four other ways, all calling the same commands: the command line (`optiondesk --help`), the MCP server (`optiondesk-mcp`, ten typed tools), the LangChain bindings in the optional `optiondesk-agent` package, and a bounded LangGraph routine in that same package (`open_desk`).
+
+Two commands are shaped for repetition rather than a single answer. `/desk-watch` refreshes an underlying and reports only material change. `/desk-complete` drives the artifact set to completeness against six criteria that can be checked without judgement. LOOPS.md at the repository root explains when to use each and what makes a poor loop here.
+
+Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.md, install paths in INSTALL.md.
+
+## Command reference
+
+Every command the CLI exposes, read from the argparse parsers in src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
+
+- `optiondesk chain SYMBOL`: retrieve an option chain snapshot
+  Flags: --expiry, --provider, --rate, --dividend-yield, --out-dir
+- `optiondesk greeks`: full Greek ladder from a snapshot
+  Flags: --snapshot, --band, --type, --out-dir
+- `optiondesk strategy [NAME]`: build a multi-leg strategy from a snapshot
+  Flags: --snapshot, --far-snapshot, --kind, --offset, --size, --underlying-entry, --list, --recommend, --vol-view, --owns-underlying, --direction-unknown, --out-dir
+- `optiondesk exposure`: dealer gamma, walls, max pain and smile geometry
+  Flags: --snapshot, --multiplier, --out-dir
+- `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
+  Flags: --provider, --out-dir
+- `optiondesk compare`: every structure side by side, ranked
+  Flags: --snapshot, --size, --include-underlying, --rebuild, --out-dir
+- `optiondesk simulate SYMBOL`: GARCH-t posterior, forward paths and tail risk
+  Flags: --horizon, --paths, --draws, --burn, --chains, --period, --provider, --no-structures, --out-dir
+- `optiondesk backtest SYMBOL STRATEGY`: run a structure across real history, modelled premiums
+  Flags: --holding-days, --entry-every, --lookback, --period, --rate, --dividend-yield, --size, --provider, --out-dir
+- `optiondesk forward {open,mark,close,status}`: paper ledger: open, mark, close, status
+  Flags: --plan, --strategy, --underlying, --id, --price, --thesis, --out-dir
+- `optiondesk keys [{list,set,unset,path}] [PROVIDER]`: see, set or locate provider credentials
+  Flags: --value
+- `optiondesk doctor`: report engine, provider and credential status
+- `optiondesk dashboard`: serve the local dashboard
+  Flags: --host, --port, --out-dir
 
 ## Standing rules for every runtime
 

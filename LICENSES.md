@@ -19,10 +19,18 @@ runtimes and to a browser.
 ## engine/ is AGPL-3.0
 
 Everything under `engine/` is licensed under the GNU Affero General Public
-License version 3. That covers the pricing and Greek analytics, and it will
-cover the volatility surface, the variance risk premium work, the dealer
-gamma analytics, the Monte Carlo and MCMC engines and the backtester as they
-are ported in.
+License version 3. That covers, today and in the shipped tree, the pricing
+and implied volatility solver, the sixteen Greeks, the multi-leg payoff
+engine and the structure playbook including the time spreads, the dealer
+gamma and smile analytics, the structure ranking, the GARCH-t MCMC sampler
+and the path simulation, and the backtest and forward-test machinery. It
+will cover the volatility surface and the variance risk premium work as
+they are ported in.
+
+Read that list as the current boundary rather than a plan. A licence file
+that describes shipped code as future work understates what the licence
+already covers, which is the wrong direction for the one document a reader
+is entitled to take literally.
 
 The practical effect of AGPL section 13: if you run a modified version of the
 engine as a network service, you must offer the source of your modified

@@ -26,8 +26,11 @@ Pricing:
   helpers and the module constants) and from the Newton-Raphson implied
   volatility solver in `witty/apps/pullers/us_options_pull.py`. An earlier
   version of this file credited `witty/models/pricing/black_scholes.py`,
-  which an audit measured at 3.1 percent similarity with no shared function
-  names. The credit above is the corrected one.
+  which a line-level comparison against that file put at roughly 3 percent
+  similarity with no shared function names. The credit above is the
+  corrected one. That comparison was made against a repository that is not
+  distributed with this one, so it cannot be re-run from here: anyone
+  auditing the attribution has to hold both trees.
 - `engine/src/optiondesk_engine/pricing/greeks_full.py` derives from
   `witty/models/pricing/greeks_full.py`, extended here to carry a
   continuous dividend yield.

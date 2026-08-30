@@ -602,7 +602,7 @@ Roughly 941 tokens in SKILL.md. Bundled: `reference.md`, `workflows/run-a-projec
 
 ### options-strategy
 
-Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit, straddles, strangles, covered calls, cash-secured puts and protective puts. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, or asks to compare strategies. Not for order placement and not for recommendations.
+"Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit, straddles, strangles, covered calls, cash-secured puts and protective puts. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, or asks to compare strategies. Not for order placement and not for recommendations."
 
 Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-structure.md`.
 
@@ -637,7 +637,7 @@ Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-str
 - `engine/tests/test_strategies.py`: 25
 - `engine/tests/test_timespread.py`: 15
 
-### shell/tests (303 test functions)
+### shell/tests (305 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -661,7 +661,7 @@ Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-str
 - `shell/tests/test_main_cli.py`: 10
 - `shell/tests/test_mcp_server.py`: 37
 - `shell/tests/test_providers.py`: 8
-- `shell/tests/test_runtime_docs.py`: 9
+- `shell/tests/test_runtime_docs.py`: 11
 - `shell/tests/test_simulate_cli.py`: 10
 - `shell/tests/test_strategy_cli.py`: 17
 - `shell/tests/test_summary_degraded_contract.py`: 4
@@ -677,7 +677,7 @@ Roughly 912 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-str
 
 ## Totals
 
-55 modules, 12519 lines of source, 150 public functions, 14 public classes, 594 test functions.
+55 modules, 12519 lines of source, 150 public functions, 14 public classes, 596 test functions.
 
 Every public name carries a docstring.
 

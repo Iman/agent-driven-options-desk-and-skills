@@ -96,7 +96,15 @@ def parse_skill(path):
         if line and not line.startswith((" ", "\t")) and ":" in line:
             key, _, value = line.partition(":")
             key = key.strip()
-            fields[key] = value.strip()
+            value = value.strip()
+            # A description containing a colon has to be quoted to be valid
+            # YAML, and the quotes are syntax rather than content. This
+            # parser is a line splitter by design, so it strips them here;
+            # the frontmatter is separately checked against a real YAML
+            # parser by the test suite.
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+            fields[key] = value
         elif key:
             fields[key] += " " + line.strip()
     for required in ("name", "description"):

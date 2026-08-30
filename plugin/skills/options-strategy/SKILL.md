@@ -1,6 +1,6 @@
 ---
 name: options-strategy
-description: Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit, straddles, strangles, covered calls, cash-secured puts and protective puts. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, or asks to compare strategies. Not for order placement and not for recommendations.
+description: "Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit, straddles, strangles, covered calls, cash-secured puts and protective puts. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, or asks to compare strategies. Not for order placement and not for recommendations."
 ---
 
 # Option strategies

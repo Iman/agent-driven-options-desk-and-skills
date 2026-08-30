@@ -13,6 +13,7 @@ copies of both files. A command added without regenerating fails here.
 """
 
 import re
+import pytest
 import subprocess
 import sys
 from pathlib import Path
@@ -242,3 +243,49 @@ def test_an_unimportable_shell_is_reported_and_writes_nothing():
     for target, content in before.items():
         assert target.read_bytes() == content, (
             "{} was rewritten during a failed run".format(target))
+
+
+def test_every_skill_frontmatter_is_valid_yaml():
+    """Our own parser is a line splitter. Everyone else uses YAML.
+
+    WHAT WOULD BREAK. options-strategy described itself as building
+    structures "from a chain: iron condors, ...". That colon ends the
+    scalar for a real YAML parser, so the whole frontmatter failed to load
+    and the skill was silently skipped by anything that reads it properly.
+    Measured against the live repository: `npx skills add` listed four of
+    our five skills, and nothing here noticed, because
+    test_every_skill_has_valid_frontmatter uses the same forgiving splitter
+    the generator does.
+    """
+    yaml = pytest.importorskip(
+        "yaml", reason="pyyaml is needed to check the frontmatter the way "
+                       "third-party tools read it")
+
+    for path in sorted((ROOT / "skills").glob("*/SKILL.md")):
+        text = path.read_text(encoding="utf-8")
+        assert text.startswith("---"), path
+        frontmatter = text.split("---", 2)[1]
+        try:
+            fields = yaml.safe_load(frontmatter)
+        except yaml.YAMLError as exc:
+            raise AssertionError(
+                "{} has frontmatter that is not valid YAML, so tools that "
+                "parse it properly will skip this skill: {}".format(
+                    path.parent.name, str(exc).splitlines()[0]))
+        assert isinstance(fields, dict), path
+        assert fields.get("name") == path.parent.name, path
+        assert fields.get("description"), path
+
+
+def test_the_generator_and_a_yaml_parser_agree():
+    """The quotes are syntax, not content, and must not reach the output."""
+    yaml = pytest.importorskip("yaml")
+    generator = _generator()
+
+    for path in sorted((ROOT / "skills").glob("*/SKILL.md")):
+        text = path.read_text(encoding="utf-8")
+        strict = yaml.safe_load(text.split("---", 2)[1])
+        ours, _ = generator.parse_skill(path)
+        assert ours["description"] == strict["description"], (
+            "{}: the generator and a YAML parser disagree about the "
+            "description".format(path.parent.name))

@@ -96,19 +96,19 @@ These were reviewed as offline data for backtesting across asset classes.
 Their licences govern what may be done with them and none of their code is
 in this tree.
 
-- `financial-data` (FutureSharks), GPL-3.0, at
-  `/Users/developer/workspace/algos/financial-data`. Twenty-five
+- `financial-data` (FutureSharks), GPL-3.0, held in a local checkout.
+  Twenty-five
   instruments of one-minute bars from 2005-01 to 2020-05, roughly 100
   million rows across six asset classes including bond futures, energy,
   metals and agriculture. The package code is GPL and stays out of the
   tree entirely; the CSV files may be read through a reader written here.
   That separation is what keeps commercial licensing of the engine
   possible.
-- `finance-vix` (datasets), ODC-PDDL-1.0, at
-  `/Users/developer/workspace/algos/finance-vix`. VIX daily history from
+- `finance-vix` (datasets), ODC-PDDL-1.0, held in a local checkout. VIX
+  daily history from
   1990 to 2021-08-19. Public domain dedication, so usable directly. Five
   years stale; the repository ships its own CBOE refresh pipeline.
-- `quant-trading`, Apache-2.0, at `/Users/developer/workspace/quant-trading`.
+- `quant-trading`, Apache-2.0, held in a local checkout.
   `data/stoxx50.xlsx`. Permissive, attribution required.
 
 ## Referenced for ideas, reimplemented here

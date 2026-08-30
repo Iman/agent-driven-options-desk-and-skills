@@ -21,4 +21,7 @@ artifacts/
 # CodeGraph index: machine-local, rebuilt by scripts/refresh.py
 .codegraph/
 .coverage
+.coverage.*
 htmlcov/
+.DS_Store
+*.ansi

@@ -631,7 +631,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is exactly the unverifiable claim this
-project is supposed to refuse. It applies forty-one breakages to a copy of
+project is supposed to refuse. It applies forty-two breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The current result is twenty-two, three and zero, plus

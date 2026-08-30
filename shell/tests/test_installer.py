@@ -110,3 +110,72 @@ def test_the_repo_default_matches_the_documented_install_line(tmp_path):
         assert named in readme, (
             "install.sh defaults to {} and the README documents a different "
             "repository".format(named))
+
+
+# ------------------------------------------------- supply chain: the repo
+
+def test_a_bare_owner_name_is_refused_rather_than_resolved_locally(tmp_path):
+    """`git clone owner/name` clones ./owner/name when it exists.
+
+    WHAT WOULD BREAK. The installer's REPO default was set to the bare
+    identifier `Iman/agent-driven-options-desk-and-skills`. Git resolves
+    that against the current working directory, so the one-line install
+    never reached GitHub at all, and anyone running it from a directory
+    where that path could be planted would have installed whatever was
+    sitting there. Reproduced by planting the directory and watching the
+    clone take it.
+
+    A local checkout is still installable. It just has to be said out loud,
+    as an absolute path or a file:// URL, rather than arriving disguised as
+    a GitHub identifier.
+    """
+    planted = tmp_path / "Iman" / "agent-driven-options-desk-and-skills"
+    (planted / "shell").mkdir(parents=True)
+    (planted / "shell" / "pyproject.toml").write_text(
+        '[project]\nname = "planted"\n', encoding="utf-8")
+    subprocess.run(["git", "init", "-q", str(planted)], check=True)
+    subprocess.run(["git", "-C", str(planted), "add", "-A"], check=True)
+    subprocess.run(
+        ["git", "-C", str(planted), "-c", "user.email=t@t", "-c",
+         "user.name=t", "commit", "-qm", "planted"], check=True)
+
+    piped = tmp_path / "piped.sh"
+    piped.write_text(INSTALLER.read_text(encoding="utf-8"), encoding="utf-8")
+    result = subprocess.run(
+        ["bash", "-c",
+         "cd {} && cat {} | bash -s -- --repo Iman/"
+         "agent-driven-options-desk-and-skills --prefix {} --no-mcp".format(
+             tmp_path, piped, tmp_path / "opt")],
+        capture_output=True, text=True,
+        env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
+
+    assert result.returncode != 0, (
+        "the installer accepted a bare owner/name and would have cloned the "
+        "planted directory")
+    assert "not an explicit remote" in result.stderr, result.stderr
+    assert not (tmp_path / "opt").exists(), (
+        "the planted source reached the install prefix")
+
+
+def test_the_repo_default_is_a_full_url():
+    """The default is what almost everyone runs, so it carries the risk."""
+    import re
+
+    script = INSTALLER.read_text(encoding="utf-8")
+    default = re.search(r'REPO="\$\{OPTIONDESK_REPO:-([^}"]*)\}"', script)
+    assert default, "the installer no longer carries a repository default"
+    value = default.group(1)
+    assert value.startswith(("https://", "ssh://", "git@")), (
+        "the default {!r} is not an explicit remote, so git would resolve it "
+        "against the working directory".format(value))
+
+
+def test_an_absolute_local_path_is_still_allowed(tmp_path):
+    """Refusing the ambiguous case must not refuse the deliberate one."""
+    result = subprocess.run(
+        ["bash", "-c",
+         "cat {} | bash -s -- --repo {} --ref main --prefix {} --no-mcp "
+         "--dry-run".format(
+             INSTALLER, tmp_path / "somewhere", tmp_path / "opt")],
+        capture_output=True, text=True)
+    assert "not an explicit remote" not in result.stderr, result.stderr

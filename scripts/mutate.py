@@ -168,6 +168,10 @@ MUTATIONS = [
      "Thirty-nine panels and, at most, thirty-two chart canvases",
      "Thirty-five panels and, at most, twenty-eight chart canvases",
      "shell/tests/test_documented_counts.py"),
+    ("installer-bare-repo-accepted", "install.sh",
+     '  require_remote_repo "$REPO"\n',
+     "",
+     "shell/tests/test_installer.py"),
     ("strategy-not-built-degraded", "shell/src/optiondesk/cli/strategy.py",
      '            "built": False,\n'
      '            "degraded": bool(source_meta.get("degraded")),\n'

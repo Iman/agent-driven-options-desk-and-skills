@@ -658,7 +658,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 321 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 324 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -679,7 +679,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           forty-one mutations, killed or survived
+python3 scripts/mutate.py           forty-two mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -711,8 +711,8 @@ differentiate, with relative tolerances and no absolute floor: an earlier
 version scaled by `max(1, |expected|)`, which silently left three Greeks
 untested, and mutation testing found fourteen surviving defects.
 That harness is in the tree as `scripts/mutate.py` rather than being
-a claim about the past: it breaks the code forty-one ways and reports
-which breakages the tests notice. Run it. Its current result is forty
+a claim about the past: it breaks the code forty-two ways and reports
+which breakages the tests notice. Run it. Its current result is forty-one
 killed and one proven equivalent, and getting there closed two real holes
 it found, the inner vega guard in the implied volatility solver and the
 ranking of a non-finite expectation. Every defect fixed since then has a

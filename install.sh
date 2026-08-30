@@ -34,7 +34,13 @@ VERSION="0.1.0"
 PREFIX="${OPTIONDESK_PREFIX:-$HOME/.optiondesk}"
 BIN_DIR="${OPTIONDESK_BIN_DIR:-$HOME/.local/bin}"
 CLAUDE_SKILLS_DIR="${OPTIONDESK_CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
-REPO="${OPTIONDESK_REPO:-Iman/agent-driven-options-desk-and-skills}"
+# A full URL, never a bare owner/name. `git clone owner/name` resolves
+# against the current working directory, so a bare identifier turns a
+# remote install into a local one silently: reproduced by planting
+# ./Iman/agent-driven-options-desk-and-skills and watching the clone
+# take it. Anyone running the one-line install from a directory an
+# attacker can write to would have installed that instead.
+REPO="${OPTIONDESK_REPO:-https://github.com/Iman/agent-driven-options-desk-and-skills.git}"
 REF="${OPTIONDESK_REF:-main}"
 
 WITH_ENGINE=1
@@ -199,6 +205,27 @@ script_dir() {
   ( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )
 }
 
+require_remote_repo() {
+  # Refuse anything git would resolve against the working directory.
+  #
+  # This is not hypothetical tidiness. `git clone owner/name` clones
+  # ./owner/name when it exists, so a value that looks like a GitHub
+  # identifier installs whatever is sitting in the directory the user
+  # happened to run from. A local path is still allowed, but only when it
+  # is said explicitly: an absolute path or a file:// URL.
+  case "$1" in
+    https://*|http://*|git://*|ssh://*|file:///*) return 0 ;;
+    /*) return 0 ;;
+    *@*:*) return 0 ;;
+    *)
+      die "refusing to clone '$1': it is not an explicit remote. A bare \
+owner/name is resolved by git against the current directory, so it would \
+install whatever happens to sit there. Use a full URL, or an absolute path \
+for a local checkout."
+      ;;
+  esac
+}
+
 resolve_source() {
   local here
   if here="$(script_dir)" && [ -f "$here/shell/pyproject.toml" ]; then
@@ -210,6 +237,7 @@ resolve_source() {
 OPTIONDESK_REPO) is required. The published URL goes in the REPO default \
 once the repository is public."
   command -v git >/dev/null 2>&1 || die "git is required to clone $REPO"
+  require_remote_repo "$REPO"
   if [ -d "$SRC/.git" ]; then
     say "Updating the existing clone at $SRC"
     run git -C "$SRC" fetch --depth 1 origin "$REF"

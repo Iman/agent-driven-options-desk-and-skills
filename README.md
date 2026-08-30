@@ -182,8 +182,8 @@ flowchart LR
 ```
 
 Two commands take a different input on purpose. `simulate` and `backtest`
-read the underlying's price history rather than the option chain, because
-they answer questions about the underlying's own behaviour. That is why the
+read the underlying's price history, not the option chain, because they
+answer questions about the underlying's own behaviour. That is why the
 dashboard files them under the symbol rather than under an expiry.
 
 ### What a single run looks like
@@ -274,9 +274,8 @@ flowchart LR
 ```
 
 Three of the five sit inside the one standard deviation expected move and
-two are extreme. That is the whole point of the framework: a spread reaches
-maximum profit on a normal move, while a naked long option needs an extreme
-one.
+two are extreme. A spread reaches maximum profit on a normal move, while a
+naked long option needs an extreme one.
 
 ---
 
@@ -342,10 +341,10 @@ These are enforced in code and covered by tests, not merely stated.
 **A missing number is never a guessed one.** A contract whose price does
 not identify a volatility gets `iv: null` and is counted in `counts.without_iv`
 on a chain snapshot, and in `skipped.no_iv` on a Greek ladder. The
-solver refuses rather than returning its own starting guess, which it used
-to do for any contract dominated by intrinsic value. A leg with no later
-quote makes a forward position unmarkable rather than marking it at zero.
-Contracts with no open interest are excluded from exposure rather than
+solver refuses, where it used to hand back its own starting guess for any
+contract dominated by intrinsic value. A leg with no later quote makes a
+forward position unmarkable instead of marking it at zero. Contracts with
+no open interest are excluded from exposure rather than
 counted as zero.
 
 **`degraded` and `notes` are different fields.** Degraded means the output
@@ -420,9 +419,9 @@ carrying the time it was generated:
     chain_SPY_2026-09-18_20260830T141217Z.json           the one it replaced
 ```
 
-The live name never changes, which is the whole design: every consumer
-resolves artifacts by that name, so the dashboard, `expiries`, the plan
-reuse in `compare` and the graph's stage check are all untouched. The
+The live name never changes. Every consumer resolves artifacts by that
+name, so the dashboard, `expiries`, the plan reuse in `compare` and the
+graph's stage check are all untouched. The
 timestamp goes on the copy that is leaving. Identical bytes are not
 archived, because re-running a command is not a new measurement.
 `OPTIONDESK_ARCHIVE=0` turns it off, and pruning is left to you: nothing
@@ -436,7 +435,7 @@ whether it was degraded. `scripts/evidence.py record` writes it, deliberately
 and by hand; `scripts/evidence.py check` verifies the documents still agree,
 and the refresh runs the check but never the record. A refresh that
 re-recorded would make the documented number follow whatever is on disk
-today, which is precisely the failure being prevented.
+today, which is the failure this file exists to prevent.
 
 A claim pins the measurement it describes, so the recorder reads the
 archived artifact rather than the newest one with the same name. What is
@@ -504,7 +503,7 @@ yield that was wrong for the ones that pay.
 | Crypto | `BITO`, `IBIT` | 35 |
 | FX | `FXE`, `FXY`, `FXB` | 56 |
 
-Two limits worth stating rather than discovering. The free provider carries
+Two limits. The free provider carries
 no option chains for futures or FX spot: `ES=F`, `CL=F`, `GC=F`,
 `EURUSD=X` and `^TNX` all return price history and zero expiries, which is
 why the exchange-traded proxies are the route. And the engine prices
@@ -512,11 +511,11 @@ European exercise, which is exact for index options and an approximation
 for the American-style ETF options above, understating the value of a deep
 in-the-money put most.
 
-### The dividend yield is fetched, and it matters more than it looks
+### The dividend yield is fetched
 
-`--dividend-yield` used to default to zero. For an underlying that pays,
-that is not a conservative assumption, it is a wrong number. Measured on a
-real 173-day TLT chain against its actual 4.7 percent trailing yield:
+`--dividend-yield` used to default to zero, which sounds conservative and
+is simply wrong for anything that pays. Measured on a real 173-day TLT
+chain against its actual 4.7 percent trailing yield:
 
 | | assumed zero | real yield |
 |---|---|---|
@@ -669,7 +668,7 @@ Every count in the docs rotted at least once before that test existed.
 ```
 ```
 
-One local hazard worth knowing before you edit anything here. If `cat` is
+One local hazard before you edit anything here. If `cat` is
 aliased to a syntax highlighter, as it is on the development machine
 (`highlight -O ansi --force`), then reading a file through the shell and
 writing the result back embeds ANSI colour codes into the source. It has
@@ -705,13 +704,15 @@ system opinions, which is what makes it testable against closed-form and
 finite-difference benchmarks. The shell holds everything that touches the
 outside world.
 
-Test conventions worth knowing before adding one. Greeks are checked
+Test conventions, before you add one. Greeks are checked
 against central finite differences of the price function they claim to
 differentiate, with relative tolerances and no absolute floor: an earlier
-version scaled by `max(1, |expected|)`, which silently left three Greeks
-untested, and mutation testing found fourteen surviving defects.
-That harness is in the tree as `scripts/mutate.py` rather than being
-a claim about the past: it breaks the code forty-two ways and reports
+version scaled by `max(1, |expected|)`, which left three Greeks untested
+with nothing to show for it, and mutation testing found fourteen surviving
+defects.
+That harness is in the tree as `scripts/mutate.py`, so it is checkable
+rather than a claim about the past. It breaks the code forty-two ways and
+reports
 which breakages the tests notice. Run it. Its current result is forty-one
 killed and one proven equivalent, and getting there closed two real holes
 it found, the inner vega guard in the implied volatility solver and the
@@ -809,7 +810,7 @@ Full detail, and the two rules that keep dual licensing possible, are in
 in [THIRD-PARTY.md](THIRD-PARTY.md). Contributions to the engine require
 the agreement in [CLA.md](CLA.md).
 
-Read [DISCLAIMER.md](DISCLAIMER.md). It is not boilerplate: it states that
-this is software rather than advice, that the author holds no regulated
-status, that modelled results are not achievable results, and what your
+Read [DISCLAIMER.md](DISCLAIMER.md). It states that this is software
+rather than advice, that the author holds no regulated status, that
+modelled results are not achievable results, and what your
 responsibilities are.

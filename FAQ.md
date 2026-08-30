@@ -260,7 +260,7 @@ usage.
 **How much of this is tested?**
 
 Over five hundred tests across the three packages, and the exact counts
-are checked by a test rather than remembered here. The Greeks are checked against
+are checked by a test instead of being remembered here. The Greeks are checked against
 central finite differences of the price function they claim to
 differentiate, with mutation testing, which is in the tree as
 `scripts/mutate.py` and which you can run, confirming that a sign flip or a

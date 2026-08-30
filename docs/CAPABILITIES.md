@@ -122,7 +122,7 @@ errors, in veta and color, were found exactly this way.
 
 Net position Greeks are reported with a `complete` flag and a `missing`
 list, because a position Greek summed over legs where one leg had no
-volatility is not a smaller number, it is a wrong one.
+volatility is a wrong number rather than a smaller one.
 
 ### 4.3 Seventeen structures
 
@@ -260,7 +260,7 @@ understated at-the-money implied volatility by 54 percent and overstated
 delta by 23 percent.
 
 Providers are registered per capability with a priority order. A provider
-whose key is absent is skipped rather than failing. A provider named
+whose key is absent is skipped instead of failing. A provider named
 explicitly with `--provider` is honoured strictly: if it cannot answer, the
 command fails rather than quietly using a different one, because a silent
 substitution is how the wrong data ends up in a report that names the right
@@ -406,7 +406,7 @@ deliberately, which is what separates it from a skill that loads itself.
 `/desk-complete` is a command rather than an agent, though it retries and
 could be either. The deciding question is whether the work needs its own
 context: it does not, because its six criteria are read from artifacts on
-disk rather than from a conversation, and the main thread benefits from
+disk, not from a conversation, and the main thread benefits from
 seeing which criterion failed. The two agents below are agents for the
 opposite reason.
 
@@ -444,7 +444,7 @@ anything else.
 
 Arguments are whitelisted against the advertised schema, so a tool cannot
 be talked into writing outside its output directory, and anything supplied
-but not advertised comes back in `ignored_arguments` rather than
+but not advertised comes back in `ignored_arguments` instead of
 disappearing. Required arguments are enforced against the schema that
 publishes them, so an omission is a `-32602` naming the tool and the
 parameter rather than an `AttributeError` from somewhere inside a handler.
@@ -460,9 +460,8 @@ truthiness test, is still answered.
 Every tool description carries the reporting rule, appended in a loop
 rather than typed into ten strings so a tool added later cannot ship
 without it, and every result that produces numbers carries the disclaimer.
-That matters more here than anywhere else: this server is the surface Codex
-and Gemini reach, and neither of them loads the skills where those rules
-otherwise live.
+This server is the surface Codex and Gemini reach, and neither of them
+loads the skills where those rules otherwise live.
 
 ---
 
@@ -488,10 +487,10 @@ Nothing here computes anything. Every number still comes from the engine.
 `agent/src/optiondesk_agent/graph.py`, requiring the optional `langgraph`
 extra.
 
-Opening a desk is not one call, it is a dependency chain: a snapshot, then
-a ladder from it, then positioning, then structures, then a comparison.
-Written as a script that is a sequence. Written as a graph it becomes
-something you can inspect, resume from a checkpoint, and stop early when
+Opening a desk is a dependency chain rather than one call: a snapshot,
+then a ladder from it, then positioning, then structures, then a
+comparison. Written as a script that is a sequence. Written as a graph it
+becomes something you can inspect, resume from a checkpoint, and stop when
 the data says stop.
 
 ```python
@@ -537,9 +536,8 @@ full treatment.
 The two loop commands exist because a loop needs a stop condition that can
 be checked without judgement. `/desk-complete` has six mechanical criteria.
 `/desk-watch` has six named thresholds and stays silent below all of them.
-"Find me a good trade" is not a loop, it is a request with no defined
-finish, and an agent given one either stops arbitrarily or runs until
-something breaks.
+"Find me a good trade" has no defined finish, so an agent given it either
+stops arbitrarily or runs until something breaks.
 
 No loop in this project places an order, and none ever will.
 
@@ -621,7 +619,7 @@ decision this project gets to make.
 The suites are the reason any of the above can be claimed. The Greeks are
 checked against finite differences of their own price function. The MCMC is
 validated by recovering parameters it was given, with coverage measured
-across several datasets rather than one, and statistical properties tested
+across several datasets and not one, and statistical properties tested
 as frequencies because a 90 percent interval is supposed to miss one time
 in ten. Mutation testing has been run against the Greek suite to confirm
 the tests can actually fail: an earlier version used an absolute tolerance
@@ -630,8 +628,8 @@ that passes rather than a test suite that works.
 
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
-repository could check it, which is exactly the unverifiable claim this
-project is supposed to refuse. It applies forty-two breakages to a copy of
+repository could check it, which is the kind of claim this project refuses
+everywhere else. It applies forty-two breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The current result is twenty-two, three and zero, plus
@@ -708,20 +706,20 @@ options with the two-currency convention. The engine's pricing module takes
 a continuous yield already, which is most of what a futures or FX option
 needs.
 
-More structures still: the payoff engine expresses more than the playbook
-names. Ratio spreads, broken wing butterflies and jade lizards are in as of
-this pass; put ratios, condors with unequal wings and the rest of the
+More structures. The payoff engine expresses more than the playbook names.
+Ratio spreads, broken wing butterflies and jade lizards are in as of this
+pass; put ratios, condors with unequal wings and the rest of the
 flexible-wing family are not.
 
 More charts still. The surface, the variance risk premium, a condor panel
 and gamma scalping levels shipped in this pass, taking the dashboard from
 28 canvases to 32. Two of them are narrower than they sound, and the panels
-say so themselves rather than leaving it to be discovered: the condor panel
+say so themselves instead of leaving it to be discovered: the condor panel
 plots the condors that exist as artifacts, because nothing in the engine
 enumerates every condor a chain admits, and the gamma panel plots levels
 rather than paths, because the simulation artifact stores the fan as
 quantiles per day and not as individual paths. Both would need engine work
 to become what their names suggest.
 
-Each of those is additive. Nothing in this project has ever been removed to
-make room for something else, and nothing should be.
+Each of those is additive, and none of it requires removing what is
+already here.

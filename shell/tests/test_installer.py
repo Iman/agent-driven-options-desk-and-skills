@@ -69,24 +69,31 @@ def test_unknown_flag_fails_loudly():
 
 
 def test_clone_mode_names_the_repository_it_could_not_reach(tmp_path):
-    """The curl path cannot see its own directory, so it clones.
+    """A failed clone has to say which repository it tried.
 
-    This used to assert that the script refused and asked for --repo,
-    because REPO had no default. It has one now, so the honest contract is
-    different: it attempts the default and, when that cannot be reached,
-    the failure has to name what it tried. An error that says only "clone
-    failed" leaves the reader guessing which repository was even involved.
+    This test has now been wrong twice, in opposite directions, and both
+    times because it depended on the state of the world. It first asserted
+    the installer refuses and asks for --repo, which held only while REPO
+    had no default. It then asserted the clone fails, which held only while
+    the repository did not exist on GitHub; publishing it made the piped
+    install succeed and the assertion false.
+
+    So it no longer touches the network or the real repository. It points
+    at an absolute path that does not exist, which the guard allows and
+    git cannot clone, and asserts the failure names what it tried. An error
+    reading only "clone failed" leaves the reader guessing.
     """
+    missing = tmp_path / "no-such-checkout"
     piped = tmp_path / "piped.sh"
     piped.write_text(INSTALLER.read_text(encoding="utf-8"), encoding="utf-8")
     result = subprocess.run(
-        ["bash", "-c", "cat {} | bash -s -- --prefix {} --no-mcp".format(
-            piped, tmp_path / "opt")],
+        ["bash", "-c", "cat {} | bash -s -- --repo {} --prefix {} "
+                       "--no-mcp".format(piped, missing, tmp_path / "opt")],
         capture_output=True, text=True,
         env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
     assert result.returncode != 0
     output = result.stderr + result.stdout
-    assert "agent-driven-options-desk-and-skills" in output, output[-400:]
+    assert str(missing) in output, output[-400:]
 
 
 def test_the_repo_default_matches_the_documented_install_line(tmp_path):

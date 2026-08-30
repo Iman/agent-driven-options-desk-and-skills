@@ -25,7 +25,7 @@ verification.
 Re-running is safe. It never overwrites a file it did not create: a skill
 directory or a binary it does not recognise is left alone with a warning.
 
-Flags worth knowing:
+Flags:
 
 | flag | effect |
 |---|---|
@@ -93,8 +93,8 @@ project's `.claude/skills`.
 
 An agent with the skills but not the tools can explain the desk, the
 conventions and the reporting rules. It cannot run anything, because the
-commands the skills describe are not there. That is a legitimate way to
-use them: as domain knowledge rather than as automation.
+commands the skills describe are not there. Using them as domain knowledge
+without the automation is a legitimate choice.
 
 ## 5. claude.ai, in the browser
 

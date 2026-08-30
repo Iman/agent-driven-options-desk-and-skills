@@ -29,6 +29,11 @@ FALLBACK_SPAN = 0.25
 
 
 def add_arguments(parser):
+    """Register structure selection and the view that drives a recommendation:
+    a named structure or recommend, the near and far snapshots, kind, offset,
+    size, underlying entry, volatility view, whether the underlying is owned,
+    whether direction is unknown, and output directory.
+    """
     parser.add_argument("name", nargs="?", default=None,
                         help="strategy to build. Omit with --list or "
                              "--recommend")
@@ -147,6 +152,9 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
                     snapshot["underlying"]))
         far_snapshot, far_path = found
 
+    # Read before the not-built return below, which reports on this
+    # snapshot and has to be able to say it was degraded.
+    source_meta = snapshot.get("meta", {})
     near = engine_strategies.split_chain(snapshot)
     far = engine_strategies.split_chain(far_snapshot)
     plan = engine_strategies.build_time_spread(
@@ -156,6 +164,8 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         return {
             "strategy": args.name,
             "built": False,
+            "degraded": bool(source_meta.get("degraded")),
+            "degraded_reason": source_meta.get("degraded_reason"),
             "reason": ("no viable structure across these two expiries: the "
                        "strikes or quotes did not admit one"),
             "source_artifact": str(path),
@@ -215,6 +225,8 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         "artifact": str(out),
         "strategy": plan["strategy"],
         "built": True,
+        "degraded": bool(source_meta.get("degraded")),
+        "degraded_reason": source_meta.get("degraded_reason"),
         "underlying": snapshot["underlying"],
         "near_expiry": plan["near_expiry"],
         "far_expiry": plan["far_expiry"],
@@ -235,6 +247,9 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
 
 
 def playbook_when(name):
+    """The playbook's own note on when a structure is the right one, or an
+    empty string if the name is unknown.
+    """
     from optiondesk import engine_bridge as bridge
 
     entry = bridge.strategies().PLAYBOOK.get(name, {})
@@ -316,6 +331,9 @@ def _curve_bounds(spot, band, strikes):
 
 
 def run(args):
+    """Build one named structure, or recommend one from the stated view, and
+    write a plan artifact.
+    """
     engine = engine_bridge.require()
     engine_strategies = engine_bridge.strategies()
 
@@ -377,6 +395,7 @@ def run(args):
         return _time_spread(args, engine, engine_strategies, snapshot, path)
 
     chain = engine_strategies.split_chain(snapshot)
+    source_meta = snapshot.get("meta", {})
     kwargs = {"size": args.size}
     if playbook.get(args.name, {}).get("needs_underlying"):
         kwargs["underlying_entry"] = args.underlying_entry
@@ -385,6 +404,8 @@ def run(args):
         return {
             "strategy": args.name,
             "built": False,
+            "degraded": bool(source_meta.get("degraded")),
+            "degraded_reason": source_meta.get("degraded_reason"),
             "reason": ("no viable structure on this chain: the strikes, "
                        "quotes or expected move did not admit one. Try "
                        "another expiry or another strategy."),
@@ -475,6 +496,8 @@ def run(args):
         "artifact": str(out),
         "strategy": plan["strategy"],
         "built": True,
+        "degraded": bool(source_meta.get("degraded")),
+        "degraded_reason": source_meta.get("degraded_reason"),
         "underlying": snapshot["underlying"],
         "expiry": plan["expiry"],
         "spot": spot,
@@ -499,6 +522,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk strategy", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

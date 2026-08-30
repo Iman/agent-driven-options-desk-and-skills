@@ -572,6 +572,12 @@ def _panel(title, hint, body):
 
 
 def render(payload):
+    """Render the complete dashboard document from one payload.
+
+    Returns a full HTML page rather than fragments, because the dashboard is
+    served without a build step and a fragment that renders alone but not in
+    place is a failure that only appears in the browser.
+    """
     ladder = payload["ladder"]
     exposure = payload.get("exposure")
     plans = payload["plans"]

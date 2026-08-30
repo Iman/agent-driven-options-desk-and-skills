@@ -25,6 +25,9 @@ CONTRACT_MULTIPLIER = 100.0
 
 
 def add_arguments(parser):
+    """Register positioning options: which snapshot, the contract multiplier
+    and output directory.
+    """
     parser.add_argument("--snapshot", default=None,
                         help="chain snapshot path. Default: most recent")
     parser.add_argument("--multiplier", type=float,
@@ -36,6 +39,9 @@ def add_arguments(parser):
 
 
 def run(args):
+    """Compute dealer gamma exposure, walls, flip levels, max pain and the
+    volatility smile from one snapshot, and write an exposure artifact.
+    """
     engine = engine_bridge.require()
     analytics = engine_bridge.analytics()
 
@@ -118,6 +124,11 @@ def run(args):
         "underlying": snapshot["underlying"],
         "expiry": snapshot.get("expiry"),
         "spot": spot,
+        # The envelope carries this into the artifact; a reader of the
+        # summary alone has to see it too, or a degraded number gets
+        # quoted as a clean one.
+        "degraded": bool(source_meta.get("degraded")),
+        "degraded_reason": source_meta.get("degraded_reason"),
         "net_gex": exposure["net_gex"],
         "regime": exposure["regime"],
         "gamma_flip": exposure["gamma_flip"],
@@ -135,6 +146,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk exposure", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

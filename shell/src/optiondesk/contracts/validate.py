@@ -27,6 +27,7 @@ class ValidationError(ValueError):
 
 
 def load_schema(filename):
+    """Read one schema file from the contracts directory."""
     with open(SCHEMA_DIR / filename, "r", encoding="utf-8") as handle:
         return json.load(handle)
 

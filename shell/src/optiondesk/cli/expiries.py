@@ -15,6 +15,7 @@ from optiondesk.providers import CAP_OPTION_CHAIN, resolve
 
 
 def add_arguments(parser):
+    """Register the listing options: provider and output directory."""
     parser.add_argument("symbol", nargs="?", default=None,
                         help="underlying ticker. Omit to list only what is "
                              "already on disk, with no network access")
@@ -59,11 +60,19 @@ def on_disk(directory=None):
 
 
 def run(args):
+    """List the expiries the provider carries for a symbol and mark the ones
+    already on disk.
+    """
     directory = args.out_dir
     local = on_disk(directory)
 
     if not args.symbol:
         return {
+            # Present and false rather than absent, so a consumer can read
+            # the key on every path this command takes. Nothing was
+            # fetched here, so there is no upstream to be degraded.
+            "degraded": False,
+            "degraded_reason": None,
             "artifact_dir": str(artifact_dir(directory)),
             "on_disk": [
                 {"underlying": v["underlying"], "expiry": v["expiry"],
@@ -99,6 +108,8 @@ def run(args):
     return {
         "underlying": symbol,
         "provider_used": provider.name,
+        "degraded": bool(choice["degraded"]),
+        "degraded_reason": "; ".join(choice["skipped"]) or None,
         "listed": len(rows),
         "already_pulled": sorted(have),
         "expiries": rows,
@@ -108,6 +119,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk expiries", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

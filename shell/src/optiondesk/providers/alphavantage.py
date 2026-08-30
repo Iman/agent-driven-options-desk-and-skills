@@ -47,6 +47,12 @@ TIMEOUT_SECONDS = 30
 
 class AlphaVantageProvider(Provider):
 
+    """Alpha Vantage, the fallback for underlying history and quotes.
+
+    Needs a key, and is skipped rather than failing when there is not one. Its
+    free tier allows roughly 25 requests a day, so it sits below the free
+    unlimited provider in every priority list.
+    """
     name = "alphavantage"
     tier = "paid"
     requires_key = True

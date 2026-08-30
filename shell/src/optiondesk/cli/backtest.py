@@ -21,6 +21,9 @@ from optiondesk.providers import CAP_UNDERLYING_HISTORY, resolve
 
 
 def add_arguments(parser):
+    """Register the window and cadence: holding days, entry interval, lookback,
+    history period, rate, dividend yield, size, provider and output directory.
+    """
     parser.add_argument("symbol", help="underlying ticker")
     parser.add_argument("strategy", help="structure to test, for example "
                                          "iron_condor")
@@ -68,6 +71,9 @@ def _benchmark(prices, dates, holding_days, entry_every, lookback,
 
 
 def run(args):
+    """Enter one structure repeatedly across real history and write a backtest
+    artifact with its honesty statement attached.
+    """
     engine = engine_bridge.require()
     strategies = engine_bridge.strategies()
     engine_backtest = engine_bridge.backtest()
@@ -139,6 +145,8 @@ def run(args):
         "artifact": str(out),
         "underlying": args.symbol.upper(),
         "strategy": args.strategy,
+        "degraded": bool(choice["degraded"]),
+        "degraded_reason": "; ".join(choice["skipped"]) or None,
         "trades": (statistics or {}).get("trades", 0),
         "win_rate": (statistics or {}).get("win_rate"),
         "mean_return_on_risk": (statistics or {}).get("mean_return"),
@@ -160,6 +168,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk backtest", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

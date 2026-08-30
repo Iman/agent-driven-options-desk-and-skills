@@ -33,6 +33,9 @@ def _doctor(_args):
 
 
 def build_parser():
+    """Assemble the top level parser by asking each command module to register
+    its own arguments.
+    """
     parser = argparse.ArgumentParser(
         prog="optiondesk",
         description="Option desk: chain retrieval, analytics, artifacts. "
@@ -97,6 +100,7 @@ HANDLERS = {
 
 
 def main(argv=None):
+    """Dispatch argv to the named subcommand and return its exit code."""
     args = build_parser().parse_args(argv)
     try:
         result = HANDLERS[args.command](args)

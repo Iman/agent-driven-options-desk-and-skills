@@ -41,6 +41,9 @@ UNITS = {
 
 
 def add_arguments(parser):
+    """Register ladder options: which snapshot, the moneyness band, the option
+    type and output directory.
+    """
     parser.add_argument("--snapshot", default=None,
                         help="path to a chain snapshot. Default: the most "
                              "recent chain artifact in the artifact dir")
@@ -56,6 +59,9 @@ def add_arguments(parser):
 
 
 def run(args):
+    """Compute the sixteen Greek ladder from a snapshot and write a graded
+    artifact, skipping contracts whose price identifies no volatility.
+    """
     engine = engine_bridge.require()
 
     path = args.snapshot or latest("chain_*.json", args.out_dir)
@@ -187,6 +193,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk greeks", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

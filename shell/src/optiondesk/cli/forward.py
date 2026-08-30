@@ -41,6 +41,9 @@ LEDGER = "forward_ledger.json"
 
 
 def add_arguments(parser):
+    """Register the four verbs and their arguments: plan, strategy, underlying,
+    identifier, price, thesis and output directory.
+    """
     parser.add_argument("action", choices=("open", "mark", "close", "status"),
                         help="what to do with the ledger")
     parser.add_argument("--plan", default=None,
@@ -121,6 +124,7 @@ def _newest_chain(directory, underlying, expiry):
 
 
 def run(args):
+    """Record, mark, settle or list a paper position in the forward ledger."""
     engine = engine_bridge.require()
     forward = engine_bridge.backtest()
     strategies = engine_bridge.strategies()
@@ -334,6 +338,9 @@ def _status(ledger, args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk forward", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

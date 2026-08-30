@@ -27,6 +27,7 @@ _REGISTRY = {}
 
 
 def register(provider):
+    """Add a provider to the registry under its own name."""
     _REGISTRY[provider.name] = provider
     return provider
 
@@ -48,6 +49,7 @@ PRIORITY = {
 
 
 def get(name):
+    """Return a provider by name, or raise listing the names that do exist."""
     if name not in _REGISTRY:
         raise KeyError("unknown provider {!r}. Known: {}".format(
             name, ", ".join(sorted(_REGISTRY))))

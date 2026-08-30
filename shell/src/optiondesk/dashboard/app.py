@@ -21,6 +21,9 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def build_payload(directory=None, underlying=None, expiry=None):
+    """Collect every artifact the dashboard renders for one underlying and
+    expiry, with the derived series and the disclaimer.
+    """
     target = artifact_dir(directory)
     payload = data_module.collect(target, underlying, expiry)
     payload["series"] = data_module.ladder_series(payload["ladder"])
@@ -30,10 +33,14 @@ def build_payload(directory=None, underlying=None, expiry=None):
 
 
 def render_index(directory=None, underlying=None, expiry=None):
+    """Render the whole dashboard document for one underlying and expiry."""
     return page_module.render(build_payload(directory, underlying, expiry))
 
 
 def status_payload(directory=None):
+    """Report what the server can see: whether the engine is installed, where
+    artifacts are read from, and the disclaimer.
+    """
     return {
         "engine": engine_bridge.status(),
         "artifact_dir": str(artifact_dir(directory)),

@@ -44,6 +44,10 @@ class _PlanArgs:
 
 
 def add_arguments(parser):
+    """Register comparison options: which snapshot, position size, whether to
+    include the underlying, whether to rebuild plans rather than reuse them,
+    and output directory.
+    """
     parser.add_argument("--snapshot", default=None,
                         help="chain snapshot path. Default: most recent")
     parser.add_argument("--size", type=float, default=1.0,
@@ -61,6 +65,9 @@ def add_arguments(parser):
 
 
 def run(args):
+    """Build every buildable structure from one snapshot, rank them under
+    stated assumptions and write a comparison artifact.
+    """
     engine = engine_bridge.require()
     playbook = engine_bridge.strategies().PLAYBOOK
     analytics = engine_bridge.analytics()
@@ -167,6 +174,8 @@ def run(args):
         "artifact": str(out),
         "underlying": snapshot["underlying"],
         "expiry": snapshot.get("expiry"),
+        "degraded": bool(source_meta.get("degraded")),
+        "degraded_reason": source_meta.get("degraded_reason"),
         "compared": len(plans),
         "reused_existing_plans": reused,
         "rankable": comparison["rankable_count"],
@@ -187,6 +196,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk compare", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

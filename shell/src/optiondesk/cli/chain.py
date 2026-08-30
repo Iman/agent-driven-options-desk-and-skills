@@ -20,6 +20,9 @@ IV_MAX = 5.0
 
 
 def add_arguments(parser):
+    """Register the pull options: expiry, provider, risk free rate, dividend
+    yield and output directory.
+    """
     parser.add_argument("symbol", help="underlying ticker, for example SPY")
     parser.add_argument("--expiry", default=None,
                         help="expiry as YYYY-MM-DD. Default: nearest listed")
@@ -50,6 +53,9 @@ def _solve_iv(engine, contract, spot, t, rate, q):
 
 
 def run(args):
+    """Pull one option chain, solve implied volatility per contract where the
+    price identifies it, and write a snapshot artifact.
+    """
     provider, choice = resolve(CAP_OPTION_CHAIN, args.provider)
     quote = provider.underlying_quote(args.symbol)
     chain = provider.option_chain(args.symbol, args.expiry)
@@ -178,6 +184,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk chain", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

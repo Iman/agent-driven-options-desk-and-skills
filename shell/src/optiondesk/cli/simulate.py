@@ -30,6 +30,10 @@ TRADING_DAYS = 252
 
 
 def add_arguments(parser):
+    """Register simulation controls: horizon, path count, draws, burn-in, chain
+    count, history period, provider, whether to price structures and output
+    directory.
+    """
     parser.add_argument("symbol", help="underlying ticker")
     parser.add_argument("--horizon", type=int, default=5,
                         help="business days to simulate forward")
@@ -68,6 +72,9 @@ def _legs_from_plan(strategies, plan):
 
 
 def run(args):
+    """Fit the GARCH(1,1)-t posterior by MCMC, simulate paths from it and write
+    a simulation artifact carrying its own convergence verdict.
+    """
     engine = engine_bridge.require()
     sim_module = engine_bridge.simulation()
     strategies = engine_bridge.strategies()
@@ -202,6 +209,8 @@ def run(args):
         "artifact": str(out),
         "underlying": args.symbol.upper(),
         "spot": spot,
+        "degraded": degraded,
+        "degraded_reason": "; ".join(reasons) or None,
         "history_observations": len(returns),
         "annualised_volatility": payload["history"]["annualised_volatility"],
         "converged": posterior.converged,
@@ -255,6 +264,9 @@ def _histogram(values, bins=48):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk simulate", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

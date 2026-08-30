@@ -33,6 +33,9 @@ MASK_VISIBLE = 2
 
 
 def add_arguments(parser):
+    """Register the key subcommand and its optional value, which is prompted
+    for with hidden input when omitted.
+    """
     parser.add_argument("action", nargs="?", default="list",
                         choices=("list", "set", "unset", "path"),
                         help="what to do")
@@ -87,6 +90,8 @@ def _write(variable, value):
 
 
 def run(args):
+    """List, set or locate provider credentials, without printing one in full.
+    """
     if args.action == "path":
         return {
             "config": str(USER_CONFIG),
@@ -167,6 +172,9 @@ def run(args):
 
 
 def main(argv=None):
+    """Parse argv for this command alone and run it, so the command works when
+    invoked directly as well as through the dispatcher.
+    """
     parser = add_arguments(argparse.ArgumentParser(
         prog="optiondesk keys", description=__doc__.splitlines()[0]))
     args = parser.parse_args(argv)

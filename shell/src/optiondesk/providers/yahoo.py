@@ -54,6 +54,12 @@ def _num(value, default=None):
 
 class YahooProvider(Provider):
 
+    """The free default, with no key and no signup.
+
+    Covers option chains, underlying history, quotes and a risk free rate
+    proxy. Data is delayed and third party, which is stated in every artifact
+    it fills rather than assumed to be understood.
+    """
     name = "yahoo"
     tier = "free"
     requires_key = False

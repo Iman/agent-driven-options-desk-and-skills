@@ -35,6 +35,36 @@ from optiondesk.providers import describe_all
 PROTOCOL_VERSION = "2025-06-18"
 SERVER_NAME = "optiondesk"
 
+USAGE = """usage: optiondesk-mcp [--help] [--version]
+
+Model Context Protocol server for the option desk, spoken over stdio.
+With no arguments it reads line-delimited JSON-RPC on standard input and
+writes one response frame per request to standard output, until the client
+closes the stream. It is meant to be launched by an MCP client, not typed
+at a prompt.
+
+Register it with a runtime:
+  claude mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
+  codex  mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
+  gemini mcp add -s user optiondesk /abs/path/to/.venv/bin/optiondesk-mcp
+
+Options:
+  -h, --help     print this text and exit
+  -V, --version  print the server version and exit
+"""
+
+# Appended to every tool description below. This server is the only surface
+# Codex and Gemini get: neither loads the skill files that carry the desk's
+# reporting discipline, so a rule that is not in the tool description does
+# not reach those runtimes at all. Worded to stay true of the two tools
+# whose summaries carry no degraded flag (option_desk_status, and
+# option_forward_test, which reads no provider and is exempt by name in
+# tests/test_summary_degraded_contract.py).
+REPORTING_RULE = (
+    " Before quoting any number from this result, state the degraded flag "
+    "and its reason when the result carries one, and cite the artifact path "
+    "it names.")
+
 
 class _Args:
     """argparse-free stand-in so CLI handlers can be called directly.
@@ -145,7 +175,15 @@ TOOLS = [
                          "description": "Strategy name, e.g. iron_condor"},
                 "list_only": {"type": "boolean",
                               "description": "List the playbook instead"},
-                "recommend": {"type": "string",
+                # Advertised as an integer, not a string, because the handler
+                # spends it as one: cli/strategy.py calls int() on it before
+                # anything else touches it, and the domain is the five
+                # outlooks -2 to +2. A schema-validating client rejected the
+                # integer a model naturally sends for "outlook -2 to +2",
+                # and the string a client sent instead only worked because
+                # int() happens to parse "1". The type now says what the
+                # value is rather than how it survives the trip.
+                "recommend": {"type": "integer",
                               "description": "Outlook -2 to +2 to rank for"},
                 "vol_view": {"type": "string",
                              "enum": ["neutral", "crush", "expand"]},
@@ -153,6 +191,24 @@ TOOLS = [
                 "direction_unknown": {"type": "boolean"},
                 "size": {"type": "number"},
                 "snapshot": {"type": "string"},
+                # The two-expiry structures this tool advertises as buildable
+                # need these three. Semantics are the CLI's, from
+                # cli/strategy.py add_arguments: the later chain, which side
+                # a time spread is built from, and how far out of the money a
+                # diagonal sells its near leg.
+                "far_snapshot": {
+                    "type": "string",
+                    "description": "The later expiry, for a calendar or "
+                                   "diagonal. Omit and the nearest later "
+                                   "chain on disk for the same underlying "
+                                   "is used"},
+                "kind": {"type": "string", "enum": ["call", "put"],
+                         "description": "Which side a time spread is built "
+                                        "from"},
+                "offset": {"type": "number",
+                           "description": "How far out of the money a "
+                                          "diagonal sells the near leg, as "
+                                          "a fraction of spot"},
             },
         },
         "handler": strategy_cmd.run,
@@ -160,7 +216,10 @@ TOOLS = [
                      "underlying_entry": None, "out_dir": None,
                      "list_only": False, "recommend": None,
                      "vol_view": "neutral", "owns_underlying": False,
-                     "direction_unknown": False},
+                     "direction_unknown": False,
+                     # Same defaults argparse gives them, so a call that
+                     # omits them behaves exactly as the CLI does.
+                     "far_snapshot": None, "kind": "call", "offset": 0.03},
     },
     {
         "name": "option_strategy_compare",
@@ -302,6 +361,14 @@ TOOLS = [
     },
 ]
 
+
+# Applied in a loop rather than typed into each description, so a tool added
+# later cannot ship without the rule. Nine of the ten descriptions carried no
+# reporting instruction at all, and DISCLAIMER reached exactly one result.
+for _tool in TOOLS:
+    _tool["description"] += REPORTING_RULE
+del _tool
+
 _BY_NAME = {tool["name"]: tool for tool in TOOLS}
 
 
@@ -310,7 +377,26 @@ def _public(tool):
             "inputSchema": tool["inputSchema"]}
 
 
-def _result(payload):
+def _result(payload, rejected=()):
+    """One tools/call result frame.
+
+    Two things travel with every payload rather than with one of them.
+
+    The disclaimer, because a result is where a number is read. It was
+    carried by option_desk_status alone, which is the one tool that reports
+    no numbers, so the tools a model actually quotes from carried nothing.
+    setdefault, so a handler that already supplies its own keeps it.
+
+    The arguments that were dropped, under the same key the LangChain
+    bindings use (agent/src/optiondesk_agent/tools.py). Silence let a caller
+    believe an unadvertised argument had been honoured: a model passing
+    out_dir got a normal-looking result written somewhere else entirely.
+    """
+    if isinstance(payload, dict):
+        payload = dict(payload)
+        payload.setdefault("disclaimer", DISCLAIMER)
+        if rejected:
+            payload["ignored_arguments"] = list(rejected)
     return {"content": [{"type": "text",
                          "text": json.dumps(payload, indent=1, default=str)}]}
 
@@ -338,6 +424,16 @@ def handle(request):
     method = request.get("method")
     request_id = request.get("id")
     params = request.get("params") or {}
+
+    # A notification carries no id, and by protocol gets no response. This
+    # check has to come before the dispatch below, not after it. Sitting
+    # after, it suppressed only the frame: a tools/call sent as a
+    # notification still ran, wrote an artifact, and was then answered with
+    # an unsolicited "id": null response the client had nothing to match.
+    # The test is the absence of the member, not a null id, because 0 is a
+    # legal JSON-RPC id and a request carrying it must still be answered.
+    if "id" not in request:
+        return None
 
     if method == "initialize":
         # The specification requires the server to answer with a version it
@@ -375,17 +471,45 @@ def handle(request):
             return {"jsonrpc": "2.0", "id": request_id,
                     "error": {"code": -32602,
                               "message": "unknown tool {!r}".format(name)}}
+        supplied = params.get("arguments") or {}
+        if not isinstance(supplied, dict):
+            # A client sending a string or a list here used to reach
+            # .get() and come back as -32603 internal error, which tells a
+            # model the server broke rather than that the call was malformed
+            # and blames the wrong side of the connection.
+            return {"jsonrpc": "2.0", "id": request_id,
+                    "error": {"code": -32602,
+                              "message": "arguments must be an object, got "
+                                         "{}".format(
+                                             type(supplied).__name__)}}
+        # inputSchema.required was published and never enforced, so a
+        # required argument left out reached the handler as its None default
+        # and failed somewhere inside it: an empty arguments object on
+        # option_chain_snapshot came back as "'NoneType' object has no
+        # attribute 'upper'", which names neither the tool nor the argument
+        # and gives a model nothing to correct. An explicit null is the same
+        # omission and is treated the same way.
+        missing = [key for key in (tool["inputSchema"].get("required") or [])
+                   if supplied.get(key) is None]
+        if missing:
+            return {"jsonrpc": "2.0", "id": request_id,
+                    "error": {"code": -32602,
+                              "message": "{} is missing required {}: {}"
+                                         .format(
+                                             name,
+                                             "argument" if len(missing) == 1
+                                             else "arguments",
+                                             ", ".join(missing))}}
         allowed = set(tool["inputSchema"].get("properties") or {})
-        args = _Args(tool["defaults"], params.get("arguments") or {}, allowed)
+        args = _Args(tool["defaults"], supplied, allowed)
         try:
             payload = tool["handler"](args)
         except Exception as exc:  # surfaced to the model, not the transport
             return {"jsonrpc": "2.0", "id": request_id,
                     "result": _error_result(exc)}
-        return {"jsonrpc": "2.0", "id": request_id, "result": _result(payload)}
+        return {"jsonrpc": "2.0", "id": request_id,
+                "result": _result(payload, args.rejected)}
 
-    if request_id is None:
-        return None
     return {"jsonrpc": "2.0", "id": request_id,
             "error": {"code": -32601,
                       "message": "method not found: {}".format(method)}}
@@ -425,6 +549,29 @@ def serve(stdin=None, stdout=None):
 
 
 def main(argv=None):
+    """Serve the JSON-RPC loop on stdin and stdout until the client closes it.
+
+    argv is read rather than ignored. Ignored, every argument fell through to
+    serve(), so 'optiondesk-mcp --help' printed nothing and blocked on stdin
+    with no prompt back and no hint that it was waiting. Help and version
+    answer and exit without reading stdin at all; an unrecognised argument
+    says so on stderr rather than silently becoming a server.
+
+    Help goes to stdout because that is where a person asking for it looks.
+    The stdout-is-protocol-only rule holds for the serving path below, which
+    these branches return before reaching.
+    """
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if "-h" in argv or "--help" in argv:
+        sys.stdout.write(USAGE)
+        return 0
+    if "-V" in argv or "--version" in argv:
+        sys.stdout.write("{} {}\n".format(SERVER_NAME, __version__))
+        return 0
+    if argv:
+        sys.stderr.write("optiondesk-mcp: unrecognised argument: {}\n\n{}"
+                         .format(" ".join(argv), USAGE))
+        return 2
     serve()
     return 0
 

@@ -27,7 +27,12 @@ from optiondesk_engine.strategies.outlook import (
     chain_iv,
     one_sd_band,
 )
-from optiondesk_engine.strategies.payoff import INF, Leg, analyze
+from optiondesk_engine.strategies.payoff import (
+    INF,
+    Leg,
+    analyze,
+    pnl_at_expiry,
+)
 
 
 # --------------------------------------------------------------- chain shape
@@ -325,12 +330,17 @@ def iron_condor(chain, iv=None, days=None, size=1.0,
     loss.
     """
     spot = chain["spot"]
-    band = _band(chain, iv, days) or (spot * 0.95, spot * 1.05)
-    width = (band[1] - band[0]) * wing_width_fraction / 2.0
+    band = _band(chain, iv, days)
+    # Strike selection needs a width even when no volatility was
+    # available. The band itself stays as it was found, because the
+    # plan reports it as the expected move and a five percent
+    # stand-in is not one.
+    reference = band or (spot * 0.95, spot * 1.05)
+    width = (reference[1] - reference[0]) * wing_width_fraction / 2.0
 
-    put_short = _closest(chain["puts"], band[0])
+    put_short = _closest(chain["puts"], reference[0])
     put_long = _closest(chain["puts"], _strike(put_short) - width)
-    call_short = _closest(chain["calls"], band[1])
+    call_short = _closest(chain["calls"], reference[1])
     call_long = _closest(chain["calls"], _strike(call_short) + width)
     if (_strike(put_long) >= _strike(put_short)
             or _strike(call_long) <= _strike(call_short)):
@@ -363,8 +373,13 @@ def iron_butterfly(chain, iv=None, days=None, size=1.0,
     merely stay in a range.
     """
     spot = chain["spot"]
-    band = _band(chain, iv, days) or (spot * 0.95, spot * 1.05)
-    wing = (band[1] - band[0]) / 2.0 * wing_fraction
+    band = _band(chain, iv, days)
+    # Strike selection needs a width even when no volatility was
+    # available. The band itself stays as it was found, because the
+    # plan reports it as the expected move and a five percent
+    # stand-in is not one.
+    reference = band or (spot * 0.95, spot * 1.05)
+    wing = (reference[1] - reference[0]) / 2.0 * wing_fraction
 
     short_call = _closest(chain["calls"], spot)
     short_put = _closest(chain["puts"], _strike(short_call))
@@ -399,8 +414,13 @@ def long_call_butterfly(chain, iv=None, days=None, size=1.0,
     body.
     """
     spot = chain["spot"]
-    band = _band(chain, iv, days) or (spot * 0.95, spot * 1.05)
-    wing = (band[1] - band[0]) / 2.0 * wing_fraction
+    band = _band(chain, iv, days)
+    # Strike selection needs a width even when no volatility was
+    # available. The band itself stays as it was found, because the
+    # plan reports it as the expected move and a five percent
+    # stand-in is not one.
+    reference = band or (spot * 0.95, spot * 1.05)
+    wing = (reference[1] - reference[0]) / 2.0 * wing_fraction
 
     body = _closest(chain["calls"], spot)
     lower = _closest(chain["calls"], _strike(body) - wing)
@@ -423,6 +443,188 @@ def long_call_butterfly(chain, iv=None, days=None, size=1.0,
     # handing over a structure that is arithmetically dead. Refuse instead.
     if plan["analysis"]["max_gain"] <= 0:
         return None
+    return plan
+
+
+# ------------------------------------------------------------- asymmetric
+
+def ratio_spread(chain, iv=None, days=None, size=1.0, ratio=2.0):
+    """Buy one call near the money, sell more than one further out.
+
+    Calls only, and that is deliberate. The short side is uncapped, which is
+    the entire point of the structure: the payoff engine reports the loss as
+    negative infinity because the slope above the top strike is negative and
+    nothing bounds it. A put ratio would be the mirror image on paper, but
+    the same engine bounds the downside at an underlying of zero, so its
+    loss comes back as a large finite number. Calling that "unlimited" would
+    be wrong, so this builder does not offer the put side rather than
+    reporting one of the two under a label that only fits the other.
+
+    The short strike is the furthest one the chain will finance without
+    paying a debit. Further out is strictly safer here, so the credit
+    constraint is what binds, and taking the furthest financed strike buys
+    the widest tent and the highest upside breakeven available for nothing.
+
+    A ratio spread that pays a debit is refused rather than returned. The
+    registry carries one trade type per structure and this one is declared a
+    credit, so a debit build would be labelled by the table as something the
+    arithmetic says it is not.
+    """
+    if ratio <= 1.0:
+        raise ValueError("a ratio spread sells more than it buys: ratio must "
+                         "be greater than 1")
+    spot = chain["spot"]
+    band = _band(chain, iv, days)
+    long_opt = _closest(chain["calls"], spot)
+    best = None
+    for short_opt in _priced(chain["calls"]):
+        if _strike(short_opt) <= _strike(long_opt):
+            continue
+        legs = [
+            Leg("call", +1, _mid(long_opt), strike=_strike(long_opt),
+                qty=size, ref=long_opt),
+            Leg("call", -1, _mid(short_opt), strike=_strike(short_opt),
+                qty=ratio * size, ref=short_opt),
+        ]
+        if analyze(legs, spot=spot)["net_cash"] <= 0:
+            continue
+        # Strikes arrive sorted, so the last credit found is the furthest.
+        best = legs
+    if best is None:
+        return None
+    return _plan("ratio_spread", best, chain, band)
+
+
+def broken_wing_butterfly(chain, iv=None, days=None, size=1.0,
+                          wing_fraction=0.5, far_wing_multiple=2.0,
+                          max_far_wing_multiple=3.0):
+    """A call butterfly with the far wing wider than the near one.
+
+    Skipping strikes on the upper wing makes the long leg out there cheaper
+    than the symmetric one, which is what turns the debit of an ordinary
+    butterfly into a credit. The credit is the whole reason to prefer this
+    shape: below the lower strike every leg expires worthless and the credit
+    is kept, so that side carries no risk at all. The price is above the
+    upper strike, where the loss is the difference between the wings less
+    the credit, which is larger than an ordinary butterfly can lose.
+
+    The near wing comes from the expected move, as the ordinary butterfly's
+    wings do. The far wing starts at far_wing_multiple times the near one
+    and walks outward only until the structure pays a credit, so the extra
+    risk taken is the least the chain will finance rather than the most it
+    will allow. max_far_wing_multiple stops that walk: past it the far leg
+    is so distant that it is a disaster hedge rather than a wing, and the
+    structure is a ratio spread wearing a butterfly's name.
+
+    A build that pays a debit is refused, on the same ground as the ratio
+    spread: it would carry risk on both sides while the registry declares it
+    a credit.
+    """
+    if far_wing_multiple <= 1.0:
+        raise ValueError("the far wing must be wider than the near one: "
+                         "far_wing_multiple must be greater than 1")
+    spot = chain["spot"]
+    band = _band(chain, iv, days)
+    # Strike selection needs a width even when no volatility was available.
+    # The band itself stays as it was found, because the plan reports it as
+    # the expected move and a five percent stand-in is not one.
+    reference = band or (spot * 0.95, spot * 1.05)
+    near_target = (reference[1] - reference[0]) / 2.0 * wing_fraction
+
+    body = _closest(chain["calls"], spot)
+    lower = _closest(chain["calls"], _strike(body) - near_target)
+    near_wing = _strike(body) - _strike(lower)
+    if near_wing <= 0:
+        return None
+
+    for upper in _priced(chain["calls"]):
+        far_wing = _strike(upper) - _strike(body)
+        if far_wing + 1e-9 < near_wing * far_wing_multiple:
+            continue
+        if far_wing > near_wing * max_far_wing_multiple + 1e-9:
+            break
+        legs = [
+            Leg("call", +1, _mid(lower), strike=_strike(lower), qty=size,
+                ref=lower),
+            Leg("call", -1, _mid(body), strike=_strike(body), qty=2.0 * size,
+                ref=body),
+            Leg("call", +1, _mid(upper), strike=_strike(upper), qty=size,
+                ref=upper),
+        ]
+        if analyze(legs, spot=spot)["net_cash"] <= 0:
+            continue
+        return _plan("broken_wing_butterfly", legs, chain, band)
+    return None
+
+
+def jade_lizard(chain, iv=None, days=None, size=1.0):
+    """A short put below the range plus a short call spread above it.
+
+    The defining property is that there is no upside risk when the total
+    credit is at least the width of the call spread: above the long call the
+    payoff is flat at credit minus width, so the sign of that number decides
+    whether a rally can cost anything. It is a property of the strikes and
+    the premiums actually available, not of the shape, so it is measured
+    from the payoff above the top strike and reported in the analysis as
+    no_upside_risk rather than assumed.
+
+    The long call is the furthest strike that keeps the property, because
+    the further out it sits the cheaper it is and the larger the credit,
+    and the credit is the maximum gain. When no strike keeps it, the
+    narrowest call spread available is used, which is the least upside risk
+    the chain offers, and the field says the property does not hold.
+
+    The whole risk is the short put. It is bounded only by the underlying
+    reaching zero, so size it as though assignment were certain.
+    """
+    spot = chain["spot"]
+    band = _band(chain, iv, days)
+    reference = band or (spot * 0.95, spot * 1.05)
+
+    below = [p for p in _priced(chain["puts"])
+             if _strike(p) <= reference[0]]
+    if not below:
+        return None
+    short_put = max(below, key=_strike)
+    short_call = _closest(chain["calls"], reference[1])
+    higher = [c for c in _priced(chain["calls"])
+              if _strike(c) > _strike(short_call)]
+    if not higher:
+        return None
+
+    def _legs(long_call):
+        return [
+            Leg("put", -1, _mid(short_put), strike=_strike(short_put),
+                qty=size, ref=short_put),
+            Leg("call", -1, _mid(short_call), strike=_strike(short_call),
+                qty=size, ref=short_call),
+            Leg("call", +1, _mid(long_call), strike=_strike(long_call),
+                qty=size, ref=long_call),
+        ]
+
+    def _covered(legs):
+        """Is the payoff above the top strike still not a loss?
+
+        Read from the payoff itself rather than compared against the width,
+        so the answer stays true if the leg selection ever changes shape.
+        """
+        top = max(leg.strike for leg in legs if leg.strike is not None)
+        return pnl_at_expiry(legs, top + 1.0) >= 0.0
+
+    chosen = None
+    for long_call in higher:
+        legs = _legs(long_call)
+        if analyze(legs, spot=spot)["net_cash"] <= 0:
+            continue
+        if _covered(legs):
+            chosen = legs
+    if chosen is None:
+        chosen = _legs(higher[0])
+        if analyze(chosen, spot=spot)["net_cash"] <= 0:
+            return None
+
+    plan = _plan("jade_lizard", chosen, chain, band)
+    plan["analysis"]["no_upside_risk"] = bool(_covered(chosen))
     return plan
 
 
@@ -545,6 +747,53 @@ PLAYBOOK = {
                         "to land close to the body."),
         "build": long_call_butterfly,
     },
+    "ratio_spread": {
+        "trade_type": "credit",
+        "outlooks": (Outlook.NEUTRAL, Outlook.MILD_BULLISH),
+        "vol_view": "crush",
+        "needs_underlying": False,
+        "when_to_use": ("A drift up that stalls, paid for by selling two "
+                        "calls for every one bought. One of those shorts is "
+                        "naked, so a strong rally loses without limit and "
+                        "the maximum loss is reported as unlimited rather "
+                        "than as a number. Read the upper breakeven against "
+                        "the expected move before using it: on a chain that "
+                        "only just finances the credit, that breakeven sits "
+                        "inside the range the market already expects."),
+        "build": ratio_spread,
+    },
+    "broken_wing_butterfly": {
+        "trade_type": "credit",
+        "outlooks": (Outlook.MILD_BEARISH, Outlook.NEUTRAL),
+        "vol_view": "crush",
+        "needs_underlying": False,
+        "when_to_use": ("A butterfly with the far wing widened until it pays "
+                        "a credit, which leaves nothing at risk below the "
+                        "lower strike: every leg expires worthless there and "
+                        "the credit is kept. The wider wing is what that "
+                        "costs, and it is charged above the upper strike, "
+                        "where the loss is the difference between the wings "
+                        "less the credit. It still wants the finish near the "
+                        "body, where the gain is largest."),
+        "build": broken_wing_butterfly,
+    },
+    "jade_lizard": {
+        "trade_type": "credit",
+        "outlooks": (Outlook.MILD_BEARISH, Outlook.NEUTRAL,
+                     Outlook.MILD_BULLISH),
+        "vol_view": "crush",
+        "needs_underlying": False,
+        "when_to_use": ("A short put under the expected range and a short "
+                        "call spread above it. When the credit is at least "
+                        "the width of that call spread the structure cannot "
+                        "lose on a rally at all; whether it holds for the "
+                        "strikes actually chosen is measured and reported as "
+                        "no_upside_risk in the analysis, so read the field "
+                        "rather than assuming the shape. The whole risk is "
+                        "the short put, so size it as though assignment "
+                        "were certain."),
+        "build": jade_lizard,
+    },
     "calendar_spread": {
         "trade_type": "debit",
         "outlooks": (Outlook.NEUTRAL,),
@@ -658,4 +907,9 @@ def describe(plan):
     if metrics["reward_risk"]:
         lines.append("reward to risk: {:.2f} to 1".format(
             metrics["reward_risk"]))
+    # Only the structures that measure it carry the key, and the ones that
+    # do are the ones whose defining claim it is.
+    if "no_upside_risk" in metrics:
+        lines.append("no upside risk: {}".format(
+            "yes" if metrics["no_upside_risk"] else "no"))
     return "\n".join(lines)

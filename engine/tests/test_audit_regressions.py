@@ -305,3 +305,74 @@ def test_the_inner_vega_guard_refuses_rather_than_inventing_a_volatility():
     for spot, strike, t, kind, price in INVENTS_A_NUMBER_WITHOUT_THE_INNER_GUARD:
         assert implied_vol(price, spot, strike, t, kind) is None, (
             "{} {} at {} should be refused".format(kind, strike, price))
+
+
+# ------------------------------------------------- the fabricated band
+
+# Three builders fell back to a flat five percent either side of spot when
+# no implied volatility was available, used it to pick strikes, which is
+# reasonable, and then recorded it in the plan as `band`. The schema says
+# band is "the one standard deviation expected move, or null when no
+# implied volatility was available", so the artifact stated a measured
+# expected move that had never been measured, and anyone reading it would
+# have taken a flat five percent for the market's own forecast.
+
+def _chain_without_volatility():
+    """Real premiums, no implied volatility.
+
+    Prices come from the engine's own model so the credit and width checks
+    the builders make can actually pass, and `iv` is stripped from every
+    contract, which is exactly what a chain looks like when the solve
+    refused. An earlier version of this test quoted intrinsic plus a flat
+    two, every builder refused it, and all six cases skipped: a test that
+    skips proves nothing and reads like a pass.
+    """
+    from optiondesk_engine.pricing.black_scholes import bs_price
+
+    spot, days, sigma, rate = 100.0, 30.0, 0.25, 0.04
+    contracts = {"calls": [], "puts": [], "spot": spot,
+                 "days_to_expiry": days, "expiry": "2026-09-18",
+                 "underlying": "TEST"}
+    for strike in range(70, 131, 2):
+        for kind, bucket in (("call", "calls"), ("put", "puts")):
+            price = bs_price(spot, float(strike), days / 365.0, sigma, kind,
+                             rate, 0.0)
+            contracts[bucket].append({
+                "symbol": "T{}{}".format(kind[0].upper(), strike),
+                "type": kind, "strike": float(strike),
+                "bid": round(price * 0.98, 4), "ask": round(price * 1.02, 4),
+                "mid": price, "iv": None, "open_interest": 500,
+                "volume": 100})
+    return contracts
+
+
+@pytest.mark.parametrize("name", ["iron_condor", "iron_butterfly",
+                                  "long_call_butterfly"])
+def test_a_plan_built_without_volatility_reports_no_band(name):
+    """Null is the honest answer, and the schema already promises it."""
+    from optiondesk_engine.strategies.playbook import build
+
+    plan = build(name, _chain_without_volatility(), size=1.0)
+    if plan is None:
+        pytest.skip("{} cannot build on this chain".format(name))
+    assert plan["band"] is None, (
+        "{} reported a band of {} from a chain with no implied "
+        "volatility".format(name, plan["band"]))
+
+
+@pytest.mark.parametrize("name", ["iron_condor", "iron_butterfly",
+                                  "long_call_butterfly"])
+def test_the_stand_in_still_picks_usable_strikes(name):
+    """Refusing to report the stand-in must not stop the build.
+
+    The fallback exists because strike selection needs a width. Removing
+    the band from the report while breaking the build would trade one
+    defect for a worse one.
+    """
+    from optiondesk_engine.strategies.playbook import build
+
+    plan = build(name, _chain_without_volatility(), size=1.0)
+    if plan is None:
+        pytest.skip("{} cannot build on this chain".format(name))
+    strikes = {leg.strike for leg in plan["legs"]}
+    assert len(strikes) >= 2, "the structure collapsed onto one strike"

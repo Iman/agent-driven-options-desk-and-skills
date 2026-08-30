@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/backtest/v1",
+  "title": "Structure backtest",
+  "description": "A structure entered repeatedly across a real price history with modelled premiums. Underlying closes are real; option premiums are Black-Scholes values at trailing realised volatility, so nothing here is achievable profit and loss. The honesty field states the limits and must be carried wherever the numbers go.",
+  "type": "object",
+  "required": [
+    "meta",
+    "underlying",
+    "strategy",
+    "honesty",
+    "settings",
+    "statistics"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "strategy": {
+      "type": "string"
+    },
+    "premium_source": {
+      "type": "string",
+      "enum": [
+        "model"
+      ]
+    },
+    "honesty": {
+      "type": "string"
+    },
+    "settings": {
+      "type": "object"
+    },
+    "statistics": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "significance": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "interval": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "benchmark": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "trades": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "skipped": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

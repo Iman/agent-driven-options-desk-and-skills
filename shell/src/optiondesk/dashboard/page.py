@@ -1,0 +1,783 @@
+"""The dashboard page: markup, tiles and tables.
+
+Charts live in charts.py, styling in style.py. This module decides what is
+on the page and in what order, which is the part worth arguing about.
+
+Order follows how a desk actually reads a chain: what is the market doing
+(positioning), what is volatility priced at (the smile), what would a
+structure pay (strategies), then the raw ladder for anyone who wants to
+check the numbers themselves.
+"""
+
+import html
+import json
+
+from optiondesk.dashboard.charts import SCRIPT
+from optiondesk.dashboard.style import STYLE
+
+
+def _tile(key, value, tone="", sub=""):
+    return (
+        "<div class='tile'><div class='k'>{}</div>"
+        "<div class='v {}'>{}</div>{}</div>"
+    ).format(html.escape(str(key)), tone, html.escape(str(value)),
+             "<div class='s'>{}</div>".format(html.escape(str(sub)))
+             if sub else "")
+
+
+def _tiles(items):
+    return "<div class='tiles'>" + "".join(
+        _tile(*item) for item in items) + "</div>"
+
+
+def _num(value, digits=2, suffix=""):
+    if value is None:
+        return "n/a"
+    try:
+        return "{:,.{d}f}{}".format(float(value), suffix, d=digits)
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def _compact(value):
+    if value is None:
+        return "n/a"
+    value = float(value)
+    magnitude = abs(value)
+    if magnitude >= 1e9:
+        return "{:.2f}bn".format(value / 1e9)
+    if magnitude >= 1e6:
+        return "{:.1f}m".format(value / 1e6)
+    if magnitude >= 1e3:
+        return "{:.1f}k".format(value / 1e3)
+    return "{:.2f}".format(value)
+
+
+def _percent(value, digits=1):
+    return "n/a" if value is None else "{:.{d}f}%".format(
+        float(value) * 100, d=digits)
+
+
+def _positioning_tiles(exposure):
+    if not exposure:
+        return ""
+    ex = exposure["exposure"]
+    smile = exposure.get("smile") or {}
+    pain = exposure.get("max_pain") or {}
+    net = ex.get("net_gex")
+    return _tiles([
+        ("Net gamma exposure", _compact(net),
+         "pos" if (net or 0) > 0 else "neg", "per 1% move"),
+        ("Hedging regime", ex.get("regime", "n/a"),
+         "pos" if ex.get("regime") == "dampening" else "neg",
+         "dampening or amplifying"),
+        ("Gamma flip", _num(ex.get("gamma_flip")), "",
+         "cumulative crosses zero"),
+        ("Call wall", _num((ex.get("call_wall") or {}).get("strike")), "",
+         _compact((ex.get("call_wall") or {}).get("gex"))),
+        ("Put wall", _num((ex.get("put_wall") or {}).get("strike")), "",
+         _compact((ex.get("put_wall") or {}).get("gex"))),
+        ("Max pain", _num(pain.get("strike")), "", "least payout"),
+        ("Put / call OI", _num(ex.get("put_call_oi_ratio"), 2), "",
+         "open interest"),
+        ("Put / call volume", _num(ex.get("put_call_volume_ratio"), 2), "",
+         "today"),
+    ])
+
+
+def _volatility_tiles(exposure):
+    if not exposure or not exposure.get("smile"):
+        return ""
+    smile = exposure["smile"]
+    band = smile.get("expected_range") or [None, None]
+    return _tiles([
+        ("At-the-money IV", _percent(smile.get("atm_iv"), 2), "",
+         "strike {}".format(_num(smile.get("atm_strike")))),
+        ("25-delta risk reversal", _percent(smile.get("risk_reversal"), 2),
+         "neg" if (smile.get("risk_reversal") or 0) > 0 else "pos",
+         "put minus call"),
+        ("25-delta butterfly", _percent(smile.get("butterfly"), 2), "",
+         "wings minus body"),
+        ("Skew slope", _num(smile.get("skew_slope_per_percent"), 4), "",
+         "iv per 1% of strike"),
+        ("Expected move", _num(smile.get("expected_move")), "",
+         "one standard deviation"),
+        ("Expected range", "{} to {}".format(_num(band[0]), _num(band[1])),
+         "", "68% of outcomes"),
+    ])
+
+
+def _table(rows, columns, body_id=None):
+    head = "".join("<th>{}</th>".format(html.escape(c)) for c in columns)
+    body = []
+    for row in rows:
+        cells = []
+        for column in columns:
+            value = row.get(column)
+            if isinstance(value, float):
+                cells.append("<td>{:.6g}</td>".format(value))
+            else:
+                cells.append("<td>{}</td>".format(
+                    html.escape(str("" if value is None else value))))
+        body.append("<tr>{}</tr>".format("".join(cells)))
+    return ("<div class='scroll'><table><thead><tr>{}</tr></thead>"
+            "<tbody{}>{}</tbody></table></div>").format(
+                head, " id='{}'".format(body_id) if body_id else "",
+                "".join(body))
+
+
+def _selector(groups, selected):
+    """Underlying and expiry picker, built from what is on disk.
+
+    Plain links with query parameters rather than a script-driven control:
+    the server already knows how to render any group, so a link is enough,
+    and every view is addressable and bookmarkable.
+    """
+    if not groups:
+        return ""
+    underlyings = []
+    seen = set()
+    for group in groups:
+        symbol = group["underlying"]
+        if symbol in seen:
+            continue
+        seen.add(symbol)
+        underlyings.append(symbol)
+
+    current = (selected or {}).get("underlying")
+    current_expiry = (selected or {}).get("expiry")
+
+    sym_buttons = "".join(
+        "<a class='pill{}' href='?u={}'>{}</a>".format(
+            " on" if symbol == current else "",
+            html.escape(str(symbol)), html.escape(str(symbol)))
+        for symbol in underlyings)
+
+    expiry_buttons = "".join(
+        "<a class='pill{}' href='?u={}&amp;e={}' title='{}'>{}</a>".format(
+            " on" if group["expiry"] == current_expiry else "",
+            html.escape(str(group["underlying"])),
+            html.escape(str(group["expiry"] or "")),
+            html.escape(", ".join(group["have"]) or "nothing yet"),
+            html.escape(str(group["expiry"] or "no expiry")))
+        for group in groups if group["underlying"] == current)
+
+    have = ", ".join((selected or {}).get("have") or []) or "nothing"
+    return (
+        "<div class='selector'>"
+        "<div class='row'><span class='lbl'>underlying</span>{sym}</div>"
+        "<div class='row'><span class='lbl'>expiry</span>{exp}</div>"
+        "<div class='row'><span class='lbl'>on disk</span>"
+        "<span class='empty'>{have}{plans}</span></div>"
+        "</div>"
+    ).format(sym=sym_buttons, exp=expiry_buttons, have=html.escape(have),
+             plans=(", {} strategy plans".format(
+                 (selected or {}).get("plan_count", 0))
+                 if (selected or {}).get("plan_count") else ""))
+
+
+def _add_more(selected):
+    """The commands that put another underlying or expiry on this page."""
+    symbol = (selected or {}).get("underlying") or "SPY"
+    return _panel(
+        "Analysing something else",
+        "This page renders artifacts on disk. To add an underlying or an "
+        "expiry, run the commands below and refresh. Any agent connected to "
+        "the MCP server can run them for you.",
+        "<pre class='cmds'>"
+        "optiondesk expiries QQQ            # what is listed\n"
+        "optiondesk chain QQQ --expiry 2026-09-18\n"
+        "optiondesk greeks --band 0.06\n"
+        "optiondesk exposure\n"
+        "optiondesk compare                 # every structure, ranked\n"
+        "optiondesk simulate QQQ --horizon 14\n"
+        "optiondesk backtest QQQ iron_condor --period 5y\n"
+        "\n"
+        "optiondesk expiries                # what you already have\n"
+        "</pre>"
+        "<p class='hint'>Currently showing {}. Each command writes one "
+        "schema-validated artifact into the artifact directory.</p>".format(
+            html.escape(str(symbol))))
+
+
+def _comparison_panel(comparison):
+    """Every structure side by side, with the ordering criterion visible."""
+    if not comparison:
+        return ""
+    rows = comparison.get("rows") or []
+    if not rows:
+        return ""
+    leader = comparison.get("leader") or {}
+
+    header = ["rank", "structure", "type", "net", "max gain", "max loss",
+              "capital at risk", "reward:risk", "P(profit)", "expected P/L",
+              "return on risk", "delta", "theta", "vega", "friction"]
+
+    def cell(value, digits=2, percent=False):
+        if value is None:
+            return "n/a"
+        if isinstance(value, str):
+            return html.escape(value)
+        if percent:
+            return "{:.1f}%".format(float(value) * 100)
+        return "{:,.{d}f}".format(float(value), d=digits)
+
+    body = []
+    ordered = sorted(rows, key=lambda r: (r.get("rank") or 999,
+                                          r.get("strategy") or ""))
+    for row in ordered:
+        classes = []
+        if row.get("rank") == 1:
+            classes.append("lead")
+        if not row.get("rankable"):
+            classes.append("out")
+        excluded = "; ".join(row.get("excluded_because") or [])
+        body.append(
+            "<tr class='{cls}' title='{why}'>"
+            "<td>{rank}</td><td>{name}</td><td>{type}</td><td>{net}</td>"
+            "<td>{gain}</td><td>{loss}</td><td>{risk}</td><td>{rr}</td>"
+            "<td>{pop}</td><td>{ev}</td><td>{ror}</td><td>{delta}</td>"
+            "<td>{theta}</td><td>{vega}</td>"
+            "<td><span class='badge {fv}'>{fv}</span></td></tr>".format(
+                cls=" ".join(classes), why=html.escape(excluded),
+                rank=row.get("rank") or "",
+                name=html.escape(str(row.get("strategy", "")).replace(
+                    "_", " ")),
+                type=html.escape(str(row.get("trade_type") or "")),
+                net=cell(row.get("net_cash")),
+                gain=cell(row.get("max_gain")),
+                loss=cell(row.get("max_loss")),
+                risk=cell(row.get("capital_at_risk")),
+                rr=cell(row.get("reward_risk")),
+                pop=cell(row.get("probability_of_profit"), percent=True),
+                ev=cell(row.get("expected_pnl")),
+                ror=cell(row.get("expected_return_on_risk"), percent=True),
+                delta=cell(row.get("net_delta"), 3),
+                theta=cell(row.get("net_theta"), 3),
+                vega=cell(row.get("net_vega")),
+                fv=html.escape(str(row.get("friction_verdict") or "n/a"))))
+
+    lead_line = ""
+    if leader:
+        margin = comparison.get("margin_over_runner_up")
+        lead_line = (
+            "<p class='lead-line'><strong>Top of the ordering: {name}</strong>"
+            " at {ror} expected return on capital at risk, "
+            "P(profit) {pop}{margin}.</p>".format(
+                name=html.escape(str(leader.get("strategy", "")).replace(
+                    "_", " ")),
+                ror=cell(leader.get("expected_return_on_risk"), percent=True),
+                pop=cell(leader.get("probability_of_profit"), percent=True),
+                margin=(", ahead of the next by {}".format(
+                    cell(margin, percent=True)) if margin else "")))
+
+    return _panel(
+        "Every structure, side by side",
+        comparison.get("criterion", ""),
+        lead_line
+        + "<div class='scroll'><table><thead><tr>"
+        + "".join("<th>{}</th>".format(html.escape(h)) for h in header)
+        + "</tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
+        + "<p class='caveat'><strong>Read this before using the order.</strong>"
+        " {}</p>".format(html.escape(comparison.get("caveat", ""))))
+
+
+def _diagnostic_line(diagnostics):
+    """Worst R-hat and smallest ESS, or a statement that there are none.
+
+    Every R-hat is None when the chains were too short to split, and the
+    unguarded max() over an empty generator did not merely omit a tile: it
+    raised inside the renderer and took the whole dashboard process down,
+    on an artifact the pipeline had written quite happily.
+    """
+    rhats = [v for v in (diagnostics.get("rhat") or {}).values()
+             if v is not None]
+    esses = [v for v in (diagnostics.get("ess") or {}).values()
+             if v is not None]
+    if not rhats or not esses:
+        return "diagnostics unavailable"
+    worst = max(rhats)
+    return "R-hat {}, ESS {:.0f}".format(
+        "infinite" if worst == float("inf") else "{:.3f}".format(worst),
+        min(esses))
+
+
+def _simulation_section(simulation):
+    """The posterior, the fan, and the risk that follows from it."""
+    if not simulation:
+        return ""
+    posterior = simulation["posterior"]
+    diagnostics = posterior["diagnostics"]
+    risk = simulation.get("risk") or {}
+    history = simulation.get("history") or {}
+    params = posterior["parameters"]
+    converged = posterior["converged"]
+
+    warn = ""
+    if not converged:
+        warn = ("<div class='warn'><strong>The sampler has not "
+                "converged.</strong> {}</div>".format(
+                    html.escape(diagnostics.get("note", ""))))
+
+    tiles = _tiles([
+        ("Horizon", "{} days".format(
+            simulation["simulation"]["horizon_days"]), "",
+         "{:,} paths".format(simulation["simulation"]["paths"])),
+        ("Realised volatility", _percent(
+            history.get("annualised_volatility"), 1), "", "annualised"),
+        ("Persistence", _num(params["alpha"]["p50"] + params["beta"]["p50"],
+                             3), "", "alpha plus beta"),
+        ("Tail weight", _num(params["nu"]["p50"], 1), "",
+         "degrees of freedom"),
+        ("VaR 95", _percent(risk.get("var_95"), 2), "neg", "over horizon"),
+        ("Expected shortfall 95", _percent(risk.get("es_95"), 2), "neg",
+         "mean of the tail"),
+        ("VaR 99", _percent(risk.get("var_99"), 2), "neg", "over horizon"),
+        ("Converged", "yes" if converged else "no",
+         "pos" if converged else "neg", _diagnostic_line(diagnostics)),
+    ])
+
+    parameter_rows = []
+    for name in ("mu", "omega", "alpha", "beta", "nu"):
+        stats = params[name]
+        rhat = stats.get("rhat")
+        parameter_rows.append(
+            "<tr><td>{}</td><td>{:.6g}</td><td>{:.6g}</td><td>{:.6g}</td>"
+            "<td>{}</td><td>{:.0f}</td></tr>".format(
+                name, stats["p5"], stats["p50"], stats["p95"],
+                "n/a" if rhat is None else (
+                    "infinite" if rhat == float("inf")
+                    else "{:.3f}".format(rhat)),
+                stats.get("ess") or 0))
+
+    structures = simulation.get("structures") or []
+    structure_rows = []
+    for row in sorted(structures, key=lambda r: -(r.get("disagreement") or 0)):
+        disagreement = row.get("disagreement")
+        tone = ""
+        if disagreement is not None:
+            tone = "pos" if disagreement > 0 else "neg"
+        structure_rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td class='{}'>{}</td>"
+            "<td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                html.escape(str(row["strategy"]).replace("_", " ")),
+                _percent(row.get("realised_vol_probability_of_profit"), 1),
+                _percent(row.get("implied_vol_probability_of_profit"), 1),
+                tone,
+                ("{:+.1f} pts".format(disagreement * 100)
+                 if disagreement is not None else "n/a"),
+                _num(row.get("median")), _num(row.get("p5")),
+                _num(row.get("expected_shortfall_5"))))
+
+    body = (warn + tiles
+            + _panel("Posterior predictive fan",
+                     "Every path draws its own parameter set from the "
+                     "posterior, so the width carries parameter uncertainty "
+                     "as well as volatility. Bands are the 5 to 95 and 25 to "
+                     "75 ranges.",
+                     "<div id='fan' class='chart'></div>")
+            + "<div class='grid2'>"
+            + _panel("Terminal distribution",
+                     "Where the paths finish. The tail is Student-t, not "
+                     "normal, because the returns are.",
+                     "<div id='terminal' class='chart short'></div>")
+            + _panel("Posterior parameters",
+                     "Median with the 5 and 95 percent bounds, plus the "
+                     "convergence diagnostics for each parameter.",
+                     "<div class='scroll'><table><thead><tr><th>parameter"
+                     "</th><th>p5</th><th>median</th><th>p95</th>"
+                     "<th>R-hat</th><th>ESS</th></tr></thead><tbody>"
+                     + "".join(parameter_rows) + "</tbody></table></div>")
+            + "</div>")
+
+    if structure_rows:
+        body += _panel(
+            "Realised volatility against implied",
+            "Probability of profit for each structure under the volatility "
+            "the underlying has actually shown, next to the probability "
+            "under the volatility its options are priced at. The gap is the "
+            "disagreement between the market's forecast and the past, and "
+            "neither side of it is the truth.",
+            "<div class='scroll'><table><thead><tr><th>structure</th>"
+            "<th>P(profit) realised</th><th>P(profit) implied</th>"
+            "<th>gap</th><th>median P/L</th><th>p5</th>"
+            "<th>expected shortfall</th></tr></thead><tbody>"
+            + "".join(structure_rows) + "</tbody></table></div>")
+
+    return "<h2 class='section'>Simulation</h2>" + body
+
+
+def _backtest_section(backtests):
+    """Historical behaviour of each structure, with its honesty statement."""
+    if not backtests:
+        return ""
+    rows = []
+    honesty = ""
+    for test in backtests:
+        stats = test.get("statistics") or {}
+        significance = test.get("significance") or {}
+        interval = test.get("interval") or {}
+        honesty = test.get("honesty", honesty)
+        p_value = significance.get("p_value")
+        rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                html.escape(str(test.get("strategy", "")).replace("_", " ")),
+                stats.get("trades", 0),
+                _percent(stats.get("win_rate"), 1),
+                _percent(stats.get("mean_return"), 2),
+                _num(stats.get("total_return_on_risk")),
+                _num(stats.get("max_drawdown_in_risk_units")),
+                _num(stats.get("sharpe_per_trade"), 3),
+                ("{:.4f}".format(p_value) if p_value is not None else "n/a"),
+                "yes" if interval.get("excludes_zero") else "no"))
+
+    benchmark = (backtests[0].get("benchmark") or {}).get("statistics") or {}
+    benchmark_line = ""
+    if benchmark:
+        benchmark_line = (
+            "<p class='hint'>Buy and hold the underlying over the same "
+            "windows: {} per window across {} windows. A structure that "
+            "merely tracks the market should be read against this, not "
+            "against zero.</p>".format(
+                _percent(benchmark.get("mean_return"), 2),
+                benchmark.get("trades", 0)))
+
+    return ("<h2 class='section'>Backtest</h2>"
+            + _panel(
+                "Structures across real history, with modelled premiums",
+                "Entered on a fixed schedule and held to expiry. One unit of "
+                "capital at risk per trade, returns summed rather than "
+                "compounded.",
+                benchmark_line
+                + "<div class='scroll'><table><thead><tr><th>structure</th>"
+                "<th>trades</th><th>win rate</th><th>mean on risk</th>"
+                "<th>total</th><th>max drawdown</th><th>sharpe per trade</th>"
+                "<th>p-value</th><th>interval excludes zero</th></tr></thead>"
+                "<tbody>" + "".join(rows) + "</tbody></table></div>"
+                + "<div id='equity' class='chart short'></div>"
+                + "<p class='caveat'><strong>What this is not.</strong> {}"
+                "</p>".format(html.escape(honesty))))
+
+
+def _term_section(term_structure):
+    """Volatility across expiries, which one chain cannot show."""
+    if len(term_structure or []) < 2:
+        return ""
+    rows = []
+    for row in term_structure:
+        rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{}</td></tr>".format(
+                html.escape(str(row.get("expiry"))),
+                _num(row.get("days"), 1),
+                _percent(row.get("atm_iv"), 2),
+                _percent(row.get("risk_reversal"), 2),
+                _percent(row.get("butterfly"), 2),
+                _num(row.get("expected_move"))))
+    return (
+        "<h2 class='section'>Term structure</h2>"
+        + "<div class='grid2'>"
+        + _panel("Volatility and expected move by expiry",
+                 "At-the-money volatility on the left axis, the one "
+                 "standard deviation move on the right. An upward slope is "
+                 "the market charging more for time.",
+                 "<div id='term' class='chart short'></div>")
+        + _panel("Skew across expiries",
+                 "The 25-delta risk reversal and butterfly by tenor. A "
+                 "steepening risk reversal means the downside is getting "
+                 "relatively dearer as you go out.",
+                 "<div id='skewterm' class='chart short'></div>")
+        + "</div>"
+        + _panel("Every expiry on file",
+                 "Pulled chains only. Add more with optiondesk chain SYM "
+                 "--expiry DATE.",
+                 "<div class='scroll'><table><thead><tr><th>expiry</th>"
+                 "<th>days</th><th>atm iv</th><th>25d risk reversal</th>"
+                 "<th>25d butterfly</th><th>expected move</th></tr></thead>"
+                 "<tbody>" + "".join(rows) + "</tbody></table></div>"))
+
+
+def _depth_section(chain_series):
+    if not chain_series or not (chain_series.get("calls")
+                                or chain_series.get("puts")):
+        return ""
+    return _panel(
+        "Volume by strike",
+        "Contracts traded today, calls up and puts down, across the whole "
+        "chain rather than the graded band. Open interest is where "
+        "positions sit; volume is where they moved.",
+        "<div id='volume' class='chart short'></div>")
+
+
+def _overlay_section(plans, comparison):
+    if not plans:
+        return ""
+    body = _panel(
+        "Every structure on one axis",
+        "The same payoff curves drawn together, so the shapes can be "
+        "compared directly rather than one at a time. Drag to zoom.",
+        "<div id='overlay' class='chart tall'></div>")
+    if comparison and comparison.get("rows"):
+        body += _panel(
+            "Probability against expected return",
+            "Each structure placed by model probability of profit and "
+            "expected return on capital at risk, sized by that capital. "
+            "Red is a structure friction calls untradeable. The dashed line "
+            "is zero expectation: below it the model expects a loss.",
+            "<div id='riskreward' class='chart'></div>")
+    return body
+
+
+def _distribution_section(simulation):
+    """One profit distribution per structure, from the simulated paths."""
+    if not simulation:
+        return ""
+    structures = [s for s in (simulation.get("structures") or [])
+                  if s.get("histogram")]
+    if not structures:
+        return ""
+    cells = "".join(
+        "<div class='panel'><div id='dist{}' class='chart short'></div>"
+        "</div>".format(index)
+        for index in range(min(6, len(structures))))
+    return _panel(
+        "Where each structure lands",
+        "Profit distribution across the simulated paths, priced at expiry "
+        "from the structure's own legs, using the volatility the underlying "
+        "has actually shown rather than the volatility its options are "
+        "priced at. Green is profit, red is loss, the dashed line is the "
+        "median outcome.",
+        "<div class='grid3'>" + cells + "</div>")
+
+
+def _backtest_detail_section(backtests):
+    if not backtests:
+        return ""
+    return ("<div class='grid2'>"
+            + _panel("Drawdown from peak",
+                     "How far each structure fell below its own running "
+                     "high, in units of per-trade risk.",
+                     "<div id='drawdown' class='chart short'></div>")
+            + _panel("Outcome distribution per trade",
+                     "Every trade's return on risk, so a high win rate "
+                     "sitting on a few large losses is visible as such.",
+                     "<div id='tradehist' class='chart short'></div>")
+            + "</div>")
+
+
+def _panel(title, hint, body):
+    return ("<div class='panel'><h3>{}</h3><p class='hint'>{}</p>{}</div>"
+            ).format(html.escape(title), html.escape(hint), body)
+
+
+def render(payload):
+    ladder = payload["ladder"]
+    exposure = payload.get("exposure")
+    plans = payload["plans"]
+    series = payload["series"]
+
+    head = (
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>Option desk</title><style>{}</style>"
+        "<script src='/static/echarts.min.js'></script></head><body>"
+        "<div class='wrap'>".format(STYLE)
+    )
+
+    if not ladder and not plans and not exposure:
+        body = (
+            "<header class='top'><div class='title'><h1>Option desk</h1>"
+            "</div><div class='meta'>{}</div></header>"
+            "<div class='panel'><h3>Nothing to show yet</h3>"
+            "<p class='hint'>Produce some data first.</p>"
+            "<p><code>optiondesk chain SPY</code><br>"
+            "<code>optiondesk greeks</code><br>"
+            "<code>optiondesk exposure</code><br>"
+            "<code>optiondesk compare</code><br>"
+            "<code>optiondesk simulate SPY --horizon 14</code></p></div>"
+        ).format(html.escape(payload["artifact_dir"]))
+        # The body used to be built and then dropped: the return
+        # concatenated only the head and the footer, so the first page a
+        # new user ever sees was blank between them.
+        return head + body + (
+            "<footer>{}</footer></div>"
+            "<script>window.__OPTIONDESK__ = {};</script>"
+            "<script>{}</script></body></html>").format(
+            html.escape(payload["disclaimer"]),
+            json.dumps({"series": {"calls": [], "puts": []}, "plans": [],
+                        "spot": None, "exposure": None, "simulation": None,
+                        "backtests": []}), SCRIPT)
+
+    meta = (ladder or exposure or {}).get("meta", {})
+    spot = ((ladder or {}).get("spot") or (exposure or {}).get("spot")
+            or (plans[0]["spot"] if plans else None))
+    underlying = ((ladder or {}).get("underlying")
+                  or (exposure or {}).get("underlying")
+                  or (plans[0]["underlying"] if plans else ""))
+    expiry = ((exposure or {}).get("expiry")
+              or (ladder["rows"][0]["expiry"] if ladder and ladder.get("rows")
+                  else "")
+              or (plans[0].get("expiry") if plans else ""))
+    days = (exposure or {}).get("days_to_expiry")
+    degraded = bool(meta.get("degraded"))
+
+    header = (
+        "<header class='top'><div class='title'>"
+        "<h1>Option desk</h1><span class='sym'>{sym}</span>"
+        "<span class='meta'>spot {spot} &middot; {expiry}{dte} &middot; "
+        "{provider}</span></div>"
+        "<div class='meta'><span class='dot{stale}'></span>{status} &middot; "
+        "generated {generated} &middot; {path}</div></header>"
+    ).format(
+        sym=html.escape(str(underlying)),
+        spot=_num(spot),
+        expiry=html.escape(str(expiry or "no expiry")),
+        dte=" ({} days)".format(_num(days, 1)) if days else "",
+        provider=html.escape(str(meta.get("provider_used") or "no provider")),
+        stale=" stale" if degraded else "",
+        status="degraded" if degraded else "clean",
+        generated=html.escape(str(meta.get("generated_utc") or "n/a")),
+        path=html.escape(str(payload.get("ladder_path")
+                             or payload["artifact_dir"])))
+
+    warn = ""
+    if degraded:
+        warn = ("<div class='warn'><strong>Degraded.</strong> {}</div>"
+                .format(html.escape(str(meta.get("degraded_reason") or ""))))
+
+    notes = (meta.get("notes") or [])
+    notes_html = ("<ul class='notes'>" + "".join(
+        "<li>{}</li>".format(html.escape(str(n))) for n in notes) + "</ul>"
+        if notes else "")
+
+    sections = []
+    sections.append(_selector(payload.get("groups") or [],
+                              payload.get("selected")))
+
+    comparison = payload.get("comparison")
+    if comparison:
+        sections.append("<h2 class='section'>Structure comparison</h2>"
+                        + _comparison_panel(comparison))
+
+    if exposure:
+        assumption = ("<p class='assume'>{}</p>".format(
+            html.escape(exposure["exposure"].get("assumption", ""))))
+        sections.append(
+            "<h2 class='section'>Positioning</h2>"
+            + _positioning_tiles(exposure)
+            + _panel(
+                "Dealer gamma exposure by strike",
+                "Exposure a hedger would have to trade per one percent move, "
+                "calls above the line and puts below. Walls are where that "
+                "hedging concentrates.",
+                "<div id='gex' class='chart'></div>" + assumption)
+            + "<div class='grid2'>"
+            + _panel("Cumulative exposure and the flip",
+                     "Running total across strikes. Where it crosses zero is "
+                     "the level below which hedging amplifies moves rather "
+                     "than damping them.",
+                     "<div id='gexcum' class='chart short'></div>")
+            + _panel("Open interest",
+                     "Calls up, puts down. Where the contracts actually sit, "
+                     "before any assumption about who is on which side.",
+                     "<div id='oi' class='chart short'></div>")
+            + "</div>"
+            + _panel("Max pain profile",
+                     "Total payout to option holders at each settlement "
+                     "price. The minimum is the conventional max pain level. "
+                     "It describes where open interest sits, not where price "
+                     "is going.",
+                     "<div id='pain' class='chart short'></div>"))
+
+    if exposure and exposure.get("smile"):
+        sections.append("<h2 class='section'>Volatility</h2>"
+                        + _volatility_tiles(exposure))
+
+    sections.append(_term_section(payload.get("term_structure")))
+
+    if series["calls"] or series["puts"]:
+        sections.append(_panel(
+            "The smile",
+            "Implied volatility by strike with the 25-delta wings marked. "
+            "The gap between them is the risk reversal, and its sign says "
+            "which side of the market is bid.",
+            "<div id='smile' class='chart'></div>"))
+        sections.append(
+            "<div class='grid3'>"
+            + _panel("Delta", "dV/dS per 1.0 of underlying",
+                     "<div id='delta' class='chart short'></div>")
+            + _panel("Gamma", "delta change per 1.0 of underlying",
+                     "<div id='gamma' class='chart short'></div>")
+            + _panel("Vega", "per 1.00 of volatility",
+                     "<div id='vega' class='chart short'></div>")
+            + _panel("Theta", "value change per calendar day",
+                     "<div id='theta' class='chart short'></div>")
+            + _panel("Vanna", "d2V/dS dsigma",
+                     "<div id='vanna' class='chart short'></div>")
+            + _panel("Charm", "delta change per calendar day",
+                     "<div id='charm' class='chart short'></div>")
+            + "</div>")
+
+    sections.append(_depth_section(payload.get("chain_series")))
+
+    if plans:
+        picker = "".join(
+            "<button type='button' aria-pressed='false'>{}</button>".format(
+                html.escape(p["strategy"].replace("_", " "))) for p in plans)
+        legs_table = _table([], ["leg", "strike", "qty", "price", "bid",
+                                 "ask", "iv", "open int"], body_id="plan-legs")
+        sections.append(
+            "<h2 class='section'>Structures</h2>"
+            + _panel(
+                "Payoff at expiry",
+                "Profit above the zero line, loss below. Spot dotted, "
+                "breakevens dashed, expected move shaded. Premiums are mid "
+                "quotes, so this is the structure's shape and not a fill.",
+                "<div class='picker'>{}</div>"
+                "<div id='plan-tiles' class='tiles'></div>"
+                "<p class='hint' id='plan-when'></p>"
+                "<p class='hint' id='plan-friction'></p>"
+                "<div id='payoff' class='chart tall'></div>"
+                "{}".format(picker, legs_table)))
+
+    if ladder and ladder.get("rows"):
+        columns = ["strike", "type", "iv", "price", "delta", "gamma", "vega",
+                   "theta", "rho", "vanna", "vomma", "charm", "speed",
+                   "zomma", "color"]
+        sections.append(
+            "<h2 class='section'>The ladder</h2>"
+            + _panel(
+                "{} graded contracts".format(len(ladder["rows"])),
+                "Theta, charm, veta and color are per calendar day. Vega is "
+                "per 1.00 of volatility, so divide by 100 for the per-point "
+                "figure. Contracts with no usable implied volatility are not "
+                "here: they were skipped, not estimated.",
+                _table(ladder["rows"], columns)))
+
+    sections.append(_overlay_section(plans, comparison))
+    sections.append(_simulation_section(payload.get("simulation")))
+    sections.append(_distribution_section(payload.get("simulation")))
+    sections.append(_backtest_section(payload.get("backtests")))
+    sections.append(_backtest_detail_section(payload.get("backtests")))
+    sections.append("<h2 class='section'>Adding data</h2>"
+                    + _add_more(payload.get("selected")))
+
+    embedded = json.dumps({
+        "series": series,
+        "chain_series": payload.get("chain_series")
+        or {"calls": [], "puts": []},
+        "term_structure": payload.get("term_structure") or [],
+        "comparison": comparison,
+        "spot": spot,
+        "plans": plans,
+        "exposure": exposure,
+        "simulation": payload.get("simulation"),
+        "backtests": payload.get("backtests") or [],
+    }, default=str)
+
+    return (head + header + warn + notes_html + "".join(sections)
+            + ("<footer>{}</footer></div>"
+               "<script>window.__OPTIONDESK__ = {};</script>"
+               "<script>{}</script></body></html>").format(
+                   html.escape(payload["disclaimer"]), embedded, SCRIPT))

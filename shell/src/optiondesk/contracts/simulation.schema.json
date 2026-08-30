@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/simulation/v1",
+  "title": "Posterior predictive simulation",
+  "description": "A Bayesian GARCH(1,1)-t posterior estimated by MCMC from the underlying's own returns, the forward price distribution simulated from it with one parameter draw per path, the tail risk that follows, and the profit distribution of any structures on disk. Convergence diagnostics are part of the artifact: quantiles from a posterior that has not converged mean nothing and the artifact says so.",
+  "type": "object",
+  "required": [
+    "meta",
+    "underlying",
+    "spot",
+    "posterior",
+    "simulation"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "spot": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "history": {
+      "type": "object",
+      "properties": {
+        "observations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "first": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "period": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "annualised_volatility": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "posterior": {
+      "type": "object",
+      "required": [
+        "converged",
+        "parameters",
+        "diagnostics"
+      ],
+      "properties": {
+        "converged": {
+          "type": "boolean"
+        },
+        "model": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "diagnostics": {
+          "type": "object"
+        }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "required": [
+        "horizon_days",
+        "paths",
+        "fan"
+      ],
+      "properties": {
+        "horizon_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "paths": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "antithetic": {
+          "type": "boolean"
+        },
+        "fan": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "terminal_histogram": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "risk": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "structures": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

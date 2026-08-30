@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/strategy_comparison/v1",
+  "title": "Strategy comparison",
+  "description": "Every structure built from one chain, side by side, ordered by model expected profit per unit of capital at risk. The order is an ordering under stated assumptions, not a recommendation, and the caveat field explains why any positive expectation here largely measures the difference between the model's single volatility and the market's smile.",
+  "type": "object",
+  "required": [
+    "meta",
+    "underlying",
+    "criterion",
+    "caveat",
+    "rows"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "expiry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spot": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "criterion": {
+      "type": "string"
+    },
+    "caveat": {
+      "type": "string"
+    },
+    "rankable_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "excluded_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "margin_over_runner_up": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "leader": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "ranked": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    },
+    "row": {
+      "type": "object",
+      "required": [
+        "strategy",
+        "rankable"
+      ],
+      "properties": {
+        "strategy": {
+          "type": "string"
+        },
+        "rank": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "trade_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "net_cash": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max_gain": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "max_loss": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "capital_at_risk": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "reward_risk": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "breakevens": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          }
+        },
+        "probability_of_profit": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "probability_of_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "expected_pnl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "expected_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "expected_return_on_risk": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "net_delta": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "net_theta": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "net_vega": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "net_gamma": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "friction_verdict": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "friction_cost": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rankable": {
+          "type": "boolean"
+        },
+        "excluded_because": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

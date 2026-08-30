@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/greeks_ladder/v1",
+  "title": "Analytic Greek ladder",
+  "description": "First to third order Black-Scholes-Merton Greeks for the contracts of one chain snapshot. Computed by the AGPL engine from the snapshot's own per-contract implied volatility. Contracts without a usable volatility are counted in skipped, never estimated.",
+  "type": "object",
+  "required": [
+    "meta",
+    "underlying",
+    "spot",
+    "units",
+    "rows"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "source_artifact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "spot": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "risk_free_rate": {
+      "type": "number"
+    },
+    "dividend_yield": {
+      "type": "number"
+    },
+    "units": {
+      "type": "object",
+      "description": "Unit of every field in a row, restated in the artifact so a consumer never infers them.",
+      "required": [
+        "delta",
+        "vega",
+        "theta"
+      ],
+      "properties": {
+        "delta": {
+          "type": "string"
+        },
+        "gamma": {
+          "type": "string"
+        },
+        "vega": {
+          "type": "string"
+        },
+        "theta": {
+          "type": "string"
+        },
+        "rho": {
+          "type": "string"
+        },
+        "charm": {
+          "type": "string"
+        },
+        "veta": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        }
+      }
+    },
+    "skipped": {
+      "type": "object",
+      "properties": {
+        "no_iv": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expired": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "out_of_band": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "expiry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "days_to_expiry": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "required": [
+        "symbol",
+        "type",
+        "strike",
+        "expiry",
+        "iv",
+        "price",
+        "delta",
+        "gamma",
+        "vega",
+        "theta"
+      ],
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "call",
+            "put"
+          ]
+        },
+        "strike": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "days_to_expiry": {
+          "type": "number",
+          "minimum": 0
+        },
+        "iv": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "moneyness": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "gamma": {
+          "type": "number"
+        },
+        "vega": {
+          "type": "number"
+        },
+        "theta": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number"
+        },
+        "lam": {
+          "type": "number"
+        },
+        "vanna": {
+          "type": "number"
+        },
+        "vomma": {
+          "type": "number"
+        },
+        "charm": {
+          "type": "number"
+        },
+        "veta": {
+          "type": "number"
+        },
+        "speed": {
+          "type": "number"
+        },
+        "zomma": {
+          "type": "number"
+        },
+        "color": {
+          "type": "number"
+        },
+        "ultima": {
+          "type": "number"
+        },
+        "dual_delta": {
+          "type": "number"
+        },
+        "dual_gamma": {
+          "type": "number"
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/exposure/v1",
+  "title": "Chain positioning and exposure",
+  "description": "Dealer gamma exposure by strike, the walls, the estimated flip level, max pain, put-call ratios and volatility smile geometry for one underlying and expiry. Sign conventions rest on an assumption about who is on which side of the market, stated in the artifact.",
+  "type": "object",
+  "required": [
+    "meta",
+    "underlying",
+    "spot",
+    "exposure"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "source_artifact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "spot": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "expiry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "days_to_expiry": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "exposure": {
+      "type": "object",
+      "required": [
+        "rows",
+        "net_gex",
+        "assumption"
+      ],
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exposure_row"
+          }
+        },
+        "net_gex": {
+          "type": "number"
+        },
+        "call_wall": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "put_wall": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "gamma_flip": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "regime": {
+          "type": "string",
+          "enum": [
+            "dampening",
+            "amplifying"
+          ]
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "call_open_interest": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "put_open_interest": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "put_call_oi_ratio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "put_call_volume_ratio": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "assumption": {
+          "type": "string"
+        }
+      }
+    },
+    "max_pain": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "smile": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    },
+    "exposure_row": {
+      "type": "object",
+      "required": [
+        "strike",
+        "net_gex"
+      ],
+      "properties": {
+        "strike": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "call_gex": {
+          "type": "number"
+        },
+        "put_gex": {
+          "type": "number"
+        },
+        "net_gex": {
+          "type": "number"
+        },
+        "cumulative_gex": {
+          "type": "number"
+        },
+        "call_oi": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "put_oi": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

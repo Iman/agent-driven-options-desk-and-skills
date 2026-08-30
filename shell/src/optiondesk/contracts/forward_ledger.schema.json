@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/forward_ledger/v1",
+  "title": "Forward test ledger",
+  "description": "Positions recorded before their outcome was known, and marked against chain snapshots that arrived afterwards. Paper, not fills: entry and marks are mid quotes. What a forward test removes is hindsight, not the spread.",
+  "type": "object",
+  "required": [
+    "meta",
+    "positions"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "summary": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "required": [
+        "id",
+        "strategy",
+        "underlying",
+        "opened_utc",
+        "legs",
+        "entry_spot",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "underlying": {
+          "type": "string"
+        },
+        "expiry": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "opened_utc": {
+          "type": "string"
+        },
+        "closed_utc": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "size": {
+          "type": "number"
+        },
+        "entry_spot": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "entry_value": {
+          "type": "number"
+        },
+        "trade_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_plan": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "thesis": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "legs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "marks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "settlement": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

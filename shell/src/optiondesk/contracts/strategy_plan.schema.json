@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "optiondesk/strategy_plan/v1",
+  "title": "Option strategy plan",
+  "description": "One multi-leg strategy built from a chain snapshot: the legs, the expiry risk graph, model probabilities under a lognormal settlement assumption, the net position Greeks, an estimate of round-trip friction at the quoted spreads, and the payoff curve for plotting. Premiums are model and mid-quote values. Nothing here is an executable price, an order, or a recommendation.",
+  "type": "object",
+  "required": [
+    "meta",
+    "strategy",
+    "trade_type",
+    "underlying",
+    "spot",
+    "legs",
+    "analysis",
+    "payoff_curve"
+  ],
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "source_artifact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "strategy": {
+      "type": "string"
+    },
+    "trade_type": {
+      "type": "string",
+      "enum": [
+        "debit",
+        "credit"
+      ]
+    },
+    "underlying": {
+      "type": "string"
+    },
+    "spot": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "expiry": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "days_to_expiry": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "size": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "outlooks": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "outlook_labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "when_to_use": {
+      "type": "string"
+    },
+    "band": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "description": "Lower and upper edge of the one standard deviation expected move, or null when no implied volatility was available to build it.",
+      "items": {
+        "type": "number"
+      }
+    },
+    "legs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/leg"
+      }
+    },
+    "analysis": {
+      "$ref": "#/$defs/analysis"
+    },
+    "probability": {
+      "$ref": "#/$defs/probability"
+    },
+    "net_greeks": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Position Greeks, netted across option legs with sign and quantity. Units match the Greek ladder artifact."
+    },
+    "friction": {
+      "$ref": "#/$defs/friction"
+    },
+    "payoff_curve": {
+      "type": "object",
+      "required": [
+        "prices",
+        "pnl"
+      ],
+      "properties": {
+        "prices": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "pnl": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "leg": {
+      "type": "object",
+      "required": [
+        "kind",
+        "side",
+        "price",
+        "qty"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "call",
+            "put",
+            "underlying"
+          ]
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "long",
+            "short"
+          ]
+        },
+        "strike": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "price": {
+          "type": "number"
+        },
+        "qty": {
+          "type": "number"
+        },
+        "symbol": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bid": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ask": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "iv": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "open_interest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "volume": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": [
+        "net_cash",
+        "trade_type",
+        "breakevens"
+      ],
+      "properties": {
+        "net_cash": {
+          "type": "number",
+          "description": "Positive is a credit received, negative a debit paid. Option legs only."
+        },
+        "trade_type": {
+          "type": "string",
+          "enum": [
+            "debit",
+            "credit"
+          ]
+        },
+        "breakevens": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "max_gain": {
+          "type": [
+            "number",
+            "string"
+          ],
+          "description": "A number, or the string unlimited where the position is genuinely unbounded. JSON has no infinity, and rounding an unbounded risk to a comfortable number would be a lie."
+        },
+        "max_loss": {
+          "type": [
+            "number",
+            "string"
+          ]
+        },
+        "reward_risk": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "probability": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Model estimates under a lognormal settlement distribution built from current implied volatility, with no directional drift. Not a forecast and not an observed win rate.",
+      "properties": {
+        "profit": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "loss": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "expected_pnl": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "expected_loss": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "model": {
+          "type": "string"
+        }
+      }
+    },
+    "friction": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "thin",
+            "untradeable",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "round_trip": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "entry_cost": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rel_to_premium": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "worst_rel_spread": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "legs_without_quotes": {
+          "type": "integer"
+        },
+        "depth_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "generated_utc",
+        "tool",
+        "provider_used",
+        "degraded",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "generated_utc": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "shell_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_used": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "degraded": {
+          "type": "boolean"
+        },
+        "degraded_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordinary observations that are not defects, such as how many contracts carried no quotes. Never used for degradation."
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "disclaimer": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

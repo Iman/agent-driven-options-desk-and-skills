@@ -11,7 +11,11 @@ dependencies = []
 yahoo = ["yfinance>=0.2"]
 dashboard = ["fastapi>=0.110", "uvicorn>=0.27"]
 engine = ["optiondesk-engine"]
-dev = ["pytest", "yfinance>=0.2"]
+# fastapi and uvicorn are here as well as in the dashboard extra so the
+# suite actually exercises the richer server. Without them the test for
+# its routes skips, and a skipped test reads like a pass.
+dev = ["pytest", "yfinance>=0.2", "pyyaml", "fastapi>=0.110",
+       "uvicorn>=0.27"]
 
 [project.scripts]
 optiondesk = "optiondesk.cli.__main__:main"

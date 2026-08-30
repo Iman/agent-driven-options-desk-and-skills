@@ -369,3 +369,44 @@ def test_the_install_path_count_matches_the_numbered_sections():
     assert "{} paths, each verified".format(word.capitalize()) in read(
         "docs/CAPABILITIES.md"), (
         "docs/CAPABILITIES.md disagrees with INSTALL.md")
+
+
+def test_every_package_carries_the_licence_it_declares():
+    """A published package whose licence is only in prose is a problem.
+
+    The repository is dual licensed, and the root had no LICENSE file at
+    all, so GitHub showed none and a visitor could not tell what applied to
+    what. The agent package declared MIT in its metadata and shipped no
+    licence text.
+    """
+    expected = {
+        "engine": ("AGPL-3.0-only", "AFFERO"),
+        "shell": ("MIT", "MIT"),
+        "agent": ("MIT", "MIT"),
+    }
+    for package, (declared, in_text) in expected.items():
+        directory = ROOT / package
+        if not directory.exists():
+            continue
+        licence = directory / "LICENSE"
+        assert licence.exists(), (
+            "{} declares {} and ships no LICENSE file".format(package,
+                                                              declared))
+        assert in_text in licence.read_text(encoding="utf-8").upper(), (
+            "{}/LICENSE does not look like {}".format(package, declared))
+
+        pyproject = directory / "pyproject.toml"
+        if pyproject.exists():
+            text = pyproject.read_text(encoding="utf-8")
+            assert declared in text, (
+                "{}/pyproject.toml does not declare {}".format(package,
+                                                              declared))
+
+    root_licence = ROOT / "LICENSE"
+    assert root_licence.exists(), (
+        "the repository root has no LICENSE, so GitHub shows none at all")
+    text = root_licence.read_text(encoding="utf-8")
+    for package in expected:
+        assert package + "/" in text, (
+            "the root LICENSE does not say what applies to {}/".format(
+                package))

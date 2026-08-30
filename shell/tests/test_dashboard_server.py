@@ -37,14 +37,17 @@ def running_dashboard(tmp_path_factory):
     fallback server has no shutdown hook, so each start would leak a
     listening socket for the rest of the session.
     """
-    if _fastapi_installed():
-        pytest.skip("fastapi is installed, so serve() takes the uvicorn path")
     tmp_path = tmp_path_factory.mktemp("artifacts")
     write_json({"underlying": "TEST", "expiry": "2026-09-18", "spot": 100.0,
                 "meta": {}}, "chain_TEST_2026-09-18.json", tmp_path)
     port = free_port()
+    # The fallback directly, not through serve(), which picks uvicorn when
+    # FastAPI is installed. These tests are named for the fallback and have
+    # to exercise it whatever else happens to be in the environment: they
+    # used to skip on any machine that had FastAPI, which is every machine
+    # that installed the dashboard extra.
     thread = threading.Thread(
-        target=app_module.serve,
+        target=app_module._serve_stdlib,
         args=("127.0.0.1", port, str(tmp_path)), daemon=True)
     thread.start()
 
@@ -134,3 +137,51 @@ def test_the_query_parameters_select_the_group(running_dashboard):
     response, body = get(running_dashboard + "/?u=TEST&e=2026-09-18")
     assert response.status == 200
     assert body.decode().startswith("<!doctype html>")
+
+
+def test_serve_picks_the_richer_server_when_it_can_and_falls_back_when_not():
+    """The dispatch itself, which no test covered.
+
+    The fallback tests now call `_serve_stdlib` directly, which is right for
+    them and leaves the choice in `serve()` unexercised. That choice is the
+    thing a fresh clone depends on: with FastAPI absent the dashboard has to
+    still come up, and with it present the richer server has to be the one
+    that runs.
+    """
+    import sys
+
+    calls = []
+
+    def fake_stdlib(host, port, directory):
+        calls.append(("stdlib", host, port))
+        return 0
+
+    real_stdlib = app_module._serve_stdlib
+    app_module._serve_stdlib = fake_stdlib
+    real_uvicorn = sys.modules.get("uvicorn")
+    try:
+        # FastAPI missing: the import fails and the fallback has to run.
+        sys.modules["uvicorn"] = None
+        assert app_module.serve("127.0.0.1", 1, "/tmp") == 0
+        assert calls == [("stdlib", "127.0.0.1", 1)], calls
+
+        if _fastapi_installed():
+            # Present: uvicorn.run is called instead, and the fallback is not.
+            class FakeUvicorn:
+                started = []
+
+                @staticmethod
+                def run(app, host=None, port=None, log_level=None):
+                    FakeUvicorn.started.append((host, port))
+
+            sys.modules["uvicorn"] = FakeUvicorn
+            calls.clear()
+            assert app_module.serve("127.0.0.1", 2, "/tmp") == 0
+            assert FakeUvicorn.started == [("127.0.0.1", 2)]
+            assert calls == [], "the fallback ran while FastAPI was available"
+    finally:
+        app_module._serve_stdlib = real_stdlib
+        if real_uvicorn is None:
+            sys.modules.pop("uvicorn", None)
+        else:
+            sys.modules["uvicorn"] = real_uvicorn

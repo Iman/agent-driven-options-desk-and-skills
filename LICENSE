@@ -1,0 +1,31 @@
+This repository is licensed under two different licences. Which one applies
+depends on which directory a file is in, and the split is deliberate.
+
+    engine/     GNU Affero General Public License v3.0 only
+                Full text in engine/LICENSE
+
+    shell/      MIT
+    agent/      MIT
+                Full text in shell/LICENSE and agent/LICENSE
+
+    everything  MIT, on the same terms as the shell
+    else
+
+No single-licence label describes this repository, so please do not read
+one from a badge. The engine is the part that carries the AGPL obligation:
+if you run a modified version of it as a network service, you must offer
+the source of your modified version to that service's users. Running it
+privately carries no such obligation, and the MIT parts carry none at all.
+
+The two components are joined by exactly one adapter module,
+shell/src/optiondesk/engine_bridge.py, so the boundary can be checked with
+a single grep. The shell runs without the engine installed and reports
+Greeks as unavailable rather than computing them.
+
+A commercial licence removing the AGPL obligations is available from the
+copyright holder.
+
+See LICENSES.md for the reasoning, THIRD-PARTY.md for what is vendored and
+under what terms, and DISCLAIMER.md for what this software is and is not.
+
+Copyright (C) 2026 Iman Samizadeh.

@@ -51,7 +51,10 @@ def _chain(spot=100.0, days=30.0, iv=0.25, spread=0.10):
     """
     contracts = []
     t = days / 365.0
-    for strike in range(80, 121, 5):
+    # One point apart, as a real index chain is listed. At five points
+    # apart a ratio spread and a broken wing cannot be financed at all, and
+    # they skipped rather than being tested.
+    for strike in range(80, 121, 1):
         for kind in ("call", "put"):
             mid = bs_price(spot, float(strike), t, iv, kind, 0.04, 0.0)
             contracts.append({
@@ -242,9 +245,11 @@ def test_split_chain_without_spot_is_an_error():
 def test_every_buildable_strategy_produces_a_coherent_plan(name):
     chain = split_chain(_chain())
     plan = build(name, chain)
-    if plan is None:
-        pytest.skip("{} found no viable structure on the synthetic chain"
-                    .format(name))
+    assert plan is not None, (
+        "{} built nothing on a chain listed one point apart with real "
+        "model prices. Every structure in the playbook has to be "
+        "buildable here, or the registry is advertising something the "
+        "engine cannot produce.".format(name))
     assert plan["strategy"] == name
     assert plan["legs"]
     metrics = plan["analysis"]
@@ -345,11 +350,28 @@ def test_underlying_legs_are_excluded_from_option_friction():
 
 
 def test_butterfly_refuses_a_structure_that_cannot_profit():
-    # A chain quoted so wide that the body is cheap relative to the wings
-    # makes the butterfly cost more than the distance between its strikes.
-    # The builder must return None rather than a dead structure.
+    """A butterfly costing more than its width cannot profit anywhere.
+
+    The wings are marked up until the debit exceeds the distance between
+    the strikes, which is the shape quoted chains produce once spreads are
+    wide or a strike is stale. The builder has to return None rather than
+    hand back an arithmetically dead structure.
+
+    The markup is applied to whichever wings the builder actually selects,
+    not to two hardcoded strikes: it used to assume a body at 100 with
+    wings at 95 and 105, which held only while the fixture listed strikes
+    five apart, and the test passed for the wrong reason the moment the
+    fixture became realistic.
+    """
     chain = split_chain(_chain())
+    plan = build("long_call_butterfly", chain)
+    assert plan is not None, "the fixture no longer supports a butterfly"
+    body = [leg.strike for leg in plan["legs"] if leg.side < 0][0]
+    wings = sorted(leg.strike for leg in plan["legs"] if leg.side > 0)
+
     for contract in chain["calls"]:
-        if contract["strike"] in (95.0, 105.0):
-            contract["mid"] *= 3.0
-    assert build("long_call_butterfly", chain) is None
+        if contract["strike"] in wings:
+            contract["mid"] *= 20.0
+    assert build("long_call_butterfly", chain) is None, (
+        "a butterfly with wings at {} around a body at {} costs more than "
+        "its width and still built".format(wings, body))

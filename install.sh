@@ -34,7 +34,7 @@ VERSION="0.1.0"
 PREFIX="${OPTIONDESK_PREFIX:-$HOME/.optiondesk}"
 BIN_DIR="${OPTIONDESK_BIN_DIR:-$HOME/.local/bin}"
 CLAUDE_SKILLS_DIR="${OPTIONDESK_CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
-REPO="${OPTIONDESK_REPO:-}"
+REPO="${OPTIONDESK_REPO:-Iman/agent-driven-options-desk-and-skills}"
 REF="${OPTIONDESK_REF:-main}"
 
 WITH_ENGINE=1

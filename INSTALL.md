@@ -50,7 +50,7 @@ Flags worth knowing:
 /plugin install option-desk@option-desk
 ```
 
-Or, once published, `/plugin marketplace add Iman/option-desk`.
+Or, once published, `/plugin marketplace add Iman/agent-driven-options-desk-and-skills`.
 
 That gives you the five skills, six commands (`/desk-open`, `/desk-risk`,
 `/desk-test`, `/desk-mark`, plus `/desk-watch` and `/desk-complete` which

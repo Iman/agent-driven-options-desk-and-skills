@@ -1,0 +1,26 @@
+Suggested GitHub topics for this repository. Set them in Settings, or in
+the About panel on the repository page. Topics are what GitHub search
+matches on, alongside the description, which is why "skills" lives here
+rather than in the repository name.
+
+options
+options-trading
+options-pricing
+greeks
+volatility
+quantitative-finance
+backtesting
+claude-skills
+agent-skills
+mcp
+mcp-server
+langgraph
+python
+
+Suggested description:
+
+An options analytics desk an AI agent can drive and a person can read.
+Sixteen Greeks, seventeen structures, dealer positioning, GARCH-t
+simulation, backtests and a local dashboard. Skills, commands, agents, MCP
+tools and LangChain bindings over one engine. Research software, not
+investment advice.

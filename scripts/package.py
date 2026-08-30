@@ -120,8 +120,14 @@ def build_plugin():
         "version": VERSION,
         "description": DESCRIPTION,
         "author": AUTHOR,
+        # These are what search matches on. "skills" and "claude-skills"
+        # are here rather than in the repository name, where they would
+        # cost eleven characters of every install URL forever and would
+        # name the smallest of six surfaces.
         "keywords": ["options", "greeks", "volatility", "risk", "trading",
-                     "quantitative-finance", "backtesting", "mcp"],
+                     "quantitative-finance", "backtesting", "mcp",
+                     "skills", "claude-skills", "agent-skills",
+                     "langgraph", "options-pricing"],
         "license": "MIT",
     }
     (PLUGIN / ".claude-plugin" / "plugin.json").write_text(

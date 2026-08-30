@@ -13,7 +13,12 @@
     "trading",
     "quantitative-finance",
     "backtesting",
-    "mcp"
+    "mcp",
+    "skills",
+    "claude-skills",
+    "agent-skills",
+    "langgraph",
+    "options-pricing"
   ],
   "license": "MIT"
 }

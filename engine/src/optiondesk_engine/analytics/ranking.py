@@ -177,6 +177,21 @@ def score_row(row, vol_view="neutral"):
     verdict = friction.get("verdict")
     absent = missing_inputs(row)
 
+    # A structure the comparison would not rank is not ranked here either.
+    # Two panels of one dashboard disagreed about the ratio spread: the
+    # comparison excluded it because return on risk has no denominator when
+    # the loss is unbounded, and this module scored it at rank 17 by
+    # substituting the premium for the worst case. Both answers were
+    # defensible on their own and the pair was not.
+    if row.get("rankable") is False:
+        return None, {
+            "excluded": "not rankable in the comparison",
+            "reason": (row.get("friction", {}).get("reason")
+                       or "the comparison beside this one excludes it, and "
+                          "one page cannot rank a structure the panel above "
+                          "it says cannot be ranked"),
+            "missing": absent,
+        }
     if verdict is None:
         return None, {
             "excluded": "no friction verdict",
@@ -325,6 +340,12 @@ def row_from_comparison(row):
     reason = "; ".join(str(r) for r in (row.get("excluded_because") or []))
     return {
         "structure": row.get("strategy"),
+        # Carried so this ranking cannot disagree with the ordering beside
+        # it. The comparison excludes a structure whose return on risk is
+        # undefined, and this module was scoring that same structure at
+        # rank 17 through a premium substitution, so one dashboard showed
+        # sixteen ranked and seventeen ranked on two panels of one page.
+        "rankable": row.get("rankable"),
         "trade_type": row.get("trade_type"),
         "net_cash": row.get("net_cash"),
         "max_gain": row.get("max_gain"),

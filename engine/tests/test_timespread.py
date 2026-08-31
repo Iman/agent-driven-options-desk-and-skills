@@ -403,3 +403,64 @@ def test_the_snapshot_rates_choose_the_legs(chains):
     assert picked(defaults) != picked(with_rates), (
         "the carry did not reach the selection: same legs at 4 percent and "
         "no dividend as at 1 percent and 8 percent")
+
+
+def test_a_maximum_on_the_scan_edge_says_so(chains):
+    """A maximum that lands on the window boundary is a property of the
+    window, not of the structure.
+
+    An audit measured one published reward to risk of 4.90 that reads 1.47
+    at a tenth of the scan width and 12.02 at two and a half times it, all
+    of the same structure on the same chain, with the maximum sitting
+    eleven standard deviations below spot at a tail probability around
+    7e-29. The number was published as a bare ratio with nothing beside it
+    saying where it came from.
+    """
+    from optiondesk_engine.strategies.timespread import analyze_at_front
+
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+    plan = build_time_spread("ratio_call_diagonal", near, far)
+    assert plan is not None
+
+    analysis = plan["analysis"]
+    assert analysis["reward_risk_bounded_by_scan"] is True
+    assert analysis["max_gain_on_boundary"] is True
+    low_sd, high_sd = analysis["scan_range_sd"]
+    assert low_sd < -2.0 and high_sd > 2.0
+    assert "edge of that range" in analysis["note"]
+
+    # And the ratio really does move with the window, which is the whole
+    # reason the flag has to be there.
+    narrow = analyze_at_front(plan["legs"], plan["spot"], span=0.10)
+    wide = analyze_at_front(plan["legs"], plan["spot"], span=1.00)
+    assert wide["max_gain"] > narrow["max_gain"] * 2
+
+
+def test_an_interior_maximum_is_not_flagged(chains):
+    """The flag has to distinguish. A structure whose peak sits inside the
+    window carries a maximum that is its own.
+    """
+    from optiondesk_engine.strategies.timespread import analyze_at_front
+
+    near, far = chains
+    plan = calendar_spread(near, far, kind="call")
+    assert plan is not None
+
+    # A calendar's peak is where its strike is, which is inside any
+    # sensible window, so the gain is its own number at every width.
+    for span in (0.10, 0.40, 1.00):
+        analysis = analyze_at_front(plan["legs"], plan["spot"], span=span)
+        assert analysis["max_gain_on_boundary"] is False
+        assert abs(analysis["max_gain"] - 1.3220) < 0.01
+
+    # Widened to the price floor, the worst case is a real bound rather
+    # than a window edge, and the flag has to stop firing there or it
+    # would cry wolf on every structure.
+    to_the_floor = analyze_at_front(plan["legs"], plan["spot"], span=1.00)
+    assert to_the_floor["max_loss_on_boundary"] is False
+    assert to_the_floor["reward_risk_bounded_by_scan"] is False
+
+    # At a narrower window the same worst case IS the window, and says so.
+    narrow = analyze_at_front(plan["legs"], plan["spot"], span=0.10)
+    assert narrow["max_loss_on_boundary"] is True

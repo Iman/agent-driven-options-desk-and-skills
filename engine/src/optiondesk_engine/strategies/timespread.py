@@ -181,6 +181,40 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
     net_cash = net_option_cash(legs)
     max_gain = profits[best_index]
     max_loss = profits[worst_index]
+
+    # Where the extremum sits matters as much as its value. When it lands on
+    # the edge of the scan the payoff is still rising there, so the figure
+    # is a property of the window rather than of the structure, and it
+    # keeps growing as the window widens. An audit measured a published
+    # reward to risk of 4.90 at span 0.40 which reads 1.47 at span 0.10 and
+    # 12.02 at span 1.00, all of the same structure on the same chain.
+    on_edge = 1e-9 * max(spot, 1.0)
+    # The lower edge is only a window artifact while it is above the price
+    # floor. Once the scan reaches 0.01 the underlying cannot go lower, so
+    # an extremum there is a real bound and flagging it would cry wolf.
+    lo_is_floor = lo <= 0.011
+
+    def on_boundary(index):
+        at_low = abs(prices[index] - lo) <= on_edge and not lo_is_floor
+        at_high = abs(prices[index] - hi) <= on_edge
+        return at_low or at_high
+
+    gain_on_boundary = on_boundary(best_index)
+    loss_on_boundary = on_boundary(worst_index)
+
+    # How far the scan reaches, in standard deviations of the underlying
+    # over the time to the mark, using the legs' own volatilities. This is
+    # the number that says whether an extremum at the edge is a scenario or
+    # an arithmetic curiosity: the 4.90 above sits 11.1 sd from spot, with
+    # a tail probability around 7e-29.
+    ivs = [leg.iv for leg in legs if leg.iv]
+    scan_sd = None
+    if ivs and at_days > 0 and spot > 0:
+        sigma = (sum(ivs) / len(ivs)) * math.sqrt(at_days / DAYS_PER_YEAR)
+        if sigma > 0:
+            scan_sd = [math.log(lo / spot) / sigma, math.log(hi / spot)
+                       / sigma]
+
     return {
         "net_cash": net_cash,
         "trade_type": "credit" if net_cash > 0 else "debit",
@@ -191,6 +225,13 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
         "max_loss_at": prices[worst_index],
         "reward_risk": (max_gain / abs(max_loss)
                         if max_loss < 0 and max_gain > 0 else None),
+        # True when the figure above is bounded by the window rather than
+        # by the structure. A reader who takes a boundary ratio for a
+        # property of the trade is reading the scan width.
+        "max_gain_on_boundary": gain_on_boundary,
+        "max_loss_on_boundary": loss_on_boundary,
+        "reward_risk_bounded_by_scan": gain_on_boundary or loss_on_boundary,
+        "scan_range_sd": scan_sd,
         # How much of the peak profit the structure hands back at the far
         # end of the scan. A diagonal can be "too right": past the short
         # strike the long's time value drains against the short's
@@ -204,7 +245,14 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
         "scanned_fraction": span,
         "note": ("Maximum gain and loss are over the scanned range, not "
                  "over all prices, because the surviving leg makes the "
-                 "profit a curve with no closed form. " + ASSUMPTION),
+                 "profit a curve with no closed form."
+                 + (" The maximum sits on the edge of that range, so it "
+                    "and the reward to risk derived from it are bounded by "
+                    "the window and grow as the window widens: read them "
+                    "as the shape at the edge of a scenario, not as the "
+                    "structure's best case."
+                    if gain_on_boundary or loss_on_boundary else "")
+                 + " " + ASSUMPTION),
     }
 
 

@@ -44,13 +44,13 @@ Dealer gamma exposure, walls, and max pain from an option chain.
 
 Composite support score: one number per structure, under a printed formula.
 
-341 lines.
+362 lines.
 
 - **is_unbounded()** (line 117): True for an infinite figure however it reached us
 - **missing_inputs()** (line 149): The names of the required inputs this row does not carry
 - **score_row()** (line 169): (score, components) under the printed formula, or (None, exclusion)
-- **rank_rows()** (line 290): (ranked, rejected): the scored rows in order, and the excluded ones
-- **row_from_comparison()** (line 314): One comparison-artifact row in the shape score_row reads
+- **rank_rows()** (line 305): (ranked, rejected): the scored rows in order, and the excluded ones
+- **row_from_comparison()** (line 329): One comparison-artifact row in the shape score_row reads
 
 ### `engine/src/optiondesk_engine/analytics/smile.py`
 
@@ -242,7 +242,7 @@ Strategy constructors and the playbook registry.
 
 Structures whose legs expire on different dates.
 
-555 lines.
+603 lines.
 
 - class **TimeLeg** (line 49): One leg of a structure whose legs expire on different dates
   - methods: `__init__`, `value_at`, `as_dict`
@@ -250,11 +250,11 @@ Structures whose legs expire on different dates.
 - **pnl_at()** (line 127): Profit once at_days have passed, with the underlying at price
 - **payoff_curve()** (line 134): (prices, profits) at the mark date, with strikes included exactly
 - **analyze_at_front()** (line 150): Risk graph at the near expiry
-- **calendar_spread()** (line 285): Sell the near expiry and buy the far one at the same strike
-- **diagonal_spread()** (line 331): A calendar with different strikes: carry plus a directional lean
-- **ratio_call_diagonal()** (line 508): Bullish ratio diagonal. kind is fixed by the name
-- **ratio_put_diagonal()** (line 513): Bearish mirror of the ratio call diagonal
-- **build_time_spread()** (line 526): Build a two-expiry structure by name
+- **calendar_spread()** (line 333): Sell the near expiry and buy the far one at the same strike
+- **diagonal_spread()** (line 379): A calendar with different strikes: carry plus a directional lean
+- **ratio_call_diagonal()** (line 556): Bullish ratio diagonal. kind is fixed by the name
+- **ratio_put_diagonal()** (line 561): Bearish mirror of the ratio call diagonal
+- **build_time_spread()** (line 574): Build a two-expiry structure by name
 
 ## Package: shell (PolyForm-Noncommercial-1.0.0)
 
@@ -465,9 +465,9 @@ Collect artifacts from disk into the shape the dashboard page needs.
 
 The dashboard page: markup, tiles and tables.
 
-1366 lines.
+1396 lines.
 
-- **render()** (line 1133): Render the complete dashboard document from one payload
+- **render()** (line 1163): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -644,7 +644,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Tests
 
-### engine/tests (220 test functions)
+### engine/tests (222 test functions)
 
 - `engine/tests/test_asymmetric_structures.py`: 28
 - `engine/tests/test_audit_regressions.py`: 22
@@ -658,7 +658,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_simulation.py`: 12
 - `engine/tests/test_smile.py`: 8
 - `engine/tests/test_strategies.py`: 28
-- `engine/tests/test_timespread.py`: 23
+- `engine/tests/test_timespread.py`: 25
 
 ### shell/tests (385 test functions)
 
@@ -705,7 +705,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-56 modules, 13965 lines of source, 159 public functions, 14 public classes, 719 test functions.
+56 modules, 14064 lines of source, 159 public functions, 14 public classes, 721 test functions.
 
 Every public name carries a docstring.
 

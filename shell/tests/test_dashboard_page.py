@@ -706,12 +706,16 @@ def test_the_composite_refuses_to_call_itself_an_edge_estimate():
             "the composite panel used the word {!r}".format(banned))
 
 
-def test_the_composite_marks_a_score_that_rested_on_a_substitution():
-    """Catches a stand-in value being spent as though it were measured.
+def test_the_composite_does_not_rank_what_the_comparison_excluded():
+    """Two panels of one page disagreed about the same structure.
 
-    A structure with an unbounded loss has no worst case to measure the
-    expected shortfall against, so the premium stands in. That is a choice,
-    it moves the score, and the row has to carry it.
+    The comparison excludes a structure whose return on risk has no
+    denominator, and this panel was scoring that same structure at rank 17
+    by substituting the premium for the worst case. Sixteen ranked on one
+    panel, seventeen on the other, on one screen. Both answers were
+    defensible alone and the pair was not, so the composite now defers: a
+    row the comparison will not rank is listed here with the reason rather
+    than scored.
     """
     table = comparison()
     table["expiry"] = "2026-09-18"
@@ -727,9 +731,11 @@ def test_the_composite_marks_a_score_that_rested_on_a_substitution():
     panel = composite_panel(page_module.render(
         composite_payload(comparison=table)))
 
-    assert "ratio spread *" in panel
-    assert "worst case is unbounded" in panel
-    assert "reward to risk is not defined" in panel
+    assert "ratio spread" in panel
+    assert "ratio spread *" not in panel, (
+        "a structure the comparison excluded was scored here anyway")
+    assert "not rankable in the comparison" in panel or (
+        "cannot be ranked" in panel), panel[-800:]
 
 
 def test_the_composite_does_not_appear_without_a_comparison():

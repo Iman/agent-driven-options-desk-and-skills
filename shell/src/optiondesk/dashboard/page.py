@@ -459,9 +459,10 @@ def _composite_section(comparison, simulation, backtests, days):
 
     weights = assembled["weights"]
     header = ["rank", "structure", "score", "pop", "edge", "rr", "es",
-              "adjust", "friction", "model P(profit)", "model P/L",
-              "sim P(profit)", "sim mean", "history trades",
-              "history win rate", "history mean on risk", "views"]
+              "shortfall", "worst case", "adjust", "friction",
+              "model P(profit)", "model P/L", "sim P(profit)", "sim mean",
+              "history trades", "history win rate",
+              "history mean on risk", "views"]
 
     body = []
     for entry in assembled["ranked"]:
@@ -478,7 +479,7 @@ def _composite_section(comparison, simulation, backtests, days):
             "<tr class='{cls}' title='{why}'>"
             "<td>{rank}</td><td>{name}{mark}</td><td><strong>{score}</strong>"
             "</td><td>{pop}</td><td>{edge}</td><td>{rr}</td><td>{es}</td>"
-            "<td>{adjust}</td>"
+            "<td>{shortfall}</td><td>{worst}</td><td>{adjust}</td>"
             "<td><span class='badge {fv}'>{fv}</span></td>"
             "<td>{mpop}</td><td>{mpnl}</td><td>{spop}</td><td>{smean}</td>"
             "<td>{trades}</td><td>{win}</td><td>{hmean}</td>"
@@ -493,6 +494,13 @@ def _composite_section(comparison, simulation, backtests, days):
                 edge=_num(parts["edge_norm"], 3),
                 rr=_num(parts["rr_norm"], 3),
                 es=_num(parts["es_norm"], 3),
+                # The es component is a fraction of the worst case, so it
+                # is scale free and a structure risking the whole stock can
+                # score better on it than one risking eight points while
+                # losing more money when it loses. Both figures are here so
+                # the reader can see which is which.
+                shortfall=_num(model.get("expected_loss")),
+                worst=_num(model.get("max_loss")),
                 adjust="{:+.1f}, x{:.2f}".format(parts["vrp_tilt"],
                                                  parts["thin_multiplier"]),
                 fv=html.escape(str(model.get("friction_verdict") or "n/a")),
@@ -940,6 +948,20 @@ def _condor_section(condors):
                                  "expiry", ", ".join(families))))))
 
 
+def _scan_edge_sd(analysis):
+    """Where the scan edge sits, in standard deviations of the underlying.
+
+    A maximum gain on the boundary is only interesting if the boundary is
+    somewhere the underlying could plausibly go. On one live pair the edge
+    was eleven standard deviations out, with a tail probability around
+    7e-29, and the reward to risk built from it was published as 4.90.
+    """
+    band = analysis.get("scan_range_sd")
+    if not band:
+        return "range unknown"
+    return "{:+.1f} to {:+.1f} sd".format(band[0], band[1])
+
+
 def _time_spread_section(plans):
     """The structures whose legs live on different expiries.
 
@@ -991,14 +1013,22 @@ def _time_spread_section(plans):
             # four legs of the ratio structures land elsewhere.
             "rate": _num(plan.get("risk_free_rate"), 5),
             "dividend": _num(plan.get("dividend_yield"), 5),
+            # A maximum that sits on the edge of the scan is bounded by the
+            # window, and the ratio built from it grows as the window
+            # widens. Saying where it sits, in standard deviations, is the
+            # difference between a scenario and an arithmetic curiosity.
+            "max gain at": _num(analysis.get("max_gain_at")),
+            "scan edge": ("yes, {}".format(_scan_edge_sd(analysis))
+                          if analysis.get("reward_risk_bounded_by_scan")
+                          else "no"),
         })
     if not spreads:
         return ""
     spreads.sort(key=lambda row: row["structure"])
     columns = ["structure", "side", "near days", "far days", "long strike",
                "short strike", "long qty", "short qty", "delta ratio",
-               "giveback", "net", "max gain", "max loss", "rate",
-               "dividend"]
+               "giveback", "net", "max gain", "max gain at", "scan edge",
+               "max loss", "rate", "dividend"]
     return (
         "<h2 class='section'>Time spreads</h2>"
         + _panel(

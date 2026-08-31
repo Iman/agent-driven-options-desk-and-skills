@@ -89,7 +89,37 @@
       }
     },
     "analysis": {
-      "$ref": "#/$defs/analysis"
+      "$ref": "#/$defs/analysis",
+      "properties": {
+        "max_gain_on_boundary": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "True when the maximum gain sits on the edge of the scanned range, so it is bounded by the window rather than by the structure and grows as the window widens."
+        },
+        "max_loss_on_boundary": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "The same for the maximum loss."
+        },
+        "reward_risk_bounded_by_scan": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "True when either extremum is on the boundary, in which case reward_risk is a property of the scan width. Measured on one live pair: 1.47 at span 0.10, 4.90 at span 0.40, 12.02 at span 1.00."
+        },
+        "scan_range_sd": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "description": "How far the scan reaches below and above spot, in standard deviations of the underlying over the time to the mark, from the legs' own volatilities. An extremum at minus eleven sd is arithmetic, not a scenario."
+        }
+      }
     },
     "probability": {
       "$ref": "#/$defs/probability"

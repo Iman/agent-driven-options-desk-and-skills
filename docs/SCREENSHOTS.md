@@ -5,9 +5,9 @@ live run: SPY at the 2026-10-16 expiry with the 2026-12-18 expiry also
 on disk, 394 and 303 contracts, all twenty-three structures built and
 seventeen of them backtested over five years. The two expiry structures
 are priced at the rate and dividend yield the snapshot measured, which
-the time spread panel names. Free data, delayed, with two of 394 contracts
-falling back to the provider's volatility and fourteen carrying none, which
-the page says for itself.
+the time spread panel names. Free data, delayed, with two of 394
+contracts falling back to the provider's volatility and fourteen
+carrying none, which the page says for itself.
 
 Each image is clipped to the element's own bounding box read from the
 live DOM, so a panel image is exactly that panel.
@@ -71,9 +71,9 @@ above this one. This page is the complete set.
 
 ## Panels
 
-### 199 graded contracts
+### 197 graded contracts
 
-![199 graded contracts](screenshots/gallery/panels/199-graded-contracts.png)
+![197 graded contracts](screenshots/gallery/panels/197-graded-contracts.png)
 
 ### Analysing something else
 

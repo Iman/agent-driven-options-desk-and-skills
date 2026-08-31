@@ -1,15 +1,16 @@
 ---
 description: Pull a chain, grade it, read positioning, and rank every structure for one underlying
 argument-hint: SYMBOL [EXPIRY]
+arguments: [symbol, expiry]
 ---
 
-Open the desk on $1 for the expiry $2, or the nearest listed expiry when
+Open the desk on $symbol for the expiry $expiry, or the nearest listed expiry when
 none is given.
 
 Run these in order, reading each summary before the next:
 
-1. `optiondesk expiries $1`
-2. `optiondesk chain $1` with `--expiry $2` if an expiry was given
+1. `optiondesk expiries $symbol`
+2. `optiondesk chain $symbol` with `--expiry $expiry` if an expiry was given
 3. `optiondesk greeks --band 0.06`
 4. `optiondesk exposure`
 5. `optiondesk compare`

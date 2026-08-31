@@ -192,11 +192,17 @@ neither places an order. `LOOPS.md` covers both.
 
 **Can I run it on a schedule?**
 
-`/schedule every weekday at 21:30: run /desk-watch SPY` for a repeating check, or
-`/schedule every weekday at 21:30: run /desk-watch SPY`. Use `/desk-watch`
-rather than `/desk-open` for anything recurring: it reports only material
-change and says "no material change" otherwise, which is what keeps a
-recurring command worth reading.
+Inside a session, `/loop 6h run /desk-watch SPY`.
+
+Without a session, use `cron` or `launchd`. Claude Code's `/schedule`
+creates a scheduled cloud agent, which runs on Anthropic's infrastructure
+and cannot see `optiondesk` on your machine or a single artifact in your
+home directory. This documentation recommended `/schedule` in four places
+and was wrong in all four.
+
+Either way use `/desk-watch` rather than `/desk-open` for anything
+recurring: it reports only material change and says "no material change"
+otherwise, which is what keeps a recurring command worth reading.
 
 **What makes a good loop, and what does not?**
 

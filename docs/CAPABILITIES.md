@@ -549,8 +549,8 @@ full treatment.
 | turn based | you ask, it finishes | `/desk-open SPY` |
 | goal based | stop when a checkable condition holds | `/goal run /desk-complete SPY until every criterion is met, stop after
 5 tries.` |
-| time based | run again every so often | `/schedule every weekday at 21:30: run /desk-watch SPY` |
-| proactive | scheduled, with a goal inside | `/schedule every weekday at 22:00: run /desk-complete SPY` |
+| time based | run again every so often | `/loop 6h run /desk-watch SPY` |
+| scheduled | outside the session entirely | `cron` or `launchd`, because `/schedule` runs in the cloud and cannot reach a local desk |
 | graph | inside an application you build | `open_desk("SPY", budget=8)` |
 
 The two loop commands exist because a loop needs a stop condition that can

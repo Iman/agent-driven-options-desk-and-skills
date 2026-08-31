@@ -161,6 +161,9 @@ def build_plugin():
             "category": "Finance",
             "capabilities": ["Read", "Write"],
             "websiteURL": REPOSITORY,
+            # Codex enforces MAX_DEFAULT_PROMPT_COUNT = 3 and
+            # MAX_DEFAULT_PROMPT_LEN = 128, neither of which appears in the
+            # prose documentation. A fourth entry is rejected outright.
             "defaultPrompt": [
                 "Show the Greek ladder for SPY's nearest expiry.",
                 "Read dealer positioning for QQQ.",
@@ -203,11 +206,19 @@ def build_plugin():
         "edit the sources and rebuild, or the next build will discard your "
         "changes.\n\n"
         "The MCP server entry expects `optiondesk-mcp` on PATH, which "
-        "`install.sh` puts there. The five skills work in ChatGPT and "
-        "Codex; the commands and agents are Claude-only. Without the local "
-        "binary, the skills remain instructions and cannot produce fresh "
-        "market numbers. ChatGPT web also needs a hosted HTTP MCP connector "
-        "to execute the tools; this bundle provides only local stdio MCP.\n",
+        "`install.sh` puts there.\n\n"
+        "What reaches which host. The five skills work in Claude Code, "
+        "ChatGPT and Codex. The two agents are Claude only: Codex reads "
+        "agents as TOML under ~/.codex/agents and ignores these Markdown "
+        "ones entirely, so they ship here as inert weight for that host. "
+        "The commands are Claude first: Codex converts a plugin's commands "
+        "into skills at install time but skips any command whose body uses "
+        "$1-style placeholders, so five of the six do not appear there and "
+        "desk-mark does.\n\n"
+        "Without the local binary the skills remain instructions and "
+        "cannot produce fresh market numbers. ChatGPT on the web also "
+        "needs a hosted HTTP MCP connector to execute the tools; this "
+        "bundle provides only local stdio MCP.\n",
         encoding="utf-8")
     return PLUGIN
 

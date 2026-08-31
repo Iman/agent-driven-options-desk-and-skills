@@ -1,9 +1,10 @@
 ---
 description: Bring one underlying to a complete artifact set against checkable criteria. Built for goal-based loops.
 argument-hint: SYMBOL [EXPIRY]
+arguments: [symbol, expiry]
 ---
 
-Bring the desk on $1 to a complete state, for expiry $2 if one was given
+Bring the desk on $symbol to a complete state, for expiry $expiry if one was given
 and the nearest listed expiry beyond a week otherwise. This has a
 deterministic finish, which is what makes it usable with `/goal`:
 
@@ -38,12 +39,12 @@ Read them from the artifacts, not from the command output.
 Each attempt runs only what is missing or failing, not the chain again.
 
 ```
-optiondesk expiries $1
-optiondesk chain $1 --expiry <chosen>
+optiondesk expiries $symbol
+optiondesk chain $symbol --expiry <chosen>
 optiondesk greeks --band 0.06
 optiondesk exposure
 optiondesk compare
-optiondesk simulate $1 --horizon <days to expiry, rounded up> --draws 4000
+optiondesk simulate $symbol --horizon <days to expiry, rounded up> --draws 4000
 ```
 
 ## When something is short

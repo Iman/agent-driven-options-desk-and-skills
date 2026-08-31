@@ -556,3 +556,99 @@ def test_the_documented_dashboard_port_is_the_real_default():
                 assert str(default) in line or "--port" in line, (
                     "{} shows `{}` without --port, but the default is "
                     "{}".format(name, line.strip(), default))
+
+
+def test_no_document_recommends_scheduling_the_desk_in_the_cloud():
+    """`/schedule` creates a cloud agent. This desk is local.
+
+    WHAT WOULD BREAK. Claude Code's /schedule builds a scheduled agent that
+    runs on Anthropic's infrastructure. It cannot see `optiondesk` in
+    ~/.local/bin, the virtualenv under ~/.optiondesk, or any artifact in
+    ~/TradingDesk. Four documents recommended scheduling `/desk-watch` and
+    `/desk-complete` that way, which produces a routine that wakes up
+    somewhere with none of the desk and nothing to compare against.
+
+    Mentioning /schedule is fine, and two documents now explain exactly
+    this. Putting a desk command after it is not.
+    """
+    import re
+
+    offenders = []
+    for name in ("README.md", "FAQ.md", "LOOPS.md", "docs/CAPABILITIES.md"):
+        for number, line in enumerate(read(name).splitlines(), 1):
+            if "/schedule" not in line:
+                continue
+            after = line.split("/schedule", 1)[1]
+            if re.search(r"/desk-|optiondesk ", after):
+                offenders.append("{}:{}: {}".format(name, number,
+                                                    line.strip()[:70]))
+
+    commands = ROOT / ".claude" / "commands"
+    for path in sorted(commands.glob("*.md")):
+        for number, line in enumerate(
+                path.read_text(encoding="utf-8").splitlines(), 1):
+            if "/schedule" in line and re.search(
+                    r"/desk-|optiondesk ", line.split("/schedule", 1)[1]):
+                offenders.append("{}:{}".format(path.name, number))
+
+    assert not offenders, (
+        "these tell the reader to schedule a local desk command as a cloud "
+        "agent: {}".format(offenders))
+
+
+def test_commands_use_named_arguments_not_indexed_ones():
+    """Indexed placeholders were off by one and silently stayed literal.
+
+    Claude Code documents `$N` as `$ARGUMENTS[N]`, zero based, so `$0` is
+    the first argument and `$1` the second. Every command here used `$1`
+    for the symbol, and an indexed placeholder with no matching argument
+    "stays in the content unchanged", so `/desk-open SPY` put a literal
+    `$1` in front of the model.
+
+    Named arguments declared in frontmatter map to positions in order, so
+    the mistake cannot be made again.
+    """
+    import re
+
+    commands = ROOT / ".claude" / "commands"
+    problems = []
+    for path in sorted(commands.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        indexed = re.findall(r"\$\{?\d", text)
+        if indexed:
+            problems.append("{} still uses {}".format(path.name,
+                                                      sorted(set(indexed))))
+            continue
+
+        head = text.split("---", 2)[1] if text.startswith("---") else ""
+        declared = re.search(r"^arguments:\s*\[([^\]]*)\]", head, re.M)
+        names = ([n.strip() for n in declared.group(1).split(",") if n.strip()]
+                 if declared else [])
+        used = set(re.findall(r"\$([a-z][a-z_]*)", text))
+        # Shell variables the body defines itself are not skill arguments.
+        used -= set(re.findall(r"^([A-Za-z_]+)=", text, re.M))
+        used -= {"desk", "sym", "home"}
+        unknown = [u for u in used if u not in names]
+        if unknown:
+            problems.append("{} uses {} which it does not declare".format(
+                path.name, sorted(unknown)))
+
+    assert not problems, problems
+
+
+def test_the_argument_hint_matches_the_declared_arguments():
+    """The hint is what autocomplete shows. It has to be the truth."""
+    import re
+
+    for path in sorted((ROOT / ".claude" / "commands").glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        head = text.split("---", 2)[1] if text.startswith("---") else ""
+        hint = re.search(r"^argument-hint:\s*(.+)$", head, re.M)
+        declared = re.search(r"^arguments:\s*\[([^\]]*)\]", head, re.M)
+        if not hint or not declared:
+            continue
+        names = [n.strip() for n in declared.group(1).split(",") if n.strip()]
+        shown = re.findall(r"[A-Za-z_]+", hint.group(1))
+        assert len(shown) == len(names), (
+            "{}: the hint shows {} and the command declares {}".format(
+                path.name, shown, names))

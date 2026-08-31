@@ -88,9 +88,12 @@ codex plugin marketplace add Iman/agent-driven-options-desk-and-skills
 codex plugin add option-desk@option-desk
 ```
 
-Codex also finds the skills with no plugin at all: it scans
-`.agents/skills` in a repository and `~/.agents/skills` for your user, and
-this repository symlinks the first to `shell/skills`. Cloning it is enough.
+Codex also finds the skills with no plugin at all. It scans, in order,
+`.agents/skills` in the working directory, the same in the parent
+directory, the same at the repository root, then `~/.agents/skills` for
+your user and `/etc/codex/skills` for the machine. This repository
+symlinks the repository-root one to `shell/skills`, and symlinked skill
+folders are documented as followed, so cloning it is enough.
 
 Browser ChatGPT is the one place the tools cannot follow. The MCP server is
 a local process and a web page cannot run one on your machine, so there the
@@ -720,8 +723,8 @@ Five ways to make this repeat, and they are not the same thing.
 | turn based | you ask, it finishes | `/desk-open SPY` |
 | goal based | stop when a checkable condition holds | `/goal run /desk-complete SPY until every criterion is met, stop after
 5 tries.` |
-| time based | run again every so often | `/schedule every weekday at 21:30: run /desk-watch SPY` |
-| proactive | scheduled, with a goal inside | `/schedule every weekday at 22:00: run /desk-complete SPY` |
+| time based | run again every so often | `/loop 6h run /desk-watch SPY` |
+| scheduled | outside the session entirely | `cron` or `launchd`, because `/schedule` runs in the cloud and cannot reach a local desk |
 | graph | inside an application you build | `open_desk("SPY", budget=8)` |
 
 Two commands exist specifically to be looped. `/desk-complete` has six
@@ -773,7 +776,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 356 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 359 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 

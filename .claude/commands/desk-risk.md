@@ -1,12 +1,13 @@
 ---
 description: Simulate an underlying forward and compare realised volatility against implied for every structure on file
 argument-hint: SYMBOL [HORIZON_DAYS]
+arguments: [symbol, horizon]
 ---
 
-Project $1 forward over $2 business days, or fourteen when no horizon is
+Project $symbol forward over $horizon business days, or fourteen when no horizon is
 given.
 
-1. `optiondesk simulate $1 --horizon ${2:-14} --draws 4000`
+1. `optiondesk simulate $symbol --horizon $horizon --draws 4000`
 2. Read `converged` first. If it is false, say so, do not quote a single
    quantile, and offer a higher `--draws` instead of proceeding.
 3. Report the fan as a range with its horizon attached, the value at risk

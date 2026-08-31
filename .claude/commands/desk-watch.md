@@ -1,16 +1,19 @@
 ---
 description: Refresh one underlying and report only what materially changed since the last run. Built for scheduled loops.
 argument-hint: SYMBOL [EXPIRY]
+arguments: [symbol, expiry]
 ---
 
-Refresh $1 and report only what changed. Written to be run repeatedly, so
+Refresh $symbol and report only what changed. Written to be run repeatedly, so
 it must stay quiet when nothing has moved.
 
 Cadence matters here. The free provider serves the last settled close, not
 an intraday price, so nothing this command watches can move more than once
-per trading session. Schedule it once a day after the close, with
-`/schedule every weekday at 21:30: run /desk-watch SPY`. A thirty minute
-loop would re-pull the same close and report nothing, repeatedly.
+per trading session. Once a day after the close is the honest cadence.
+Inside a session use `/loop 6h run /desk-watch SPY`. To run it without a
+session, use cron or launchd: `/schedule` creates a cloud agent that
+cannot reach the desk on this machine. A thirty minute loop would
+re-pull the same close and report nothing, repeatedly.
 
 ## 1. Capture the baseline BEFORE refreshing anything
 
@@ -20,7 +23,8 @@ nothing left to compare against.
 
 ```
 DESK="${OPTIONDESK_ARTIFACTS:-$HOME/TradingDesk/option-desk}"
-ls -t "$DESK"/exposure_$1_*.json | head -3
+SYM=$symbol
+ls -t "$DESK"/exposure_${SYM}_*.json | head -3
 ```
 
 From the newest exposure artifact for the expiry you are watching, record:
@@ -31,7 +35,7 @@ From the newest exposure artifact for the expiry you are watching, record:
 ## 2. Refresh
 
 ```
-optiondesk chain $1 ${2:+--expiry $2}
+optiondesk chain $symbol --expiry $expiry
 optiondesk greeks --band 0.06
 optiondesk exposure
 ```

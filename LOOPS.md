@@ -54,7 +54,6 @@ run finds.
 ### Time based: run it again every so often
 
 ```
-/schedule every weekday at 21:30: run /desk-watch SPY
 /loop 6h run /desk-watch SPY
 ```
 
@@ -76,15 +75,55 @@ itself.
 `/desk-mark` suits the same treatment on a slower cadence, since marking a
 paper position only means something once new quotes exist.
 
-### Proactive: scheduled, with a goal inside it
+### Proactive: scheduled, and why it does not fit this desk
+
+`/schedule` creates a scheduled cloud agent. That is the important word.
+The routine runs on Anthropic's infrastructure, not on your machine, so it
+cannot see `optiondesk` in `~/.local/bin`, the virtualenv under
+`~/.optiondesk`, or a single artifact in `~/TradingDesk/option-desk`. A
+scheduled `/desk-watch` would wake up somewhere with none of the desk and
+nothing to compare against.
+
+Earlier versions of this file recommended exactly that, in four places. It
+was wrong, and it is the kind of wrong that costs someone an evening before
+they work out why nothing runs.
+
+Use the operating system instead, where the work actually lives:
 
 ```
-/schedule every weekday at 22:00: run /desk-complete SPY until every
-criterion is met, stop after 3 tries.
+# crontab -e, weekdays at 21:30, after the close
+30 21 * * 1-5 cd ~/TradingDesk && /Users/you/.local/bin/optiondesk chain SPY
 ```
 
-The routine runs on its own, each run has a checkable finish, and the whole
-thing stops when you stop it.
+Or `launchd` on macOS, which survives reboots and is what
+`tradermonty/claude-trading-skills` uses for the same job. Scheduling the
+data pull locally and reading it in a session afterwards gets you the
+outcome without pretending a cloud routine can reach your disk.
+
+`/schedule` remains the right tool for work that is genuinely remote:
+watching a repository, a queue, or anything reachable from the internet
+rather than from your home directory.
+
+### The other host schedules differently, and better, for this
+
+OpenAI's scheduled tasks run against a local project rather than in a
+detached cloud. They support recurring cadences and RFC 5545 rules, and
+they can use skills and plugins, so a daily `desk-watch` there reaches the
+same `optiondesk` binary and the same artifacts you would use by hand. The
+machine has to be on and the app running, which is the honest catch.
+
+They are created from ChatGPT on the web or the desktop app. The Codex CLI
+cannot create or manage them, and neither can the IDE extension, so this is
+one of the few places where the desktop app does something the terminal
+cannot.
+
+There is no OpenAI equivalent of a goal-based loop that runs until a
+condition holds. The nearest was Agent Builder's While node, and Agent
+Builder shuts down on 30 November 2026, so it is not worth building on.
+Codex answers the same need with subagents, which delegate rather than
+iterate. That is why the bounded graph in this project's own `agent[graph]`
+package stays: it is the portable version of a goal loop, and there is
+nothing on the OpenAI side to swap it for.
 
 ## What makes a good loop here, and what does not
 

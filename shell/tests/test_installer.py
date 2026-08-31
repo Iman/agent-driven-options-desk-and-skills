@@ -142,9 +142,14 @@ def test_a_bare_owner_name_is_refused_rather_than_resolved_locally(tmp_path):
         '[project]\nname = "planted"\n', encoding="utf-8")
     subprocess.run(["git", "init", "-q", str(planted)], check=True)
     subprocess.run(["git", "-C", str(planted), "add", "-A"], check=True)
+    # commit.gpgsign is on globally for this user, and a throwaway fixture
+    # commit has nobody to type a passphrase: without this the test hangs
+    # until gpg times out and then fails on "failed to write commit
+    # object". A test must not depend on the developer's signing setup.
     subprocess.run(
         ["git", "-C", str(planted), "-c", "user.email=t@t", "-c",
-         "user.name=t", "commit", "-qm", "planted"], check=True)
+         "user.name=t", "-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false",
+         "commit", "-qm", "planted"], check=True)
 
     piped = tmp_path / "piped.sh"
     piped.write_text(INSTALLER.read_text(encoding="utf-8"), encoding="utf-8")

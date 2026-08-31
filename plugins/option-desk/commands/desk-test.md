@@ -1,11 +1,12 @@
 ---
 description: Backtest a structure with modelled premiums and judge honestly whether the result means anything
 argument-hint: SYMBOL STRUCTURE [PERIOD]
+arguments: [symbol, structure, period]
 ---
 
-Test $2 on $1 over $3, defaulting to five years.
+Test $structure on $symbol over $period, defaulting to five years.
 
-1. `optiondesk backtest $1 $2 --period ${3:-5y}`
+1. `optiondesk backtest $symbol $structure --period $period`
 2. Read the output in this order, which is the order that stops a backtest
    selling itself: trade count, then the buy and hold benchmark, then the
    p-value, then the bootstrap interval, and only then the headline return.
@@ -14,4 +15,4 @@ Test $2 on $1 over $3, defaulting to five years.
    number from it: real closes, modelled premiums, no spread, no slippage,
    no assignment, and entry and exit priced by the same model.
 5. If the user wants to take it further, register it forward rather than
-   tuning it: `optiondesk forward open --strategy $2 --thesis "..."`.
+   tuning it: `optiondesk forward open --strategy $structure --thesis "..."`.

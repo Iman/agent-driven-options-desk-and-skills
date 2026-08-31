@@ -730,12 +730,17 @@ request from the viewer's browser. It reads artifacts and never writes
 them, so it cannot corrupt a run in progress.
 
 Sections: a selector for underlying and expiry built from what is on disk,
-structure comparison, positioning (gamma by strike, cumulative profile,
+structure comparison, composite support (one score per structure under a
+printed formula, with the model, the simulation and five years of history
+side by side and their disagreements marked), time spreads (the two-expiry
+family with the delta ratio, the giveback, the carry each was priced at and
+where its maximum sits), positioning (gamma by strike, cumulative profile,
 open interest, max pain), volatility (smile with 25-delta wings, six Greek
 small multiples), structures (payoff with spot, breakevens and expected
-move), simulation (posterior fan, terminal distribution, parameter table
-with diagnostics, realised against implied), backtest (statistics table and
-equity curves), and the ladder.
+move), the ladder, condor search, simulation (posterior fan, terminal
+distribution, parameter table with diagnostics, realised against implied),
+and backtest (statistics table, equity curves, drawdown and the per-trade
+outcome distribution).
 
 Every view is addressable: `?u=SPY&e=2026-09-18`.
 
@@ -800,6 +805,13 @@ buy-and-hold benchmark over the same windows, with the drawdown and the
 per-trade outcome distribution beside it. The panel states what it is not
 before it states what it found: 233 iron condors on SPY over five years,
 63.9 percent of them winners, and a total of minus 30 units of risk.
+
+Those 233 windows overlap. A thirty day hold entered every five trading
+days shares twenty-five of its thirty days with its neighbour, so the
+significance test flips signs a block at a time and the interval resamples
+blocks. The artifacts carry the block. It matters: correcting for the
+overlap moved four structures from below the conventional 0.05 to above
+it, and one from 0.0005 to 0.148.
 
 ![The backtest statistics table, equity curve, drawdown from peak, and the per-trade outcome distribution](docs/screenshots/dashboard-backtest.png)
 
@@ -985,6 +997,68 @@ Measured, not asserted:
   bindings that discarded every argument they were given, and six commands
   that wrote a degraded flag into the artifact and printed a summary with
   no trace of it.
+
+### Three independent recomputations, and what they found
+
+In September 2026 three agents recomputed this project's arithmetic from
+scratch, against implementations written from the definitions rather than
+from this source, and reported only what disagreed. The suite was green at
+the time: more than nine hundred tests, ten refresh stages, a mutation
+harness with no survivors.
+
+Most of the arithmetic held, and these figures are worth quoting because
+they were measured rather than assumed. All twenty-three payoff analyses
+reproduced from their own legs, including every breakeven and both
+unbounded cases. Probability of profit and the tail statistics agreed with
+400,000 Monte Carlo draws per structure and then with Simpson quadrature
+over eight million nodes, worst residual 5.75e-11. All sixteen Greeks
+matched high-precision central differences to 9.95e-13 on a live ladder,
+with every scaling convention confirmed: per calendar day for theta, charm,
+veta and color, per 1.00 rather than per point for vega and rho. Put-call
+parity held to 6.55 double epsilon across 40,040 pairs. The exposure
+figures reproduced to 3.5e-16. R-hat matched the standard split definition
+to 0.00e+00. The comparison ranking reproduced exactly, margin over the
+runner-up to 0.00e+00.
+
+Eleven things did not hold, and all eleven are fixed:
+
+- The implied volatility solver tested sensitivity at its 0.30 starting
+  guess and refused contracts it could identify from there. On one live
+  chain that was 41 contracts, it drove the provider-volatility fallback to
+  12.2 percent, and it was the sole reason the chain and its ladder were
+  marked degraded. The same chain now solves 380 of 394 and is not
+  degraded.
+- A risk-free rate of exactly zero was falsy, so it was silently replaced
+  by four percent while the flag reporting a missing rate stayed false.
+- The published payoff curve was drawn at the module defaults while the
+  analysis beside it in the same file used the snapshot's rates. One
+  calendar carried a maximum gain of 8.136160 and a curve peaking at
+  9.030645 at the same price.
+- Every simulation artifact said `antithetic: true`. Of ten thousand pairs,
+  none shared a shock sequence: the construction had never run. The test
+  guarding it asserted the artifact's own flag.
+- The significance tests assumed independent trades. The windows overlap by
+  83 percent and the effective sample is 64 to 88 rather than 233.
+- Two-expiry maxima were published as properties of the structure when they
+  are properties of the scan window: one reward to risk read 1.47, 4.90 and
+  12.02 at three window widths, and the shipped figure sat eleven standard
+  deviations from spot.
+- `delta_ratio` was documented in five places, one of them a JSON schema,
+  as the thing keeping a large move uncapped. One long against two short
+  satisfies it and is a net short call with unbounded loss.
+- The exposure artifact reported eight contracts skipped for missing open
+  interest when all 394 carried it and the missing thing was volatility.
+- The dashboard rendered a confident zero trades for a structure that
+  entered 233 and correctly refused a return on risk it cannot define.
+- The composite panel ranked a structure the comparison beside it excluded,
+  so one page showed sixteen ranked and seventeen ranked.
+- Five tests passed against deliberately broken code, every one caught by
+  the mutation harness and none by review.
+
+The lesson is in [LOOPS.md](LOOPS.md) as a fourth kind of loop, and the
+work it left behind is in [docs/BACKLOG.md](docs/BACKLOG.md). The short
+form: a test checks what its author thought to check, and none of these
+lived where anyone had thought to look.
 
 Two things that were claimed here and could not be checked from the
 repository have been dealt with rather than left standing. "Mutation

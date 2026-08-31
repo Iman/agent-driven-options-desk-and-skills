@@ -1,4 +1,4 @@
-# Reference: the twenty-one structures and what each needs
+# Reference: the twenty-three structures and what each needs
 
 ## Single expiry
 
@@ -26,8 +26,10 @@
 
 | structure | type | needs | pays when |
 |---|---|---|---|
-| calendar_spread | debit | the price sitting still | the near leg decays faster than the far |
-| diagonal_spread | debit | a drift toward the short strike | decay plus a directional lean |
+| calendar_spread | debit | the price sitting still | the near leg decays faster than the far, call side |
+| calendar_put_spread | debit | the price sitting still | the same trade on the put side, where the skew is usually richer |
+| diagonal_spread | debit | a drift toward the short strike | decay plus an upward lean |
+| diagonal_put_spread | debit | a drift toward the short strike | decay plus a downward lean |
 | ratio_call_diagonal | debit | a rise, without the cap a 1x1 imposes | the back-month longs outrun the fewer front-month shorts |
 | ratio_put_diagonal | debit | a fall, without the cap a 1x1 imposes | the back-month longs outrun the fewer front-month shorts |
 

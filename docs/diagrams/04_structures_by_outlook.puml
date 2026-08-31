@@ -1,6 +1,6 @@
 @startuml
 !include theme.iuml
-title Option desk - Seventeen structures, tagged by the directional view each needs
+title Option desk - Twenty-one structures, tagged by the directional view each needs
 
 rectangle "-2\nstrong bearish" as sb
 rectangle "-1\nmild bearish" as mb
@@ -14,9 +14,9 @@ n -right- mu
 mu -right- su
 
 rectangle "long_put\nprotective_put" as lp
-rectangle "bear_put_spread" as bps
+rectangle "bear_put_spread\nbear_call_spread (credit)" as bps
 rectangle "iron_condor, iron_butterfly\nlong_call_butterfly\ncash_secured_put, covered_call*" as ic
-rectangle "bull_call_spread\ncovered_call" as bcs
+rectangle "bull_call_spread\nbull_put_spread (credit)\ncovered_call" as bcs
 rectangle "long_call\nstraddle, strangle**" as lc
 
 sb .down.> lp
@@ -26,7 +26,7 @@ mu .down.> bcs
 su .down.> lc
 
 rectangle "Asymmetric by design:\nratio_spread (uncapped short side)\nbroken_wing_butterfly (one-sided risk,\noften a credit)\njade_lizard (no upside risk only when\ncredit > call-spread width, and it reports\nwhether that actually holds)" as asym
-rectangle "Two expiries, from a pair of snapshots:\ncalendar_spread, diagonal_spread\n(--far-snapshot, or the next expiry\nfound on disk)" as timesp
+rectangle "Two expiries, from a pair of snapshots:\ncalendar_spread, diagonal_spread,\nratio_call_diagonal, ratio_put_diagonal\n(delta-targeted legs: short delta mass\nstrictly below long, or no plan at all)" as timesp
 
 note bottom of n
 Three of the five outlooks sit inside the
@@ -44,5 +44,5 @@ buckets because they need a large move.
 * covered_call spans neutral to mild bullish.
 end note
 
-caption Builders return legs; the payoff engine, comparison, backtest and forward test pick every new structure up automatically.
+caption Builders return legs; the payoff engine, comparison, backtest and forward test pick every new structure up automatically. Credit verticals refuse a plan that pays a debit.
 @enduml

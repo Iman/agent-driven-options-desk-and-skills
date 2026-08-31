@@ -157,9 +157,20 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
     source_meta = snapshot.get("meta", {})
     near = engine_strategies.split_chain(snapshot)
     far = engine_strategies.split_chain(far_snapshot)
+    # A registry entry names the builder and the side it is built from, so
+    # the call and the put sides of one builder can be two structures with
+    # two names and two artifacts. Without this the put side existed only
+    # as a flag, built fine, and never appeared as a row anywhere.
+    meta = engine_strategies.PLAYBOOK.get(args.name, {})
+    builder = meta.get("build_two_expiry") or args.name
+    kind = meta.get("kind") or args.kind
     plan = engine_strategies.build_time_spread(
-        args.name, near, far, kind=args.kind, size=args.size,
-        **({"offset": args.offset} if args.name == "diagonal_spread" else {}))
+        builder, near, far, kind=kind, size=args.size,
+        **({"offset": args.offset} if builder == "diagonal_spread" else {}))
+    if plan is not None:
+        # Keep the name the user asked for. The builder returns its own,
+        # which is shared between the two sides.
+        plan["strategy"] = args.name
     if plan is None:
         return {
             "strategy": args.name,

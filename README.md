@@ -23,11 +23,11 @@ Then ask your agent "where are the gamma walls on SPY?" and it will use the
 skills this installs. Eight other ways in, including Codex and ChatGPT, are
 in [INSTALL.md](INSTALL.md).
 
-![All twenty-one structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
+![All twenty-three structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
 
 Every screenshot on this page is one live run against free data: SPY at the
 2026-10-16 expiry with 2026-12-18 also on disk, 394 and 303 contracts, all
-twenty-one structures built and seventeen of them backtested over five
+twenty-three structures built and seventeen of them backtested over five
 years.
 None of it has been cleaned up. The amber banner is the run reporting that
 48 of those contracts fell back to the provider's published volatility
@@ -210,7 +210,7 @@ The six skills, and when each one fires:
 |---|---|
 | `options-greeks` | chains, implied volatility by strike, the sixteen Greeks per contract |
 | `options-positioning` | dealer gamma, the walls, the flip, max pain, put-call ratios, skew |
-| `options-strategy` | twenty-one structures, built, priced and ranked side by side |
+| `options-strategy` | twenty-three structures, built, priced and ranked side by side |
 | `options-simulation` | GARCH-t Monte Carlo, the fan, value at risk, expected shortfall |
 | `options-backtest` | real history with modelled premiums, significance, and paper forward tests |
 

@@ -2,7 +2,7 @@
 
 Every panel and every chart the dashboard renders, captured from one
 live run: SPY at the 2026-10-16 expiry with the 2026-12-18 expiry also
-on disk, 394 and 303 contracts, all twenty-one structures built and
+on disk, 394 and 303 contracts, all twenty-three structures built and
 seventeen of them backtested over five years. Free data, delayed, and
 degraded on 12.2 percent of contracts, which the page says for itself.
 

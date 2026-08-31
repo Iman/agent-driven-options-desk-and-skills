@@ -897,6 +897,36 @@ PLAYBOOK = {
         "build": None,
         "build_two_expiry": "calendar_spread",
     },
+    "calendar_put_spread": {
+        "trade_type": "debit",
+        "outlooks": (Outlook.NEUTRAL,),
+        "vol_view": "any",
+        "needs_underlying": False,
+        "needs_two_expiries": True,
+        "when_to_use": ("The put side of the same time spread. It carries "
+                        "the same decay difference and a different skew: "
+                        "the put wing is usually the bid one, so the near "
+                        "leg sold is richer and the far leg bought costs "
+                        "more. Built as its own structure because a chain "
+                        "can favour one side over the other and a page "
+                        "showing only the call side cannot say which."),
+        "build": None,
+        "build_two_expiry": "calendar_spread",
+        "kind": "put",
+    },
+    "diagonal_put_spread": {
+        "trade_type": "debit",
+        "outlooks": (Outlook.MILD_BEARISH,),
+        "vol_view": "any",
+        "needs_underlying": False,
+        "needs_two_expiries": True,
+        "when_to_use": ("The put side of the diagonal: the calendar's "
+                        "carry with a downward lean rather than an upward "
+                        "one."),
+        "build": None,
+        "build_two_expiry": "diagonal_spread",
+        "kind": "put",
+    },
     "ratio_call_diagonal": {
         "trade_type": "debit",
         "outlooks": (Outlook.MILD_BULLISH, Outlook.STRONG_BULLISH),
@@ -930,6 +960,7 @@ PLAYBOOK = {
         "vol_view": "any",
         "needs_underlying": False,
         "needs_two_expiries": True,
+        "kind": "call",
         "when_to_use": ("A calendar with different strikes: a directional "
                         "lean on top of the calendar's carry."),
         "build": None,

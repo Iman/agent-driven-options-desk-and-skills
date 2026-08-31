@@ -141,7 +141,7 @@ Net position Greeks are reported with a `complete` flag and a `missing`
 list, because a position Greek summed over legs where one leg had no
 volatility is a wrong number rather than a smaller one.
 
-### 4.3 Twenty-one structures
+### 4.3 Twenty-three structures
 
 | structure | when it is the right shape |
 |---|---|
@@ -160,7 +160,9 @@ volatility is a wrong number rather than a smaller one.
 | iron butterfly | pinned rather than merely range bound |
 | long call butterfly | a cheap bet on pinning near a strike |
 | calendar spread | sell near, buy far, same strike, collect the decay difference |
+| calendar put spread | the put side of the same trade, where the skew is usually richer |
 | diagonal spread | a calendar with a directional lean |
+| diagonal put spread | the put side, leaning down instead of up |
 | ratio call diagonal | back-month longs against fewer front-month shorts, so a large rise is not capped |
 | ratio put diagonal | the bearish mirror, a large fall not capped |
 | ratio spread | financed by selling more than you buy, and uncapped on the short side |
@@ -171,7 +173,7 @@ Each plan carries legs, breakevens, maximum gain and loss, reward to risk,
 model probability of profit, net Greeks, and a friction estimate of what
 the round trip costs at quoted spreads.
 
-Four of these are different in kind. The calendar, the diagonal and the two
+Six of these are different in kind. The calendar, the diagonal and the two
 ratio diagonals have legs on different expiries, so when the near leg dies the far leg is still alive
 and still worth something. The payoff is a curve rather than line segments
 and can only be drawn by pricing the surviving leg, which is done at the

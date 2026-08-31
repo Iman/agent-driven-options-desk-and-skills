@@ -16,8 +16,8 @@ Codex or ChatGPT, use the second or the fourth.
 ./install.sh
 ```
 
-Creates a virtualenv at `~/.optiondesk`, installs the MIT shell with the
-free data provider and the AGPL engine, links `optiondesk` and
+Creates a virtualenv at `~/.optiondesk`, installs the shell with the free
+data provider and the analytics engine, links `optiondesk` and
 `optiondesk-mcp` into `~/.local/bin`, copies the skills into both
 `~/.claude/skills` and `~/.agents/skills` so Claude Code and Codex each
 find them, registers the MCP server with every agent runtime CLI it finds,
@@ -35,7 +35,7 @@ Flags:
 | flag | effect |
 |---|---|
 | `--dry-run` | print the plan, change nothing |
-| `--no-engine` | MIT shell only, no AGPL component, Greeks unavailable |
+| `--no-engine` | shell only, no analytics engine, Greeks unavailable |
 | `--skills-only` | just the markdown skills, no Python at all |
 | `--no-mcp` | leave every runtime config untouched |
 | `--no-keys` | skip the optional key prompt |
@@ -210,7 +210,7 @@ guidance.
 optiondesk doctor
 ```
 
-Reports the shell version, whether the AGPL engine is present, which
+Reports the shell version, whether the analytics engine is present, which
 providers can answer, which optional keys are configured (never their
 values), and where artifacts are written.
 

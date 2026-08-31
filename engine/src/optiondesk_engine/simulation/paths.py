@@ -1,6 +1,7 @@
 """Forward paths from a fitted posterior, and what they imply for risk.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 One parameter draw per path, so parameter uncertainty is carried into the
 fan rather than being collapsed to a point estimate first. That is the whole

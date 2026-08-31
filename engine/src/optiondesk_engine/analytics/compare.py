@@ -1,6 +1,7 @@
 """Rank structures against each other under a stated, visible criterion.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 WHAT THIS IS. Given several plans built from the same chain, it puts them in
 one table and orders them by expected profit per unit of capital at risk,

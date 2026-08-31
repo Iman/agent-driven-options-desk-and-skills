@@ -3,7 +3,7 @@ name = "optiondesk-engine"
 version = "0.1.0"
 description = "Option pricing and Greek analytics engine for the option desk"
 requires-python = ">=3.11"
-license = { text = "AGPL-3.0-only" }
+license = { text = "PolyForm-Noncommercial-1.0.0" }
 authors = [{ name = "Iman Samizadeh" }]
 dependencies = []
 

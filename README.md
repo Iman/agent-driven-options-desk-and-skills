@@ -49,7 +49,7 @@ curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-
 ```
 
 Or from a checkout, `./install.sh`. Either way it creates a virtualenv
-under `~/.optiondesk`, installs the MIT shell and the AGPL engine, links
+under `~/.optiondesk`, installs the shell and the analytics engine, links
 `optiondesk` and `optiondesk-mcp` into `~/.local/bin`, copies the skills
 into `~/.claude/skills` and `~/.agents/skills`, so Claude Code and Codex
 each find them, and registers the MCP server with every agent runtime CLI
@@ -57,7 +57,7 @@ it finds. Re-running is safe. `./install.sh --uninstall`
 reverses it and removes only what it created.
 
 Useful flags: `--dry-run` to see the plan and change nothing, `--no-engine`
-for the MIT shell alone, `--skills-only` for no Python at all, `--no-mcp`
+for the shell alone, `--skills-only` for no Python at all, `--no-mcp`
 to leave runtime configs untouched, `--prefix` to install elsewhere.
 
 ### Skills only, through the skills CLI
@@ -194,7 +194,7 @@ reads artifacts and writes nothing.
 
 ## Architecture
 
-Three packages under two licences, joined by one adapter. Eight ways in,
+Three packages under one licence, joined by one adapter. Eight ways in,
 one
 set of artifacts out.
 
@@ -217,7 +217,7 @@ flowchart TB
         bridge["engine_bridge<br/>THE ONLY IMPORT<br/>OF THE ENGINE"]
     end
 
-    subgraph engine["engine &nbsp;(AGPL-3.0)"]
+    subgraph engine["engine &nbsp;(the numbers)"]
         pricing["pricing<br/>Black-Scholes-Merton,<br/>16 Greeks, implied vol"]
         strategies["strategies<br/>payoff, playbook,<br/>outlook, friction"]
         analytics["analytics<br/>gamma exposure, walls,<br/>max pain, smile, ranking"]
@@ -897,9 +897,11 @@ gone, replaced by the test above, which anyone can run.
 | `AGENTS.md` | project rules and the command inventory for Codex, which loads the skills itself from `.agents/skills` |
 | `GEMINI.md` | the same plus all five skills compiled in, because Gemini CLI discovers none |
 | `DISCLAIMER.md` | what this is not, and what you are responsible for |
-| `LICENSES.md` | the two licences and where the boundary sits |
+| `LICENSES.md` | what noncommercial covers, and what needs an agreement |
 | `THIRD-PARTY.md` | what is vendored and under what terms |
 | `CLA.md`, `CONTRIBUTORS.md` | contribution terms |
+| `SECURITY.md` | what is in scope, and how to report it privately |
+| `CODE_OF_CONDUCT.md` | how to disagree here |
 
 The generated ones are rebuilt by `python3 scripts/refresh.py`. Editing
 them by hand is wasted work.
@@ -908,27 +910,46 @@ them by hand is wasted work.
 
 ## Licensing
 
-`shell/` is MIT: take it, embed it, sell it. `engine/` is AGPL-3.0: run it
-privately however you like, but publish your modifications if you run a
-modified version as a network service. A commercial licence for the engine
-is available from the copyright holder.
+[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0),
+one licence over the whole repository.
+
+Free, with nothing to ask, for any noncommercial purpose: personal study,
+research, experiment, hobby projects, and use by charitable, educational,
+public research, health, environmental or government organisations
+whatever their funding. Modify it, build on it, pass it on, as long as
+these terms travel with it.
+
+A separate written agreement is required first for anything done for
+commercial advantage or private monetary compensation. That includes use
+inside a fund or a trading business, selling it or access to it, paid
+consulting or signals produced with it, charging for a course built on it,
+and raising investment, grants, donations or crowdfunding on the back of
+it. Ask; terms are negotiable and a share is one of the shapes they take.
 
 ```mermaid
 flowchart LR
-    subgraph mit["shell, MIT"]
-        s1["skills, contracts, MCP server,<br/>provider registry, CLI, dashboard"]
-    end
-    subgraph agpl["engine, AGPL-3.0"]
-        e1["pricing, Greeks, strategies,<br/>analytics, simulation, backtest"]
-    end
-    s1 -->|"engine_bridge<br/>the only seam"| e1
-    e1 -.->|"commercial licence<br/>available separately"| buy["Firms that cannot<br/>accept AGPL"]
+    free["Noncommercial use<br/>study, research, hobby,<br/>charities, schools, government"]
+    work["option desk<br/>engine, shell, agent, skills"]
+    paid["Commercial use<br/>funds, products, paid research,<br/>fundraising on the back of it"]
+
+    free -->|"no permission needed"| work
+    paid -.->|"written agreement first"| work
 ```
 
-Full detail, and the two rules that keep dual licensing possible, are in
-[LICENSES.md](LICENSES.md). Provenance of every borrowed line is recorded
-in [THIRD-PARTY.md](THIRD-PARTY.md). Contributions to the engine require
-the agreement in [CLA.md](CLA.md).
+This is deliberately not open source in the OSI sense, and the trade is
+real: fewer users, fewer contributors, and some directories treat a
+noncommercial licence as unfree. The previous arrangement, MIT plus AGPL,
+allowed the exact thing it was meant to stop, since AGPL permits commercial
+use and selling and only asks that a modified network service publishes its
+source.
+
+Copies taken before 2026-08-31 keep the terms they were given. A licence
+already granted cannot be withdrawn, and this file does not pretend
+otherwise.
+
+Full detail in [LICENSES.md](LICENSES.md), provenance of every borrowed
+line in [THIRD-PARTY.md](THIRD-PARTY.md), and contribution terms in
+[CLA.md](CLA.md).
 
 Read [DISCLAIMER.md](DISCLAIMER.md). It states that this is software
 rather than advice, that the author holds no regulated status, that

@@ -1,6 +1,7 @@
 """Complete analytic Black-Scholes-Merton Greek ladder, first to third order.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 Derived from the author's prior work in the 001-qaunt repository
 (smartsheep.witty.models.pricing.greeks_full) and relicensed here by the

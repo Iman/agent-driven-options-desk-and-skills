@@ -133,7 +133,7 @@ def build_plugin():
         # cost eleven characters of every install URL forever and would
         # name the smallest of six surfaces.
         "keywords": keywords,
-        "license": "MIT",
+        "license": "PolyForm-Noncommercial-1.0.0",
     }
     (PLUGIN / ".claude-plugin" / "plugin.json").write_text(
         json.dumps(claude_manifest, indent=2) + "\n", encoding="utf-8")
@@ -145,7 +145,7 @@ def build_plugin():
         "author": AUTHOR,
         "homepage": REPOSITORY,
         "repository": REPOSITORY,
-        "license": "MIT",
+        "license": "PolyForm-Noncommercial-1.0.0",
         "keywords": keywords,
         "skills": "./skills/",
         "mcpServers": "./.mcp.json",

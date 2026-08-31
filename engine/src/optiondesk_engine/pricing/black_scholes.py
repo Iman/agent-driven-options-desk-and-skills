@@ -1,6 +1,7 @@
 """European Black-Scholes-Merton pricing and implied volatility.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only. See the
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement. See the
 LICENSE file at the root of the engine component.
 
 Derived from the author's prior work in the 001-qaunt repository

@@ -1,6 +1,7 @@
 """Performance statistics, and honest tests of whether they mean anything.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 A backtest produces a mean return. The interesting question is never the
 mean, it is whether a mean that size could easily have arisen by chance

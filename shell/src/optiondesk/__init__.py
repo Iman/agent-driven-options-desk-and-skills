@@ -8,4 +8,4 @@ Nothing in this package is investment advice. See DISCLAIMER.md.
 """
 
 __version__ = "0.1.0"
-LICENSE = "MIT"
+LICENSE = "PolyForm-Noncommercial-1.0.0"

@@ -1,4 +1,4 @@
-"""The single seam between the MIT shell and the AGPL engine.
+"""The single seam between the shell and the AGPL engine.
 
 Only this module imports the engine. Every other part of the shell asks it
 for analytics. That keeps the licence boundary auditable with one grep, and
@@ -15,7 +15,7 @@ MISSING_MESSAGE = (
     "The analytics engine is not installed, so no Greeks were computed. "
     "Install it with 'pip install optiondesk-engine' (or 'pip install -e "
     "engine' from a source checkout). It is licensed AGPL-3.0, separately "
-    "from this MIT shell; see LICENSES.md before deploying it as a network "
+    "from this shell; see LICENSES.md before deploying it as a network "
     "service."
 )
 

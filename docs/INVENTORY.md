@@ -10,235 +10,235 @@ Every number the desk reports. Standard library only, no network.
 
 ### `engine/src/optiondesk_engine/__init__.py`
 
-Option pricing and analytics engine.
+The analytics engine.
 
-59 lines.
+57 lines.
 
 
 ### `engine/src/optiondesk_engine/analytics/__init__.py`
 
 Chain-level analytics: positioning, exposure and pain.
 
-17 lines.
+18 lines.
 
 
 ### `engine/src/optiondesk_engine/analytics/compare.py`
 
 Rank structures against each other under a stated, visible criterion.
 
-175 lines.
+176 lines.
 
-- **score_plan()** (line 72): Score components for one plan. Every field can be None
-- **rank_strategies()** (line 143): Compare plans and order the rankable ones, best first
+- **score_plan()** (line 73): Score components for one plan. Every field can be None
+- **rank_strategies()** (line 144): Compare plans and order the rankable ones, best first
 
 ### `engine/src/optiondesk_engine/analytics/exposure.py`
 
 Dealer gamma exposure, walls, and max pain from an option chain.
 
-211 lines.
+212 lines.
 
-- **chain_exposure()** (line 34): Gamma exposure by strike, the walls, and the flip level
-- **max_pain()** (line 168): The strike where option holders collect the least at expiry
+- **chain_exposure()** (line 35): Gamma exposure by strike, the walls, and the flip level
+- **max_pain()** (line 169): The strike where option holders collect the least at expiry
 
 ### `engine/src/optiondesk_engine/analytics/smile.py`
 
 Volatility smile geometry: the numbers a volatility trader quotes.
 
-143 lines.
+144 lines.
 
-- **smile_metrics()** (line 73): Smile geometry from graded ladder rows, or None where unavailable
+- **smile_metrics()** (line 74): Smile geometry from graded ladder rows, or None where unavailable
 
 ### `engine/src/optiondesk_engine/backtest/__init__.py`
 
 Historical and forward testing of option structures.
 
-42 lines.
+43 lines.
 
 
 ### `engine/src/optiondesk_engine/backtest/forward.py`
 
 Forward testing: mark a registered position against later quotes.
 
-159 lines.
+160 lines.
 
-- **mark_position()** (line 57): Mark one recorded position against a later chain snapshot
-- **settle_position()** (line 147): Settle a position at expiry against a final underlying price
+- **mark_position()** (line 58): Mark one recorded position against a later chain snapshot
+- **settle_position()** (line 148): Settle a position at expiry against a final underlying price
 
 ### `engine/src/optiondesk_engine/backtest/runner.py`
 
 Run a structure repeatedly across a price history.
 
-177 lines.
+178 lines.
 
-- **realised_volatility()** (line 32): Annualised volatility from log returns, or None if too few
-- **synthetic_chain()** (line 41): A chain of strikes around spot, priced by the model
-- **run_backtest()** (line 76): Enter a structure repeatedly and settle each one at expiry
+- **realised_volatility()** (line 33): Annualised volatility from log returns, or None if too few
+- **synthetic_chain()** (line 42): A chain of strikes around spot, priced by the model
+- **run_backtest()** (line 77): Enter a structure repeatedly and settle each one at expiry
 
 ### `engine/src/optiondesk_engine/backtest/stats.py`
 
 Performance statistics, and honest tests of whether they mean anything.
 
-148 lines.
+149 lines.
 
-- **performance_stats()** (line 34): Summary statistics for a series of per-trade returns
-- **permutation_p_value()** (line 94): How often a no-edge rule beats this mean by chance
-- **bootstrap_mean_interval()** (line 128): Confidence interval for the mean return, by resampling trades
+- **performance_stats()** (line 35): Summary statistics for a series of per-trade returns
+- **permutation_p_value()** (line 95): How often a no-edge rule beats this mean by chance
+- **bootstrap_mean_interval()** (line 129): Confidence interval for the mean return, by resampling trades
 
 ### `engine/src/optiondesk_engine/pricing/__init__.py`
 
 Pricing and Greek analytics.
 
-5 lines.
+6 lines.
 
 
 ### `engine/src/optiondesk_engine/pricing/black_scholes.py`
 
 European Black-Scholes-Merton pricing and implied volatility.
 
-227 lines.
+228 lines.
 
-- **d1_d2()** (line 90): The two Black-Scholes arguments, shared by price and every Greek
-- **bs_price()** (line 97): Black-Scholes-Merton price of a European option
-- **vega_raw()** (line 120): dV/dsigma per 1.00 of volatility. Used by the IV solver
-- **intrinsic()** (line 127): Discounted intrinsic value, the no-arbitrage floor for a European
-- **implied_vol()** (line 137): Implied volatility from an option price, or None
+- **d1_d2()** (line 91): The two Black-Scholes arguments, shared by price and every Greek
+- **bs_price()** (line 98): Black-Scholes-Merton price of a European option
+- **vega_raw()** (line 121): dV/dsigma per 1.00 of volatility. Used by the IV solver
+- **intrinsic()** (line 128): Discounted intrinsic value, the no-arbitrage floor for a European
+- **implied_vol()** (line 138): Implied volatility from an option price, or None
 
 ### `engine/src/optiondesk_engine/pricing/forwards.py`
 
 Options on futures and on foreign exchange.
 
-174 lines.
+175 lines.
 
-- **black76_price()** (line 77): Price an option on a futures contract
-- **black76_greeks()** (line 95): The full Greek ladder for an option on a future
-- **black76_implied_vol()** (line 107): Solve volatility from a futures option price
-- **garman_kohlhagen_price()** (line 120): Price a currency option
-- **garman_kohlhagen_greeks()** (line 142): The full Greek ladder for a currency option
-- **garman_kohlhagen_implied_vol()** (line 156): Solve volatility from a currency option price
-- **forward_from_spot()** (line 164): The forward price implied by a spot and two rates
+- **black76_price()** (line 78): Price an option on a futures contract
+- **black76_greeks()** (line 96): The full Greek ladder for an option on a future
+- **black76_implied_vol()** (line 108): Solve volatility from a futures option price
+- **garman_kohlhagen_price()** (line 121): Price a currency option
+- **garman_kohlhagen_greeks()** (line 143): The full Greek ladder for a currency option
+- **garman_kohlhagen_implied_vol()** (line 157): Solve volatility from a currency option price
+- **forward_from_spot()** (line 165): The forward price implied by a spot and two rates
 
 ### `engine/src/optiondesk_engine/pricing/greeks_full.py`
 
 Complete analytic Black-Scholes-Merton Greek ladder, first to third order.
 
-184 lines.
+185 lines.
 
-- **all_greeks()** (line 72): Full analytic Greek ladder for one European contract
-- **net_greeks()** (line 156): Net the Greeks of a multi-leg position
+- **all_greeks()** (line 73): Full analytic Greek ladder for one European contract
+- **net_greeks()** (line 157): Net the Greeks of a multi-leg position
 
 ### `engine/src/optiondesk_engine/simulation/__init__.py`
 
 Simulation: volatility models, posteriors, and forward path distributions.
 
-28 lines.
+29 lines.
 
 
 ### `engine/src/optiondesk_engine/simulation/garch.py`
 
 GARCH(1,1) with Student-t innovations, estimated by MCMC.
 
-401 lines.
+402 lines.
 
-- class **GarchPosterior** (line 235): Posterior draws plus the diagnostics needed to trust them
+- class **GarchPosterior** (line 236): Posterior draws plus the diagnostics needed to trust them
   - methods: `__init__`, `converged`, `summary`, `last_variance`
-- **garch_log_likelihood()** (line 54): Log likelihood of the GARCH(1,1)-t model, or negative infinity
-- **fit_garch_t()** (line 273): Sample the posterior of a GARCH(1,1)-t model by adaptive random walk
+- **garch_log_likelihood()** (line 55): Log likelihood of the GARCH(1,1)-t model, or negative infinity
+- **fit_garch_t()** (line 274): Sample the posterior of a GARCH(1,1)-t model by adaptive random walk
 
 ### `engine/src/optiondesk_engine/simulation/paths.py`
 
 Forward paths from a fitted posterior, and what they imply for risk.
 
-251 lines.
+252 lines.
 
-- **simulate_paths()** (line 51): Posterior predictive price paths
-- **terminal_risk()** (line 151): Value at risk and expected shortfall on the horizon return
-- **position_distribution()** (line 199): Distribution of a position's profit across the simulated terminals
+- **simulate_paths()** (line 52): Posterior predictive price paths
+- **terminal_risk()** (line 152): Value at risk and expected shortfall on the horizon return
+- **position_distribution()** (line 200): Distribution of a position's profit across the simulated terminals
 
 ### `engine/src/optiondesk_engine/strategies/__init__.py`
 
 Multi-leg option strategy construction, payoff analysis and friction.
 
-61 lines.
+62 lines.
 
 
 ### `engine/src/optiondesk_engine/strategies/friction.py`
 
 Friction and liquidity gate for strategy plans.
 
-155 lines.
+156 lines.
 
-- **leg_quote()** (line 45): (bid, ask, mid, open_interest, volume) from a leg's source contract
-- **plan_friction()** (line 62): Estimate the round trip cost of trading a plan's legs
+- **leg_quote()** (line 46): (bid, ask, mid, open_interest, volume) from a leg's source contract
+- **plan_friction()** (line 63): Estimate the round trip cost of trading a plan's legs
 
 ### `engine/src/optiondesk_engine/strategies/outlook.py`
 
 The five-direction outlook framework.
 
-101 lines.
+102 lines.
 
-- class **Outlook** (line 28): The five directional views a structure can express
+- class **Outlook** (line 29): The five directional views a structure can express
   - methods: `label`
-- **expected_move()** (line 52): One standard deviation move to expiry, in price units
-- **one_sd_band()** (line 62): (lower, upper) edges of the 68 percent probability range
-- **classify_target()** (line 68): Map a price target onto one of the five directions
-- **chain_iv()** (line 85): At-the-money implied volatility from a split chain, or None
+- **expected_move()** (line 53): One standard deviation move to expiry, in price units
+- **one_sd_band()** (line 63): (lower, upper) edges of the 68 percent probability range
+- **classify_target()** (line 69): Map a price target onto one of the five directions
+- **chain_iv()** (line 86): At-the-money implied volatility from a split chain, or None
 
 ### `engine/src/optiondesk_engine/strategies/payoff.py`
 
 Expiry payoff engine for multi-leg option strategies.
 
-348 lines.
+349 lines.
 
-- class **Leg** (line 25): One leg of a strategy
+- class **Leg** (line 26): One leg of a strategy
   - methods: `__init__`, `pnl_at_expiry`, `as_dict`
-- **pnl_at_expiry()** (line 85): Total strategy profit or loss if the underlying settles at price
-- **net_option_cash()** (line 90): Cash from the option legs at the moment the trade is opened
-- **analyze()** (line 116): Risk graph metrics for a single expiry strategy
-- **probability_of_profit()** (line 232): Probability the strategy expires profitable, or None
-- **tail_metrics()** (line 264): Closed-form loss statistics under the same lognormal model
-- **payoff_curve()** (line 332): (prices, pnls) across [lo, hi], with exact strikes included
+- **pnl_at_expiry()** (line 86): Total strategy profit or loss if the underlying settles at price
+- **net_option_cash()** (line 91): Cash from the option legs at the moment the trade is opened
+- **analyze()** (line 117): Risk graph metrics for a single expiry strategy
+- **probability_of_profit()** (line 233): Probability the strategy expires profitable, or None
+- **tail_metrics()** (line 265): Closed-form loss statistics under the same lognormal model
+- **payoff_curve()** (line 333): (prices, pnls) across [lo, hi], with exact strikes included
 
 ### `engine/src/optiondesk_engine/strategies/playbook.py`
 
 Strategy constructors and the playbook registry.
 
-915 lines.
+916 lines.
 
-- **split_chain()** (line 40): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
-- **long_call()** (line 138): Stock replacement. Uncapped upside, risk capped at the premium
-- **long_put()** (line 146): Alternative to shorting. Bearish, risk capped at the premium
-- **bull_call_spread()** (line 154): Buy the lower strike call, sell a higher one against it
-- **bear_put_spread()** (line 194): Mirror of the bull call spread: buy the higher put, sell a lower
-- **cash_secured_put()** (line 230): Sell a put below the lower band edge
-- **covered_call()** (line 252): Own the underlying and sell a call above the upper band edge
-- **protective_put()** (line 273): Long underlying plus a long at-the-money put. Insurance
-- **straddle()** (line 289): Buy the at-the-money call and put. A storm, direction unknown
-- **strangle()** (line 302): The cheaper cousin: an out of the money call and put
-- **iron_condor()** (line 324): A put credit spread and a call credit spread together
-- **iron_butterfly()** (line 367): Sell the at-the-money straddle, buy wings to cap it
-- **long_call_butterfly()** (line 408): Buy one lower call, sell two at the money, buy one higher
-- **ratio_spread()** (line 451): Buy one call near the money, sell more than one further out
-- **broken_wing_butterfly()** (line 498): A call butterfly with the far wing wider than the near one
-- **jade_lizard()** (line 560): A short put below the range plus a short call spread above it
-- **recommend()** (line 824): Rank the playbook for a view. Returns (name, score, meta), best first
-- **build()** (line 867): Build one plan by name. chain must come from split_chain
-- **describe()** (line 886): A readable block for logs and reports
+- **split_chain()** (line 41): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
+- **long_call()** (line 139): Stock replacement. Uncapped upside, risk capped at the premium
+- **long_put()** (line 147): Alternative to shorting. Bearish, risk capped at the premium
+- **bull_call_spread()** (line 155): Buy the lower strike call, sell a higher one against it
+- **bear_put_spread()** (line 195): Mirror of the bull call spread: buy the higher put, sell a lower
+- **cash_secured_put()** (line 231): Sell a put below the lower band edge
+- **covered_call()** (line 253): Own the underlying and sell a call above the upper band edge
+- **protective_put()** (line 274): Long underlying plus a long at-the-money put. Insurance
+- **straddle()** (line 290): Buy the at-the-money call and put. A storm, direction unknown
+- **strangle()** (line 303): The cheaper cousin: an out of the money call and put
+- **iron_condor()** (line 325): A put credit spread and a call credit spread together
+- **iron_butterfly()** (line 368): Sell the at-the-money straddle, buy wings to cap it
+- **long_call_butterfly()** (line 409): Buy one lower call, sell two at the money, buy one higher
+- **ratio_spread()** (line 452): Buy one call near the money, sell more than one further out
+- **broken_wing_butterfly()** (line 499): A call butterfly with the far wing wider than the near one
+- **jade_lizard()** (line 561): A short put below the range plus a short call spread above it
+- **recommend()** (line 825): Rank the playbook for a view. Returns (name, score, meta), best first
+- **build()** (line 868): Build one plan by name. chain must come from split_chain
+- **describe()** (line 887): A readable block for logs and reports
 
 ### `engine/src/optiondesk_engine/strategies/timespread.py`
 
 Structures whose legs expire on different dates.
 
-338 lines.
+339 lines.
 
-- class **TimeLeg** (line 48): One leg of a structure whose legs expire on different dates
+- class **TimeLeg** (line 49): One leg of a structure whose legs expire on different dates
   - methods: `__init__`, `value_at`, `as_dict`
-- **net_option_cash()** (line 121): Cash at entry. Positive is a credit, negative a debit
-- **pnl_at()** (line 126): Profit once at_days have passed, with the underlying at price
-- **payoff_curve()** (line 133): (prices, profits) at the mark date, with strikes included exactly
-- **analyze_at_front()** (line 149): Risk graph at the near expiry
-- **calendar_spread()** (line 244): Sell the near expiry and buy the far one at the same strike
-- **diagonal_spread()** (line 277): A calendar with different strikes: carry plus a directional lean
-- **build_time_spread()** (line 315): Build a two-expiry structure by name
+- **net_option_cash()** (line 122): Cash at entry. Positive is a credit, negative a debit
+- **pnl_at()** (line 127): Profit once at_days have passed, with the underlying at price
+- **payoff_curve()** (line 134): (prices, profits) at the mark date, with strikes included exactly
+- **analyze_at_front()** (line 150): Risk graph at the near expiry
+- **calendar_spread()** (line 245): Sell the near expiry and buy the far one at the same strike
+- **diagonal_spread()** (line 278): A calendar with different strikes: carry plus a directional lean
+- **build_time_spread()** (line 316): Build a two-expiry structure by name
 
 ## Package: shell (MIT)
 
@@ -255,14 +255,14 @@ Option desk shell.
 
 Artifact envelope and atomic writing.
 
-195 lines.
+197 lines.
 
-- **utc_now()** (line 36): Current UTC time as an ISO-8601 string ending in Z
-- **envelope()** (line 45): Build the meta block shared by every artifact
-- **archive_existing()** (line 104): Move an artifact about to be replaced into the archive
-- **write_json()** (line 141): Write one artifact atomically. Returns the path written
-- **read_json()** (line 173): Read one artifact from disk
-- **latest()** (line 184): Most recently modified artifact matching a glob, or None
+- **utc_now()** (line 38): Current UTC time as an ISO-8601 string ending in Z
+- **envelope()** (line 47): Build the meta block shared by every artifact
+- **archive_existing()** (line 106): Move an artifact about to be replaced into the archive
+- **write_json()** (line 143): Write one artifact atomically. Returns the path written
+- **read_json()** (line 175): Read one artifact from disk
+- **latest()** (line 186): Most recently modified artifact matching a glob, or None
 
 ### `shell/src/optiondesk/cli/__init__.py`
 
@@ -462,7 +462,7 @@ Dashboard stylesheet, kept apart from the markup that uses it.
 
 ### `shell/src/optiondesk/engine_bridge.py`
 
-The single seam between the MIT shell and the AGPL engine.
+The single seam between the shell and the AGPL engine.
 
 111 lines.
 
@@ -678,7 +678,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `reference.md`, `workflows/choose-a-st
 
 ## Totals
 
-55 modules, 12519 lines of source, 150 public functions, 14 public classes, 629 test functions.
+55 modules, 12540 lines of source, 150 public functions, 14 public classes, 629 test functions.
 
 Every public name carries a docstring.
 

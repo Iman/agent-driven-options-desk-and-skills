@@ -380,10 +380,13 @@ def test_every_package_carries_the_licence_it_declares():
     what. The agent package declared MIT in its metadata and shipped no
     licence text.
     """
+    # One licence over the whole repository since 2026-08-31. The earlier
+    # MIT and AGPL split permitted the commercial use it was meant to
+    # prevent.
     expected = {
-        "engine": ("AGPL-3.0-only", "AFFERO"),
-        "shell": ("MIT", "MIT"),
-        "agent": ("MIT", "MIT"),
+        "engine": ("PolyForm-Noncommercial-1.0.0", "POLYFORM NONCOMMERCIAL"),
+        "shell": ("PolyForm-Noncommercial-1.0.0", "POLYFORM NONCOMMERCIAL"),
+        "agent": ("PolyForm-Noncommercial-1.0.0", "POLYFORM NONCOMMERCIAL"),
     }
     for package, (declared, in_text) in expected.items():
         directory = ROOT / package
@@ -406,11 +409,24 @@ def test_every_package_carries_the_licence_it_declares():
     root_licence = ROOT / "LICENSE"
     assert root_licence.exists(), (
         "the repository root has no LICENSE, so GitHub shows none at all")
-    text = root_licence.read_text(encoding="utf-8")
+
+    # One licence covers the whole repository, so every copy must be
+    # identical. When they differed, the root file had to explain the split
+    # instead; a repository where two LICENSE files disagree is worse than
+    # one with a single file, because the reader cannot tell which governs.
+    root_text = root_licence.read_text(encoding="utf-8")
     for package in expected:
-        assert package + "/" in text, (
-            "the root LICENSE does not say what applies to {}/".format(
-                package))
+        directory = ROOT / package
+        if not directory.exists():
+            continue
+        assert (directory / "LICENSE").read_text(encoding="utf-8") == \
+            root_text, (
+            "{}/LICENSE differs from the root LICENSE".format(package))
+
+    assert "Required Notice:" in root_text, (
+        "the licence carries no Required Notice, which is the clause that "
+        "makes attribution travel with a copy")
+    assert "noncommercial" in root_text.lower()
 
 
 def test_every_repository_named_as_an_influence_states_its_licence():

@@ -1,6 +1,7 @@
 """Chain-level analytics: positioning, exposure and pain.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 Where the pricing modules answer "what is this contract worth", these
 answer "where is the open interest, and what does hedging it imply".

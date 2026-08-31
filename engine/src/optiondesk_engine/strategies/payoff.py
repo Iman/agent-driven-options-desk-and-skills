@@ -1,6 +1,7 @@
 """Expiry payoff engine for multi-leg option strategies.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 Ported from smartsheep.witty.strategies.payoff.
 
 Every strategy in the playbook is a list of legs at a single expiry. This

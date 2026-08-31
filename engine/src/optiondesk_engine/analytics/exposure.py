@@ -1,6 +1,7 @@
 """Dealer gamma exposure, walls, and max pain from an option chain.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 The concepts follow the dealer gamma work in the author's 001-qaunt desk
 (smartsheep.witty.analytics.gex and gamma_regime), reimplemented here
 against this project's chain contract.

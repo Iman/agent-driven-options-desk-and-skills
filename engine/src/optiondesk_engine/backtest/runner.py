@@ -1,6 +1,7 @@
 """Run a structure repeatedly across a price history.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 THE LOOP. Every entry_every trading days, build the structure from a
 synthetic chain priced at the volatility estimated from the trailing window,

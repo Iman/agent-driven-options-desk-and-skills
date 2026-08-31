@@ -14,11 +14,11 @@ from the skills. All three are rebuilt by `python3 scripts/refresh.py`.
 
 ## 1. The shape of it
 
-Three packages, two licences, one adapter between them.
+Three packages, one licence, one adapter between them.
 
 | package | licence | what it is | depends on |
 |---|---|---|---|
-| `engine` | AGPL-3.0-only | every number the desk reports | the standard library, nothing else |
+| `engine` | PolyForm NC 1.0.0 | every number the desk reports | the standard library, nothing else |
 | `shell` | MIT | data, contracts, CLI, dashboard, MCP server | the engine, optionally |
 | `agent` | MIT | LangChain tools, LangGraph routine | the shell, and langchain-core |
 

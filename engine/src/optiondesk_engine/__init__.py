@@ -1,25 +1,23 @@
-"""Option pricing and analytics engine.
+"""The analytics engine.
 
-Copyright (C) 2026 Iman Samizadeh
+Copyright (C) 2026 Iman Samizadeh.
 
-This program is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, either version 3 of the License, or (at your option) any
-later version.
+Licensed under the PolyForm Noncommercial License 1.0.0. Any noncommercial
+purpose is permitted, including personal study, research, and use by
+charitable, educational, public research, health, environmental and
+government organisations. Commercial use, which includes any use for
+commercial advantage or private monetary compensation, requires a separate
+written agreement with the copyright holder.
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-details.
+The full terms are in LICENSE at the root of this package and at
+https://polyformproject.org/licenses/noncommercial/1.0.0
 
-You should have received a copy of the GNU Affero General Public License along
-with this program. If not, see <https://www.gnu.org/licenses/>.
-
-A separate commercial licence is available from the copyright holder.
+This is research software. It is not investment advice, not a
+recommendation and not a solicitation. See DISCLAIMER.md.
 """
 
 __version__ = "0.1.0"
-LICENSE = "AGPL-3.0-only"
+LICENSE = "PolyForm-Noncommercial-1.0.0"
 
 from optiondesk_engine.pricing.black_scholes import (
     bs_price,

@@ -1,6 +1,7 @@
 """GARCH(1,1) with Student-t innovations, estimated by MCMC.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 Follows the Bayesian GARCH-t work in the author's 001-qaunt desk
 (smartsheep.witty.models.stochastic), reimplemented here in the standard
 library so the engine keeps its no-dependency property.

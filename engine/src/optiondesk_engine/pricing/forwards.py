@@ -1,6 +1,7 @@
 """Options on futures and on foreign exchange.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
+Commercial use requires a separate written agreement.
 
 WHAT THESE ARE, AND WHAT THEY ARE NOT FED BY. Black-76 prices an option on
 a futures contract, and Garman-Kohlhagen prices an option on a currency

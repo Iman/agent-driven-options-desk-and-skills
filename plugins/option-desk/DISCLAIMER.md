@@ -131,3 +131,69 @@ If any provision is held unenforceable, the remainder stays in force.
 Nothing here is legal, tax, accounting or financial advice. Consult a
 qualified professional in your jurisdiction before acting on anything this
 software produces.
+
+## 12. No regulated activity is carried on
+
+The copyright holder is not authorised or regulated by the Financial
+Conduct Authority, the Securities and Exchange Commission, or any other
+financial regulator, and does not hold himself out as being so.
+
+Nothing offered here constitutes, and nothing here is intended to
+constitute:
+
+- investment advice or a personal recommendation, within the meaning of the
+  FCA Handbook or Article 53 of the Financial Services and Markets Act 2000
+  (Regulated Activities) Order 2001, or advice within the meaning of the
+  US Investment Advisers Act of 1940
+- an offer, inducement or invitation to engage in investment activity, or a
+  financial promotion within the meaning of section 21 of the Financial
+  Services and Markets Act 2000
+- dealing, arranging, managing, safeguarding or administering investments
+  for any person
+- an offer to sell or a solicitation of an offer to buy any security
+
+No client relationship, advisory relationship, agency or fiduciary duty of
+any kind arises between you and the copyright holder through your use of
+this software, through correspondence about it, or through any commercial
+licence granted for it.
+
+The software is general in nature. It knows nothing of your circumstances,
+objectives, tax position, risk tolerance or regulatory status, and it does
+not consider them. Its output is not suitable or appropriate for you, in
+the regulatory sense of those words, because no assessment of suitability
+or appropriateness has been performed or is possible.
+
+## 13. No reliance
+
+You must not rely on anything this software produces. Any decision you take
+is yours alone, taken on your own judgement and on your own information,
+and the copyright holder has no responsibility for it.
+
+Model output is not a forecast. Backtest results are not achievable
+results, and the honesty statement carried in every backtest artifact
+explains precisely why. Historical or simulated performance does not
+indicate future performance.
+
+## 14. Indemnity
+
+To the extent permitted by law, you agree to indemnify the copyright holder
+against any claim, loss, liability, cost or expense, including reasonable
+legal fees, arising from your use of this software, from any output you
+distribute or act on, from any decision you or a third party takes in
+connection with it, and from any breach of these terms or of the licence.
+
+## 15. Where you may not use it
+
+You are responsible for determining whether use of this software is lawful
+where you are, and for complying with all applicable law, including
+sanctions, export control, market abuse and financial promotion rules.
+
+Do not use it where doing so would require an authorisation you do not
+hold, and do not present its output to another person in a way that would
+constitute advice, a personal recommendation or a financial promotion
+unless you are authorised to make one.
+
+Commercial use of any kind requires a separate written agreement under
+LICENSES.md. Obtaining such an agreement does not make the copyright holder
+your adviser, does not transfer any regulatory permission to you, and does
+not make him responsible for how you use the software.

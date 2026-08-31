@@ -17,7 +17,8 @@ Three categories, and the difference between them is legal, not stylistic:
 
 All of the following were authored by Iman Samizadeh in the `001-qaunt`
 repository (package `smartsheep.witty`, originally marked proprietary) and
-are relicensed here under AGPL-3.0 by the copyright holder.
+are relicensed here under the PolyForm Noncommercial License 1.0.0 by the
+copyright holder, who wrote them.
 
 Pricing:
 

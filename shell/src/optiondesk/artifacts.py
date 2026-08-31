@@ -28,8 +28,10 @@ DISCLAIMER = (
 )
 
 LICENSE_NOTE = (
-    "Produced by optiondesk (MIT shell) and, where analytics are present, "
-    "optiondesk-engine (AGPL-3.0). See LICENSES.md."
+    "Produced by optiondesk under the PolyForm Noncommercial License 1.0.0. "
+    "Noncommercial use is permitted; commercial use requires a separate "
+    "written agreement with the copyright holder. See LICENSE and "
+    "LICENSES.md."
 )
 
 

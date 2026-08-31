@@ -1,6 +1,6 @@
 """A desk routine as a state graph, with a bounded loop.
 
-Copyright (C) 2026 Iman Samizadeh. MIT, like the rest of the agent layer.
+Copyright (C) 2026 Iman Samizadeh. PolyForm Noncommercial 1.0.0, like the rest of this project.
 
 WHAT THIS IS FOR. Opening a desk on an underlying is not one call, it is a
 short dependency chain: a chain snapshot, then a Greek ladder from it, then

@@ -1,69 +1,75 @@
-# Licensing map
+# Licensing
 
-This repository ships two separately licensed components. The boundary is a
-directory boundary, and it is deliberate. Read this file before copying any
-code out of the tree.
+One licence covers this repository: the
+[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+The full text is in `LICENSE` at the root and in each package.
 
-## shell/ is MIT
+## What you may do without asking
 
-Everything under `shell/` is MIT licensed. That covers the skill documents,
-the JSON contracts and schemas, the provider registry and its free data
-providers, the CLI plumbing, the MCP server and the dashboard. The intent is
-that anyone can take the shell, embed it, fork it, or ship it inside a
-commercial product without asking permission.
+Any noncommercial purpose. The licence names these explicitly: research,
+experiment and testing for the benefit of public knowledge, personal study,
+private entertainment, hobby projects, amateur pursuits, and religious
+observance, in each case without an anticipated commercial application.
 
-The shell contains no proprietary modelling. It fetches data, validates it
-against a schema, writes artifacts, and exposes those artifacts to agent
-runtimes and to a browser.
+Use by a charitable organisation, an educational institution, a public
+research organisation, a public safety or health organisation, an
+environmental protection organisation, or a government institution is
+permitted regardless of how that organisation is funded.
 
-## engine/ is AGPL-3.0
+You may modify it, build on it, and pass it on, provided whoever receives
+it also receives these terms.
 
-Everything under `engine/` is licensed under the GNU Affero General Public
-License version 3. That covers, today and in the shipped tree, the pricing
-and implied volatility solver, the sixteen Greeks, the multi-leg payoff
-engine and the structure playbook including the time spreads, the dealer
-gamma and smile analytics, the structure ranking, the GARCH-t MCMC sampler
-and the path simulation, and the backtest and forward-test machinery. It
-will cover the volatility surface and the variance risk premium work as
-they are ported in.
+## What requires a written agreement first
 
-Read that list as the current boundary rather than a plan. A licence file
-that describes shipped code as future work understates what the licence
-already covers, which is the wrong direction for the one document a reader
-is entitled to take literally.
+Anything for commercial advantage or private monetary compensation. In this
+project's terms, and without limiting the licence itself, that includes:
 
-The practical effect of AGPL section 13: if you run a modified version of the
-engine as a network service, you must offer the source of your modified
-version to the users of that service. Running it privately for yourself
-carries no such obligation.
+- using it inside a fund, a trading desk, a proprietary trading operation,
+  or any business that manages money
+- selling it, or selling access to it, or bundling it into a paid product
+  or a subscription
+- offering paid consulting, research, signals or analysis produced with it
+- raising investment, grant money, donations or crowdfunding on the basis
+  of it, whether or not the software itself is distributed
+- using it in a course, programme or service that charges a fee
 
-## Commercial licensing of the engine
+If you want to do any of that, contact the copyright holder. Terms are
+negotiable and a share arrangement is one of the shapes they can take. The
+answer to a polite request is not automatically no.
 
-The copyright in the engine is held by Iman Samizadeh. AGPL is offered as one
-option. A separate commercial licence, which removes the AGPL obligations, is
-available on request. Dual licensing only remains possible while every line in
-`engine/` is either originally authored here or received under a permissive
-licence, which leads to the two standing rules below.
+## Why this rather than an open source licence
 
-## Two standing rules
+This is deliberate and it is not open source in the OSI sense. The earlier
+arrangement, MIT for the shell and AGPL for the engine, permitted exactly
+the thing it was meant to prevent: AGPL allows commercial use and selling,
+and only requires that a modified network service publishes its source. A
+person taking this engine, wrapping it, and raising money on it would have
+been complying.
 
-1. No third-party GPL or AGPL code enters `engine/`. Third-party copyleft
-   cannot be relicensed by this project, and its presence would end the
-   ability to grant commercial licences. Permissively licensed third-party
-   code (MIT, BSD, Apache-2.0) is acceptable with attribution recorded in
-   THIRD-PARTY.md.
-2. No code of unknown provenance enters either component. A public repository
-   with no licence file is not permissively licensed. It is all rights
-   reserved by default, and it stays out.
+The cost is real. Fewer people will use it, some package indexes and
+directories treat noncommercial licences as unfree, and it will attract
+fewer contributors. That trade was made knowingly.
 
-## Contributions
+## Relicensing, stated plainly
 
-Outside contributions to `engine/` require a signed contributor licence
-agreement before merge. See CLA.md. Without it the project cannot offer
-commercial licences covering the contributed lines.
+This repository was published on 2026-08-30 under MIT and AGPL-3.0-only,
+and relicensed on 2026-08-31. Copies taken under the earlier terms keep
+those terms for those versions: a licence already granted cannot be
+withdrawn. Everything from the relicensing commit onward is PolyForm
+Noncommercial.
 
-## Data is not code
+Contributions are covered by `CLA.md`, which grants the copyright holder a
+perpetual licence over them and is what makes relicensing possible.
 
-A licence on this software grants no rights over any market data it retrieves.
-Data redistribution rights are governed by each data provider's own terms.
-See DISCLAIMER.md.
+## What the licence does not do
+
+It does not make this software fit for any purpose, and it does not make
+its output advice. `DISCLAIMER.md` is the document that matters there, and
+the licence's own No Liability section is not a substitute for reading it.
+
+It does not grant any rights in third-party components. Apache ECharts is
+vendored under Apache-2.0 and keeps its own terms; see `THIRD-PARTY.md`.
+
+It does not grant rights in market data. Data reaches you from a provider
+under that provider's terms, and whether you may store or redistribute it
+is between you and them.

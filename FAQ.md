@@ -127,21 +127,42 @@ that assumption, and the artifact carries it in a field.
 
 ## Structure and licensing
 
-**Why are there two packages with two licences?**
+**Why are there three packages under one licence?**
 
-The shell is MIT so anyone can embed it, fork it or ship it commercially.
-The engine is AGPL because it is the part that took the work. They are
-joined by exactly one adapter module, so the boundary can be checked with a
-single grep, and the shell runs without the engine installed: it reports
-Greeks as unavailable rather than guessing them.
+The split is about dependencies and testability, not licensing. The engine
+has no dependencies outside the standard library and no network access,
+which is what lets it be checked against closed-form and finite-difference
+benchmarks. The shell holds everything that touches the outside world. The
+agent layer is optional and never in the compute path. One adapter module
+joins the shell to the engine, so the seam can be checked with one grep,
+and the shell runs without the engine by reporting Greeks as unavailable
+rather than guessing them.
 
 **Can I use this commercially?**
 
-The shell, yes, under MIT. The engine under AGPL means you may run it
-privately however you like, but if you run a modified version as a network
-service you must offer that modified source to its users. A commercial
-licence that removes those obligations is available from the copyright
-holder.
+Not without a written agreement. The licence is
+[PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0):
+free for any noncommercial purpose, including personal study, research,
+hobby projects, and use by charities, schools, public research bodies and
+government however they are funded.
+
+Commercial use means anything for commercial advantage or private monetary
+compensation. Using it inside a fund, selling it or access to it, paid
+consulting or signals produced with it, and raising money on the back of it
+all need an agreement first. Ask the copyright holder; terms are negotiable
+and a revenue share is one of the shapes they can take.
+
+**It used to be MIT and AGPL. What happened?**
+
+Those terms permitted the thing they were meant to prevent. AGPL allows
+commercial use and selling; it only requires that a modified version run as
+a network service publishes its source. Someone taking the engine, wrapping
+it and raising money on it was complying. Relicensed on 2026-08-31, one day
+after publication.
+
+Copies taken under the old terms keep them for those versions. A licence
+already granted cannot be withdrawn, and pretending otherwise would be
+worse than the original mistake.
 
 **What is the difference between the skills, the commands, the agents and
 the MCP tools?**

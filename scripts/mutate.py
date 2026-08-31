@@ -264,6 +264,17 @@ MUTATIONS = [
      '        raise ValueError("no key given, nothing was written")',
      "        pass",
      "shell/tests/test_keys_cli.py"),
+    ("ratio-guard-removed", ENGINE + "/strategies/timespread.py",
+     "    if short_mass >= long_mass:\n        return None",
+     "    if False:\n        return None",
+     "engine/tests/test_timespread.py"),
+    ("credit-vertical-pays-a-debit", ENGINE + "/strategies/playbook.py",
+     "    plan = _plan(\"bull_put_spread\", legs, chain, band)\n"
+     "    # A credit spread that pays a debit has its strikes the wrong way\n"
+     "    # round or its quotes crossed. Either way it is not this structure.\n"
+     "    if plan[\"analysis\"][\"net_cash\"] <= 0:\n        return None",
+     "    plan = _plan(\"bull_put_spread\", legs, chain, band)",
+     "engine/tests/test_strategies.py"),
     ("calendar-strike-from-near-chain-only",
      ENGINE + "/strategies/timespread.py",
      "    chosen = min(shared, key=lambda value: abs(value - target))",

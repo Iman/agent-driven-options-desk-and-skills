@@ -19,6 +19,18 @@ For every structure put in front of you, answer these in order.
 settlement price that produces it. If the loss is unbounded, say so first
 and in those words.
 
+**If the structure spans two expiries, check the two numbers that define
+it.** `delta_ratio` is the short delta mass over the long: at or above one
+the structure caps the move it was opened for, and the builder refuses to
+produce that, so a plan carrying a ratio near one is close to the edge of
+what it claims to be. `giveback` is how much of the peak profit is handed
+back at the far end of the scanned range; a plain diagonal has one and a
+ratio diagonal is built not to. Both are read off the plan, and both are
+measured over the scanned range rather than over all prices, which is a
+limit worth saying out loud rather than a number to quote as if it were
+exact. The whole mark rests on the surviving leg being priced at today's
+volatility, so say what happens to the trade if that volatility falls.
+
 **What has to happen for it to work.** State it as a range and a horizon,
 not a direction. "Between 758 and 783 by 18 September" is a claim someone
 can disagree with; "mildly bullish" is not.

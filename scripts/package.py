@@ -37,7 +37,7 @@ AUTHOR = {"name": "Iman Samizadeh"}
 REPOSITORY = "https://github.com/Iman/agent-driven-options-desk-and-skills"
 DESCRIPTION = (
     "Option analytics an agent can drive: chains, the full Greek ladder, "
-    "dealer positioning, seventeen structures with ranking, a GARCH-t "
+    "dealer positioning, twenty-one structures with ranking, a GARCH-t "
     "simulation, backtests with modelled premiums, and a paper forward "
     "test. Research software, not investment advice."
 )

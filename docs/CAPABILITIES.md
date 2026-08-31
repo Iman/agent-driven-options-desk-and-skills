@@ -141,7 +141,7 @@ Net position Greeks are reported with a `complete` flag and a `missing`
 list, because a position Greek summed over legs where one leg had no
 volatility is a wrong number rather than a smaller one.
 
-### 4.3 Seventeen structures
+### 4.3 Twenty-one structures
 
 | structure | when it is the right shape |
 |---|---|
@@ -149,6 +149,8 @@ volatility is a wrong number rather than a smaller one.
 | long put | bearish, risk capped at premium |
 | bull call spread | mildly bullish, full profit on a normal move |
 | bear put spread | mildly bearish, higher probability than a long put |
+| bull put spread | mildly bullish, collected rather than paid, capped by the lower long |
+| bear call spread | mildly bearish, collected rather than paid, capped by the higher long |
 | cash secured put | neutral to mildly bullish, or paid to wait to own |
 | covered call | own it, expect sideways to mildly up |
 | protective put | keep the upside, cap the downside, pay for it |
@@ -159,6 +161,8 @@ volatility is a wrong number rather than a smaller one.
 | long call butterfly | a cheap bet on pinning near a strike |
 | calendar spread | sell near, buy far, same strike, collect the decay difference |
 | diagonal spread | a calendar with a directional lean |
+| ratio call diagonal | back-month longs against fewer front-month shorts, so a large rise is not capped |
+| ratio put diagonal | the bearish mirror, a large fall not capped |
 | ratio spread | financed by selling more than you buy, and uncapped on the short side |
 | broken wing butterfly | a butterfly with unequal wings, no risk on one side, often a credit |
 | jade lizard | short put plus short call spread, no upside risk when the credit exceeds the call width |
@@ -167,8 +171,8 @@ Each plan carries legs, breakevens, maximum gain and loss, reward to risk,
 model probability of profit, net Greeks, and a friction estimate of what
 the round trip costs at quoted spreads.
 
-Two of these are different in kind. A calendar and a diagonal have legs on
-different expiries, so when the near leg dies the far leg is still alive
+Four of these are different in kind. The calendar, the diagonal and the two
+ratio diagonals have legs on different expiries, so when the near leg dies the far leg is still alive
 and still worth something. The payoff is a curve rather than line segments
 and can only be drawn by pricing the surviving leg, which is done at the
 volatility it carries today. That assumption is the largest source of error
@@ -346,7 +350,7 @@ flag, and it was verified by removing one and watching it go red.
 ECharts from a vendored copy so a viewer's browser makes no third-party
 request.
 
-Thirty-nine panels and, at most, thirty-two chart canvases: twenty with
+Forty panels and, at most, thirty-two chart canvases: twenty with
 fixed identities, six Greek profiles and up to six per-structure outcome
 distributions. Each renders only when the artifact behind it exists, rather
 than being drawn empty:
@@ -649,7 +653,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies fifty-four breakages to a copy of
+everywhere else. It applies fifty-six breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The current result is twenty-two, three and zero, plus

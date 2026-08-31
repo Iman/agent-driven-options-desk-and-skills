@@ -197,7 +197,7 @@ def run(args):
         "ranked": comparison["ranked"],
         # Persisted, not only printed. The stdout summary carried this and
         # the artifact did not, so the dashboard could show twelve
-        # structures out of seventeen with nothing on the page saying which
+        # structures out of twenty-one with nothing on the page saying which
         # five were missing or why.
         "not_compared": failed,
     }

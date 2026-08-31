@@ -614,6 +614,73 @@ def _condor_section(condors):
                                  "expiry", ", ".join(families))))))
 
 
+def _time_spread_section(plans):
+    """The structures whose legs live on different expiries.
+
+    They are separated from the rest because their numbers mean something
+    different. Every other structure settles on one date, so its maximum
+    gain and loss are exact. These are marked at the near expiry with the
+    surviving leg priced at the volatility it carries today, so the
+    figures are a shape under an unchanged surface, not a forecast.
+
+    The two columns that only exist here are the ones that separate a
+    ratio diagonal from a plain one: delta ratio, the short delta mass
+    over the long, and giveback, how much of the peak profit the structure
+    hands back at the far end of the scan. A 1x1 diagonal can be too
+    right; the ratio versions are built so that it cannot be.
+    """
+    spreads = []
+    for plan in plans or []:
+        days = {leg.get("days_to_expiry") for leg in plan.get("legs") or []
+                if leg.get("days_to_expiry") is not None}
+        if len(days) < 2:
+            continue
+        analysis = plan.get("analysis") or {}
+        legs = plan.get("legs") or []
+        near = min(days)
+        far = max(days)
+        long_leg = next((leg for leg in legs if leg.get("side") == "long"),
+                        None)
+        short_leg = next((leg for leg in legs if leg.get("side") == "short"),
+                         None)
+        spreads.append({
+            "structure": (plan.get("strategy") or "").replace("_", " "),
+            "side": (long_leg or {}).get("kind") or "",
+            "near days": _num(near, 1),
+            "far days": _num(far, 1),
+            "long strike": _num((long_leg or {}).get("strike")),
+            "short strike": _num((short_leg or {}).get("strike")),
+            "long qty": _num((long_leg or {}).get("qty"), 1),
+            "short qty": _num((short_leg or {}).get("qty"), 1),
+            "delta ratio": _num(plan.get("delta_ratio"), 3),
+            "giveback": _num(plan.get("giveback")),
+            "net": _num(analysis.get("net_cash")),
+            "max gain": _num(analysis.get("max_gain")),
+            "max loss": _num(analysis.get("max_loss")),
+        })
+    if not spreads:
+        return ""
+    spreads.sort(key=lambda row: row["structure"])
+    columns = ["structure", "side", "near days", "far days", "long strike",
+               "short strike", "long qty", "short qty", "delta ratio",
+               "giveback", "net", "max gain", "max loss"]
+    return (
+        "<h2 class='section'>Time spreads</h2>"
+        + _panel(
+            "Structures with legs on two expiries",
+            "Marked at the near expiry with the surviving leg priced at "
+            "the volatility it carries today. Delta ratio is the short "
+            "delta mass over the long: below one is what keeps a large "
+            "move from being capped. Giveback is how much of the peak "
+            "profit is handed back at the far end of the scanned range.",
+            _table(spreads, columns)
+            + "<p class='assume'>Maximum gain and loss here are over the "
+              "scanned range rather than over all prices, because the "
+              "surviving leg makes the profit a curve with no closed "
+              "form. A blank delta ratio means the structure is a 1x1 and "
+              "does not hold one.</p>"))
+
+
 def _gamma_scalp_section(simulation, ladder, plans, expiry):
     """The simulated corridor with the gamma that sits across it."""
     if not simulation:
@@ -817,6 +884,8 @@ def render(payload):
     if comparison:
         sections.append("<h2 class='section'>Structure comparison</h2>"
                         + _comparison_panel(comparison))
+
+    sections.append(_time_spread_section(plans))
 
     if exposure:
         assumption = ("<p class='assume'>{}</p>".format(

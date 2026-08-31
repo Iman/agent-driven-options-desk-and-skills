@@ -231,3 +231,77 @@ def test_a_calendar_still_refuses_when_no_strike_is_shared(chains):
     assert not ({c["strike"] for c in near["calls"]}
                 & {c["strike"] for c in far["calls"]})
     assert calendar_spread(near, far, kind="call") is None
+
+
+def _delta_chain(days, iv, spot=100.0, expiry="2026-01-01", low=70, high=131,
+                 step=1):
+    """A chain wide enough to hold a 65 delta leg and a 25 delta leg."""
+    return _chain(days, iv, spot=spot, expiry=expiry, low=low, high=high,
+                  step=step)
+
+
+def test_a_ratio_diagonal_holds_more_long_delta_than_short(chains):
+    """The constraint that makes it that structure rather than a 1x1 with
+    an extra contract. Ported from the author's 001-qaunt work, where the
+    ratio was the point: the front shorts subsidise the carry while the
+    delta ratio stays below one, so the move is not capped.
+    """
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+
+    for name, kind in (("ratio_call_diagonal", "call"),
+                       ("ratio_put_diagonal", "put")):
+        plan = build_time_spread(name, near, far)
+        assert plan is not None, "{} did not build".format(name)
+        assert plan["kind"] == kind
+        assert 0 < plan["delta_ratio"] < 1, (
+            "short delta mass must stay below long delta mass")
+        longs = [leg for leg in plan["legs"] if leg.side > 0]
+        shorts = [leg for leg in plan["legs"] if leg.side < 0]
+        assert len(longs) == 1 and len(shorts) == 1
+        assert longs[0].qty > shorts[0].qty, "more back month than front"
+        assert longs[0].days > shorts[0].days, "the long is the back month"
+
+
+def test_a_ratio_diagonal_is_refused_when_the_ratio_would_cap_the_move(
+        chains):
+    """Equal delta mass caps the very move the structure is opened for.
+    Returning a plan anyway would describe a capped trade as an uncapped
+    one, which is the failure the ratio exists to avoid.
+    """
+    from optiondesk_engine.strategies import timespread
+
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+    # Two shorts against one long, chosen so every other check passes: the
+    # short strike is further out of the money than the long, both legs
+    # price, and the expiries are the right way round. The only thing wrong
+    # is the delta mass, 1.02 times the long's. An earlier version of this
+    # test used equal deltas and equal quantities, which the strike check
+    # rejected first, so it passed while the guard was removed.
+    plan = timespread._ratio_diagonal(near, far, "call", long_delta=0.55,
+                                      short_delta=0.30, long_qty=1.0,
+                                      short_qty=2.0)
+    assert plan is None
+
+    # One short instead of two, same deltas, and it builds: the refusal
+    # above is the mass and nothing else.
+    allowed = timespread._ratio_diagonal(near, far, "call", long_delta=0.55,
+                                         short_delta=0.30, long_qty=1.0,
+                                         short_qty=1.0)
+    assert allowed is not None
+    assert allowed["delta_ratio"] < 1
+
+
+def test_the_ratio_gives_back_less_than_the_one_by_one(chains):
+    """The measurable difference between the two shapes, and the reason
+    both are kept. A 1x1 diagonal hands profit back beyond the short
+    strike as the long's time value drains against the short's intrinsic.
+    """
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+
+    ratio = build_time_spread("ratio_call_diagonal", near, far)
+    plain = build_time_spread("diagonal_spread", near, far, kind="call")
+    assert ratio is not None and plain is not None
+    assert ratio["giveback"] <= plain["analysis"]["upside_giveback"]

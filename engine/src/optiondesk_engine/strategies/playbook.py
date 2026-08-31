@@ -322,6 +322,72 @@ def strangle(chain, iv=None, days=None, size=1.0, wing_fraction=0.5):
     return _plan("strangle", legs, chain, band)
 
 
+def bull_put_spread(chain, iv=None, days=None, size=1.0,
+                    wing_width_fraction=0.5):
+    """Sell a put at the lower band edge, buy a lower one to cap the loss.
+
+    The credit half of a bullish view. Where a bull call spread pays a
+    debit and needs the move to happen, this collects the premium and
+    needs the move not to happen against it. Both are bullish and they
+    are not the same trade, which is why the old spread algo enumerated
+    the debit and credit verticals as separate families.
+
+    Ported from the credit vertical enumeration in the author's 001-qaunt
+    spread engine (smartsheep.witty.strategies.spreads.spread_engine).
+    """
+    spot = chain["spot"]
+    band = _band(chain, iv, days)
+    reference = band or (spot * 0.95, spot * 1.05)
+    width = (reference[1] - reference[0]) * wing_width_fraction / 2.0
+
+    short_opt = _closest(chain["puts"], reference[0])
+    long_opt = _closest(chain["puts"], _strike(short_opt) - width)
+    if _strike(long_opt) >= _strike(short_opt):
+        return None
+    legs = [
+        Leg("put", -1, _mid(short_opt), strike=_strike(short_opt), qty=size,
+            ref=short_opt),
+        Leg("put", +1, _mid(long_opt), strike=_strike(long_opt), qty=size,
+            ref=long_opt),
+    ]
+    plan = _plan("bull_put_spread", legs, chain, band)
+    # A credit spread that pays a debit has its strikes the wrong way
+    # round or its quotes crossed. Either way it is not this structure.
+    if plan["analysis"]["net_cash"] <= 0:
+        return None
+    return plan
+
+
+def bear_call_spread(chain, iv=None, days=None, size=1.0,
+                     wing_width_fraction=0.5):
+    """Sell a call at the upper band edge, buy a higher one to cap it.
+
+    The credit half of a bearish view, and the mirror of the bull put
+    spread. Together the two are the wings of an iron condor, which this
+    playbook could already build while being unable to build either half
+    on its own.
+    """
+    spot = chain["spot"]
+    band = _band(chain, iv, days)
+    reference = band or (spot * 0.95, spot * 1.05)
+    width = (reference[1] - reference[0]) * wing_width_fraction / 2.0
+
+    short_opt = _closest(chain["calls"], reference[1])
+    long_opt = _closest(chain["calls"], _strike(short_opt) + width)
+    if _strike(long_opt) <= _strike(short_opt):
+        return None
+    legs = [
+        Leg("call", -1, _mid(short_opt), strike=_strike(short_opt), qty=size,
+            ref=short_opt),
+        Leg("call", +1, _mid(long_opt), strike=_strike(long_opt), qty=size,
+            ref=long_opt),
+    ]
+    plan = _plan("bear_call_spread", legs, chain, band)
+    if plan["analysis"]["net_cash"] <= 0:
+        return None
+    return plan
+
+
 def iron_condor(chain, iv=None, days=None, size=1.0,
                 wing_width_fraction=0.5):
     """A put credit spread and a call credit spread together.
@@ -661,6 +727,29 @@ PLAYBOOK = {
                         "of a capped gain."),
         "build": bull_call_spread,
     },
+    "bull_put_spread": {
+        "trade_type": "credit",
+        "outlooks": (Outlook.MILD_BULLISH, Outlook.NEUTRAL),
+        "vol_view": "crush",
+        "needs_underlying": False,
+        "when_to_use": ("The credit half of a bullish view. Collects premium "
+                        "and wins if the underlying does not fall through "
+                        "the short strike, where a bull call spread pays a "
+                        "debit and needs the rise to arrive. Loss is capped "
+                        "by the lower long put."),
+        "build": bull_put_spread,
+    },
+    "bear_call_spread": {
+        "trade_type": "credit",
+        "outlooks": (Outlook.MILD_BEARISH, Outlook.NEUTRAL),
+        "vol_view": "crush",
+        "needs_underlying": False,
+        "when_to_use": ("The credit half of a bearish view, and the mirror "
+                        "of the bull put spread. The two together are the "
+                        "wings of an iron condor, which this playbook could "
+                        "build while being unable to build either half."),
+        "build": bear_call_spread,
+    },
     "bear_put_spread": {
         "trade_type": "debit",
         "outlooks": (Outlook.MILD_BEARISH,),
@@ -807,6 +896,33 @@ PLAYBOOK = {
                         "leg's volatility to hold up."),
         "build": None,
         "build_two_expiry": "calendar_spread",
+    },
+    "ratio_call_diagonal": {
+        "trade_type": "debit",
+        "outlooks": (Outlook.MILD_BULLISH, Outlook.STRONG_BULLISH),
+        "vol_view": "any",
+        "needs_underlying": False,
+        "needs_two_expiries": True,
+        "when_to_use": ("Back-month long calls at 50 to 80 delta with fewer "
+                        "front-month calls sold against them. The shorts "
+                        "subsidise the carry while the delta ratio stays "
+                        "below one, so a large move is not capped the way a "
+                        "1x1 diagonal caps it. Two expiries."),
+        "build": None,
+        "build_two_expiry": "ratio_call_diagonal",
+    },
+    "ratio_put_diagonal": {
+        "trade_type": "debit",
+        "outlooks": (Outlook.MILD_BEARISH, Outlook.STRONG_BEARISH),
+        "vol_view": "any",
+        "needs_underlying": False,
+        "needs_two_expiries": True,
+        "when_to_use": ("The bearish mirror. Back-month long puts with "
+                        "fewer front-month puts sold against them, delta "
+                        "ratio held below one so the fall is not capped. "
+                        "Two expiries."),
+        "build": None,
+        "build_two_expiry": "ratio_put_diagonal",
     },
     "diagonal_spread": {
         "trade_type": "debit",

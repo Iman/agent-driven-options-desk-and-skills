@@ -202,7 +202,7 @@ Expiry payoff engine for multi-leg option strategies.
 
 Strategy constructors and the playbook registry.
 
-916 lines.
+1032 lines.
 
 - **split_chain()** (line 41): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
 - **long_call()** (line 139): Stock replacement. Uncapped upside, risk capped at the premium
@@ -214,21 +214,23 @@ Strategy constructors and the playbook registry.
 - **protective_put()** (line 274): Long underlying plus a long at-the-money put. Insurance
 - **straddle()** (line 290): Buy the at-the-money call and put. A storm, direction unknown
 - **strangle()** (line 303): The cheaper cousin: an out of the money call and put
-- **iron_condor()** (line 325): A put credit spread and a call credit spread together
-- **iron_butterfly()** (line 368): Sell the at-the-money straddle, buy wings to cap it
-- **long_call_butterfly()** (line 409): Buy one lower call, sell two at the money, buy one higher
-- **ratio_spread()** (line 452): Buy one call near the money, sell more than one further out
-- **broken_wing_butterfly()** (line 499): A call butterfly with the far wing wider than the near one
-- **jade_lizard()** (line 561): A short put below the range plus a short call spread above it
-- **recommend()** (line 825): Rank the playbook for a view. Returns (name, score, meta), best first
-- **build()** (line 868): Build one plan by name. chain must come from split_chain
-- **describe()** (line 887): A readable block for logs and reports
+- **bull_put_spread()** (line 325): Sell a put at the lower band edge, buy a lower one to cap the loss
+- **bear_call_spread()** (line 361): Sell a call at the upper band edge, buy a higher one to cap it
+- **iron_condor()** (line 391): A put credit spread and a call credit spread together
+- **iron_butterfly()** (line 434): Sell the at-the-money straddle, buy wings to cap it
+- **long_call_butterfly()** (line 475): Buy one lower call, sell two at the money, buy one higher
+- **ratio_spread()** (line 518): Buy one call near the money, sell more than one further out
+- **broken_wing_butterfly()** (line 565): A call butterfly with the far wing wider than the near one
+- **jade_lizard()** (line 627): A short put below the range plus a short call spread above it
+- **recommend()** (line 941): Rank the playbook for a view. Returns (name, score, meta), best first
+- **build()** (line 984): Build one plan by name. chain must come from split_chain
+- **describe()** (line 1003): A readable block for logs and reports
 
 ### `engine/src/optiondesk_engine/strategies/timespread.py`
 
 Structures whose legs expire on different dates.
 
-366 lines.
+492 lines.
 
 - class **TimeLeg** (line 49): One leg of a structure whose legs expire on different dates
   - methods: `__init__`, `value_at`, `as_dict`
@@ -236,9 +238,11 @@ Structures whose legs expire on different dates.
 - **pnl_at()** (line 127): Profit once at_days have passed, with the underlying at price
 - **payoff_curve()** (line 134): (prices, profits) at the mark date, with strikes included exactly
 - **analyze_at_front()** (line 150): Risk graph at the near expiry
-- **calendar_spread()** (line 259): Sell the near expiry and buy the far one at the same strike
-- **diagonal_spread()** (line 305): A calendar with different strikes: carry plus a directional lean
-- **build_time_spread()** (line 343): Build a two-expiry structure by name
+- **calendar_spread()** (line 267): Sell the near expiry and buy the far one at the same strike
+- **diagonal_spread()** (line 313): A calendar with different strikes: carry plus a directional lean
+- **ratio_call_diagonal()** (line 451): Bullish ratio diagonal. kind is fixed by the name
+- **ratio_put_diagonal()** (line 456): Bearish mirror of the ratio call diagonal
+- **build_time_spread()** (line 469): Build a two-expiry structure by name
 
 ## Package: shell (PolyForm-Noncommercial-1.0.0)
 
@@ -375,12 +379,12 @@ optiondesk simulate: what the underlying's own behaviour implies.
 
 optiondesk strategy: build a multi-leg strategy from a chain snapshot.
 
-532 lines.
+540 lines.
 
 - **add_arguments()** (line 31): Register structure selection and the view that drives a recommendation:
-- **playbook_when()** (line 249): The playbook's own note on when a structure is the right one, or an
-- **run()** (line 333): Build one named structure, or recommend one from the stated view, and
-- **main()** (line 524): Parse argv for this command alone and run it, so the command works when
+- **playbook_when()** (line 257): The playbook's own note on when a structure is the right one, or an
+- **run()** (line 341): Build one named structure, or recommend one from the stated view, and
+- **main()** (line 532): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/config.py`
 
@@ -449,9 +453,9 @@ Collect artifacts from disk into the shape the dashboard page needs.
 
 The dashboard page: markup, tiles and tables.
 
-949 lines.
+1018 lines.
 
-- **render()** (line 725): Render the complete dashboard document from one payload
+- **render()** (line 792): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -608,9 +612,9 @@ Roughly 1075 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ### options-strategy
 
-"Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit, straddles, strangles, covered calls, cash-secured puts and protective puts. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, or asks to compare strategies. Not for order placement and not for recommendations."
+"Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit including bull put and bear call spreads, straddles, strangles, covered calls, cash-secured puts, protective puts, and the two-expiry family of calendars, diagonals and ratio diagonals. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, what a calendar or a diagonal or a ratio diagonal would do, or asks to compare strategies. Not for order placement and not for recommendations."
 
-Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/choose-a-structure.md`.
+Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/choose-a-structure.md`.
 
 ## Commands
 
@@ -628,7 +632,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Tests
 
-### engine/tests (179 test functions)
+### engine/tests (185 test functions)
 
 - `engine/tests/test_asymmetric_structures.py`: 28
 - `engine/tests/test_audit_regressions.py`: 20
@@ -640,8 +644,8 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_greeks_full.py`: 14
 - `engine/tests/test_simulation.py`: 12
 - `engine/tests/test_smile.py`: 8
-- `engine/tests/test_strategies.py`: 25
-- `engine/tests/test_timespread.py`: 17
+- `engine/tests/test_strategies.py`: 28
+- `engine/tests/test_timespread.py`: 20
 
 ### shell/tests (366 test functions)
 
@@ -687,7 +691,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-55 modules, 12659 lines of source, 150 public functions, 14 public classes, 659 test functions.
+55 modules, 12978 lines of source, 154 public functions, 14 public classes, 665 test functions.
 
 Every public name carries a docstring.
 

@@ -211,6 +211,14 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         "band": None,
         "legs": [leg.as_dict() for leg in plan["legs"]],
         "analysis": analysis,
+        # A ratio diagonal is defined by the delta ratio it holds and the
+        # giveback that ratio buys. Dropping them here would have written
+        # a plan indistinguishable from a 1x1 with two contracts on one
+        # leg, which is the thing the structure exists not to be.
+        "delta_ratio": plan.get("delta_ratio"),
+        "long_delta": plan.get("long_delta"),
+        "short_delta": plan.get("short_delta"),
+        "giveback": plan.get("giveback"),
         "probability": None,
         "net_greeks": None,
         "friction": None,

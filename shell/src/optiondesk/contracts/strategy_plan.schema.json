@@ -124,6 +124,34 @@
           }
         }
       }
+    },
+    "delta_ratio": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Short delta mass divided by long delta mass, for a ratio structure. Below one is what keeps the move uncapped; at or above one the structure caps the move it was opened for and is not built."
+    },
+    "long_delta": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Absolute delta of the back-month long leg as selected."
+    },
+    "short_delta": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Absolute delta of the front-month short leg."
+    },
+    "giveback": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Profit handed back from the peak at the far end of the scanned range, in the structure's own direction. The number that separates a ratio diagonal from a 1x1."
     }
   },
   "$defs": {

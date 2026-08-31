@@ -2,14 +2,14 @@
 
 Every panel and every chart the dashboard renders, captured from one
 live run: SPY at the 2026-10-16 expiry with the 2026-12-18 expiry also
-on disk, 394 and 303 contracts, all seventeen structures built, fifteen
-of them backtested over five years. Free data, delayed, and degraded on
-12.2 percent of contracts, which the page says for itself.
+on disk, 394 and 303 contracts, all twenty-one structures built and
+seventeen of them backtested over five years. Free data, delayed, and
+degraded on 12.2 percent of contracts, which the page says for itself.
 
 Each image is clipped to the element's own bounding box read from the
 live DOM, so a panel image is exactly that panel.
 
-The seven images used in [README.md](../README.md) are in the directory
+The eight images used in [README.md](../README.md) are in the directory
 above this one. This page is the complete set.
 
 ## The whole page
@@ -49,6 +49,10 @@ above this one. This page is the complete set.
 ### The ladder
 
 ![the ladder](screenshots/gallery/sections/the-ladder.png)
+
+### Time spreads
+
+![time spreads](screenshots/gallery/sections/time-spreads.png)
 
 ### Volatility surface
 
@@ -167,6 +171,10 @@ above this one. This page is the complete set.
 ### Structures across real history with modelled premiums
 
 ![structures across real history with modelled premiums](screenshots/gallery/panels/structures-across-real-history-with-modelled-premiums.png)
+
+### Structures with legs on two expiries
+
+![structures with legs on two expiries](screenshots/gallery/panels/structures-with-legs-on-two-expiries.png)
 
 ### Terminal distribution
 

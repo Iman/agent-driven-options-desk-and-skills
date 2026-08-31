@@ -191,6 +191,14 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
         "max_loss_at": prices[worst_index],
         "reward_risk": (max_gain / abs(max_loss)
                         if max_loss < 0 and max_gain > 0 else None),
+        # How much of the peak profit the structure hands back at the far
+        # end of the scan. A diagonal can be "too right": past the short
+        # strike the long's time value drains against the short's
+        # intrinsic and the position gives profit back. Reported so the
+        # 1x1 and the ratio can be compared on the number that separates
+        # them rather than on the story about them.
+        "upside_giveback": max_gain - profits[-1],
+        "downside_giveback": max_gain - profits[0],
         "at_days": at_days,
         "scan_range": [lo, hi],
         "scanned_fraction": span,
@@ -334,9 +342,127 @@ def diagonal_spread(near, far, kind="call", size=1.0, offset=0.03):
     return _plan("diagonal_spread", legs, spot, near, far, kind)
 
 
+def _delta_of(contract, spot, kind, r=DEFAULT_R, q=DEFAULT_Q):
+    """The contract's delta, computed when the chain does not carry one.
+
+    A chain snapshot in this project holds prices and volatilities, not
+    Greeks: the ladder is a separate artifact. The delta-targeted leg
+    selection these structures need therefore has to derive it, from the
+    contract's own implied volatility, rather than read it.
+    """
+    if contract.get("delta") is not None:
+        return abs(float(contract["delta"]))
+    iv = contract.get("iv")
+    days = contract.get("days") or contract.get("days_to_expiry")
+    if not iv or not days:
+        return None
+    t = float(days) / DAYS_PER_YEAR
+    if t <= 0:
+        return None
+    strike = float(contract["strike"])
+    d1 = ((math.log(spot / strike) + (r - q + 0.5 * float(iv) ** 2) * t)
+          / (float(iv) * math.sqrt(t)))
+    cdf = 0.5 * (1.0 + math.erf(d1 / math.sqrt(2.0)))
+    delta = math.exp(-q * t) * (cdf if kind == "call" else cdf - 1.0)
+    return abs(delta)
+
+
+def _by_delta(contracts, kind, target, spot, days):
+    """The priced contract whose absolute delta is nearest the target."""
+    scored = []
+    for contract in _priced(contracts):
+        if contract.get("type") != kind:
+            continue
+        enriched = dict(contract)
+        enriched.setdefault("days", days)
+        delta = _delta_of(enriched, spot, kind)
+        if delta is None:
+            continue
+        scored.append((abs(delta - target), enriched, delta))
+    if not scored:
+        return None, None
+    _, contract, delta = min(scored, key=lambda row: row[0])
+    return contract, delta
+
+
+def _ratio_diagonal(near, far, kind, size=1.0, long_delta=0.65,
+                    short_delta=0.25, long_qty=2.0, short_qty=1.0):
+    """Back-month longs against fewer front-month shorts, at a delta ratio.
+
+    Ported from the author's 001-qaunt work
+    (smartsheep.witty.strategies.diagonal.ratio_call_diagonal), which
+    built it from the Smolinsky study: the workhorse expression for a
+    leader breaking out is a long back-month contract at 50 to 80 delta
+    with nearer contracts sold against it at a ratio, so the front shorts
+    subsidise the carry without capping the move.
+
+    The constraint that makes it that trade rather than a 1x1 with extra
+    contracts is enforced here rather than assumed: the short delta mass
+    must stay strictly below the long delta mass. When it does not, the
+    structure caps the very move it was opened for, and this returns
+    nothing instead of a plan that would misdescribe itself.
+
+    Legs are chosen by delta, not by distance from spot. A 65 delta back
+    month leg is in the money on purpose.
+    """
+    near_days, far_days = _check_order(near, far)
+    spot = float(near["spot"])
+
+    long_opt, long_d = _by_delta(_side(far, kind), kind, long_delta, spot,
+                                 far_days)
+    short_opt, short_d = _by_delta(_side(near, kind), kind, short_delta,
+                                   spot, near_days)
+    if long_opt is None or short_opt is None:
+        return None
+
+    # The short has to be the further out of the money contract of the
+    # pair, or this is not a diagonal in the intended direction.
+    if kind == "call" and float(short_opt["strike"]) <= float(
+            long_opt["strike"]):
+        return None
+    if kind == "put" and float(short_opt["strike"]) >= float(
+            long_opt["strike"]):
+        return None
+
+    long_mass = long_d * long_qty * size
+    short_mass = short_d * short_qty * size
+    if short_mass >= long_mass:
+        return None
+
+    legs = [
+        TimeLeg(kind, +1, long_opt["mid"], float(long_opt["strike"]),
+                long_qty * size, float(long_opt["iv"]), far_days,
+                ref=long_opt),
+        TimeLeg(kind, -1, short_opt["mid"], float(short_opt["strike"]),
+                short_qty * size, float(short_opt["iv"]), near_days,
+                ref=short_opt),
+    ]
+    name = "ratio_{}_diagonal".format(kind)
+    plan = _plan(name, legs, spot, near, far, kind)
+    analysis = plan["analysis"]
+    plan["delta_ratio"] = short_mass / long_mass
+    plan["long_delta"] = long_d
+    plan["short_delta"] = short_d
+    plan["giveback"] = (analysis["upside_giveback"] if kind == "call"
+                        else analysis["downside_giveback"])
+    return plan
+
+
+def ratio_call_diagonal(near, far, kind=None, size=1.0, **kwargs):
+    """Bullish ratio diagonal. kind is fixed by the name."""
+    return _ratio_diagonal(near, far, "call", size=size, **kwargs)
+
+
+def ratio_put_diagonal(near, far, kind=None, size=1.0, **kwargs):
+    """Bearish mirror of the ratio call diagonal."""
+    return _ratio_diagonal(near, far, "put", size=size, **kwargs)
+
+
 BUILDERS = {
     "calendar_spread": calendar_spread,
     "diagonal_spread": diagonal_spread,
+    "ratio_call_diagonal": ratio_call_diagonal,
+    "ratio_put_diagonal": ratio_put_diagonal,
 }
 
 

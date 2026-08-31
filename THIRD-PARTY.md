@@ -47,6 +47,18 @@ Strategies, ported in full and adapted to this project's chain contract:
   butterfly builders added here.
 - `engine/src/optiondesk_engine/strategies/friction.py` from
   `witty/strategies/friction.py`.
+- `engine/src/optiondesk_engine/strategies/timespread.py` follows
+  `witty/strategies/diagonal.py`. The calendar and the plain diagonal were
+  reimplemented against this project's chain contract; the two ratio
+  diagonals, the delta-targeted leg selection, the delta-ratio constraint
+  and the giveback measurement are ported from that module, which built
+  them from the Smolinsky study recorded in that repository's research
+  notes on 2026-07-16.
+- The `bull_put_spread` and `bear_call_spread` builders in
+  `engine/src/optiondesk_engine/strategies/playbook.py` follow the credit
+  vertical family enumerated in
+  `witty/strategies/spreads/spread_engine.py`, which treated debit and
+  credit verticals as separate families on purpose.
 
 Analytics:
 

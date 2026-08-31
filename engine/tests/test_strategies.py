@@ -375,3 +375,74 @@ def test_butterfly_refuses_a_structure_that_cannot_profit():
     assert build("long_call_butterfly", chain) is None, (
         "a butterfly with wings at {} around a body at {} costs more than "
         "its width and still built".format(wings, body))
+
+
+def test_the_credit_verticals_build_and_collect(chain=None):
+    """A bull put spread and a bear call spread, which the playbook could
+    not build until now while being able to build both of them at once as
+    an iron condor.
+
+    Ported from the credit vertical enumeration in the author's 001-qaunt
+    spread engine, where debit and credit verticals were deliberately
+    separate families: a bull call spread pays a debit and needs the rise
+    to arrive, a bull put spread collects and needs the fall not to.
+    """
+    chain = split_chain(_chain())
+    for name in ("bull_put_spread", "bear_call_spread"):
+        plan = build(name, chain)
+        assert plan is not None, "{} did not build".format(name)
+        assert plan["analysis"]["net_cash"] > 0, "a credit spread must pay"
+        assert len(plan["legs"]) == 2
+        sides = sorted(leg.side for leg in plan["legs"])
+        assert sides == [-1, 1], "one long and one short"
+        assert plan["analysis"]["max_loss"] < 0
+        assert math.isfinite(plan["analysis"]["max_loss"]), (
+            "the long leg exists to cap the loss")
+
+
+def test_the_credit_verticals_are_the_two_halves_of_a_condor():
+    """The condor's wings and these two structures come from the same band
+    edges, so the shorts must agree. If they drift apart, one of the three
+    builders has changed its strike selection and the other two have not.
+    """
+    chain = split_chain(_chain())
+    condor = build("iron_condor", chain)
+    put_side = build("bull_put_spread", chain)
+    call_side = build("bear_call_spread", chain)
+    assert condor and put_side and call_side
+
+    def short_strike(plan, kind):
+        return [leg.strike for leg in plan["legs"]
+                if leg.kind == kind and leg.side < 0][0]
+
+    assert short_strike(put_side, "put") == short_strike(condor, "put")
+    assert short_strike(call_side, "call") == short_strike(condor, "call")
+
+
+def test_a_credit_vertical_that_would_pay_a_debit_is_refused():
+    """A quote inversion makes the short leg cheaper than the long one, and
+    the "credit" spread then costs money to open. Returning it would put a
+    debit trade in the table under a credit heading, where every reader,
+    human or agent, would misread its risk: a credit spread's maximum loss
+    is the width less the credit, and this one has no credit.
+
+    The inversion is planted rather than waited for. It happens in real
+    chains through stale quotes on illiquid strikes.
+    """
+    snapshot = _chain()
+    puts = sorted((c for c in snapshot["contracts"] if c["type"] == "put"),
+                  key=lambda c: c["strike"])
+    # Make every put cost the same. The short and the long then collect and
+    # pay the same premium, so the spread opens for nothing, which is not a
+    # credit.
+    for contract in puts:
+        contract["mid"] = 1.0
+        contract["bid"] = 0.95
+        contract["ask"] = 1.05
+
+    chain = split_chain(snapshot)
+    assert build("bull_put_spread", chain) is None
+
+    # The call side is untouched and still builds, so the refusal above is
+    # the inversion and not a broken fixture.
+    assert build("bear_call_spread", chain) is not None

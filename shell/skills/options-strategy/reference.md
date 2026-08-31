@@ -1,4 +1,4 @@
-# Reference: the seventeen structures and what each needs
+# Reference: the twenty-one structures and what each needs
 
 ## Single expiry
 
@@ -8,6 +8,8 @@
 | long_put | debit | strong bearish | a large move down |
 | bull_call_spread | debit | mild bullish | a normal move up |
 | bear_put_spread | debit | mild bearish | a normal move down |
+| bull_put_spread | credit | mild bullish to neutral | the price not falling through the short put |
+| bear_call_spread | credit | mild bearish to neutral | the price not rising through the short call |
 | cash_secured_put | credit | neutral to mild bullish | anything but a large fall |
 | covered_call | credit | neutral to mild bullish | sideways, with the underlying held |
 | protective_put | debit | either extreme | a fall, while keeping the upside |
@@ -26,10 +28,22 @@
 |---|---|---|---|
 | calendar_spread | debit | the price sitting still | the near leg decays faster than the far |
 | diagonal_spread | debit | a drift toward the short strike | decay plus a directional lean |
+| ratio_call_diagonal | debit | a rise, without the cap a 1x1 imposes | the back-month longs outrun the fewer front-month shorts |
+| ratio_put_diagonal | debit | a fall, without the cap a 1x1 imposes | the back-month longs outrun the fewer front-month shorts |
 
 A calendar's payoff is a curve, not line segments, because the far leg is
 still alive when the near one expires. Its maximum gain and loss are found
 by scanning a range and are reported with the range that was scanned.
+
+The two ratio diagonals differ from the plain diagonal in one measurable
+way rather than in emphasis. A 1x1 diagonal can be too right: past the
+short strike the long leg's time value drains against the short's
+intrinsic and the position hands profit back. The ratio versions hold more
+back-month delta than front-month delta, so that giveback does not happen,
+and both plans report `delta_ratio` and `giveback` so the difference can be
+read rather than believed. A structure whose short delta mass reaches the
+long's is not built at all, because it would cap the move it was opened
+for.
 
 ## The five directions
 

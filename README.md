@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-854%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-54%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-862%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-56%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -23,11 +23,12 @@ Then ask your agent "where are the gamma walls on SPY?" and it will use the
 skills this installs. Eight other ways in, including Codex and ChatGPT, are
 in [INSTALL.md](INSTALL.md).
 
-![All seventeen structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
+![All twenty-one structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
 
 Every screenshot on this page is one live run against free data: SPY at the
 2026-10-16 expiry with 2026-12-18 also on disk, 394 and 303 contracts, all
-seventeen structures built and fifteen of them backtested over five years.
+twenty-one structures built and seventeen of them backtested over five
+years.
 None of it has been cleaned up. The amber banner is the run reporting that
 48 of those contracts fell back to the provider's published volatility
 because the solve did not identify one. That is what the desk looks like
@@ -209,7 +210,7 @@ The six skills, and when each one fires:
 |---|---|
 | `options-greeks` | chains, implied volatility by strike, the sixteen Greeks per contract |
 | `options-positioning` | dealer gamma, the walls, the flip, max pain, put-call ratios, skew |
-| `options-strategy` | seventeen structures, built, priced and ranked side by side |
+| `options-strategy` | twenty-one structures, built, priced and ranked side by side |
 | `options-simulation` | GARCH-t Monte Carlo, the fan, value at risk, expected shortfall |
 | `options-backtest` | real history with modelled premiums, significance, and paper forward tests |
 
@@ -737,7 +738,7 @@ Every view is addressable: `?u=SPY&e=2026-09-18`.
 
 ### What it looks like
 
-Seven views below. Every panel and every chart, seventy-five images in all,
+Eight views below. Every panel and every chart, seventy-seven images in all,
 is in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
 
 Positioning. Dealer gamma by strike with the walls marked, the cumulative
@@ -753,6 +754,14 @@ smile with its 25-delta wings, and the first and second order Greek curves
 drawn on one axis each.
 
 ![Implied volatility by strike and expiry, the smile with 25-delta wings marked, and delta, gamma, vega and theta curves](docs/screenshots/dashboard-volatility.png)
+
+Time spreads. The structures whose legs live on two expiries, kept apart
+from the rest because their numbers mean something different: they are
+marked at the near expiry with the surviving leg priced at today's
+volatility. Delta ratio and giveback are the two columns that separate a
+ratio diagonal from a plain one.
+
+![The two-expiry structures with their delta ratios and givebacks](docs/screenshots/dashboard-time-spreads.png)
 
 Structures. A picker for every structure built from this chain, the plan's
 numbers, the payoff at expiry with spot, breakevens and the expected move
@@ -867,7 +876,7 @@ the project looked broken when it was not.
 Or one suite at a time:
 
 ```
-./shell/.venv/bin/python -m pytest engine/tests -q    # 294 tests
+./shell/.venv/bin/python -m pytest engine/tests -q    # 302 tests
 ./shell/.venv/bin/python -m pytest shell/tests -q     # 402 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
@@ -889,7 +898,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           fifty-four mutations, killed or survived
+python3 scripts/mutate.py           fifty-six mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -922,7 +931,7 @@ version scaled by `max(1, |expected|)`, which left three Greeks untested
 with nothing to show for it, and mutation testing found fourteen surviving
 defects.
 That harness is in the tree as `scripts/mutate.py`, so it is checkable
-rather than a claim about the past. It breaks the code fifty-four ways and
+rather than a claim about the past. It breaks the code fifty-six ways and
 reports
 which breakages the tests notice. Run it. Its current result is forty-two
 killed and one proven equivalent, and getting there closed two real holes

@@ -224,8 +224,10 @@ TOOLS = [
     {
         "name": "option_strategy_compare",
         "description": (
-            "Build every structure from one chain and rank them by model "
-            "expected profit per unit of capital at risk. Returns the full "
+            "Build every structure in the playbook from one chain, "
+            "including the calendar and the diagonal when a later expiry "
+            "is on disk, and rank them by model expected profit per unit "
+            "of capital at risk. Returns the full "
             "table, the leader, and the caveat that any positive "
             "expectation largely measures the gap between the model's "
             "single volatility and the market's smile. Not a "
@@ -236,12 +238,13 @@ TOOLS = [
                 "snapshot": {"type": "string"},
                 "size": {"type": "number"},
                 "include_underlying": {"type": "boolean"},
+                "far_snapshot": {"type": "string"},
             },
         },
         "handler": compare_cmd.run,
         "defaults": {"snapshot": None, "size": 1.0,
                      "include_underlying": False, "rebuild": False,
-                     "out_dir": None},
+                     "far_snapshot": None, "out_dir": None},
     },
     {
         "name": "option_positioning",

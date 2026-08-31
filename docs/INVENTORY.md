@@ -228,7 +228,7 @@ Strategy constructors and the playbook registry.
 
 Structures whose legs expire on different dates.
 
-339 lines.
+366 lines.
 
 - class **TimeLeg** (line 49): One leg of a structure whose legs expire on different dates
   - methods: `__init__`, `value_at`, `as_dict`
@@ -236,9 +236,9 @@ Structures whose legs expire on different dates.
 - **pnl_at()** (line 127): Profit once at_days have passed, with the underlying at price
 - **payoff_curve()** (line 134): (prices, profits) at the mark date, with strikes included exactly
 - **analyze_at_front()** (line 150): Risk graph at the near expiry
-- **calendar_spread()** (line 245): Sell the near expiry and buy the far one at the same strike
-- **diagonal_spread()** (line 278): A calendar with different strikes: carry plus a directional lean
-- **build_time_spread()** (line 316): Build a two-expiry structure by name
+- **calendar_spread()** (line 259): Sell the near expiry and buy the far one at the same strike
+- **diagonal_spread()** (line 305): A calendar with different strikes: carry plus a directional lean
+- **build_time_spread()** (line 343): Build a two-expiry structure by name
 
 ## Package: shell (PolyForm-Noncommercial-1.0.0)
 
@@ -304,11 +304,11 @@ optiondesk chain: retrieve one option chain and write a snapshot.
 
 optiondesk compare: every structure from one chain, side by side.
 
-206 lines.
+243 lines.
 
-- **add_arguments()** (line 46): Register comparison options: which snapshot, position size, whether to
-- **run()** (line 67): Build every buildable structure from one snapshot, rank them under
-- **main()** (line 198): Parse argv for this command alone and run it, so the command works when
+- **add_arguments()** (line 52): Register comparison options: which snapshot, position size, whether to
+- **run()** (line 77): Build every buildable structure from one snapshot, rank them under
+- **main()** (line 235): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/expiries.py`
 
@@ -427,7 +427,7 @@ Local dashboard over the artifacts on disk.
 
 The dashboard's client-side chart code.
 
-1100 lines.
+1103 lines.
 
 
 ### `shell/src/optiondesk/dashboard/data.py`
@@ -479,11 +479,11 @@ The single seam between the shell and the analytics engine.
 
 Model Context Protocol server over stdio, standard library only.
 
-580 lines.
+583 lines.
 
-- **handle()** (line 412): Handle one JSON-RPC request. Returns a response dict, or None for a
-- **serve()** (line 518): Read line-delimited JSON-RPC from stdin, write responses to stdout
-- **main()** (line 551): Serve the JSON-RPC loop on stdin and stdout until the client closes it
+- **handle()** (line 415): Handle one JSON-RPC request. Returns a response dict, or None for a
+- **serve()** (line 521): Read line-delimited JSON-RPC from stdin, write responses to stdout
+- **main()** (line 554): Serve the JSON-RPC loop on stdin and stdout until the client closes it
 
 ### `shell/src/optiondesk/providers/__init__.py`
 
@@ -628,7 +628,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Tests
 
-### engine/tests (177 test functions)
+### engine/tests (179 test functions)
 
 - `engine/tests/test_asymmetric_structures.py`: 28
 - `engine/tests/test_audit_regressions.py`: 20
@@ -641,9 +641,9 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_simulation.py`: 12
 - `engine/tests/test_smile.py`: 8
 - `engine/tests/test_strategies.py`: 25
-- `engine/tests/test_timespread.py`: 15
+- `engine/tests/test_timespread.py`: 17
 
-### shell/tests (362 test functions)
+### shell/tests (366 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -654,7 +654,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_contracts.py`: 8
 - `shell/tests/test_dashboard_app.py`: 9
 - `shell/tests/test_dashboard_data.py`: 25
-- `shell/tests/test_dashboard_page.py`: 24
+- `shell/tests/test_dashboard_page.py`: 25
 - `shell/tests/test_dashboard_server.py`: 7
 - `shell/tests/test_dividend_yield.py`: 9
 - `shell/tests/test_documented_counts.py`: 23
@@ -671,6 +671,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_packaging.py`: 8
 - `shell/tests/test_providers.py`: 8
 - `shell/tests/test_runtime_docs.py`: 14
+- `shell/tests/test_screenshots.py`: 3
 - `shell/tests/test_simulate_cli.py`: 10
 - `shell/tests/test_strategy_cli.py`: 17
 - `shell/tests/test_summary_degraded_contract.py`: 4
@@ -686,7 +687,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-55 modules, 12589 lines of source, 150 public functions, 14 public classes, 653 test functions.
+55 modules, 12659 lines of source, 150 public functions, 14 public classes, 659 test functions.
 
 Every public name carries a docstring.
 

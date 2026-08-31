@@ -67,6 +67,25 @@
       "items": {
         "$ref": "#/$defs/row"
       }
+    },
+    "not_compared": {
+      "type": "array",
+      "description": "Structures in the playbook that produced no plan from this chain, each with the reason. Present so a reader can see what is absent from the ranking and why.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategy",
+          "reason"
+        ]
+      }
     }
   },
   "$defs": {

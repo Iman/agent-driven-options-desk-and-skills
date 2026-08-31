@@ -101,8 +101,11 @@ function frame(extra) {
       borderWidth: 1, textStyle: { color: ink, fontSize: 11.5 },
       axisPointer: { type: 'cross', label: { backgroundColor: muted,
         color: dark ? '#000' : '#fff' } } },
-    legend: { top: 0, right: 0, textStyle: { color: muted, fontSize: 10.5 },
-      itemWidth: 13, itemHeight: 7, icon: 'roundRect' }
+    // Scrolling rather than wrapping. With one series per structure the
+    // legend runs to fifteen entries, and a wrapped second row is drawn
+    // over the plot: the drawdown chart lost its top third to it.
+    legend: { top: 0, right: 0, type: 'scroll', textStyle: { color: muted,
+      fontSize: 10.5 }, itemWidth: 13, itemHeight: 7, icon: 'roundRect' }
   }, extra || {});
 }
 

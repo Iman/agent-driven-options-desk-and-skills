@@ -30,7 +30,8 @@ from optiondesk.contracts import SCHEMA_FILES, STRATEGY_COMPARISON, validate
 class _PlanArgs:
     """The arguments one strategy build needs, without argparse."""
 
-    def __init__(self, name, snapshot, size, out_dir):
+    def __init__(self, name, snapshot, size, out_dir, far_snapshot=None,
+                 kind="call", offset=0.03):
         self.name = name
         self.snapshot = snapshot
         self.size = size
@@ -41,6 +42,11 @@ class _PlanArgs:
         self.vol_view = "neutral"
         self.owns_underlying = False
         self.direction_unknown = False
+        # Time spreads need a second expiry and a side. strategy resolves
+        # the far snapshot itself when it is not named.
+        self.far_snapshot = far_snapshot
+        self.kind = kind
+        self.offset = offset
 
 
 def add_arguments(parser):
@@ -56,6 +62,10 @@ def add_arguments(parser):
                         dest="include_underlying",
                         help="include structures that require holding the "
                              "underlying")
+    parser.add_argument("--far-snapshot", default=None, dest="far_snapshot",
+                        help="the later expiry used by the calendar and the "
+                             "diagonal. Omit and the nearest later chain on "
+                             "disk for this underlying is used")
     parser.add_argument("--rebuild", action="store_true",
                         help="rebuild every structure even when a plan for "
                              "it already exists for this chain")
@@ -101,9 +111,31 @@ def run(args):
                 existing[plan.get("strategy")] = plan
 
     for name, meta in sorted(playbook.items()):
+        # A structure with no single-expiry builder is a time spread. It
+        # was skipped outright, so a comparison could never hold a calendar
+        # or a diagonal even with both expiries on disk, and the artifact
+        # said only "needs two expiries" as though the data were missing.
+        # strategy already resolves the far chain itself, so the build is
+        # the same call with the extra arguments.
         if meta["build"] is None:
-            failed.append({"strategy": name,
-                           "reason": "needs two expiries"})
+            try:
+                result = strategy_cmd.run(_PlanArgs(
+                    name, str(path), args.size, args.out_dir,
+                    far_snapshot=getattr(args, "far_snapshot", None)))
+            except FileNotFoundError as exc:
+                failed.append({"strategy": name, "reason": str(exc)})
+                continue
+            except Exception as exc:
+                failed.append({"strategy": name,
+                               "reason": "{}: {}".format(
+                                   type(exc).__name__, exc)})
+                continue
+            if not result.get("built"):
+                failed.append({"strategy": name,
+                               "reason": result.get("reason",
+                                                    "no viable structure")})
+                continue
+            plans.append(read_json(result["artifact"]))
             continue
         if meta["needs_underlying"] and not args.include_underlying:
             failed.append({"strategy": name,
@@ -163,6 +195,11 @@ def run(args):
         "leader": comparison["leader"],
         "rows": comparison["rows"],
         "ranked": comparison["ranked"],
+        # Persisted, not only printed. The stdout summary carried this and
+        # the artifact did not, so the dashboard could show twelve
+        # structures out of seventeen with nothing on the page saying which
+        # five were missing or why.
+        "not_compared": failed,
     }
     validate(payload, SCHEMA_FILES[STRATEGY_COMPARISON])
     filename = "comparison_{}_{}.json".format(

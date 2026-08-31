@@ -179,3 +179,55 @@ def test_build_by_name_and_its_error(chains):
 def test_analysis_refuses_an_empty_position():
     with pytest.raises(ValueError):
         analyze_at_front([], 100.0)
+
+
+def test_a_calendar_builds_when_the_two_ladders_differ(chains):
+    """Real expiries are not listed on the same strike ladder.
+
+    SPY on 2026-08-31 quoted the October expiry one point apart and the
+    December expiry five points apart. The builder picked the near strike
+    closest to spot, 766, then the far strike closest to that, 765, saw
+    they differed and returned nothing, reporting that the strikes or
+    quotes did not admit a calendar. A shared strike sat one point from
+    spot in both chains. It made calendars unbuildable on most real pairs
+    and blamed the data.
+
+    The near chain here lists every point and the far chain every five, the
+    same shape that produced the failure.
+    """
+    near = _chain(21, 0.22, spot=100.6, expiry="2026-09-18",
+                  low=90, high=111, step=1)
+    far = _chain(56, 0.24, spot=100.6, expiry="2026-10-23",
+                 low=90, high=111, step=5)
+
+    # Spot sits where the two ladders disagree, which is the whole point:
+    # the near chain's closest strike to spot is 101, the far chain does
+    # not list 101, and its own closest is 100. Choosing from the near
+    # chain first therefore finds no match, while a strike both chains
+    # quote sits well within a point of spot.
+    near_only = min((c["strike"] for c in near["calls"]),
+                    key=lambda s: abs(s - 100.6))
+    assert near_only == 101.0
+    assert 101.0 not in [c["strike"] for c in far["calls"]]
+    assert 100.0 in [c["strike"] for c in far["calls"]]
+
+    plan = calendar_spread(near, far, kind="call")
+    assert plan is not None, "a shared strike existed and was not used"
+    strikes = {leg.strike for leg in plan["legs"]}
+    assert len(strikes) == 1, "a calendar has one strike in both expiries"
+    assert strikes.pop() == 100.0
+    assert plan["near_days"] < plan["far_days"]
+
+
+def test_a_calendar_still_refuses_when_no_strike_is_shared(chains):
+    """Narrowing the failure must not remove it. Two ladders with nothing in
+    common are a diagonal at best, and calling that a calendar would
+    misdescribe its risk.
+    """
+    near = _chain(21, 0.22, spot=100.0, expiry="2026-09-18",
+                  low=90, high=111, step=5)
+    far = _chain(56, 0.24, spot=100.0, expiry="2026-10-23",
+                 low=92, high=113, step=5)
+    assert not ({c["strike"] for c in near["calls"]}
+                & {c["strike"] for c in far["calls"]})
+    assert calendar_spread(near, far, kind="call") is None

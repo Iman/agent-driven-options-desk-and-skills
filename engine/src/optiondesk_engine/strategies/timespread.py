@@ -218,6 +218,20 @@ def _priced(contracts):
     return out
 
 
+def _shared_strikes(near, far, kind):
+    """Strikes that both chains quote with a usable price and volatility.
+
+    A time spread needs one leg in each expiry, so a strike listed in only
+    one of them is no use however close to spot it sits.
+    """
+    def priced_strikes(chain):
+        return {float(c["strike"])
+                for c in _priced(_side(chain, kind))
+                if c.get("type") == kind}
+
+    return sorted(priced_strikes(near) & priced_strikes(far))
+
+
 def _closest(contracts, kind, target):
     candidates = [c for c in _priced(contracts) if c.get("type") == kind]
     if not candidates:
@@ -254,16 +268,29 @@ def calendar_spread(near, far, kind="call", size=1.0, strike=None):
     spot = float(near["spot"])
     target = float(strike) if strike is not None else spot
 
-    short = _closest(_side(near, kind), kind, target)
-    if short is None:
+    # The strike has to be chosen from the strikes both chains price, not
+    # from the near chain alone. Real expiries are not listed on the same
+    # ladder: a weekly quotes one point apart while a quarterly quotes
+    # five, so picking the nearest near-chain strike to spot lands on 766
+    # when the far chain lists 760, 765, 770. The old code then took the
+    # closest far strike, found 765, saw 766 was not 765, and reported "the
+    # strikes or quotes did not admit one" while 765 sat one point from
+    # spot in both chains. It made calendars unbuildable on most real
+    # pairs, which is not a data problem and was reported as one.
+    shared = _shared_strikes(near, far, kind)
+    if not shared:
         return None
-    long_leg = _closest(_side(far, kind), kind, float(short["strike"]))
-    if long_leg is None:
+    chosen = min(shared, key=lambda value: abs(value - target))
+
+    short = _closest(_side(near, kind), kind, chosen)
+    long_leg = _closest(_side(far, kind), kind, chosen)
+    if short is None or long_leg is None:
         return None
     if abs(float(long_leg["strike"]) - float(short["strike"])) > 1e-9:
-        # A calendar is defined by a shared strike. Without one in both
-        # chains this is a diagonal, and calling it a calendar would
-        # misdescribe its risk.
+        # A calendar is defined by a shared strike. Reaching here means the
+        # intersection above disagreed with what _closest returned, which
+        # would be a bug rather than a thin chain, and building anyway
+        # would misdescribe the structure's risk as a calendar's.
         return None
 
     legs = [

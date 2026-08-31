@@ -516,3 +516,16 @@ def test_the_x_axis_labels_are_rounded():
 
     assert "function axisNumber" in SCRIPT
     assert "formatter: axisNumber" in SCRIPT
+
+
+def test_the_shared_legend_scrolls_rather_than_wrapping():
+    """One series per structure means fifteen legend entries once every
+    structure has been backtested. A wrapped legend is drawn over the plot,
+    which took the top third of the drawdown chart.
+
+    A string assertion against the emitted script, for the same reason as
+    the axis test above: there is no JavaScript runtime here.
+    """
+    from optiondesk.dashboard.charts import SCRIPT
+
+    assert "type: 'scroll'" in SCRIPT

@@ -40,7 +40,7 @@ Every command the CLI exposes, read from the argparse parsers in src/optiondesk/
 - `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
   Flags: --provider, --out-dir
 - `optiondesk compare`: every structure side by side, ranked
-  Flags: --snapshot, --size, --include-underlying, --rebuild, --out-dir
+  Flags: --snapshot, --size, --include-underlying, --far-snapshot, --rebuild, --out-dir
 - `optiondesk simulate SYMBOL`: GARCH-t posterior, forward paths and tail risk
   Flags: --horizon, --paths, --draws, --burn, --chains, --period, --provider, --no-structures, --out-dir
 - `optiondesk backtest SYMBOL STRATEGY`: run a structure across real history, modelled premiums

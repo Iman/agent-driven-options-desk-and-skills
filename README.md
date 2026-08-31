@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-848%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-53%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-854%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-54%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -23,13 +23,27 @@ Then ask your agent "where are the gamma walls on SPY?" and it will use the
 skills this installs. Eight other ways in, including Codex and ChatGPT, are
 in [INSTALL.md](INSTALL.md).
 
-![Every structure on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
+![All seventeen structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
 
-Every screenshot on this page is one live run against free data, SPY at the
-2026-10-16 expiry, 394 contracts, and none of them has been cleaned up. The
-amber banner is the run reporting that 48 of those contracts fell back to
-the provider's published volatility because the solve did not identify one.
-That is what the desk looks like when the data is ordinary.
+Every screenshot on this page is one live run against free data: SPY at the
+2026-10-16 expiry with 2026-12-18 also on disk, 394 and 303 contracts, all
+seventeen structures built and fifteen of them backtested over five years.
+None of it has been cleaned up. The amber banner is the run reporting that
+48 of those contracts fell back to the provider's published volatility
+because the solve did not identify one. That is what the desk looks like
+when the data is ordinary.
+
+To reproduce all of it in one command:
+
+```
+./demo.sh
+```
+
+It pulls two expiries for SPY and QQQ, computes the ladder and the
+positioning, builds and ranks every structure, simulates the underlying
+forward, backtests each structure over five years, opens and marks a paper
+position, then serves the dashboard over the result. `--dry-run` prints
+every command without running one, and `--help` lists the rest.
 
 > **Research software. Not investment advice, not a recommendation, not a
 > solicitation.** Modelled premiums are not fills, backtested results are
@@ -723,6 +737,9 @@ Every view is addressable: `?u=SPY&e=2026-09-18`.
 
 ### What it looks like
 
+Seven views below. Every panel and every chart, seventy-five images in all,
+is in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+
 Positioning. Dealer gamma by strike with the walls marked, the cumulative
 profile and where it crosses zero, open interest before any assumption
 about who holds it, and the max pain curve. The sign convention is stated
@@ -850,8 +867,8 @@ the project looked broken when it was not.
 Or one suite at a time:
 
 ```
-./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 398 tests
+./shell/.venv/bin/python -m pytest engine/tests -q    # 294 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 402 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -872,7 +889,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           fifty-three mutations, killed or survived
+python3 scripts/mutate.py           fifty-four mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -905,7 +922,7 @@ version scaled by `max(1, |expected|)`, which left three Greeks untested
 with nothing to show for it, and mutation testing found fourteen surviving
 defects.
 That harness is in the tree as `scripts/mutate.py`, so it is checkable
-rather than a claim about the past. It breaks the code fifty-three ways and
+rather than a claim about the past. It breaks the code fifty-four ways and
 reports
 which breakages the tests notice. Run it. Its current result is forty-two
 killed and one proven equivalent, and getting there closed two real holes

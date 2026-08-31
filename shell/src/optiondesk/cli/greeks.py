@@ -76,7 +76,13 @@ def run(args):
     # constant silently prices every contract off an invented rate and
     # reports rho computed from it, so the substitution is recorded.
     rate_missing = snapshot.get("risk_free_rate") is None
-    rate = float(snapshot.get("risk_free_rate") or 0.04)
+    # `or` treats a rate of exactly 0.0 as absent and substitutes 0.04,
+    # while rate_missing above stays False, so the substitution is made and
+    # then not reported. A zero rate is reachable: optiondesk chain --rate 0
+    # accepts it, and a ^IRX quote of 0.00 produces it. Measured on the live
+    # ATM call, the silent swap moved price by 14.3 percent, theta by 29.5
+    # percent, and flipped the sign of vanna.
+    rate = 0.04 if rate_missing else float(snapshot["risk_free_rate"])
     q = float(snapshot.get("dividend_yield", 0.0))
     days = float(snapshot["days_to_expiry"])
     t = days / 365.0

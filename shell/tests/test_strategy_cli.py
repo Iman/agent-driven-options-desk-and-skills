@@ -324,3 +324,42 @@ def test_curve_bounds_never_go_below_zero():
     """
     lo, _ = strategy_cmd._curve_bounds(1.0, (0.0, 500.0), [500.0])
     assert lo > 0
+
+
+def test_the_published_curve_agrees_with_its_own_analysis(
+        chain_snapshot, args_factory, tmp_path):
+    """One artifact carried two prices for the same structure.
+
+    payoff_curve takes r and q after points, and the call passed five
+    positional arguments, so the curve was drawn at the module defaults of
+    4 percent and no dividend while the analysis beside it used the rates
+    the snapshot measured. A calendar reported max_gain 8.136160 in a file
+    whose own curve peaked at 9.030645 at the same underlying price, with
+    both fields declaring the same rate: 11 percent of the maximum gain,
+    6.9 percent of the capital at risk.
+    """
+    import copy
+    from optiondesk.artifacts import read_json, write_json
+
+    # A rate that differs from the module default, or the two paths agree
+    # by luck and this test proves nothing. The shared fixture carries
+    # 0.04, which is exactly the default the curve used to be drawn at.
+    near = chain_snapshot()
+    near["risk_free_rate"] = 0.01
+    near["dividend_yield"] = 0.03
+    write_json(near, "chain_TEST_2026-09-18.json", tmp_path)
+    far = copy.deepcopy(near)
+    far["expiry"] = "2026-10-16"
+    far["days_to_expiry"] = near["days_to_expiry"] + 28
+    write_json(far, "chain_TEST_2026-10-16.json", tmp_path)
+
+    result = strategy_cmd.run(strategy_args(args_factory, tmp_path,
+                                            name="calendar_spread"))
+    assert result["built"] is True
+    plan = read_json(result["artifact"])
+    assert plan["risk_free_rate"] == 0.01
+    peak = max(plan["payoff_curve"]["pnl"])
+    assert abs(peak - plan["analysis"]["max_gain"]) < 1e-9, (
+        "the curve peaks at {} while the analysis says {}".format(
+            peak, plan["analysis"]["max_gain"]))
+    assert plan["risk_free_rate"] is not None

@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-912%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-63%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-923%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-70%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -29,10 +29,12 @@ Every screenshot on this page is one live run against free data: SPY at the
 2026-10-16 expiry with 2026-12-18 also on disk, 394 and 303 contracts, all
 twenty-three structures built and seventeen of them backtested over five
 years.
-None of it has been cleaned up. The amber banner is the run reporting that
-48 of those contracts fell back to the provider's published volatility
-because the solve did not identify one. That is what the desk looks like
-when the data is ordinary.
+None of it has been cleaned up. Two of the 394 contracts fall back to the
+provider's published volatility and fourteen carry none at all, and the
+page says both for itself rather than presenting a chain that solved
+perfectly. An earlier version of this run showed 48 fallbacks and an amber
+degradation banner; an audit found the solver was refusing contracts it
+could identify, and fixing that took the fallbacks from 48 to 2.
 
 To reproduce all of it in one command:
 
@@ -885,8 +887,8 @@ the project looked broken when it was not.
 Or one suite at a time:
 
 ```
-./shell/.venv/bin/python -m pytest engine/tests -q    # 340 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 414 tests
+./shell/.venv/bin/python -m pytest engine/tests -q    # 344 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 421 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -907,7 +909,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           sixty-three mutations, killed or survived
+python3 scripts/mutate.py           seventy mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 

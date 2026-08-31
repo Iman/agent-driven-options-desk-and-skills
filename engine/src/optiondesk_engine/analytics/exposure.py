@@ -48,6 +48,12 @@ def chain_exposure(contracts, spot, multiplier=CONTRACT_MULTIPLIER):
 
     by_strike = {}
     skipped = 0
+    # Counted apart because they are different facts and a note that gives
+    # one cause for the other is wrong. On a live SPY chain every contract
+    # carried open interest and the skips were all missing gamma, while the
+    # artifact said the opposite.
+    skipped_reasons = {"no_gamma": 0, "no_open_interest": 0,
+                       "no_strike": 0, "not_an_option": 0}
     call_oi = put_oi = 0
     call_volume = put_volume = 0
 
@@ -55,6 +61,7 @@ def chain_exposure(contracts, spot, multiplier=CONTRACT_MULTIPLIER):
         kind = contract.get("type")
         if kind not in ("call", "put"):
             skipped += 1
+            skipped_reasons["not_an_option"] += 1
             continue
         volume = contract.get("volume") or 0
         if kind == "call":
@@ -63,6 +70,12 @@ def chain_exposure(contracts, spot, multiplier=CONTRACT_MULTIPLIER):
             put_volume += int(volume)
         if not _usable(contract):
             skipped += 1
+            if contract.get("gamma") is None:
+                skipped_reasons["no_gamma"] += 1
+            elif contract.get("open_interest") is None:
+                skipped_reasons["no_open_interest"] += 1
+            else:
+                skipped_reasons["no_strike"] += 1
             continue
         strike = float(contract["strike"])
         open_interest = int(contract["open_interest"])
@@ -93,6 +106,7 @@ def chain_exposure(contracts, spot, multiplier=CONTRACT_MULTIPLIER):
         return {
             "rows": [], "net_gex": 0.0, "call_wall": None, "put_wall": None,
             "gamma_flip": None, "skipped": skipped,
+            "skipped_reasons": dict(skipped_reasons),
             "put_call_oi_ratio": None, "put_call_volume_ratio": None,
             "assumption": _ASSUMPTION,
         }
@@ -149,6 +163,7 @@ def chain_exposure(contracts, spot, multiplier=CONTRACT_MULTIPLIER):
         "spot": spot,
         "regime": ("dampening" if running > 0 else "amplifying"),
         "skipped": skipped,
+        "skipped_reasons": dict(skipped_reasons),
         "call_open_interest": call_oi,
         "put_open_interest": put_oi,
         "put_call_oi_ratio": (put_oi / call_oi) if call_oi else None,

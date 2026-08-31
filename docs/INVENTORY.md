@@ -35,10 +35,10 @@ Rank structures against each other under a stated, visible criterion.
 
 Dealer gamma exposure, walls, and max pain from an option chain.
 
-212 lines.
+227 lines.
 
 - **chain_exposure()** (line 35): Gamma exposure by strike, the walls, and the flip level
-- **max_pain()** (line 169): The strike where option holders collect the least at expiry
+- **max_pain()** (line 184): The strike where option holders collect the least at expiry
 
 ### `engine/src/optiondesk_engine/analytics/ranking.py`
 
@@ -90,11 +90,11 @@ Run a structure repeatedly across a price history.
 
 Performance statistics, and honest tests of whether they mean anything.
 
-149 lines.
+186 lines.
 
 - **performance_stats()** (line 35): Summary statistics for a series of per-trade returns
 - **permutation_p_value()** (line 95): How often a no-edge rule beats this mean by chance
-- **bootstrap_mean_interval()** (line 129): Confidence interval for the mean return, by resampling trades
+- **bootstrap_mean_interval()** (line 152): Confidence interval for the mean return, by resampling trades
 
 ### `engine/src/optiondesk_engine/pricing/__init__.py`
 
@@ -107,7 +107,7 @@ Pricing and Greek analytics.
 
 European Black-Scholes-Merton pricing and implied volatility.
 
-228 lines.
+241 lines.
 
 - **d1_d2()** (line 91): The two Black-Scholes arguments, shared by price and every Greek
 - **bs_price()** (line 98): Black-Scholes-Merton price of a European option
@@ -160,11 +160,11 @@ GARCH(1,1) with Student-t innovations, estimated by MCMC.
 
 Forward paths from a fitted posterior, and what they imply for risk.
 
-252 lines.
+270 lines.
 
-- **simulate_paths()** (line 52): Posterior predictive price paths
-- **terminal_risk()** (line 152): Value at risk and expected shortfall on the horizon return
-- **position_distribution()** (line 200): Distribution of a position's profit across the simulated terminals
+- **simulate_paths()** (line 62): Posterior predictive price paths
+- **terminal_risk()** (line 170): Value at risk and expected shortfall on the horizon return
+- **position_distribution()** (line 218): Distribution of a position's profit across the simulated terminals
 
 ### `engine/src/optiondesk_engine/strategies/__init__.py`
 
@@ -300,11 +300,11 @@ optiondesk command dispatcher.
 
 optiondesk backtest: a structure entered repeatedly across real history.
 
-199 lines.
+222 lines.
 
 - **add_arguments()** (line 23): Register the window and cadence: holding days, entry interval, lookback,
 - **run()** (line 73): Enter one structure repeatedly across real history and write a backtest
-- **main()** (line 191): Parse argv for this command alone and run it, so the command works when
+- **main()** (line 214): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/chain.py`
 
@@ -341,11 +341,11 @@ optiondesk expiries: what is listed, and what is already on disk.
 
 optiondesk exposure: positioning and volatility geometry for a chain.
 
-156 lines.
+178 lines.
 
 - **add_arguments()** (line 27): Register positioning options: which snapshot, the contract multiplier
 - **run()** (line 41): Compute dealer gamma exposure, walls, flip levels, max pain and the
-- **main()** (line 148): Parse argv for this command alone and run it, so the command works when
+- **main()** (line 170): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/forward.py`
 
@@ -361,11 +361,11 @@ optiondesk forward: a paper ledger of positions recorded before the fact.
 
 optiondesk greeks: full Greek ladder from a chain snapshot.
 
-203 lines.
+209 lines.
 
 - **add_arguments()** (line 43): Register ladder options: which snapshot, the moneyness band, the option
 - **run()** (line 61): Compute the sixteen Greek ladder from a snapshot and write a graded
-- **main()** (line 195): Parse argv for this command alone and run it, so the command works when
+- **main()** (line 201): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/keys.py`
 
@@ -391,12 +391,12 @@ optiondesk simulate: what the underlying's own behaviour implies.
 
 optiondesk strategy: build a multi-leg strategy from a chain snapshot.
 
-557 lines.
+570 lines.
 
-- **add_arguments()** (line 31): Register structure selection and the view that drives a recommendation:
-- **playbook_when()** (line 274): The playbook's own note on when a structure is the right one, or an
-- **run()** (line 358): Build one named structure, or recommend one from the stated view, and
-- **main()** (line 549): Parse argv for this command alone and run it, so the command works when
+- **add_arguments()** (line 35): Register structure selection and the view that drives a recommendation:
+- **playbook_when()** (line 287): The playbook's own note on when a structure is the right one, or an
+- **run()** (line 371): Build one named structure, or recommend one from the stated view, and
+- **main()** (line 562): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/config.py`
 
@@ -465,9 +465,9 @@ Collect artifacts from disk into the shape the dashboard page needs.
 
 The dashboard page: markup, tiles and tables.
 
-1358 lines.
+1366 lines.
 
-- **render()** (line 1125): Render the complete dashboard document from one payload
+- **render()** (line 1133): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -644,11 +644,11 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Tests
 
-### engine/tests (216 test functions)
+### engine/tests (220 test functions)
 
 - `engine/tests/test_asymmetric_structures.py`: 28
-- `engine/tests/test_audit_regressions.py`: 20
-- `engine/tests/test_backtest.py`: 15
+- `engine/tests/test_audit_regressions.py`: 22
+- `engine/tests/test_backtest.py`: 17
 - `engine/tests/test_compare.py`: 10
 - `engine/tests/test_exposure.py`: 11
 - `engine/tests/test_forward.py`: 8
@@ -660,25 +660,26 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 28
 - `engine/tests/test_timespread.py`: 23
 
-### shell/tests (378 test functions)
+### shell/tests (385 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
 - `shell/tests/test_artifacts.py`: 4
+- `shell/tests/test_backtest_overlap.py`: 3
 - `shell/tests/test_backtest_unbounded.py`: 3
 - `shell/tests/test_chain_cli.py`: 16
 - `shell/tests/test_compare_cli.py`: 7
 - `shell/tests/test_contracts.py`: 8
 - `shell/tests/test_dashboard_app.py`: 9
 - `shell/tests/test_dashboard_data.py`: 25
-- `shell/tests/test_dashboard_page.py`: 35
+- `shell/tests/test_dashboard_page.py`: 36
 - `shell/tests/test_dashboard_server.py`: 7
 - `shell/tests/test_dividend_yield.py`: 9
 - `shell/tests/test_documented_counts.py`: 23
 - `shell/tests/test_documented_evidence.py`: 6
 - `shell/tests/test_expiries_cli.py`: 10
-- `shell/tests/test_exposure_cli.py`: 8
-- `shell/tests/test_greeks_cli.py`: 5
+- `shell/tests/test_exposure_cli.py`: 9
+- `shell/tests/test_greeks_cli.py`: 6
 - `shell/tests/test_house_rules.py`: 8
 - `shell/tests/test_installer.py`: 22
 - `shell/tests/test_keys_cli.py`: 17
@@ -690,7 +691,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_runtime_docs.py`: 14
 - `shell/tests/test_screenshots.py`: 3
 - `shell/tests/test_simulate_cli.py`: 10
-- `shell/tests/test_strategy_cli.py`: 17
+- `shell/tests/test_strategy_cli.py`: 18
 - `shell/tests/test_summary_degraded_contract.py`: 4
 - `shell/tests/test_yahoo_provider.py`: 26
 
@@ -704,7 +705,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-56 modules, 13810 lines of source, 159 public functions, 14 public classes, 708 test functions.
+56 modules, 13965 lines of source, 159 public functions, 14 public classes, 719 test functions.
 
 Every public name carries a docstring.
 

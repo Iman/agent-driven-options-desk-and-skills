@@ -77,3 +77,26 @@ def test_snapshot_degradation_is_inherited(tmp_path, snapshot, args_factory):
         snapshot=None, band=0.10, type="both", out_dir=str(tmp_path)))
     assert result["degraded"] is True
     assert "engine missing" in result["degraded_reason"]
+
+
+def test_a_zero_risk_free_rate_is_honoured_not_replaced(snapshot,
+                                                        args_factory,
+                                                        tmp_path):
+    """Zero is a rate. `or 0.04` treated it as absent.
+
+    The substitution left no trace: the flag that reports a missing rate
+    tests `is None` and stayed False, while the value used became 0.04. A
+    zero rate is reachable through `optiondesk chain --rate 0` and through
+    a 0.00 quote on the bill index. Measured on the live at-the-money call,
+    the swap moved price by 14.3 percent and theta by 29.5 percent, and
+    flipped the sign of vanna.
+    """
+    snapshot["risk_free_rate"] = 0.0
+    write_json(snapshot, "chain_TEST_2026-09-18.json", tmp_path)
+
+    result = greeks_cmd.run(args_factory(
+        snapshot=None, band=0.10, type="both", out_dir=str(tmp_path)))
+    artifact = read_json(result["artifact"])
+    assert artifact["risk_free_rate"] == 0.0, (
+        "a stated rate of zero was replaced by {}".format(
+            artifact["risk_free_rate"]))

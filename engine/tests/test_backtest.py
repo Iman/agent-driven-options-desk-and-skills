@@ -193,3 +193,61 @@ def test_statistics_refuse_a_sample_too_small_to_speak_about():
     assert permutation_p_value([0.1, 0.2]) is None
     assert bootstrap_mean_interval([0.1, 0.2]) is None
     assert performance_stats([]) is None
+
+
+def test_the_permutation_test_flips_whole_blocks():
+    """Overlapping windows are not independent trades, and treating them as
+    such understates the standard error.
+
+    A thirty day hold entered every five trading days shares twenty-five of
+    its thirty days with its neighbour. An audit measured the effect on
+    this project's own artifacts: autocorrelation positive through lag five
+    and collapsing at lag six, an effective sample of 64 to 88 rather than
+    233, and three structures crossing 0.05 once the dependence was
+    accounted for, one of them from 0.0005 to 0.068.
+
+    A serially correlated series is the discriminating input. Independent
+    sign flips break the correlation and produce a small p-value; block
+    flips preserve it and produce an honest one.
+    """
+    import random
+
+    rng = random.Random(5)
+    series, value = [], 0.0
+    for _ in range(240):
+        value = 0.85 * value + rng.gauss(0.0, 1.0)
+        series.append(value + 0.35)
+
+    independent = permutation_p_value(series, trials=2000, block=1)
+    blocked = permutation_p_value(series, trials=2000, block=6)
+
+    assert independent["block"] == 1
+    assert blocked["block"] == 6
+    assert blocked["p_value"] > independent["p_value"], (
+        "blocking did not widen the null: {} against {}".format(
+            blocked["p_value"], independent["p_value"]))
+
+
+def test_the_interval_widens_when_trades_overlap():
+    """The same argument for the confidence interval. Resampling single
+    trades from a correlated series produces an interval too narrow, and on
+    the live artifacts it was narrow enough to exclude zero for two
+    structures that a moving-block interval does not.
+    """
+    import random
+
+    rng = random.Random(7)
+    series, value = [], 0.0
+    for _ in range(240):
+        value = 0.85 * value + rng.gauss(0.0, 1.0)
+        series.append(value + 0.2)
+
+    single = bootstrap_mean_interval(series, trials=2000, block=1)
+    blocked = bootstrap_mean_interval(series, trials=2000, block=6)
+
+    assert blocked["block"] == 6
+    width_single = single["upper"] - single["lower"]
+    width_blocked = blocked["upper"] - blocked["lower"]
+    assert width_blocked > width_single, (
+        "the block interval is not wider: {} against {}".format(
+            width_blocked, width_single))

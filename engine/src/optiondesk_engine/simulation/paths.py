@@ -9,28 +9,38 @@ reason for sampling a posterior instead of maximising a likelihood: a fan
 built from one fitted parameter set is narrower than the data supports, and
 a value at risk computed from it is comfortable in a way that is not earned.
 
-ANTITHETIC PAIRS, AND WHAT THEY ACTUALLY BUY. For every drawn shock the
-opposite shock is also run. GARCH(1,1) has no leverage term and the
-variance update squares the residual, so the mirrored path has a bit
-identical variance path and the pair is an exact mirror in log price. The
-construction is unbiased.
+THERE ARE NO ANTITHETIC PAIRS, AND THERE HAVE NOT BEEN FOR SOME TIME. This
+module used to say that every drawn shock had its opposite run beside it,
+and every artifact it wrote carried "antithetic": true. An audit measured
+it: of ten thousand pairs, zero shared a shock sequence, and the
+correlation between pair members was -0.016 where a working mirror gives
+-1. The reason is visible once looked for. The sign loop drew its shocks
+inside itself, so each side pulled fresh numbers from the stream, and
+negating an independently drawn symmetric Student-t simply yields another
+independent draw. The construction did nothing at all.
 
-It is not uniformly a variance reduction, and an earlier version of this
-docstring claimed it was. Measured across 40 replications against
-independent sampling at equal path count, the ratio of variances:
+The test that guarded it asserted that the artifact's antithetic flag was
+true, and the writer set that flag as an unconditional literal, so the test
+asserted the claim rather than the property.
 
-    mean of terminal   0.035   far better
+Removing it rather than repairing it, deliberately. The two halves of a
+pair would have to share a parameter draw to mirror, and each path drawing
+its own parameters is the more valuable of the two properties: the
+docstring's own measurements, kept below, show mirroring helping the centre
+and hurting the tail, and the tail is what a risk number is for.
+
+    mean of terminal   0.035   mirroring far better
     median             0.25    better
     25th percentile    0.81    marginally better
     5th percentile     1.20    WORSE
     1st percentile     2.16    much worse
     value at risk 99   2.03    much worse
 
-Mirroring helps the centre and hurts the tail, and the tail is what a risk
-number is for. Half of that cost came from sharing one posterior draw
-across a pair, which halves the number of independent parameter draws while
-parameter uncertainty dominates the tail. That half is now fixed: each path
-draws its own parameters and only the shocks are mirrored.
+Those figures described a construction that was not running, and they are
+retained here only to record why the repair was not the right answer. What
+runs now is what has effectively been running all along: independent draws,
+one parameter set per path, unbiased, with the tail precision the table
+above says that buys.
 """
 
 import math
@@ -74,7 +84,10 @@ def simulate_paths(posterior, spot, horizon_days, paths=DEFAULT_PATHS,
         # draw halved the number of independent parameter samples, and
         # parameter uncertainty is what dominates the tail quantiles that
         # value at risk depends on.
-        for sign in (1.0, -1.0):
+        # Two paths per outer step, keeping the requested count exact.
+        # This was a sign loop mirroring the shocks, and the mirroring was
+        # inert: see the module docstring.
+        for _side in (0, 1):
             params = draws[rng.randrange(len(draws))]
             mu, omega, alpha, beta, nu = params
             if not all(math.isfinite(v) for v in params):
@@ -90,7 +103,7 @@ def simulate_paths(posterior, spot, horizon_days, paths=DEFAULT_PATHS,
             broken = False
             for day in range(horizon_days):
                 sigma = math.sqrt(variance)
-                residual = sigma * _standard_t(rng, nu) * sign
+                residual = sigma * _standard_t(rng, nu)
                 log_price += mu + residual
                 if not math.isfinite(log_price) or log_price > 700:
                     broken = True
@@ -129,12 +142,17 @@ def simulate_paths(posterior, spot, horizon_days, paths=DEFAULT_PATHS,
         "discarded_paths": discarded,
         "horizon_days": horizon_days,
         "spot": spot,
-        "antithetic": True,
+        # False, and stated rather than removed, because every artifact
+        # written before this said true and a reader comparing two runs
+        # needs to see the field change rather than vanish.
+        "antithetic": False,
         "quantiles": list(quantiles),
-        "note": ("Shocks are mirrored in antithetic pairs, with an "
-                 "independent parameter draw per path. Mirroring reduces "
-                 "the variance of the centre of the distribution and "
-                 "increases it in the extreme tail."),
+        "note": ("Paths are independent draws, one posterior "
+                 "parameter set each, so parameter uncertainty is "
+                 "carried into the fan rather than collapsed to a "
+                 "point estimate. Earlier runs of this tool "
+                 "reported antithetic pairs; the mirroring was "
+                 "measured to be inert and has been removed."),
     }
 
 

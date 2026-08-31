@@ -296,15 +296,63 @@ def test_the_inner_vega_guard_refuses_rather_than_dividing_by_zero():
             "{} {} at {} should be refused".format(kind, strike, price))
 
 
-def test_the_inner_vega_guard_refuses_rather_than_inventing_a_volatility():
-    """A flat curve gives bisection an arbitrary point to land on.
+def test_a_returned_volatility_is_always_identified_at_its_own_answer():
+    """The invariant, restated after a later audit corrected where it is
+    tested rather than whether it holds.
 
-    Each of these returned a plausible looking volatility, between 114 and
-    409 percent, from a price that identifies no volatility at all.
+    The original version of this test asserted that four specific prices
+    were REFUSED. They were, but for the wrong reason: the solver checked
+    vega at the 0.30 Newton seed and returned None the moment it was small,
+    which is a statement about the seed and not about the contract. On one
+    live SPY chain that refused 41 contracts that bisection identifies to
+    better than 1e-5 in sigma, with vega at the answer between 0.26 and
+    6.5, and the resulting fallback to provider volatility was the only
+    reason the chain was marked degraded at all.
+
+    What must hold is the thing the module actually promises: a returned
+    volatility reprices the input and is identified where it was found. A
+    price that cannot do both still gets None.
     """
+    from optiondesk_engine.pricing.black_scholes import (MIN_VEGA, bs_price,
+                                                         vega_raw)
+
     for spot, strike, t, kind, price in INVENTS_A_NUMBER_WITHOUT_THE_INNER_GUARD:
-        assert implied_vol(price, spot, strike, t, kind) is None, (
-            "{} {} at {} should be refused".format(kind, strike, price))
+        sigma = implied_vol(price, spot, strike, t, kind)
+        if sigma is None:
+            continue
+        assert abs(bs_price(spot, strike, t, sigma, kind) - price) < 1e-6, (
+            "{} {} at {} returned {} which does not reprice".format(
+                kind, strike, price, sigma))
+        assert abs(vega_raw(spot, strike, t, sigma)) >= MIN_VEGA, (
+            "{} {} at {} returned {} where the price is insensitive to "
+            "volatility".format(kind, strike, price, sigma))
+
+
+def test_a_price_below_intrinsic_is_still_refused():
+    """The refusal that has to survive the change above. A quote under
+    discounted intrinsic implies no volatility at any sigma, and the
+    solver must not reach for one.
+    """
+    spot, strike, t = 765.68, 450.0, 46.0991 / 365.0
+    assert implied_vol(292.685, spot, strike, t, "call") is None
+
+
+def test_the_solver_identifies_a_deep_contract_the_seed_cannot():
+    """The case the old guard refused. Vega at the 0.30 seed is 8.6e-16;
+    at the answer it is above 5. One is a property of the seed, the other
+    of the contract, and only the second is a reason to refuse.
+    """
+    from optiondesk_engine.pricing.black_scholes import bs_price, vega_raw
+
+    spot, strike, t = 765.68, 300.0, 46.0991 / 365.0
+    r, q = 0.03734999895095825, 0.009827865520819972
+    assert abs(vega_raw(spot, strike, t, 0.30, r, q)) < 1e-12
+
+    sigma = implied_vol(466.935, spot, strike, t, "call", r, q)
+    assert sigma is not None, "a solvable deep contract was refused"
+    assert abs(bs_price(spot, strike, t, sigma, "call", r, q)
+               - 466.935) < 1e-5
+    assert abs(vega_raw(spot, strike, t, sigma, r, q)) > 1.0
 
 
 # ------------------------------------------------- the fabricated band

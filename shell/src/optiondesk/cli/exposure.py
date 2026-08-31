@@ -54,8 +54,14 @@ def run(args):
 
     spot = float(snapshot["spot"])
     days = float(snapshot["days_to_expiry"])
-    rate = float(snapshot.get("risk_free_rate") or 0.04)
-    dividend_yield = float(snapshot.get("dividend_yield") or 0.0)
+    # Not `or`: a rate of exactly 0.0 is falsy and would be replaced by
+    # 0.04 here, silently, in an artifact that records no rate field at all
+    # and so leaves no trace of the substitution. A zero dividend yield is
+    # a real value too, and the same expression hid it.
+    rate = snapshot.get("risk_free_rate")
+    rate = 0.04 if rate is None else float(rate)
+    dividend_yield = snapshot.get("dividend_yield")
+    dividend_yield = 0.0 if dividend_yield is None else float(dividend_yield)
     t = days / 365.0
 
     # Gamma for every contract that carries a volatility. This is the whole
@@ -90,9 +96,25 @@ def run(args):
                      "are excluded from the exposure profile"
                      .format(without_iv))
     if exposure["skipped"]:
-        notes.append("{} contracts have no open interest recorded and are "
-                     "excluded rather than counted as zero"
-                     .format(exposure["skipped"]))
+        # One note per cause. This used to say every skipped contract had
+        # no open interest recorded, and an audit measured that all 394 on
+        # the live chain carried it: they were skipped for having no gamma,
+        # which is the missing volatility the note above already reports.
+        # Two notes about the same contracts, giving two different causes,
+        # one of them false.
+        reasons = exposure.get("skipped_reasons") or {}
+        if reasons.get("no_open_interest"):
+            notes.append("{} contracts have no open interest recorded and "
+                         "are excluded rather than counted as zero"
+                         .format(reasons["no_open_interest"]))
+        if reasons.get("no_gamma"):
+            notes.append("{} contracts carry no gamma and are absent from "
+                         "the exposure profile, which is the missing "
+                         "volatility reported above"
+                         .format(reasons["no_gamma"]))
+        if reasons.get("no_strike"):
+            notes.append("{} contracts carry no strike and cannot be "
+                         "placed".format(reasons["no_strike"]))
 
     payload = {
         "meta": envelope(

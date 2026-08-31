@@ -140,7 +140,8 @@ def implied_vol(price, spot, strike, t, kind, r=DEFAULT_R, q=DEFAULT_Q,
     """Implied volatility from an option price, or None.
 
     Newton-Raphson from a 0.30 seed, falling back to bisection when Newton
-    leaves the bracket, stalls, or runs out of iterations.
+    leaves the bracket, stalls, runs out of iterations, or reaches a point
+    where the price is locally insensitive to volatility.
 
     A candidate is accepted only when the price both reprices within tol AND
     is actually sensitive to volatility there, meaning vega exceeds
@@ -176,10 +177,22 @@ def implied_vol(price, spot, strike, t, kind, r=DEFAULT_R, q=DEFAULT_Q,
         if abs(diff) < tol:
             return _accept(sigma, spot, strike, t, kind, r, q)
         if abs(v) < MIN_VEGA:
-            # The price carries no volatility information here. Newton has
-            # nowhere to go, and bisection would land on an arbitrary point
-            # of a flat curve, so neither is allowed to answer.
-            return None
+            # Newton has nowhere to go from HERE. That is a statement about
+            # this iterate, not about the contract, and treating it as a
+            # refusal was wrong: vega is evaluated at the 0.30 seed, and a
+            # deep in the money contract has almost no vega there while
+            # having plenty at its actual volatility. An audit measured the
+            # cost on one live SPY chain: 41 of 56 refusals were solvable by
+            # bisection to better than 1e-5 in sigma, with vega at the
+            # answer between 0.26 and 6.5, and the resulting fallback to
+            # provider volatility was the sole reason the chain and its
+            # ladder were both marked degraded.
+            #
+            # Bisection is bracketed and cannot diverge, and _accept still
+            # tests vega AT THE ANSWER, which is where the identification
+            # question belongs. A contract that genuinely carries no
+            # volatility information is still refused there.
+            break
         sigma -= diff / v
         if not (IV_MIN < sigma <= IV_MAX):
             break

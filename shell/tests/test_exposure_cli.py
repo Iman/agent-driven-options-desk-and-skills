@@ -150,3 +150,22 @@ def test_a_named_snapshot_is_used_in_preference_to_the_newest(
     result = exposure_cmd.run(exposure_args(args_factory, tmp_path,
                                             snapshot=str(wanted)))
     assert result["expiry"] == september["expiry"] == "2026-09-18"
+
+
+def test_a_missing_volatility_is_not_reported_as_missing_open_interest(
+        chain_snapshot, args_factory, tmp_path):
+    """The note has to name the cause that applied.
+
+    On the live SPY chain every one of 394 contracts carried open interest
+    and eight were skipped for having no gamma, while the artifact said all
+    eight had no open interest recorded. Two notes about the same contracts
+    gave two different causes and one was false.
+    """
+    put_snapshot(chain_snapshot, tmp_path, no_iv={(85.0, "call")})
+    result = exposure_cmd.run(exposure_args(args_factory, tmp_path))
+
+    assert not any("no open interest recorded" in note
+                   for note in result["notes"]), (
+        "a contract skipped for missing volatility was reported as missing "
+        "open interest")
+    assert any("no gamma" in note for note in result["notes"])

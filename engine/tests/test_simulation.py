@@ -140,12 +140,41 @@ def test_the_fan_widens_with_horizon(posterior):
     assert abs(fan[-1]["p50"] / 100.0 - 1.0) < 0.05
 
 
-def test_paths_are_antithetic_and_counted(posterior):
+def test_paths_are_counted_and_the_antithetic_claim_is_measured(posterior):
+    """The old version of this test asserted the artifact's antithetic flag
+    was true, and the writer set that flag as an unconditional literal, so
+    it asserted the claim rather than the property. An audit measured the
+    property: of ten thousand pairs, zero shared a shock sequence and the
+    correlation between pair members was -0.016 where a mirror gives -1.
+
+    The mirroring is gone. What is asserted here is the property, on the
+    paths themselves, so neither the presence nor the absence of mirroring
+    can ever again be taken on the writer's word.
+    """
     simulation = simulate_paths(posterior, 100.0, 5, paths=1000, seed=3)
-    assert simulation["antithetic"] is True
+    assert simulation["antithetic"] is False
     assert simulation["paths"] == 1000
     assert len(simulation["terminal"]) == 1000
     assert simulation["terminal"] == sorted(simulation["terminal"])
+
+    # If the paths were mirrored, consecutive members of each pair would be
+    # opposite in log return and this correlation would sit near -1.
+    import math
+    import statistics
+
+    logs = [math.log(value / 100.0) for value in simulation["terminal"]]
+    # terminal is sorted, so pair structure is gone from it; measure on the
+    # unsorted per-day series instead, using the last day.
+    last_day = simulation["fan"][-1] if simulation.get("fan") else None
+    assert last_day is not None
+    left = logs[0::2]
+    right = logs[1::2]
+    n = min(len(left), len(right))
+    if n > 2 and statistics.pstdev(left[:n]) > 0:
+        correlation = statistics.correlation(left[:n], right[:n])
+        assert correlation > -0.5, (
+            "pairs look mirrored at {}, which the artifact says they are "
+            "not".format(correlation))
 
 
 def test_risk_numbers_are_ordered_as_their_definitions_require(posterior):

@@ -92,7 +92,7 @@ def performance_stats(returns, holding_days=None):
     return stats
 
 
-def permutation_p_value(returns, trials=2000, seed=17):
+def permutation_p_value(returns, trials=2000, seed=17, block=1):
     """How often a no-edge rule beats this mean by chance.
 
     The null is that the sign of each trade's return is arbitrary, which is
@@ -101,23 +101,46 @@ def permutation_p_value(returns, trials=2000, seed=17):
     of shuffles whose mean is at least as extreme as the observed one.
 
     Two-sided, because a rule that reliably loses is also a finding.
+
+    BLOCKS, AND WHY THEY ARE NOT OPTIONAL HERE. Flipping each trade's sign
+    independently assumes the trades are independent. These are not. A
+    thirty day hold entered every five trading days shares twenty-five of
+    its thirty days with its neighbour, and an audit measured the
+    consequence: autocorrelation positive through lag five and collapsing
+    at lag six, exactly the geometry of the overlap, and an effective
+    sample of 64 to 88 rather than 233. Standard errors were understated
+    by a factor of 1.6 to 1.9, and three structures crossed the 0.05 line
+    when the dependence was accounted for, one of them from 0.0005 to
+    0.068.
+
+    Signs are therefore flipped a block at a time. The caller passes the
+    number of consecutive trades that share days, which the runner derives
+    from the holding period and the entry spacing rather than guessing.
+    A block of 1 restores the old independent behaviour and is correct only
+    when entries do not overlap.
     """
     if len(returns) < 5:
         return None
+    block = max(1, int(block))
     observed = abs(_mean(returns))
     rng = random.Random(seed)
     at_least_as_extreme = 0
+    n = len(returns)
     for _ in range(trials):
-        shuffled = [value if rng.random() < 0.5 else -value
-                    for value in returns]
+        signs = []
+        while len(signs) < n:
+            sign = 1.0 if rng.random() < 0.5 else -1.0
+            signs.extend([sign] * block)
+        shuffled = [value * sign for value, sign in zip(returns, signs)]
         if abs(_mean(shuffled)) >= observed:
             at_least_as_extreme += 1
     return {
         "p_value": (at_least_as_extreme + 1) / float(trials + 1),
         "trials": trials,
+        "block": block,
         "observed_mean": _mean(returns),
-        "null": ("the sign of each trade's return is arbitrary, which is "
-                 "what a rule with no edge produces"),
+        "null": ("the sign of each block of overlapping trades is "
+                 "arbitrary, which is what a rule with no edge produces"),
         "caveat": ("A p-value is only a p-value for a hypothesis chosen "
                    "before seeing the data. A rule selected because its "
                    "backtest looked good has already spent its degrees of "
@@ -126,16 +149,29 @@ def permutation_p_value(returns, trials=2000, seed=17):
     }
 
 
-def bootstrap_mean_interval(returns, trials=2000, level=0.90, seed=19):
-    """Confidence interval for the mean return, by resampling trades."""
+def bootstrap_mean_interval(returns, trials=2000, level=0.90, seed=19,
+                            block=1):
+    """Confidence interval for the mean return, by resampling trades.
+
+    A moving-block bootstrap when block exceeds one. Resampling individual
+    trades assumes they are independent, and overlapping windows are not:
+    the interval that assumption produces is too narrow, and on this data
+    it was narrow enough to exclude zero for two structures that a
+    dependence-aware interval does not.
+    """
     if len(returns) < 5:
         return None
+    block = max(1, int(block))
     rng = random.Random(seed)
     n = len(returns)
     means = []
+    starts = max(1, n - block + 1)
     for _ in range(trials):
-        sample = [returns[rng.randrange(n)] for _ in range(n)]
-        means.append(_mean(sample))
+        sample = []
+        while len(sample) < n:
+            start = rng.randrange(starts)
+            sample.extend(returns[start:start + block])
+        means.append(_mean(sample[:n]))
     means.sort()
     lower_index = int((1.0 - level) / 2.0 * (trials - 1))
     upper_index = int((1.0 + level) / 2.0 * (trials - 1))
@@ -145,5 +181,6 @@ def bootstrap_mean_interval(returns, trials=2000, level=0.90, seed=19):
         "upper": means[upper_index],
         "level": level,
         "trials": trials,
+        "block": block,
         "excludes_zero": means[lower_index] > 0 or means[upper_index] < 0,
     }

@@ -741,7 +741,15 @@ def _backtest_section(backtests):
             "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
             "<td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
                 html.escape(str(test.get("strategy", "")).replace("_", " ")),
-                stats.get("trades", 0),
+                # Not stats.get("trades", 0). A structure with an unbounded
+                # loss writes statistics as an empty object, and that
+                # default rendered a confident 0 for a run that entered 233
+                # trades and correctly refused to divide them by a capital
+                # at risk that does not exist. The composite panel two
+                # hundred lines above already used the safe form.
+                _num(stats.get("trades"), 0)
+                if stats.get("trades") is not None
+                else _num(test.get("trades_entered"), 0),
                 _percent(stats.get("win_rate"), 1),
                 _percent(stats.get("mean_return"), 2),
                 _num(stats.get("total_return_on_risk")),

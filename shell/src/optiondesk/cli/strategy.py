@@ -23,6 +23,10 @@ from optiondesk.artifacts import (
 from optiondesk.contracts import SCHEMA_FILES, STRATEGY_PLAN, validate
 
 CURVE_POINTS = 240
+# Only used when a plan carries no carry of its own, which the
+# two-expiry builders always do now.
+DEFAULT_CURVE_RATE = 0.04
+DEFAULT_CURVE_YIELD = 0.0
 # How far either side of spot the payoff curve runs when no volatility band
 # is available. Wide enough to show where an unbounded leg is heading.
 FALLBACK_SPAN = 0.25
@@ -187,9 +191,18 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
     analysis["max_gain"] = _jsonable(analysis["max_gain"])
     analysis["max_loss"] = _jsonable(analysis["max_loss"])
 
+    # The rates are passed explicitly. payoff_curve takes r and q after
+    # points, so the five positional arguments this used to pass left both
+    # at the module defaults while the analysis beside it in the same
+    # artifact used the snapshot's own. One file therefore carried a
+    # max_gain of 8.14 and a curve that peaked at 9.03 at the same price,
+    # a gap of 11 percent of the maximum gain and 6.9 percent of the
+    # capital at risk, with both fields declaring the same rate.
     prices, pnls = engine_strategies.timespread.payoff_curve(
         plan["legs"], max(plan["spot"] * 0.6, 0.01), plan["spot"] * 1.4,
-        analysis["at_days"], CURVE_POINTS)
+        analysis["at_days"], CURVE_POINTS,
+        r=plan.get("risk_free_rate", DEFAULT_CURVE_RATE),
+        q=plan.get("dividend_yield", DEFAULT_CURVE_YIELD))
 
     source_meta = snapshot.get("meta", {})
     notes = list(source_meta.get("notes") or [])

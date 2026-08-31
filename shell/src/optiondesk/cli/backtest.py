@@ -90,8 +90,18 @@ def run(args):
     returns = result["returns"]
     statistics = engine_backtest.performance_stats(returns,
                                                    args.holding_days)
-    significance = engine_backtest.permutation_p_value(returns)
-    interval = engine_backtest.bootstrap_mean_interval(returns)
+    # Consecutive entries share days whenever the hold is longer than the
+    # spacing between entries, and every statistic below is computed on
+    # returns that therefore are not independent. The block is how many
+    # consecutive trades overlap: thirty day holds entered every five
+    # trading days give six, which is exactly where the measured
+    # autocorrelation collapses.
+    overlap_block = max(1, -(-int(args.holding_days) // max(1, int(
+        args.entry_every))))
+    significance = engine_backtest.permutation_p_value(
+        returns, block=overlap_block)
+    interval = engine_backtest.bootstrap_mean_interval(
+        returns, block=overlap_block)
     benchmark = _benchmark(history["closes"], history["dates"],
                            args.holding_days, args.entry_every,
                            args.lookback, engine_backtest)
@@ -124,6 +134,14 @@ def run(args):
         notes.append("{} entries skipped, mostly where no viable structure "
                      "existed at that volatility".format(
                          len(result["skipped"])))
+    if significance and significance.get("block", 1) > 1:
+        notes.append(
+            "Entries overlap: each trade shares days with {} of its "
+            "neighbours, so the significance test flips signs a block at a "
+            "time and the interval resamples blocks. Treating these as {} "
+            "independent trades would understate the standard error by "
+            "roughly a factor of two.".format(
+                significance["block"] - 1, len(returns)))
     if significance and significance["p_value"] > 0.05:
         notes.append("the permutation test cannot distinguish this result "
                      "from a rule with no edge")
@@ -177,6 +195,11 @@ def run(args):
             "max_drawdown_in_risk_units"),
         "sharpe_per_trade": (statistics or {}).get("sharpe_per_trade"),
         "p_value": (significance or {}).get("p_value"),
+        # How many consecutive trades share days. Published because a
+        # p-value computed at block 1 on overlapping windows is a different
+        # and more flattering number than one computed at the real block,
+        # and a reader comparing two runs has to be able to see which.
+        "overlap_block": (significance or {}).get("block"),
         "mean_interval": ([interval["lower"], interval["upper"]]
                           if interval else None),
         "interval_excludes_zero": (interval or {}).get("excludes_zero"),

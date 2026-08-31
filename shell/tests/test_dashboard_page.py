@@ -778,3 +778,25 @@ def test_tooltips_round_their_numbers():
     # formatter stops being applied while the word survives.
     assert "valueFormatter: function" in SCRIPT
     assert "axisPointer" in SCRIPT
+
+
+def test_the_backtest_table_never_reports_zero_trades_for_a_real_run():
+    """A structure with an unbounded loss writes statistics as an empty
+    object, and `stats.get("trades", 0)` rendered a confident 0 where 233
+    trades had been entered and correctly refused a return on risk. The
+    composite panel already used the safe form; this table did not.
+    """
+    from optiondesk.dashboard.page import _backtest_section
+
+    unbounded = {
+        "strategy": "ratio_spread",
+        "trades_entered": 233,
+        "statistics": {},
+        "significance": {},
+        "interval": {},
+        "honesty": "premiums are modelled",
+    }
+    html_out = _backtest_section([unbounded])
+    assert "233" in html_out, "the entered count is not on the page"
+    assert ">0<" not in html_out.replace(" ", ""), (
+        "a zero trade count was rendered for a run that entered 233")

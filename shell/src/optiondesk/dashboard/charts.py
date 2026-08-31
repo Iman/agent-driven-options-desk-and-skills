@@ -48,9 +48,19 @@ const axis = {
   nameTextStyle: { color: muted, fontSize: 10.5 },
   nameLocation: 'middle'
 };
+function axisNumber(v) {
+  // The x axis is pinned to dataMin and dataMax, so its end labels are the
+  // raw endpoints of whatever series it holds. On the payoff chart those
+  // are computed, and the axis read 574.2599945068359. Two decimals with
+  // trailing zeros removed, so a strike still reads 700 and not 700.00.
+  if (typeof v !== 'number') return v;
+  return String(Math.round(v * 100) / 100);
+}
 function xAxis(name, extra) {
   return Object.assign({}, axis, { type: 'value', name: name, nameGap: 26,
-    scale: true, min: 'dataMin', max: 'dataMax' }, extra || {});
+    scale: true, min: 'dataMin', max: 'dataMax',
+    axisLabel: { color: muted, fontSize: 10.5, formatter: axisNumber } },
+    extra || {});
 }
 function yAxis(name, extra) {
   return Object.assign({}, axis, { type: 'value', name: name, nameGap: 46,

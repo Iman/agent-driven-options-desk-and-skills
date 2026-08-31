@@ -500,3 +500,19 @@ def test_the_four_new_payload_keys_reach_the_script():
     assert embedded["variance_premium"]["realised"] == 0.30
     assert embedded["condors"][0]["width"] == 20.0
     assert embedded["simulation"]["simulation"]["fan"][0]["p50"] == 100.0
+
+
+def test_the_x_axis_labels_are_rounded():
+    """The payoff axis is pinned to dataMin and dataMax, and its endpoints
+    are computed rather than strikes, so the chart rendered an axis label of
+    574.2599945068359. Visible in the first screenshots taken for the README.
+
+    This is a string assertion against the emitted script, which is weaker
+    than exercising the chart: there is no JavaScript runtime in this suite.
+    It catches the formatter being removed, which is how the label would
+    come back, and claims nothing more than that.
+    """
+    from optiondesk.dashboard.charts import SCRIPT
+
+    assert "function axisNumber" in SCRIPT
+    assert "formatter: axisNumber" in SCRIPT

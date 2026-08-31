@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-847%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-52%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-848%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-53%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -22,6 +22,14 @@ optiondesk chain SPY && optiondesk greeks && optiondesk dashboard
 Then ask your agent "where are the gamma walls on SPY?" and it will use the
 skills this installs. Eight other ways in, including Codex and ChatGPT, are
 in [INSTALL.md](INSTALL.md).
+
+![Every structure on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
+
+Every screenshot on this page is one live run against free data, SPY at the
+2026-10-16 expiry, 394 contracts, and none of them has been cleaned up. The
+amber banner is the run reporting that 48 of those contracts fell back to
+the provider's published volatility because the solve did not identify one.
+That is what the desk looks like when the data is ordinary.
 
 > **Research software. Not investment advice, not a recommendation, not a
 > solicitation.** Modelled premiums are not fills, backtested results are
@@ -713,6 +721,50 @@ equity curves), and the ladder.
 
 Every view is addressable: `?u=SPY&e=2026-09-18`.
 
+### What it looks like
+
+Positioning. Dealer gamma by strike with the walls marked, the cumulative
+profile and where it crosses zero, open interest before any assumption
+about who holds it, and the max pain curve. The sign convention is stated
+on the panel rather than buried, because it is the assumption most likely
+to be wrong for a single name.
+
+![Dealer gamma exposure by strike, cumulative exposure and the flip, open interest, and the max pain profile](docs/screenshots/dashboard-positioning.png)
+
+Volatility. The surface by strike and expiry from two expiries on file, the
+smile with its 25-delta wings, and the first and second order Greek curves
+drawn on one axis each.
+
+![Implied volatility by strike and expiry, the smile with 25-delta wings marked, and delta, gamma, vega and theta curves](docs/screenshots/dashboard-volatility.png)
+
+Structures. A picker for every structure built from this chain, the plan's
+numbers, the payoff at expiry with spot, breakevens and the expected move
+drawn on it, and the legs it would take with their own quotes.
+
+![The structure picker, the plan's numbers, the payoff at expiry with spot, breakevens and the expected move, and the leg table](docs/screenshots/dashboard-structures.png)
+
+The ladder, and every structure on one axis. Sixteen Greeks per contract,
+then the payoff curves overlaid so the shapes can be compared directly, and
+each structure placed by model probability of profit against expected
+return on risk.
+
+![The graded contract ladder, all structures overlaid on one payoff axis, and a scatter of probability against expected return](docs/screenshots/dashboard-ladder.png)
+
+Simulation. A GARCH-t posterior with R-hat and effective sample size beside
+every parameter, the predictive fan, the terminal distribution, and the
+profit distribution of each saved plan priced at expiry from the underlying
+the simulation actually produced.
+
+![The posterior predictive fan, terminal distribution, posterior parameter table with R-hat and ESS, realised against implied per structure, and per-structure profit distributions](docs/screenshots/dashboard-simulation.png)
+
+Backtest. Entered on a fixed schedule and held to expiry, against a
+buy-and-hold benchmark over the same windows, with the drawdown and the
+per-trade outcome distribution beside it. The panel states what it is not
+before it states what it found: 233 iron condors on SPY over five years,
+63.9 percent of them winners, and a total of minus 30 units of risk.
+
+![The backtest statistics table, equity curve, drawdown from peak, and the per-trade outcome distribution](docs/screenshots/dashboard-backtest.png)
+
 ---
 
 ## Extending it
@@ -799,7 +851,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 397 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 398 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -820,7 +872,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           fifty-two mutations, killed or survived
+python3 scripts/mutate.py           fifty-three mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -853,7 +905,7 @@ version scaled by `max(1, |expected|)`, which left three Greeks untested
 with nothing to show for it, and mutation testing found fourteen surviving
 defects.
 That harness is in the tree as `scripts/mutate.py`, so it is checkable
-rather than a claim about the past. It breaks the code fifty-two ways and
+rather than a claim about the past. It breaks the code fifty-three ways and
 reports
 which breakages the tests notice. Run it. Its current result is forty-two
 killed and one proven equivalent, and getting there closed two real holes

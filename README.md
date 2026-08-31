@@ -16,6 +16,7 @@ solicitation. Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
 ## Contents
 
 - [Install](#install)
+- [Usage](#usage)
 - [Five minutes to a full desk](#five-minutes-to-a-full-desk)
 - [Architecture](#architecture)
 - [How data flows](#how-data-flows)
@@ -24,6 +25,7 @@ solicitation. Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
 - [The rules this project holds itself to](#the-rules-this-project-holds-itself-to)
 - [Artifacts and contracts](#artifacts-and-contracts)
 - [Data providers](#data-providers)
+- [Asset classes](#asset-classes)
 - [The dashboard](#the-dashboard)
 - [Extending it](#extending-it)
 - [Loops and the graph](#loops-and-the-graph)
@@ -150,7 +152,7 @@ terminal:
 optiondesk expiries SPY           what is listed, and what you already hold
 optiondesk chain SPY              pull it
 optiondesk compare                every structure, ranked
-optiondesk dashboard              serve the charts at 127.0.0.1:8799
+optiondesk dashboard              serve the charts at 127.0.0.1:8787
 ```
 
 The five skills, and when each one fires:
@@ -771,7 +773,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 354 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 356 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 

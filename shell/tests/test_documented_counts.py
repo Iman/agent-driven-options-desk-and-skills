@@ -507,3 +507,52 @@ def test_every_skill_points_at_a_disclaimer_that_travels_with_it():
         assert any(n.endswith("DISCLAIMER.md") for n in names), (
             "{} references a disclaimer it does not carry".format(
                 archive.name))
+
+
+def test_the_readme_contents_list_names_every_section():
+    """A table of contents that omits a section is worse than none.
+
+    Two sections added in one afternoon, Usage and Asset classes, never
+    reached the list. A reader scanning it concludes the document does not
+    cover them.
+    """
+    text = read("README.md")
+    body = text.split("## Contents", 1)[1].split("\n---", 1)[0]
+    listed = set(re.findall(r"^- \[([^\]]+)\]", body, re.M))
+    actual = [h for h in re.findall(r"^## (.+)$", text, re.M)
+              if h != "Contents"]
+
+    missing = [h for h in actual if h not in listed]
+    assert not missing, (
+        "these sections are in the README and not in its contents "
+        "list: {}".format(missing))
+
+    phantom = [h for h in listed if h not in actual]
+    assert not phantom, (
+        "the contents list names sections that do not exist: {}".format(
+            phantom))
+
+
+def test_the_documented_dashboard_port_is_the_real_default():
+    """A port a reader types and cannot reach is a bad first impression."""
+    import ast
+
+    source = (SHELL / "src" / "optiondesk" / "cli"
+              / "__main__.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    default = None
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.keyword) and node.arg == "default"
+                and isinstance(node.value, ast.Constant)
+                and isinstance(node.value.value, int)
+                and 1024 < node.value.value < 65536):
+            default = node.value.value
+            break
+    assert default, "no dashboard port default found in the parser"
+
+    for name in ("README.md", "INSTALL.md", "FAQ.md"):
+        for line in read(name).splitlines():
+            if "optiondesk dashboard" in line and "127.0.0.1:" in line:
+                assert str(default) in line or "--port" in line, (
+                    "{} shows `{}` without --port, but the default is "
+                    "{}".format(name, line.strip(), default))

@@ -8,13 +8,14 @@ The same capabilities are also exposed over MCP by `optiondesk-mcp`, which is th
 
 They are not copied into this file. You discover skills in `.agents/skills`, scanning from the working directory up to the repository root, and read a skill's body only once you have selected it. Here `.agents/skills` resolves to `skills/`, so all of these are already available to you:
 
+- `desk-setup`
 - `options-backtest`
 - `options-greeks`
 - `options-positioning`
 - `options-simulation`
 - `options-strategy`
 
-Compiling their bodies into this file as well would add about 23 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
+Compiling their bodies into this file as well would add about 26 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
 
 ## What else is here
 

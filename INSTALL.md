@@ -55,7 +55,7 @@ Flags:
 npx skills add Iman/agent-driven-options-desk-and-skills
 ```
 
-Installs the five skills and nothing else, with no Python involved. Add
+Installs the six skills and nothing else, with no Python involved. Add
 `--list` to see them first, or `--skill options-greeks options-strategy` to
 take a subset.
 
@@ -88,7 +88,7 @@ CLI is installed too.
 
 Or, once published, `/plugin marketplace add Iman/agent-driven-options-desk-and-skills`.
 
-That gives you the five skills, six commands (`/desk-open`, `/desk-risk`,
+That gives you the six skills, six commands (`/desk-open`, `/desk-risk`,
 `/desk-test`, `/desk-mark`, plus `/desk-watch` and `/desk-complete` which
 are shaped for loops), two agents (an adversarial risk reviewer and a data
 auditor) and the MCP server declaration, in one step.
@@ -122,9 +122,9 @@ mention it. The binary has it, and the binary is the authority.
 
 The bundle carries two manifests over one set of files. Codex and ChatGPT
 read `.codex-plugin/plugin.json`, Claude Code reads
-`.claude-plugin/plugin.json`, and both point at the same five skills. The
+`.claude-plugin/plugin.json`, and both point at the same six skills. The
 six commands and two agents in it are Claude-only, so what Codex gets from
-this path is the five skills plus the MCP server declaration.
+this path is the six skills plus the MCP server declaration.
 
 Codex also finds the skills with no plugin at all, because it scans
 `.agents/skills` in a repository and `~/.agents/skills` for your user. This
@@ -139,7 +139,7 @@ binary on your computer. Reaching that would need a hosted Streamable HTTP
 MCP service with authentication and per-user credentials, which does not
 exist here and is not planned in this repository.
 
-So in browser ChatGPT the five skills work as knowledge and instructions,
+So in browser ChatGPT the six skills work as knowledge and instructions,
 the same as options 2 and 6, and they say so themselves: each one now
 carries an execution route telling the agent to prefer the MCP tool, fall
 back to the command line, and if neither is available to state plainly that

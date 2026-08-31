@@ -207,7 +207,7 @@ def build_plugin():
         "changes.\n\n"
         "The MCP server entry expects `optiondesk-mcp` on PATH, which "
         "`install.sh` puts there.\n\n"
-        "What reaches which host. The five skills work in Claude Code, "
+        "What reaches which host. The six skills work in Claude Code, "
         "ChatGPT and Codex. The two agents are Claude only: Codex reads "
         "agents as TOML under ~/.codex/agents and ignores these Markdown "
         "ones entirely, so they ship here as inert weight for that host. "

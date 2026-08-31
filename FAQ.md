@@ -180,7 +180,7 @@ Both. Codex scans `.agents/skills` in a repository and `~/.agents/skills`
 for your user, and this repository symlinks the first to `shell/skills`, so
 a clone is enough and `npx skills add` covers the second. There is a plugin
 for Codex too, registered with `codex plugin marketplace add`, carrying the
-same five skills as the Claude bundle.
+same six skills as the Claude bundle.
 
 What differs is the tools, not the skills. Codex on your machine can run
 the local MCP server; ChatGPT in a browser cannot execute a binary on your

@@ -129,7 +129,7 @@ skills are knowledge and instructions. Each skill says so itself.
 /plugin install option-desk@option-desk
 ```
 
-That adds the five skills, six commands, two agents and the MCP server
+That adds the six skills, six commands, two agents and the MCP server
 declaration in one step. The commands and agents come only through this
 path; the skills CLI installs skills.
 
@@ -181,7 +181,7 @@ optiondesk compare                every structure, ranked
 optiondesk dashboard              serve the charts at 127.0.0.1:8787
 ```
 
-The five skills, and when each one fires:
+The six skills, and when each one fires:
 
 | Skill | Covers |
 |---|---|
@@ -470,7 +470,7 @@ Ten tools are exposed: `option_chain_snapshot`, `option_greeks_ladder`,
 `option_positioning`, `option_simulate`, `option_backtest`,
 `option_forward_test`, `option_desk_status`.
 
-Five skills ship: `options-greeks`, `options-strategy`,
+Six skills ship: `options-greeks`, `options-strategy`,
 `options-positioning`, `options-simulation`, `options-backtest`. Each
 carries the reporting rules an agent must follow, not just the commands.
 
@@ -918,12 +918,14 @@ gone, replaced by the test above, which anyone can run.
 | `LOOPS.md` | the four loop kinds, and what makes a good loop here |
 | `FAQ.md` | the questions people actually ask |
 | `AGENTS.md` | project rules and the command inventory for Codex, which loads the skills itself from `.agents/skills` |
-| `GEMINI.md` | the same plus all five skills compiled in, because Gemini CLI discovers none |
+| `GEMINI.md` | the same plus all six skills compiled in, because Gemini CLI discovers none |
 | `DISCLAIMER.md` | what this is not, and what you are responsible for |
 | `LICENSES.md` | what noncommercial covers, and what needs an agreement |
 | `THIRD-PARTY.md` | what is vendored and under what terms |
 | `CLA.md`, `CONTRIBUTORS.md` | contribution terms |
 | `SECURITY.md` | what is in scope, and how to report it privately |
+| `PRIVACY.md` | what leaves your machine, which is one request to a market data provider |
+| `docs/SUBMISSION.md` | the directory submission pack, and why OpenAI's is not possible yet |
 | `CODE_OF_CONDUCT.md` | how to disagree here, and the one rule about not asking where anyone is |
 | `CONTRIBUTING.md` | measure first, test what you claim, and what gets sent back |
 

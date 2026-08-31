@@ -378,7 +378,7 @@ without mixing. An empty dashboard says which commands would fill it.
 
 ## 8. Skills
 
-Five skills, following the progressive disclosure pattern: a name and
+Six skills, following the progressive disclosure pattern: a name and
 description that decide whether the skill loads at all, a SKILL.md that is
 a router rather than a manual, and bundled resources loaded only when the
 work needs them.

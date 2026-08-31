@@ -66,6 +66,13 @@ def split_chain(snapshot, spot=None):
         "spot": float(resolved_spot),
         "days": snapshot.get("days_to_expiry"),
         "expiry": snapshot.get("expiry"),
+        # Carried so a builder can price with the rates this snapshot
+        # actually measured. The time spread builders were selecting legs
+        # by delta at the module defaults, 4 percent and no dividend, while
+        # the snapshot held 3.735 percent and a fetched yield, and three of
+        # four selected strikes differed because of it.
+        "risk_free_rate": snapshot.get("risk_free_rate"),
+        "dividend_yield": snapshot.get("dividend_yield"),
     }
 
 

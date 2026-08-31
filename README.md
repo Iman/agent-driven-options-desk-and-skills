@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-862%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-56%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-911%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-62%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -738,7 +738,7 @@ Every view is addressable: `?u=SPY&e=2026-09-18`.
 
 ### What it looks like
 
-Eight views below. Every panel and every chart, seventy-seven images in all,
+Nine views below. Every panel and every chart, seventy-nine images in all,
 is in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
 
 Positioning. Dealer gamma by strike with the walls marked, the cumulative
@@ -754,6 +754,15 @@ smile with its 25-delta wings, and the first and second order Greek curves
 drawn on one axis each.
 
 ![Implied volatility by strike and expiry, the smile with 25-delta wings marked, and delta, gamma, vega and theta curves](docs/screenshots/dashboard-volatility.png)
+
+Composite support. Every structure on one axis under a printed formula,
+with the four components shown separately so the ordering can be disagreed
+with by component, and with the model, the simulation and the five-year
+history side by side. Where those three disagree the row says so rather
+than averaging them into one confident number. It is an ordering under
+stated weights, not an estimate of edge and not a view on what to do.
+
+![The composite ranking with its formula, its components, and the model, simulation and history columns side by side](docs/screenshots/dashboard-composite.png)
 
 Time spreads. The structures whose legs live on two expiries, kept apart
 from the rest because their numbers mean something different: they are
@@ -876,8 +885,8 @@ the project looked broken when it was not.
 Or one suite at a time:
 
 ```
-./shell/.venv/bin/python -m pytest engine/tests -q    # 302 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 402 tests
+./shell/.venv/bin/python -m pytest engine/tests -q    # 340 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 413 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -898,7 +907,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           fifty-six mutations, killed or survived
+python3 scripts/mutate.py           sixty-two mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 

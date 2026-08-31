@@ -263,34 +263,84 @@ def test_a_ratio_diagonal_holds_more_long_delta_than_short(chains):
         assert longs[0].days > shorts[0].days, "the long is the back month"
 
 
-def test_a_ratio_diagonal_is_refused_when_the_ratio_would_cap_the_move(
-        chains):
-    """Equal delta mass caps the very move the structure is opened for.
-    Returning a plan anyway would describe a capped trade as an uncapped
-    one, which is the failure the ratio exists to avoid.
+def test_a_ratio_diagonal_refuses_a_net_short_shape(chains):
+    """The check that carries the claim, and for a while did not exist.
+
+    An audit built this structure through the public API at one long
+    against two short. It satisfied the delta bound at a ratio of 0.76 and
+    was a net short call whose loss is unbounded on the upside, measured at
+    -3787 over a wide scan, while the docstring, the skill reference, the
+    dashboard panel and the plan schema all said the delta bound was what
+    kept the move uncapped. It never did. Holding more back-month
+    contracts than front-month ones is what does.
     """
     from optiondesk_engine.strategies import timespread
 
     near = _delta_chain(28, 0.22, expiry="2026-09-18")
     far = _delta_chain(112, 0.24, expiry="2026-12-18")
-    # Two shorts against one long, chosen so every other check passes: the
-    # short strike is further out of the money than the long, both legs
-    # price, and the expiries are the right way round. The only thing wrong
-    # is the delta mass, 1.02 times the long's. An earlier version of this
-    # test used equal deltas and equal quantities, which the strike check
-    # rejected first, so it passed while the guard was removed.
-    plan = timespread._ratio_diagonal(near, far, "call", long_delta=0.55,
-                                      short_delta=0.30, long_qty=1.0,
-                                      short_qty=2.0)
-    assert plan is None
 
-    # One short instead of two, same deltas, and it builds: the refusal
-    # above is the mass and nothing else.
-    allowed = timespread._ratio_diagonal(near, far, "call", long_delta=0.55,
-                                         short_delta=0.30, long_qty=1.0,
+    for long_qty, short_qty in ((1.0, 2.0), (1.0, 1.0), (2.0, 3.0)):
+        assert timespread._ratio_diagonal(
+            near, far, "call", long_qty=long_qty,
+            short_qty=short_qty) is None, (
+                "{} long against {} short is not a ratio diagonal".format(
+                    long_qty, short_qty))
+
+    assert timespread._ratio_diagonal(near, far, "call", long_qty=2.0,
+                                      short_qty=1.0) is not None
+
+
+def test_a_ratio_diagonal_refuses_a_short_that_is_not_further_out(chains):
+    """The short leg has to sit beyond the long one in the trade's own
+    direction, or the structure is not a diagonal at all.
+
+    This check had no test until an audit deleted it and all 302 engine
+    tests stayed green. Asking for a far out of the money long and a near
+    the money short inverts the pair, which is the shape it exists to
+    refuse.
+    """
+    from optiondesk_engine.strategies import timespread
+
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+
+    inverted = timespread._ratio_diagonal(near, far, "call", long_delta=0.10,
+                                          short_delta=0.55, long_qty=2.0,
+                                          short_qty=1.0)
+    assert inverted is None
+
+    ordered = timespread._ratio_diagonal(near, far, "call", long_delta=0.65,
+                                         short_delta=0.25, long_qty=2.0,
                                          short_qty=1.0)
-    assert allowed is not None
-    assert allowed["delta_ratio"] < 1
+    assert ordered is not None
+    strikes = {leg.side: leg.strike for leg in ordered["legs"]}
+    assert strikes[-1] > strikes[1], "the short call must be the further one"
+
+
+def test_a_ratio_diagonal_reads_its_own_tail(chains):
+    """The third check reads the payoff rather than the contracts.
+
+    Neither of the other two looks at the profit curve, so a leg mix whose
+    far end falls away would pass both. This measures the slope at the edge
+    of the scanned range in the structure's own direction and refuses a
+    structure that gives ground there.
+    """
+    from optiondesk_engine.strategies import timespread
+
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+    plan = timespread._ratio_diagonal(near, far, "call")
+    assert plan is not None
+
+    spot = float(near["spot"])
+    hi = spot * 1.40
+    step = spot * 0.01
+    from optiondesk_engine.strategies.timespread import pnl_at
+    at_days = plan["near_days"]
+    assert pnl_at(plan["legs"], hi, at_days) >= pnl_at(
+        plan["legs"], hi - step, at_days), (
+            "a structure that is refused when its tail turns down must not "
+            "be returned with a tail that turns down")
 
 
 def test_the_ratio_gives_back_less_than_the_one_by_one(chains):
@@ -304,4 +354,52 @@ def test_the_ratio_gives_back_less_than_the_one_by_one(chains):
     ratio = build_time_spread("ratio_call_diagonal", near, far)
     plain = build_time_spread("diagonal_spread", near, far, kind="call")
     assert ratio is not None and plain is not None
-    assert ratio["giveback"] <= plain["analysis"]["upside_giveback"]
+
+    # An absolute assertion, at two widths. The earlier version compared
+    # two quantities that are both non-negative by construction, so
+    # hardcoding the ratio's giveback to zero left it passing: it tested
+    # the 1x1's formula and nothing about the ratio at all.
+    from optiondesk_engine.strategies.timespread import analyze_at_front
+    for span in (0.40, 2.0):
+        wide = analyze_at_front(ratio["legs"], ratio["spot"], span=span)
+        assert wide["upside_giveback"] == 0.0, (
+            "the ratio hands back {} at span {}".format(
+                wide["upside_giveback"], span))
+    assert plain["analysis"]["upside_giveback"] > 0.0, (
+        "the 1x1 is kept precisely because it does give profit back")
+
+
+def test_the_snapshot_rates_choose_the_legs(chains):
+    """Legs are selected at the chain's own carry, not at the defaults.
+
+    An audit measured the difference on the live SPY pair: at the module
+    defaults of 4 percent and no dividend the call short landed on 791 and
+    the put long on 800; at the snapshot's own 3.735 percent and 0.9828
+    percent dividend yield they landed on 790 and 795. Three of four legs
+    moved. A delta target is a statement about carry, so reading the carry
+    off the chain is not a refinement, it is the difference between
+    selecting the contract the target names and a neighbouring one.
+    """
+    from optiondesk_engine.strategies import timespread
+
+    near = _delta_chain(28, 0.22, expiry="2026-09-18")
+    far = _delta_chain(112, 0.24, expiry="2026-12-18")
+
+    defaults = timespread._ratio_diagonal(near, far, "call")
+
+    # A dividend yield large enough to move the ladder, stated on the chain
+    # the way a real snapshot states it.
+    for chain in (near, far):
+        chain["risk_free_rate"] = 0.01
+        chain["dividend_yield"] = 0.08
+    with_rates = timespread._ratio_diagonal(near, far, "call")
+
+    assert defaults is not None and with_rates is not None
+    assert (with_rates["risk_free_rate"], with_rates["dividend_yield"]) == (
+        0.01, 0.08), "the plan must name the carry it used"
+    assert defaults["risk_free_rate"] == timespread.DEFAULT_R
+
+    picked = lambda plan: sorted(leg.strike for leg in plan["legs"])
+    assert picked(defaults) != picked(with_rates), (
+        "the carry did not reach the selection: same legs at 4 percent and "
+        "no dividend as at 1 percent and 8 percent")

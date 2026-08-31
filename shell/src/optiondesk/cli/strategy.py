@@ -226,6 +226,12 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         # giveback that ratio buys. Dropping them here would have written
         # a plan indistinguishable from a 1x1 with two contracts on one
         # leg, which is the thing the structure exists not to be.
+        # The carry the legs were selected and priced at. Named because
+        # the figures depend on it: at the module defaults rather than this
+        # snapshot's own rate and dividend yield, three of four legs of the
+        # ratio structures land on different strikes.
+        "risk_free_rate": plan.get("risk_free_rate"),
+        "dividend_yield": plan.get("dividend_yield"),
         "delta_ratio": plan.get("delta_ratio"),
         "long_delta": plan.get("long_delta"),
         "short_delta": plan.get("short_delta"),

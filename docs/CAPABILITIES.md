@@ -352,7 +352,7 @@ flag, and it was verified by removing one and watching it go red.
 ECharts from a vendored copy so a viewer's browser makes no third-party
 request.
 
-Forty panels and, at most, thirty-two chart canvases: twenty with
+Forty-one panels and, at most, thirty-two chart canvases: twenty with
 fixed identities, six Greek profiles and up to six per-structure outcome
 distributions. Each renders only when the artifact behind it exists, rather
 than being drawn empty:
@@ -370,6 +370,23 @@ than being drawn empty:
 - the variance risk premium, implied against realised, on an axis of days to expiry rather than calendar time, because the history block carries one realised figure and not a series
 - the condors that exist as artifacts, short width against expected return, which is not the same as every condor the chain admits
 - gamma scalping levels from the simulation fan, with the reference levels driven by whichever structure is selected
+
+One panel carries no chart at all. Composite support scores every compared
+structure out of 100 under a formula printed on the page beside its
+weights, `100 * (0.30 pop + 0.30 edge + 0.25 rr + 0.15 (1 - es))`, with a
+volatility tilt and a multiplier for a thin friction verdict. Each of the
+four components is a column of its own, so the ordering can be argued with
+component by component rather than accepted whole. Beside them sit the
+three independent readings of the same structure that exist on disk: the
+comparison artifact's model expectation and probability, the simulation's
+per-structure outcome, and the backtest history. They routinely disagree,
+and the last column says where, rather than averaging it away. The panel
+states all three horizons it drew from, because they are not the same
+horizon; it names every input that was absent and every value that stood in
+for one; it lists the structures it could not score with the reason; and it
+says in its own words that a ranking is not an estimate of edge. The
+arithmetic is a faithful port of the spread engine in the author's earlier
+research repository, and it is tested against a score computed by hand.
 
 Conventions hold across every panel so a reader learns them once: spot is a
 dotted grey line, breakevens are dashed amber, the expected move is a
@@ -655,14 +672,15 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies fifty-six breakages to a copy of
+everywhere else. It applies sixty-two breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
-suite, or survived. The current result is twenty-two, three and zero, plus
-one mutant proven equivalent and recorded as such with the argument for why
+suite, or survived. The last full run recorded here, on 2026-08-31 and
+over fifty-eight of them, was fifty-four, three and zero, plus one
+mutant proven equivalent and recorded as such with the argument for why
 it cannot be killed.
 
-Fourteen of the twenty-six exist because of defects found and fixed on one day:
+Fourteen of them exist because of defects found and fixed on one day:
 an MCP server that answered notifications, one that never enforced its own
 required arguments, one that returned an internal error for a malformed
 call, a house-rules scan whose key pattern could be weakened without

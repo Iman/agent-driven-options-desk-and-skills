@@ -130,7 +130,7 @@
         "number",
         "null"
       ],
-      "description": "Short delta mass divided by long delta mass, for a ratio structure. Below one is what keeps the move uncapped; at or above one the structure caps the move it was opened for and is not built."
+      "description": "Short delta mass divided by long delta mass at entry, for a ratio structure. It is a bound on the split at entry and nothing more: it does not by itself keep a large move uncapped, and a structure satisfying it can still be net short. What keeps the move uncapped is holding more back-month contracts than front-month ones, which the builder checks first."
     },
     "long_delta": {
       "type": [
@@ -152,6 +152,20 @@
         "null"
       ],
       "description": "Profit handed back from the peak at the far end of the scanned range, in the structure's own direction. The number that separates a ratio diagonal from a 1x1."
+    },
+    "risk_free_rate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The rate the legs were selected and priced at, read off the chain snapshot rather than assumed."
+    },
+    "dividend_yield": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The continuous dividend yield used, read off the chain snapshot rather than assumed to be zero."
     }
   },
   "$defs": {

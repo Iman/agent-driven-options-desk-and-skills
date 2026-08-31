@@ -126,3 +126,44 @@ def test_a_real_key_shape_still_trips_it(refresh, tmp_path, monkeypatch):
         "key " + "9K4MZ7Q1" + "RD2VHN6X" + "\n", encoding="utf-8")
     problems = refresh.check_rules()
     assert any("key material" in p for p in problems), problems
+
+
+def test_personal_material_is_caught(refresh, tmp_path, monkeypatch):
+    """An agent working in this tree once wrote a file of notes about the
+    maintainer's CV and an article draft into docs/. It was untracked and
+    was caught by reading the working tree, which is luck rather than a
+    control.
+
+    The scan must fire on that shape of content. It must not quote what it
+    found: a report that echoes the line puts the material into the log,
+    which is the thing being prevented.
+    """
+    # Assembled from pieces rather than written out, because a test file
+    # containing the literal phrase would itself trip the scan it is
+    # testing, and the scan reads every tracked file including this one.
+    planted = tmp_path / "notes.md"
+    planted.write_text(
+        "{} {}: {} version 13.3 rebuilt tonight.\n".format(
+            "Campaign", "notes", "CV"), encoding="utf-8")
+    monkeypatch.setattr(refresh, "tracked_text_files", lambda: [planted])
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    problems = refresh.check_rules()
+    assert problems, "the scan did not fire on personal material"
+    assert any("personal material" in p for p in problems)
+    assert not any("13.3" in p or "ampaign" in p for p in problems), (
+        "the report quoted the material it was meant to keep out of logs")
+
+
+def test_ordinary_option_prose_does_not_trip_the_personal_scan(
+        refresh, tmp_path, monkeypatch):
+    """This repository says profile, position and exposure constantly. A
+    scan that fired on those would be switched off within a day.
+    """
+    planted = tmp_path / "ordinary.md"
+    planted.write_text(
+        "The max pain profile shows where open interest sits. A position "
+        "profile is a different thing from a volatility profile, and the "
+        "delta profile of this structure is flat.\n", encoding="utf-8")
+    monkeypatch.setattr(refresh, "tracked_text_files", lambda: [planted])
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    assert refresh.check_rules() == []

@@ -166,8 +166,11 @@ MUTATIONS = [
      "    if entered and not measurable:",
      "    if False:",
      "shell/tests/test_backtest_unbounded.py"),
+    # The find string has to track the sentence in the document. It said
+    # "Thirty-nine" while the document said "Forty", so this mutation was
+    # reported SKIPPED, which is a mutation that proves nothing at all.
     ("dashboard-counts-unguarded", "docs/CAPABILITIES.md",
-     "Thirty-nine panels and, at most, thirty-two chart canvases",
+     "Forty-one panels and, at most, thirty-two chart canvases",
      "Thirty-five panels and, at most, twenty-eight chart canvases",
      "shell/tests/test_documented_counts.py"),
     ("installer-bare-repo-accepted", "install.sh",
@@ -264,6 +267,24 @@ MUTATIONS = [
      '        raise ValueError("no key given, nothing was written")',
      "        pass",
      "shell/tests/test_keys_cli.py"),
+    ("ratio-quantity-check-removed", ENGINE + "/strategies/timespread.py",
+     "    if long_qty <= short_qty:\n        return None",
+     "    if False:\n        return None",
+     "engine/tests/test_timespread.py"),
+    ("ratio-tail-check-removed", ENGINE + "/strategies/timespread.py",
+     "    if at_edge < inside:\n        return None",
+     "    if False:\n        return None",
+     "engine/tests/test_timespread.py"),
+    ("bear-call-credit-guard-removed", ENGINE + "/strategies/playbook.py",
+     "    plan = _plan(\"bear_call_spread\", legs, chain, band)\n"
+     "    if plan[\"analysis\"][\"net_cash\"] <= 0:\n        return None",
+     "    plan = _plan(\"bear_call_spread\", legs, chain, band)",
+     "engine/tests/test_strategies.py"),
+    ("timespread-rates-ignored", ENGINE + "/strategies/timespread.py",
+     "    rate = chain.get(\"risk_free_rate\")\n"
+     "    yield_ = chain.get(\"dividend_yield\")",
+     "    rate = None\n    yield_ = None",
+     "engine/tests/test_timespread.py"),
     ("ratio-guard-removed", ENGINE + "/strategies/timespread.py",
      "    if short_mass >= long_mass:\n        return None",
      "    if False:\n        return None",
@@ -300,6 +321,18 @@ MUTATIONS = [
      "        if name.strip() == variable:",
      "        if variable in line:",
      "shell/tests/test_keys_cli.py"),
+    # The composite score. Both of these are silent: the module still
+    # returns a plausible number out of 100 for every structure, and only
+    # the rows where friction is worst, or where a volatility view has been
+    # stated, come out wrong.
+    ("ranking-thin-verdict-ignored", ENGINE + "/analytics/ranking.py",
+     '    thin = THIN_MULTIPLIER if verdict == "thin" else 1.0',
+     "    thin = 1.0",
+     "engine/tests/test_ranking.py"),
+    ("ranking-untradeable-is-scored", ENGINE + "/analytics/ranking.py",
+     "    if verdict in EXCLUDING_VERDICTS:",
+     "    if verdict in ():",
+     "engine/tests/test_ranking.py"),
     ("credential-order-dotenv-before-environment", CONFIG,
      "    env = os.environ.get(name)\n"
      "    if env:\n"
@@ -322,6 +355,35 @@ MUTATIONS = [
 # another that still holds. Each one is recorded with the argument, so that
 # "we could not kill it" is never quietly filed as "we chose not to".
 EQUIVALENT = {
+    "ratio-guard-removed": (
+        "The entry-time delta bound cannot fire while the quantity check "
+        "and the strike ordering both hold. Reaching it needs short_mass "
+        "at or above long_mass, which with two longs against one short "
+        "means the short's delta exceeding twice the long's, while the "
+        "short is also required to be the further out of the money of the "
+        "pair and therefore the lower delta one. No chain admits both. It "
+        "is kept as defence in depth for a future shape that does not "
+        "carry those two properties, and this entry has to be revisited "
+        "the day one appears."),
+    "ratio-quantity-check-removed": (
+        "The quantity check and the tail check cover each other exactly, "
+        "for a two-leg structure, and neither can be killed while the "
+        "other stands. Past the far strike both legs are deep in the "
+        "money, so the profit slope at the edge of the scan is long_qty "
+        "minus short_qty. With the quantity check removed, any shape it "
+        "would have refused has a slope of zero or less there and is "
+        "refused by the tail check instead. They are kept as two checks "
+        "because they say different things to a reader and because the "
+        "coverage argument holds only for two legs: a future builder with "
+        "three would break it, and then this entry has to go."),
+    "ratio-tail-check-removed": (
+        "The same argument from the other side. With the quantity check "
+        "in place a two-leg structure always has a positive slope at the "
+        "edge in its own direction, so the tail check can never fire and "
+        "removing it changes nothing measurable. It is kept because it is "
+        "the only one of the three that reads the payoff rather than the "
+        "contracts, which is what would catch a shape the other two were "
+        "never designed for."),
     "rank-non-finite": (
         "rankable also requires math.isfinite(expected_return), and "
         "expected_return is expected divided by a finite risk, so a "

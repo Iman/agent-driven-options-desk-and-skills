@@ -282,6 +282,324 @@ def _comparison_panel(comparison):
         " {}</p>".format(html.escape(comparison.get("caveat", ""))))
 
 
+def _outcome_word(value):
+    """Which way one view expects a structure to come out, or None.
+
+    Deliberately three words and not a number. The three views are measured
+    in different units over different horizons, so their magnitudes are not
+    comparable and only the direction is.
+    """
+    if value is None:
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not (number == number):  # NaN, which is neither profit nor loss
+        return None
+    return "profit" if number > 0 else ("loss" if number < 0 else "flat")
+
+
+def _views_disagree(model, sim, backtest):
+    """(short, long) description of where the three views part company.
+
+    Nothing is averaged and nothing is reconciled. Two independent things
+    are reported: whether the views agree on the direction of the outcome,
+    and how far apart their probabilities of profit are. A view that is not
+    on disk is absent from both, never counted as agreement.
+    """
+    directions = [
+        ("model", _outcome_word((model or {}).get("expected_pnl"))),
+        ("simulation", _outcome_word((sim or {}).get("mean"))),
+        ("history", _outcome_word(
+            ((backtest or {}).get("statistics") or {}).get("mean_return"))),
+    ]
+    directions = [(name, word) for name, word in directions if word]
+
+    probabilities = [
+        ("model", (model or {}).get("probability_of_profit")),
+        ("simulation",
+         (sim or {}).get("realised_vol_probability_of_profit")),
+        ("history",
+         ((backtest or {}).get("statistics") or {}).get("win_rate")),
+    ]
+    probabilities = [(name, value) for name, value in probabilities
+                     if value is not None]
+
+    if len(directions) + len(probabilities) == 0:
+        return "no view", "nothing on disk says how this structure comes out"
+    if len(directions) < 2 and len(probabilities) < 2:
+        return ("one view only",
+                "only one of the three views covers this structure, so "
+                "there is nothing for it to disagree with")
+
+    detail = ["{} expects {}".format(name, word) for name, word in directions]
+    split = len({word for _, word in directions}) > 1
+
+    spread = None
+    if len(probabilities) > 1:
+        low = min(probabilities, key=lambda pair: pair[1])
+        high = max(probabilities, key=lambda pair: pair[1])
+        spread = (high[1] - low[1]) * 100.0
+        detail.append(
+            "probability of profit runs from {} at {} to {} at {}, a gap of "
+            "{:.1f} points".format(low[0], _percent(low[1]), high[0],
+                                   _percent(high[1]), spread))
+
+    short = "split on direction" if split else (
+        "agree on direction" if len(directions) > 1 else "direction: one view")
+    if spread is not None:
+        short += ", {:.0f} pt gap".format(spread)
+    return short, "; ".join(detail)
+
+
+def _composite_rows(comparison, simulation, backtests):
+    """Every compared structure, scored, with its other two views attached.
+
+    The score comes from the engine, reached through the bridge like every
+    other piece of analytics. The two extra views are matched by strategy
+    name against the simulation's per-structure block and the backtests on
+    disk, and a structure that appears in only one of them carries None for
+    the others rather than a substitute.
+    """
+    from optiondesk import engine_bridge
+
+    if not engine_bridge.AVAILABLE:
+        return None
+    ranking = engine_bridge.analytics().ranking
+
+    rows = (comparison or {}).get("rows") or []
+    if not rows:
+        return None
+
+    by_name = {row.get("strategy"): row for row in rows}
+    scored, rejected = ranking.rank_rows(
+        [ranking.row_from_comparison(row) for row in rows],
+        vol_view="neutral", top=len(rows))
+
+    simulated = {structure.get("strategy"): structure
+                 for structure in ((simulation or {}).get("structures") or [])}
+    historical = {test.get("strategy"): test for test in (backtests or [])}
+
+    out = []
+    for row in scored:
+        name = row["structure"]
+        model = by_name.get(name) or {}
+        sim = simulated.get(name)
+        history = historical.get(name)
+        short, long = _views_disagree(model, sim, history)
+        out.append({"scored": row, "model": model, "sim": sim,
+                    "backtest": history, "disagree": short,
+                    "disagree_detail": long})
+    return {"ranked": out, "rejected": rejected,
+            "weights": ranking.SCORE_WEIGHTS, "formula": ranking.FORMULA,
+            "rr_cap": ranking.RR_CAP, "vrp_tilt": ranking.VRP_TILT,
+            "thin_multiplier": ranking.THIN_MULTIPLIER,
+            "min_premium": ranking.MIN_ABS_PREMIUM}
+
+
+def _composite_horizons(comparison, simulation, backtests, days):
+    """The three horizons the score is built from, stated in one sentence.
+
+    Written out because the composite is the one place in this dashboard
+    where figures from three different horizons land in a single number. A
+    score that mixed forty-six days of model settlement with a thirty-day
+    simulation and a thirty-day holding period, and did not say so, would
+    be presenting an incomparability as a measurement.
+    """
+    expiry = (comparison or {}).get("expiry")
+    parts = ["the model figures settle at the {} expiry{}".format(
+        expiry or "selected", ", {} days away".format(_num(days, 1))
+        if days else "")]
+
+    horizon = ((simulation or {}).get("simulation") or {}).get("horizon_days")
+    if horizon is not None:
+        parts.append("the simulation runs {} days".format(horizon))
+    else:
+        parts.append("no simulation is on disk, so that column is empty")
+
+    holdings = sorted({(test.get("settings") or {}).get("holding_days")
+                       for test in (backtests or [])
+                       if (test.get("settings") or {}).get("holding_days")})
+    if holdings:
+        windows = sorted({((test.get("settings") or {}).get("first_date"),
+                           (test.get("settings") or {}).get("last_date"))
+                          for test in backtests})
+        first, last = windows[0] if windows else (None, None)
+        parts.append(
+            "the backtest holds {} days per trade{}".format(
+                " or ".join(str(h) for h in holdings),
+                ", entered across {} to {}".format(first, last)
+                if first and last else ""))
+    else:
+        parts.append("no backtest is on disk, so those columns are empty")
+
+    return ("Three horizons, not one, and they are not reconciled: "
+            + "; ".join(parts) + ".")
+
+
+def _composite_section(comparison, simulation, backtests, days):
+    """One composite score per structure, with its inputs and its dissent.
+
+    The shape follows _comparison_panel: a wide table under a printed
+    criterion. What is different is that the criterion here is arithmetic
+    rather than a sentence, so the arithmetic is printed too, along with
+    every component that went into it. A reader who dislikes the ordering
+    can point at the weight or the component they dislike.
+
+    Nothing here selects a structure. The columns to the right of the score
+    are three independent readings of the same structure and they routinely
+    disagree; the last column says so rather than averaging the
+    disagreement away, because the disagreement is the most informative
+    thing on the row.
+    """
+    assembled = _composite_rows(comparison, simulation, backtests)
+    if not assembled:
+        return ""
+
+    weights = assembled["weights"]
+    header = ["rank", "structure", "score", "pop", "edge", "rr", "es",
+              "adjust", "friction", "model P(profit)", "model P/L",
+              "sim P(profit)", "sim mean", "history trades",
+              "history win rate", "history mean on risk", "views"]
+
+    body = []
+    for entry in assembled["ranked"]:
+        row = entry["scored"]
+        parts = row["components"]
+        model = entry["model"]
+        sim = entry["sim"] or {}
+        stats = (entry["backtest"] or {}).get("statistics") or {}
+        substituted = parts["substituted"]
+        title = entry["disagree_detail"]
+        if substituted:
+            title += ". Substituted: " + "; ".join(substituted)
+        body.append(
+            "<tr class='{cls}' title='{why}'>"
+            "<td>{rank}</td><td>{name}{mark}</td><td><strong>{score}</strong>"
+            "</td><td>{pop}</td><td>{edge}</td><td>{rr}</td><td>{es}</td>"
+            "<td>{adjust}</td>"
+            "<td><span class='badge {fv}'>{fv}</span></td>"
+            "<td>{mpop}</td><td>{mpnl}</td><td>{spop}</td><td>{smean}</td>"
+            "<td>{trades}</td><td>{win}</td><td>{hmean}</td>"
+            "<td>{views}</td></tr>".format(
+                cls="lead" if row.get("rank") == 1 else "",
+                why=html.escape(title),
+                rank=row.get("rank") or "",
+                name=html.escape(str(row["structure"]).replace("_", " ")),
+                mark=" *" if substituted else "",
+                score=_num(row["score"], 1),
+                pop=_num(parts["pop_norm"], 3),
+                edge=_num(parts["edge_norm"], 3),
+                rr=_num(parts["rr_norm"], 3),
+                es=_num(parts["es_norm"], 3),
+                adjust="{:+.1f}, x{:.2f}".format(parts["vrp_tilt"],
+                                                 parts["thin_multiplier"]),
+                fv=html.escape(str(model.get("friction_verdict") or "n/a")),
+                mpop=_percent(model.get("probability_of_profit")),
+                mpnl=_num(model.get("expected_pnl")),
+                spop=_percent(sim.get("realised_vol_probability_of_profit")),
+                smean=_num(sim.get("mean")),
+                # Not stats.get("trades", 0): a backtest of a structure
+                # with an unbounded loss writes statistics as an empty
+                # object, so that default renders a confident "0 trades"
+                # where the truth is that nothing could be measured.
+                trades=_num(stats.get("trades"), 0),
+                win=_percent(stats.get("win_rate")),
+                hmean=_percent(stats.get("mean_return"), 2),
+                views=html.escape(entry["disagree"])))
+
+    substitutions = [
+        "<li><strong>{}</strong>: {}</li>".format(
+            html.escape(str(entry["scored"]["structure"]).replace("_", " ")),
+            html.escape("; ".join(entry["scored"]["components"]["substituted"])))
+        for entry in assembled["ranked"]
+        if entry["scored"]["components"]["substituted"]]
+    substitution_html = ""
+    if substitutions:
+        substitution_html = (
+            "<p class='assume'>Marked with an asterisk above: an input was "
+            "absent and something stood in for it. The score was still "
+            "computed, and what stood in is named here so it can be "
+            "discounted.</p><ul class='notes'>"
+            + "".join(substitutions) + "</ul>")
+
+    excluded_html = ""
+    if assembled["rejected"]:
+        items = []
+        for row in assembled["rejected"]:
+            exclusion = row["exclusion"]
+            items.append(
+                "<li><strong>{}</strong>: {}. Absent: {}.</li>".format(
+                    html.escape(str(row.get("structure") or "").replace(
+                        "_", " ")),
+                    html.escape(str(exclusion.get("reason") or
+                                    exclusion.get("excluded"))),
+                    html.escape(", ".join(exclusion.get("missing") or [])
+                                or "nothing")))
+        excluded_html = (
+            "<p class='assume'>{} of the structures compared here carry no "
+            "score. They are listed rather than dropped: a structure left "
+            "out of an ordering is part of what the ordering says.</p>"
+            "<ul class='notes'>{}</ul>".format(len(assembled["rejected"]),
+                                               "".join(items)))
+
+    formula = (
+        "score = 100 * ({pop:.2f} pop + {edge:.2f} edge + {rr:.2f} rr "
+        "+ {es:.2f} (1 - es))\n"
+        "  pop    model probability of profit, on [0, 1]\n"
+        "  edge   (expected P/L - round trip friction) / premium,\n"
+        "         clamped to [-1, 1] and mapped onto [0, 1]\n"
+        "  rr     min(reward:risk, {cap:g}) / {cap:g}; unbounded gain scores "
+        "1.000\n"
+        "  es     |expected shortfall| / worst case, capped at 1.000\n"
+        "then   + {tilt:g} or - {tilt:g} for a volatility view, credit "
+        "families\n"
+        "         favoured on crush and debit families on expand\n"
+        "       x {thin:g} when the friction verdict is thin\n"
+        "       clamped to [0, 100]\n"
+        "premium is floored at {floor:.2f} so quote noise cannot inflate "
+        "edge".format(
+            pop=weights["pop"], edge=weights["edge"], rr=weights["rr"],
+            es=weights["es"], cap=assembled["rr_cap"],
+            tilt=assembled["vrp_tilt"], thin=assembled["thin_multiplier"],
+            floor=assembled["min_premium"]))
+
+    return (
+        "<h2 class='section'>Composite support</h2>"
+        + _panel(
+            "Which structure has the most support under one printed formula",
+            "Four measured quantities on one axis, with the weights shown. "
+            "This is an ordering under stated weights, not an estimate of "
+            "edge and not a view on what to do.",
+            "<pre class='cmds'>" + html.escape(formula) + "</pre>"
+            + "<p class='assume'>{}</p>".format(
+                html.escape(_composite_horizons(comparison, simulation,
+                                                backtests, days)))
+            + "<p class='hint'>The volatility view is neutral, because "
+              "nothing on disk states one, so the tilt is {:+.1f} on every "
+              "row. Under a crush view every credit structure gains {:g} "
+              "points and every debit structure loses {:g}; under expand the "
+              "two swap.</p>".format(0.0, assembled["vrp_tilt"],
+                                     assembled["vrp_tilt"])
+            + "<div class='scroll'><table><thead><tr>"
+            + "".join("<th>{}</th>".format(html.escape(h)) for h in header)
+            + "</tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
+            + substitution_html
+            + excluded_html
+            + "<p class='caveat'><strong>What this number is not.</strong> "
+              "It is not an edge estimate. Three of the four components come "
+              "from the same lognormal model at a single at-the-money "
+              "volatility, so they move together and the composite is far "
+              "less independent than four terms suggest. The weights were "
+              "chosen and written down, not fitted to anything, and a "
+              "different set would reorder the table. The model, simulation "
+              "and history columns measure different things over different "
+              "horizons and are shown side by side for exactly that reason. "
+              "Where they disagree the last column says so, and that "
+              "disagreement is not resolved here.</p>"))
+
+
 def _diagnostic_line(diagnostics):
     """Worst R-hat and smallest ESS, or a statement that there are none.
 
@@ -625,9 +943,11 @@ def _time_spread_section(plans):
 
     The two columns that only exist here are the ones that separate a
     ratio diagonal from a plain one: delta ratio, the short delta mass
-    over the long, and giveback, how much of the peak profit the structure
-    hands back at the far end of the scan. A 1x1 diagonal can be too
-    right; the ratio versions are built so that it cannot be.
+    over the long at entry, and giveback, how much of the peak profit the
+    structure hands back at the far end of the scan. A 1x1 diagonal can be
+    too right. The ratio versions avoid it by holding more back-month
+    contracts than front-month ones, which is the property that does the
+    work; the delta ratio is a bound on the split, not the reason.
     """
     spreads = []
     for plan in plans or []:
@@ -884,6 +1204,13 @@ def render(payload):
     if comparison:
         sections.append("<h2 class='section'>Structure comparison</h2>"
                         + _comparison_panel(comparison))
+
+    # Directly under the comparison, because it is the same structures read
+    # a second way and the reader should meet the two orderings together
+    # rather than a screen apart.
+    sections.append(_composite_section(comparison,
+                                       payload.get("simulation"),
+                                       payload.get("backtests"), days))
 
     sections.append(_time_spread_section(plans))
 

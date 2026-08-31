@@ -9,7 +9,7 @@ degraded on 12.2 percent of contracts, which the page says for itself.
 Each image is clipped to the element's own bounding box read from the
 live DOM, so a panel image is exactly that panel.
 
-The eight images used in [README.md](../README.md) are in the directory
+The nine images used in [README.md](../README.md) are in the directory
 above this one. This page is the complete set.
 
 ## The whole page
@@ -25,6 +25,10 @@ above this one. This page is the complete set.
 ### Backtest
 
 ![backtest](screenshots/gallery/sections/backtest.png)
+
+### Composite support
+
+![composite support](screenshots/gallery/sections/composite-support.png)
 
 ### Condor search
 
@@ -75,6 +79,10 @@ above this one. This page is the complete set.
 ### Charm
 
 ![charm](screenshots/gallery/panels/charm.png)
+
+### Composite support table
+
+![composite support table](screenshots/gallery/panels/composite-support-table.png)
 
 ### Cumulative exposure and the flip
 

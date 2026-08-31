@@ -529,3 +529,235 @@ def test_the_shared_legend_scrolls_rather_than_wrapping():
     from optiondesk.dashboard.charts import SCRIPT
 
     assert "type: 'scroll'" in SCRIPT
+
+
+# ------------------------------------------------- the composite support panel
+
+COMPOSITE_EXPOSURE = {
+    "underlying": "TEST", "expiry": "2026-09-18", "spot": 100.0, "meta": {},
+    "days_to_expiry": 46.1,
+    "exposure": {"rows": [], "net_gex": 0.0, "assumption": "stated"},
+}
+
+COMPOSITE_BACKTESTS = [{
+    "strategy": "long_call",
+    "settings": {"holding_days": 30, "first_date": "2021-08-31",
+                 "last_date": "2026-08-31"},
+    "statistics": {"trades": 233, "win_rate": 0.53, "mean_return": 0.52},
+    "honesty": "premiums are modelled",
+}]
+
+
+def composite_payload(**overrides):
+    """A desk holding all three views of one structure, deliberately at odds.
+
+    The model expects a profit, the simulation expects a loss and the
+    history expects a profit, and their probabilities of profit run from 12
+    to 53 percent. A panel reporting one number over that is hiding the
+    only interesting thing on the row.
+    """
+    simulation = dict(SIMULATION)
+    simulation["structures"] = [{
+        "strategy": "long_call",
+        "realised_vol_probability_of_profit": 0.12,
+        "implied_vol_probability_of_profit": 0.43,
+        "disagreement": -0.31, "mean": -1.40, "median": -3.59,
+        "p5": -3.59, "expected_shortfall_5": -3.59, "histogram": [],
+    }]
+    # Rows spelled out rather than taken from comparison() above: the score
+    # needs the expected shortfall, which that fixture does not carry, and
+    # a row silently excluded for a missing input would make every
+    # assertion below pass against an empty table.
+    table = comparison(rows=[
+        {"rank": 1, "strategy": "long_call", "trade_type": "debit",
+         "net_cash": -3.59, "max_gain": "unlimited", "max_loss": -3.59,
+         "capital_at_risk": 3.59, "reward_risk": None,
+         "probability_of_profit": 0.43, "expected_pnl": 0.22,
+         "expected_loss": -2.15, "expected_return_on_risk": 0.061,
+         "net_delta": 0.55, "net_theta": -0.05, "net_vega": 0.11,
+         "rankable": True, "friction_verdict": "ok", "friction_cost": 0.08},
+        {"rank": None, "strategy": "iron_condor", "trade_type": "credit",
+         "net_cash": 0.76, "max_gain": 0.76, "max_loss": -4.24,
+         "capital_at_risk": 4.24, "reward_risk": 0.18,
+         "probability_of_profit": None, "expected_pnl": None,
+         "expected_loss": None, "expected_return_on_risk": None,
+         "net_delta": 0.0, "net_theta": 0.0, "net_vega": 0.0,
+         "rankable": False, "friction_verdict": "untradeable",
+         "friction_cost": 1.9,
+         "excluded_because": ["friction says untradeable: a leg has no bid"]},
+    ])
+    table["expiry"] = "2026-09-18"
+    base = {"ladder": ladder(), "exposure": COMPOSITE_EXPOSURE,
+            "comparison": table, "simulation": simulation,
+            "backtests": COMPOSITE_BACKTESTS}
+    base.update(overrides)
+    return payload(**base)
+
+
+def composite_panel(html):
+    """Just the composite section, so an assertion cannot pass on the
+    strength of text belonging to some other panel."""
+    start = html.find("<h2 class=\'section\'>Composite support</h2>")
+    assert start >= 0, "the composite section did not render"
+    end = html.find("<h2 class=\'section\'>", start + 10)
+    return html[start:end if end > 0 else len(html)]
+
+
+def test_the_composite_prints_the_formula_and_the_weights_it_used():
+    """Catches a score published without the arithmetic behind it.
+
+    A weighted sum whose weights are not on the page cannot be disagreed
+    with, only accepted or ignored, and these weights were chosen rather
+    than fitted to anything.
+    """
+    panel = composite_panel(page_module.render(composite_payload()))
+
+    assert "0.30 pop" in panel
+    assert "0.30 edge" in panel
+    assert "0.25 rr" in panel
+    assert "0.15 (1 - es)" in panel
+    assert "min(reward:risk, 3) / 3" in panel
+    assert "x 0.75 when the friction verdict is thin" in panel
+    assert "clamped to [0, 100]" in panel
+
+
+def test_the_composite_states_all_three_horizons_it_mixed():
+    """Catches figures from three horizons landing in one number silently.
+
+    Forty-six days of model settlement, a fourteen-day simulation and a
+    thirty-day holding period are not the same horizon, and a composite
+    that did not say so would present an incomparability as a measurement.
+    """
+    panel = composite_panel(page_module.render(composite_payload()))
+
+    assert "Three horizons, not one" in panel
+    assert "2026-09-18 expiry" in panel
+    assert "46.1 days away" in panel
+    assert "the simulation runs 14 days" in panel
+    assert "the backtest holds 30 days per trade" in panel
+    assert "2021-08-31 to 2026-08-31" in panel
+
+
+def test_the_composite_shows_each_component_beside_the_score():
+    """Catches the four inputs being collapsed into the total.
+
+    long_call in the fixture has an unbounded gain, so its reward term is
+    1.000 outright, and pop is the model\'s 0.43. Both have to be visible as
+    their own cells or the score cannot be argued with.
+    """
+    panel = composite_panel(page_module.render(composite_payload()))
+
+    for column in ("pop", "edge", "rr", "es", "adjust"):
+        assert "<th>{}</th>".format(column) in panel
+    assert ">0.430</td>" in panel
+    assert ">1.000</td>" in panel
+
+
+def test_the_composite_shows_three_views_and_names_the_disagreement():
+    """Catches three readings being averaged into one.
+
+    The fixture is built so the model and the history expect a profit while
+    the simulation expects a loss, with 41 points between the highest and
+    the lowest probability of profit. Both facts belong on the row.
+    """
+    panel = composite_panel(page_module.render(composite_payload()))
+
+    for column in ("model P(profit)", "sim P(profit)", "history win rate"):
+        assert "<th>{}</th>".format(column) in panel
+    assert "split on direction" in panel
+    assert "41 pt gap" in panel
+    assert "model expects profit" in panel
+    assert "simulation expects loss" in panel
+    assert "history expects profit" in panel
+
+
+def test_the_composite_lists_what_it_could_not_score_and_why():
+    """Catches an unscorable structure vanishing from the panel.
+
+    A structure missing from an ordering reads as one that came last. The
+    iron condor in the fixture is untradeable on friction, which is a
+    different claim, and it is listed with that reason rather than dropped.
+    """
+    panel = composite_panel(page_module.render(composite_payload()))
+
+    assert "carry no score" in panel
+    assert "iron condor" in panel
+    assert "Absent:" in panel
+
+
+def test_the_composite_refuses_to_call_itself_an_edge_estimate():
+    """Catches the panel reading as a selection rather than an ordering.
+
+    The words are checked as well as the caveat: this project publishes an
+    ordering under printed weights and never a course of action, and the
+    panel has to say so in its own words rather than borrowing the
+    comparison\'s caveat.
+    """
+    import html as html_module
+
+    panel = composite_panel(page_module.render(composite_payload()))
+    prose = html_module.unescape(re.sub(r"<[^>]+>", " ", panel)).lower()
+
+    assert "not an edge estimate" in prose
+    assert "ordering under stated weights" in prose
+    for banned in ("recommend", "advice", "advise", " buy ", " sell ",
+                   "best trade"):
+        assert banned not in prose, (
+            "the composite panel used the word {!r}".format(banned))
+
+
+def test_the_composite_marks_a_score_that_rested_on_a_substitution():
+    """Catches a stand-in value being spent as though it were measured.
+
+    A structure with an unbounded loss has no worst case to measure the
+    expected shortfall against, so the premium stands in. That is a choice,
+    it moves the score, and the row has to carry it.
+    """
+    table = comparison()
+    table["expiry"] = "2026-09-18"
+    table["rows"] = [{
+        "rank": 1, "strategy": "ratio_spread", "trade_type": "credit",
+        "net_cash": 0.57, "max_gain": 14.57, "max_loss": "unlimited",
+        "capital_at_risk": None, "reward_risk": None,
+        "probability_of_profit": 0.80, "expected_pnl": -1.84,
+        "expected_loss": -20.95, "expected_return_on_risk": None,
+        "net_delta": 0.0, "net_theta": 0.0, "net_vega": 0.0,
+        "rankable": False, "friction_verdict": "ok", "friction_cost": 0.05,
+    }]
+    panel = composite_panel(page_module.render(
+        composite_payload(comparison=table)))
+
+    assert "ratio spread *" in panel
+    assert "worst case is unbounded" in panel
+    assert "reward to risk is not defined" in panel
+
+
+def test_the_composite_does_not_appear_without_a_comparison():
+    """Catches an empty table rendering on a desk that has never compared.
+
+    Every panel on this page draws only when the artifact behind it exists,
+    and the composite is built entirely from the comparison artifact.
+    """
+    html = page_module.render(composite_payload(comparison=None))
+    assert "Composite support" not in html
+
+
+def test_the_composite_needs_the_engine_and_says_nothing_without_it():
+    """Catches the dashboard breaking on a shell-only install.
+
+    The shell runs without the engine by design. The score is engine
+    arithmetic reached through the bridge, so with no engine there is no
+    panel, and certainly not a panel of zeros.
+    """
+    from optiondesk import engine_bridge
+
+    original = engine_bridge.AVAILABLE
+    try:
+        engine_bridge.AVAILABLE = False
+        html = page_module.render(composite_payload())
+    finally:
+        engine_bridge.AVAILABLE = original
+
+    assert "Composite support" not in html
+    # And the rest of the page is unharmed.
+    assert "Every structure, side by side" in html

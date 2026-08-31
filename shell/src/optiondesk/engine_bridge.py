@@ -80,7 +80,13 @@ def strategies():
 
 
 def analytics():
-    """The engine's chain analytics surface: exposure, walls, max pain."""
+    """The engine's chain analytics surface.
+
+    Exposure, walls and max pain, the strategy comparison, and the
+    composite ranking in analytics.ranking. All of it reached through here
+    rather than imported directly, so the licence boundary stays checkable
+    with one grep.
+    """
     if not AVAILABLE:
         raise EngineUnavailable()
     return _analytics

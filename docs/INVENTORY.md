@@ -19,7 +19,7 @@ The analytics engine.
 
 Chain-level analytics: positioning, exposure and pain.
 
-18 lines.
+31 lines.
 
 
 ### `engine/src/optiondesk_engine/analytics/compare.py`
@@ -39,6 +39,18 @@ Dealer gamma exposure, walls, and max pain from an option chain.
 
 - **chain_exposure()** (line 35): Gamma exposure by strike, the walls, and the flip level
 - **max_pain()** (line 169): The strike where option holders collect the least at expiry
+
+### `engine/src/optiondesk_engine/analytics/ranking.py`
+
+Composite support score: one number per structure, under a printed formula.
+
+341 lines.
+
+- **is_unbounded()** (line 117): True for an infinite figure however it reached us
+- **missing_inputs()** (line 149): The names of the required inputs this row does not carry
+- **score_row()** (line 169): (score, components) under the printed formula, or (None, exclusion)
+- **rank_rows()** (line 290): (ranked, rejected): the scored rows in order, and the excluded ones
+- **row_from_comparison()** (line 314): One comparison-artifact row in the shape score_row reads
 
 ### `engine/src/optiondesk_engine/analytics/smile.py`
 
@@ -202,35 +214,35 @@ Expiry payoff engine for multi-leg option strategies.
 
 Strategy constructors and the playbook registry.
 
-1032 lines.
+1070 lines.
 
 - **split_chain()** (line 41): Normalise a chain snapshot into {'calls', 'puts', 'spot', 'days'}
-- **long_call()** (line 139): Stock replacement. Uncapped upside, risk capped at the premium
-- **long_put()** (line 147): Alternative to shorting. Bearish, risk capped at the premium
-- **bull_call_spread()** (line 155): Buy the lower strike call, sell a higher one against it
-- **bear_put_spread()** (line 195): Mirror of the bull call spread: buy the higher put, sell a lower
-- **cash_secured_put()** (line 231): Sell a put below the lower band edge
-- **covered_call()** (line 253): Own the underlying and sell a call above the upper band edge
-- **protective_put()** (line 274): Long underlying plus a long at-the-money put. Insurance
-- **straddle()** (line 290): Buy the at-the-money call and put. A storm, direction unknown
-- **strangle()** (line 303): The cheaper cousin: an out of the money call and put
-- **bull_put_spread()** (line 325): Sell a put at the lower band edge, buy a lower one to cap the loss
-- **bear_call_spread()** (line 361): Sell a call at the upper band edge, buy a higher one to cap it
-- **iron_condor()** (line 391): A put credit spread and a call credit spread together
-- **iron_butterfly()** (line 434): Sell the at-the-money straddle, buy wings to cap it
-- **long_call_butterfly()** (line 475): Buy one lower call, sell two at the money, buy one higher
-- **ratio_spread()** (line 518): Buy one call near the money, sell more than one further out
-- **broken_wing_butterfly()** (line 565): A call butterfly with the far wing wider than the near one
-- **jade_lizard()** (line 627): A short put below the range plus a short call spread above it
-- **recommend()** (line 941): Rank the playbook for a view. Returns (name, score, meta), best first
-- **build()** (line 984): Build one plan by name. chain must come from split_chain
-- **describe()** (line 1003): A readable block for logs and reports
+- **long_call()** (line 146): Stock replacement. Uncapped upside, risk capped at the premium
+- **long_put()** (line 154): Alternative to shorting. Bearish, risk capped at the premium
+- **bull_call_spread()** (line 162): Buy the lower strike call, sell a higher one against it
+- **bear_put_spread()** (line 202): Mirror of the bull call spread: buy the higher put, sell a lower
+- **cash_secured_put()** (line 238): Sell a put below the lower band edge
+- **covered_call()** (line 260): Own the underlying and sell a call above the upper band edge
+- **protective_put()** (line 281): Long underlying plus a long at-the-money put. Insurance
+- **straddle()** (line 297): Buy the at-the-money call and put. A storm, direction unknown
+- **strangle()** (line 310): The cheaper cousin: an out of the money call and put
+- **bull_put_spread()** (line 332): Sell a put at the lower band edge, buy a lower one to cap the loss
+- **bear_call_spread()** (line 368): Sell a call at the upper band edge, buy a higher one to cap it
+- **iron_condor()** (line 398): A put credit spread and a call credit spread together
+- **iron_butterfly()** (line 441): Sell the at-the-money straddle, buy wings to cap it
+- **long_call_butterfly()** (line 482): Buy one lower call, sell two at the money, buy one higher
+- **ratio_spread()** (line 525): Buy one call near the money, sell more than one further out
+- **broken_wing_butterfly()** (line 572): A call butterfly with the far wing wider than the near one
+- **jade_lizard()** (line 634): A short put below the range plus a short call spread above it
+- **recommend()** (line 979): Rank the playbook for a view. Returns (name, score, meta), best first
+- **build()** (line 1022): Build one plan by name. chain must come from split_chain
+- **describe()** (line 1041): A readable block for logs and reports
 
 ### `engine/src/optiondesk_engine/strategies/timespread.py`
 
 Structures whose legs expire on different dates.
 
-492 lines.
+555 lines.
 
 - class **TimeLeg** (line 49): One leg of a structure whose legs expire on different dates
   - methods: `__init__`, `value_at`, `as_dict`
@@ -238,11 +250,11 @@ Structures whose legs expire on different dates.
 - **pnl_at()** (line 127): Profit once at_days have passed, with the underlying at price
 - **payoff_curve()** (line 134): (prices, profits) at the mark date, with strikes included exactly
 - **analyze_at_front()** (line 150): Risk graph at the near expiry
-- **calendar_spread()** (line 267): Sell the near expiry and buy the far one at the same strike
-- **diagonal_spread()** (line 313): A calendar with different strikes: carry plus a directional lean
-- **ratio_call_diagonal()** (line 451): Bullish ratio diagonal. kind is fixed by the name
-- **ratio_put_diagonal()** (line 456): Bearish mirror of the ratio call diagonal
-- **build_time_spread()** (line 469): Build a two-expiry structure by name
+- **calendar_spread()** (line 285): Sell the near expiry and buy the far one at the same strike
+- **diagonal_spread()** (line 331): A calendar with different strikes: carry plus a directional lean
+- **ratio_call_diagonal()** (line 508): Bullish ratio diagonal. kind is fixed by the name
+- **ratio_put_diagonal()** (line 513): Bearish mirror of the ratio call diagonal
+- **build_time_spread()** (line 526): Build a two-expiry structure by name
 
 ## Package: shell (PolyForm-Noncommercial-1.0.0)
 
@@ -379,12 +391,12 @@ optiondesk simulate: what the underlying's own behaviour implies.
 
 optiondesk strategy: build a multi-leg strategy from a chain snapshot.
 
-540 lines.
+557 lines.
 
 - **add_arguments()** (line 31): Register structure selection and the view that drives a recommendation:
-- **playbook_when()** (line 257): The playbook's own note on when a structure is the right one, or an
-- **run()** (line 341): Build one named structure, or recommend one from the stated view, and
-- **main()** (line 532): Parse argv for this command alone and run it, so the command works when
+- **playbook_when()** (line 274): The playbook's own note on when a structure is the right one, or an
+- **run()** (line 358): Build one named structure, or recommend one from the stated view, and
+- **main()** (line 549): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/config.py`
 
@@ -453,9 +465,9 @@ Collect artifacts from disk into the shape the dashboard page needs.
 
 The dashboard page: markup, tiles and tables.
 
-1018 lines.
+1345 lines.
 
-- **render()** (line 792): Render the complete dashboard document from one payload
+- **render()** (line 1112): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -468,16 +480,16 @@ Dashboard stylesheet, kept apart from the markup that uses it.
 
 The single seam between the shell and the analytics engine.
 
-111 lines.
+117 lines.
 
 - class **EngineUnavailable** (line 48): Raised when analytics are requested and the engine is absent
   - methods: `__init__`
 - **require()** (line 55): Return the engine module surface, or raise with a fixable message
 - **strategies()** (line 68): The engine's strategy surface: playbook, payoff, friction
-- **analytics()** (line 82): The engine's chain analytics surface: exposure, walls, max pain
-- **simulation()** (line 89): The engine's simulation surface: GARCH-t posterior and paths
-- **backtest()** (line 96): The engine's backtest surface: the runner and its statistics
-- **status()** (line 103): Describe engine availability for artifacts and for tools/list
+- **analytics()** (line 82): The engine's chain analytics surface
+- **simulation()** (line 95): The engine's simulation surface: GARCH-t posterior and paths
+- **backtest()** (line 102): The engine's backtest surface: the runner and its statistics
+- **status()** (line 109): Describe engine availability for artifacts and for tools/list
 
 ### `shell/src/optiondesk/mcp/server.py`
 
@@ -632,7 +644,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Tests
 
-### engine/tests (185 test functions)
+### engine/tests (216 test functions)
 
 - `engine/tests/test_asymmetric_structures.py`: 28
 - `engine/tests/test_audit_regressions.py`: 20
@@ -642,12 +654,13 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_forward.py`: 8
 - `engine/tests/test_forwards.py`: 11
 - `engine/tests/test_greeks_full.py`: 14
+- `engine/tests/test_ranking.py`: 28
 - `engine/tests/test_simulation.py`: 12
 - `engine/tests/test_smile.py`: 8
 - `engine/tests/test_strategies.py`: 28
-- `engine/tests/test_timespread.py`: 20
+- `engine/tests/test_timespread.py`: 23
 
-### shell/tests (366 test functions)
+### shell/tests (377 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -658,7 +671,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_contracts.py`: 8
 - `shell/tests/test_dashboard_app.py`: 9
 - `shell/tests/test_dashboard_data.py`: 25
-- `shell/tests/test_dashboard_page.py`: 25
+- `shell/tests/test_dashboard_page.py`: 34
 - `shell/tests/test_dashboard_server.py`: 7
 - `shell/tests/test_dividend_yield.py`: 9
 - `shell/tests/test_documented_counts.py`: 23
@@ -666,7 +679,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_expiries_cli.py`: 10
 - `shell/tests/test_exposure_cli.py`: 8
 - `shell/tests/test_greeks_cli.py`: 5
-- `shell/tests/test_house_rules.py`: 6
+- `shell/tests/test_house_rules.py`: 8
 - `shell/tests/test_installer.py`: 22
 - `shell/tests/test_keys_cli.py`: 17
 - `shell/tests/test_license_claims.py`: 4
@@ -691,7 +704,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-55 modules, 12978 lines of source, 154 public functions, 14 public classes, 665 test functions.
+56 modules, 13783 lines of source, 159 public functions, 14 public classes, 707 test functions.
 
 Every public name carries a docstring.
 

@@ -25,3 +25,12 @@ artifacts/
 htmlcov/
 .DS_Store
 *.ansi
+
+# Personal material. An agent once wrote CV and article notes into docs/;
+# nothing of that kind belongs in this repository, tracked or untracked.
+campaign_notes.md
+*campaign-notes*
+*_cv.*
+*-cv.*
+cv.*
+resume.*

@@ -446,3 +446,17 @@ def test_a_credit_vertical_that_would_pay_a_debit_is_refused():
     # The call side is untouched and still builds, so the refusal above is
     # the inversion and not a broken fixture.
     assert build("bear_call_spread", chain) is not None
+
+    # And now the same planted inversion on the call side. This assertion
+    # is here because an audit deleted bear_call_spread's credit guard and
+    # all 302 engine tests still passed: its identical twin twenty-five
+    # lines above had both a test and a mutation, and it had neither.
+    other = _chain()
+    for contract in other["contracts"]:
+        if contract["type"] == "call":
+            contract["mid"] = 1.0
+            contract["bid"] = 0.95
+            contract["ask"] = 1.05
+    call_side = split_chain(other)
+    assert build("bear_call_spread", call_side) is None
+    assert build("bull_put_spread", call_side) is not None

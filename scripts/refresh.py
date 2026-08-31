@@ -192,8 +192,23 @@ def tracked_text_files():
         yield path
 
 
+# Personal material that has no business in a public repository. This scan
+# exists because an agent working in this tree wrote a file of notes about
+# the maintainer's CV and an article draft into docs/, unasked. It was
+# caught before it was committed, by reading the working tree rather than by
+# anything automatic, which is not a control. This is the control.
+#
+# The words are deliberately mundane and the pattern deliberately narrow: a
+# repository about options will say "profile" and "position" constantly, so
+# matching those would train everyone to ignore the scan.
+PERSONAL = re.compile(
+    r"(?i)(curriculum vitae|campaign notes|recruiter|linkedin\.com"
+    r"|\bmy cv\b|cv version|resume\.(docx|pdf))")
+
+
 def check_rules():
-    """The three bans and a key scan, over every tracked text file."""
+    """The three bans, a key scan, and a personal-material scan, over every
+    tracked text file."""
     problems = []
     for path in tracked_text_files():
         try:
@@ -217,6 +232,16 @@ def check_rules():
             if match and not match.group(0).isdigit():
                 problems.append("{}:{}: possible key material {}".format(
                     relative, number, match.group(0)[:4] + "..."))
+                break
+        for number, line in enumerate(text.splitlines(), 1):
+            found = PERSONAL.search(line)
+            if found:
+                # The match itself is not echoed. A report that quotes the
+                # line puts the material in the log, which is the thing
+                # being prevented.
+                problems.append(
+                    "{}:{}: personal material, not for this "
+                    "repository".format(relative, number))
                 break
     return problems
 

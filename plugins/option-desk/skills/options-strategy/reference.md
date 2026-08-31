@@ -41,11 +41,16 @@ The two ratio diagonals differ from the plain diagonal in one measurable
 way rather than in emphasis. A 1x1 diagonal can be too right: past the
 short strike the long leg's time value drains against the short's
 intrinsic and the position hands profit back. The ratio versions hold more
-back-month delta than front-month delta, so that giveback does not happen,
-and both plans report `delta_ratio` and `giveback` so the difference can be
-read rather than believed. A structure whose short delta mass reaches the
-long's is not built at all, because it would cap the move it was opened
-for.
+back-month CONTRACTS than front-month ones, which is what leaves the move
+uncapped, and both plans report `delta_ratio` and `giveback` so the
+difference can be read rather than believed.
+
+Three checks stand between a caller and a structure that would misdescribe
+itself, and they read different things: the contract count, which is the
+one that carries the property; the entry-time delta split; and the slope
+of the payoff at the edge of the scanned range. An earlier version of this
+page credited the delta split alone, which an audit falsified by building
+a net short call that satisfied it.
 
 ## The five directions
 

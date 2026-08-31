@@ -210,6 +210,24 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
 
 # --------------------------------------------------------------- builders
 
+def _rates(chain):
+    """The rate and dividend yield this chain measured, or the defaults.
+
+    The builders here used to price and select at DEFAULT_R and DEFAULT_Q
+    while the snapshot beside them carried a measured rate and a fetched
+    dividend yield. That is not a rounding difference: on the SPY pair of
+    2026-08-31 it moved three of the four selected strikes, because the
+    strike a target delta lands on depends on the carry.
+
+    Falls back to the module defaults when a chain does not carry them, so
+    the older calls/puts shape still builds.
+    """
+    rate = chain.get("risk_free_rate")
+    yield_ = chain.get("dividend_yield")
+    return (DEFAULT_R if rate is None else float(rate),
+            DEFAULT_Q if yield_ is None else float(yield_))
+
+
 def _priced(contracts):
     """Contracts with both a usable price and a volatility to mark with."""
     out = []
@@ -367,7 +385,7 @@ def _delta_of(contract, spot, kind, r=DEFAULT_R, q=DEFAULT_Q):
     return abs(delta)
 
 
-def _by_delta(contracts, kind, target, spot, days):
+def _by_delta(contracts, kind, target, spot, days, r=DEFAULT_R, q=DEFAULT_Q):
     """The priced contract whose absolute delta is nearest the target."""
     scored = []
     for contract in _priced(contracts):
@@ -375,7 +393,7 @@ def _by_delta(contracts, kind, target, spot, days):
             continue
         enriched = dict(contract)
         enriched.setdefault("days", days)
-        delta = _delta_of(enriched, spot, kind)
+        delta = _delta_of(enriched, spot, kind, r, q)
         if delta is None:
             continue
         scored.append((abs(delta - target), enriched, delta))
@@ -396,22 +414,34 @@ def _ratio_diagonal(near, far, kind, size=1.0, long_delta=0.65,
     with nearer contracts sold against it at a ratio, so the front shorts
     subsidise the carry without capping the move.
 
-    The constraint that makes it that trade rather than a 1x1 with extra
-    contracts is enforced here rather than assumed: the short delta mass
-    must stay strictly below the long delta mass. When it does not, the
-    structure caps the very move it was opened for, and this returns
-    nothing instead of a plan that would misdescribe itself.
+    What makes it that trade rather than a 1x1 with extra contracts is
+    holding more back-month contracts than front-month ones, and that is
+    the first thing checked. An earlier version of this docstring credited
+    the delta bound below with it, and an audit falsified that: one long
+    against two short satisfies the delta bound at a ratio of 0.76 and is
+    a net short call whose loss is unbounded. Three checks now stand, in
+    order of what they read: the contract count, the entry-time delta
+    split, and the slope of the payoff at the edge of the scanned range.
 
     Legs are chosen by delta, not by distance from spot. A 65 delta back
     month leg is in the money on purpose.
     """
     near_days, far_days = _check_order(near, far)
     spot = float(near["spot"])
+    r, q = _rates(near)
+
+    # First, and before anything is priced: more back-month contracts than
+    # front-month ones. This is the check that actually makes the move
+    # uncapped, and for a while this module claimed the delta bound below
+    # did it. It does not. One long against two short satisfies the delta
+    # bound at a ratio of 0.76 and is a net short call with unbounded loss.
+    if long_qty <= short_qty:
+        return None
 
     long_opt, long_d = _by_delta(_side(far, kind), kind, long_delta, spot,
-                                 far_days)
+                                 far_days, r, q)
     short_opt, short_d = _by_delta(_side(near, kind), kind, short_delta,
-                                   spot, near_days)
+                                   spot, near_days, r, q)
     if long_opt is None or short_opt is None:
         return None
 
@@ -426,6 +456,19 @@ def _ratio_diagonal(near, far, kind, size=1.0, long_delta=0.65,
 
     long_mass = long_d * long_qty * size
     short_mass = short_d * short_qty * size
+    # Second, and unreachable today: a bound on the entry-time delta split.
+    # With the quantity check above holding long_qty above short_qty, and
+    # the short required to sit further out of the money than the long,
+    # short_mass cannot reach long_mass: it would need the short's delta to
+    # exceed twice the long's while being the further out of the money of
+    # the pair. The harness records it as an equivalent mutant for exactly
+    # that reason rather than a test pretending to kill it.
+    #
+    # It stays because the two checks that make it unreachable are about a
+    # two-leg structure with a fixed quantity default, and neither is a law
+    # of the shape. A three-leg variant, or a caller passing its own
+    # quantities, would make this the only thing standing between a reader
+    # and a structure that caps the move it was opened for.
     if short_mass >= long_mass:
         return None
 
@@ -437,6 +480,20 @@ def _ratio_diagonal(near, far, kind, size=1.0, long_delta=0.65,
                 short_qty * size, float(short_opt["iv"]), near_days,
                 ref=short_opt),
     ]
+    # Third: the tail itself. The two checks above are about contracts and
+    # about entry-time deltas, and neither reads the payoff. Unequal
+    # strikes can still turn the far end of the scan short, so the profit
+    # slope is measured where it matters and a structure that falls away
+    # into its own direction is refused whatever its ratio says.
+    scan_lo, scan_hi = max(spot * 0.60, 0.01), spot * 1.40
+    edge = scan_hi if kind == "call" else scan_lo
+    step = spot * 0.01
+    at_edge = pnl_at(legs, edge, near_days, r, q)
+    inside = pnl_at(legs, edge - step if kind == "call" else edge + step,
+                    near_days, r, q)
+    if at_edge < inside:
+        return None
+
     name = "ratio_{}_diagonal".format(kind)
     plan = _plan(name, legs, spot, near, far, kind)
     analysis = plan["analysis"]
@@ -476,7 +533,8 @@ def build_time_spread(name, near, far, **kwargs):
 
 
 def _plan(name, legs, spot, near, far, kind):
-    analysis = analyze_at_front(legs, spot)
+    r, q = _rates(near)
+    analysis = analyze_at_front(legs, spot, r=r, q=q)
     return {
         "strategy": name,
         "trade_type": analysis["trade_type"],
@@ -489,4 +547,9 @@ def _plan(name, legs, spot, near, far, kind):
         "legs": legs,
         "analysis": analysis,
         "assumption": ASSUMPTION,
+        # Named because the figures above depend on them. A carry
+        # assumption that is not stated is indistinguishable from one that
+        # was not made.
+        "risk_free_rate": r,
+        "dividend_yield": q,
     }

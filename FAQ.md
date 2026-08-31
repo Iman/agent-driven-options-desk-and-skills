@@ -100,8 +100,25 @@ directional structure amplifies exactly that drift. Then read the honesty
 statement: real closes, modelled premiums, no spread, no slippage, no
 assignment, and entry and exit priced by the same model, which means the
 test cannot detect any edge arising from the market disagreeing with that
-model. Then read the p-value and its caveat: a rule chosen because its
-backtest looked good has already spent its degrees of freedom.
+model. Then read the p-value, the block beside it, and the caveat. The block
+matters: these windows overlap, since a thirty day hold entered every five
+trading days shares twenty-five of its thirty days with its neighbour, so
+the effective sample is 64 to 88 rather than 233 and the test flips signs a
+block at a time. Treating them as independent understated the standard
+error by about a factor of two, and correcting it moved four structures on
+this desk from below 0.05 to above it. The caveat still stands on top of
+all that: a rule chosen because its backtest looked good has already spent
+its degrees of freedom.
+
+**Why does the simulation artifact say `antithetic: false`?**
+
+Because it is, and older artifacts that said true were wrong. The mirroring
+was measured in September 2026 and found to be inert: of ten thousand
+pairs, none shared a shock sequence, because the shocks were drawn inside
+the sign loop. The estimates were never biased by it, so no published
+number changed, but the field was a false statement about how they were
+produced. The construction is gone and each path now draws its own
+parameters, which matters more for the tail than mirroring would have.
 
 **The simulation says `converged: false`. Can I use the numbers?**
 

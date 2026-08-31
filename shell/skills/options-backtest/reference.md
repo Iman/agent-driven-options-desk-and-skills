@@ -20,11 +20,27 @@ compounded, so the curve and the drawdown are in units of per trade risk.
 Compounding would assume the whole account is risked on every trade.
 
 The permutation test asks how often a rule with no edge produces a mean
-this large by chance, flipping the sign of each trade at random. Two sided,
-because a rule that reliably loses is also a finding.
+this large by chance, flipping signs at random. Two sided, because a rule
+that reliably loses is also a finding.
 
-The bootstrap interval resamples trades to put bounds on the mean.
-excludes_zero is the honest version of "significant".
+Signs are flipped a BLOCK at a time, not a trade at a time, and the
+bootstrap resamples blocks rather than single trades. The windows overlap:
+a thirty day hold entered every five trading days shares twenty-five of its
+thirty days with its neighbour, the measured autocorrelation is positive
+through lag five and collapses at lag six, and the effective sample is 64
+to 88 rather than 233. Flipping trades independently assumes an
+independence the data does not have and understates the standard error by
+about a factor of two. Correcting it moved four structures on this desk
+from below 0.05 to above it, one of them from 0.0005 to 0.148.
+
+Every artifact carries `overlap_block`. When it is above one the p-value
+beside it is a block p-value and the trade count is not the number of
+independent observations. Say both.
+
+The bootstrap interval puts bounds on the mean the same way.
+excludes_zero is the honest version of "significant", and it is honest
+only at the right block: two structures stopped excluding zero when the
+overlap was respected.
 
 The benchmark holds the underlying over the same windows. A structure that
 is simply long the market shows the market's drift, and without the

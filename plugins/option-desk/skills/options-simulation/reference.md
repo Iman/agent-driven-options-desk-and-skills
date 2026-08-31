@@ -25,12 +25,23 @@ The effective sample size estimator truncates its autocorrelation sum,
 which overstates for a badly mixing chain. Below about 30, do not trust the
 number itself.
 
+It is also the MINIMUM over single chains rather than the pooled figure the
+name implies, and on a live posterior it understated the standard quantity
+by roughly a factor of two. The gate is therefore stricter than it looks,
+which is the safe direction, but do not quote it as a standard ESS.
+
 ## What the numbers are
 
 Value at risk and expected shortfall are on the underlying's return over
 the horizon, expressed as positive losses. Expected shortfall is the mean
 of the tail beyond the value at risk, so it is always the larger number. If
 they are equal, the tail held one path and the run is flagged.
+
+They are not drift free. On a live SPY fit the posterior median drift was
+about 26 percent a year, so a 30 day value at risk of 3.92 percent sat only
+that far below spot while the distance from the median down to the fifth
+percentile was 6.98 points. Quote the median return beside the tail figure
+or a reader will hear a narrower distribution than the model fitted.
 
 ## The comparison that matters
 
@@ -39,9 +50,20 @@ probability under implied. The gap is the market's forecast disagreeing
 with the recent past. Neither side is the truth. Report it as a
 disagreement, never as an edge.
 
-## Antithetic pairs
+## There are no antithetic pairs
 
-Shocks are mirrored, with an independent parameter draw per path. GARCH has
-no leverage term so the mirror is exact and unbiased. Mirroring reduces the
-variance of the centre and increases it in the extreme tail, so a tail
-number from few paths is noisier than a central one.
+Paths are independent draws, one posterior parameter set each. Artifacts
+written before September 2026 carry `antithetic: true` and it was never
+true: of ten thousand pairs, none shared a shock sequence, because the
+shocks were drawn inside the sign loop and negating an independent
+symmetric draw yields another independent draw. The construction did
+nothing, and the test guarding it asserted the flag rather than the
+property.
+
+It was removed rather than repaired. Mirroring would require the two halves
+of a pair to share a parameter draw, and each path drawing its own
+parameters is worth more: parameter uncertainty dominates the tail, which
+is what a risk number is for.
+
+If you are reading an older artifact, treat that field as unreliable rather
+than as history.

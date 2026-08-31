@@ -249,6 +249,13 @@ interval, and a buy-and-hold benchmark over the same windows, because a
 directional structure amplifies drift and a number without its benchmark is
 a number that flatters itself.
 
+The permutation test and the interval are block based, because the windows
+overlap: a thirty day hold entered every five trading days shares
+twenty-five of its thirty days with its neighbour, and the effective sample
+is 64 to 88 rather than 233. Each artifact records the block it used.
+Before that correction the same data produced p-values around 0.0005 for
+structures that a dependence-aware test cannot distinguish from chance.
+
 Returns are summed in risk units rather than compounded, because
 compounding a fixed-risk sequence produces minus one hundred percent the
 first time a trade loses its full risk.

@@ -1,0 +1,43 @@
+@startuml
+!include theme.iuml
+title Option desk - Provider resolution by capability, never by vendor
+
+component "A command needs a capability:\noption_chain | underlying_quote |\nrisk_free_rate | underlying_history |\ndividend_yield" as need
+component "Registry\npriority order,\nkeyless providers always eligible,\nkeyed providers skipped\nwhen the key is absent" as reg #C6E9C6
+component "Alpha Vantage\nkey required\nhistory and quotes\n~25 requests/day free tier" as paid
+component "Yahoo\nfree, delayed,\nall capabilities" as yahoo
+component "ProviderUnavailable\nnames every candidate\nand why each was skipped" as err
+component "Artifact records provider_used\nin the meta block" as art
+
+need --> reg
+reg --> paid : key present
+reg --> yahoo : always available
+reg --> err : nothing can answer
+paid --> art
+yahoo --> art
+
+note right of reg
+--provider is strict: if the named
+provider cannot answer, the command
+fails rather than quietly serving a
+different source. strict=False in code
+allows the fallback.
+end note
+
+note bottom of art
+Keys resolve from CLI flag, then
+environment, then ./.env, then
+~/.optiondesk/config.env. They are
+read, never written to artifacts,
+never logged, prompted with
+hidden input.
+end note
+
+note bottom of yahoo
+A licence on this software grants
+no rights over the data it retrieves:
+each provider's terms govern that.
+end note
+
+caption Adding a provider is a class plus one line of priority: it is selected when its key is present and skipped when it is not.
+@enduml

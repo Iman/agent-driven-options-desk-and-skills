@@ -1,0 +1,103 @@
+@startuml
+!include theme.iuml
+title Option desk - Overall Architecture (eight ways in, one set of artifacts out)
+
+actor "Trader / Developer\n(terminal)" as human
+package "Ways in (agent runtimes)" as ways {
+  component "Claude Code\n(reads SKILL.md,\nplugin: 6 skills, 6 commands,\n2 subagents)" as claude
+  component "Codex\n(scans .agents/skills,\nsymlinked to shell/skills)" as codex
+  component "Gemini CLI\n(no skill discovery:\nGEMINI.md compiles all six)" as gemini
+  component "ChatGPT (browser)\nskills as knowledge only:\nno local process possible" as chatgpt
+}
+
+component "MCP server (optiondesk-mcp)\nlocal stdio, standard library only\n10 typed tools" as mcp
+component "CLI (optiondesk)\nexpiries | chain | greeks | exposure\nstrategy | compare | simulate\nbacktest | forward | keys | doctor | dashboard" as cli
+
+package "shell  -  everything that touches the outside world" as shell {
+  component "Provider registry\nresolve by capability,\nnever by vendor name" as providers
+  component "JSON contracts\n8 schemas + validator\n(jsonschema, stdlib fallback)" as contracts
+  component "Artifact writer\natomic tmp-then-replace,\nprovenance meta block,\ndegraded and notes kept apart" as artifacts
+  rectangle "engine_bridge\nTHE ONLY IMPORT OF THE ENGINE\n(boundary checkable with one grep)" as bridge #C6E9C6
+}
+
+package "engine  -  the numbers, standard library only, no network" as engine {
+  component "pricing\nBlack-Scholes-Merton,\n16 Greeks, implied-vol solver\nwith identifiability guards" as pricing
+  component "strategies\n17 structures, payoff engine,\noutlook tags, friction verdicts" as strategies
+  component "analytics\ndealer gamma exposure, walls,\nflip, max pain, smile, ranking" as analytics
+  component "simulation\nGARCH-t by MCMC,\nantithetic paths, VaR and ES" as simulation
+  component "backtest\nrunner, statistics, significance,\nforward marking" as backtest
+}
+
+cloud "External market data" as ext {
+  component "Yahoo\nfree, delayed,\nall capabilities, no key" as yahoo
+  component "Alpha Vantage\nkey required,\nhistory and quotes,\n~25 requests/day" as av
+}
+
+database "Artifact directory\n~/TradingDesk/option-desk\n+ archive/<date>/ for every\nreplaced measurement" as disk
+component "Dashboard\nFastAPI or stdlib, ECharts vendored,\nreads artifacts, writes nothing" as dash
+
+claude --> mcp : 1. tools/call
+codex --> mcp : 1. tools/call
+gemini --> mcp : 1. tools/call
+human --> cli : 1. subcommand
+mcp --> cli : 2. same entry points
+cli --> providers : 3. ask for a capability
+providers --> yahoo : 4. priority order
+providers --> av : 4. only if key present
+cli --> bridge : 5. numbers via the bridge
+bridge --> pricing
+bridge --> strategies
+bridge --> analytics
+bridge --> simulation
+bridge --> backtest
+cli --> contracts : 6. validate
+contracts --> artifacts : 7. write
+artifacts --> disk
+disk --> dash : 8. render
+
+note right of ways
+Runtime coverage:
+- Claude Code: skills + commands + agents + MCP
+- Codex: skills (progressive) + MCP
+- Gemini: compiled docs + MCP
+- Browser ChatGPT: knowledge only,
+  each skill says so itself
+end note
+
+note right of engine
+Engine rules:
+- standard library only, no network
+- testable against closed form and
+  central finite differences
+- a missing number is never guessed:
+  iv: null is counted, not defaulted
+end note
+
+note left of bridge
+The invariant:
+an audit found one command importing
+the engine directly. Harmless at runtime,
+still routed back through the bridge:
+an invariant with exceptions is not one.
+end note
+
+note bottom of disk
+Nothing passes between commands
+in memory. Every step is a file,
+so any step can be re-run,
+inspected or replaced.
+end note
+
+legend right
+|= Flow |= Step |
+| 1 | agent or person asks |
+| 2 | MCP maps to a CLI entry point |
+| 3-4 | registry resolves a provider by capability |
+| 5 | engine computes through the single bridge |
+| 6-7 | schema validation, atomic artifact write |
+| 8 | dashboard renders what is on disk |
+Tests: 829 passing, 0 skipped. Mutations: 48 run, 0 survived.
+endlegend
+
+caption Option desk: agent-driven options analytics. github.com/Iman/agent-driven-options-desk-and-skills. Research software, not investment advice.
+@enduml

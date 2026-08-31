@@ -355,11 +355,11 @@ optiondesk greeks: full Greek ladder from a chain snapshot.
 
 optiondesk keys: see, set and locate provider credentials.
 
-182 lines.
+221 lines.
 
-- **add_arguments()** (line 35): Register the key subcommand and its optional value, which is prompted
-- **run()** (line 92): List, set or locate provider credentials, without printing one in full
-- **main()** (line 174): Parse argv for this command alone and run it, so the command works when
+- **add_arguments()** (line 36): Register the key subcommand and its optional value, which is prompted
+- **run()** (line 131): List, set or locate provider credentials, without printing one in full
+- **main()** (line 213): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/simulate.py`
 
@@ -643,7 +643,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 25
 - `engine/tests/test_timespread.py`: 15
 
-### shell/tests (354 test functions)
+### shell/tests (357 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -664,7 +664,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_greeks_cli.py`: 5
 - `shell/tests/test_house_rules.py`: 6
 - `shell/tests/test_installer.py`: 22
-- `shell/tests/test_keys_cli.py`: 14
+- `shell/tests/test_keys_cli.py`: 17
 - `shell/tests/test_main_cli.py`: 10
 - `shell/tests/test_mcp_server.py`: 37
 - `shell/tests/test_packaging.py`: 8
@@ -685,7 +685,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-55 modules, 12540 lines of source, 150 public functions, 14 public classes, 645 test functions.
+55 modules, 12579 lines of source, 150 public functions, 14 public classes, 648 test functions.
 
 Every public name carries a docstring.
 

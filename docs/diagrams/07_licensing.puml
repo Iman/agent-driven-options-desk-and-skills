@@ -1,0 +1,35 @@
+@startuml
+!include theme.iuml
+title Option desk - Licensing (PolyForm Noncommercial 1.0.0, one licence over the whole repository)
+
+component "Noncommercial use\npersonal study, research, hobby,\ncharities, schools, public research,\nhealth, environment, government,\nwhatever their funding" as free #C6E9C6
+component "Option desk\nengine, shell, agent, skills,\ncommands, dashboard" as work
+component "Commercial use\nfunds and trading businesses,\nselling it or access to it, paid\nconsulting or signals, courses,\nfundraising on the back of it" as paid
+
+free --> work : no permission needed
+paid ..> work : written agreement first
+
+note bottom of free
+Modify it, build on it, pass it on,
+as long as these terms travel with it.
+end note
+
+note bottom of paid
+Ask: terms are negotiable and
+a share is one of the shapes
+they take.
+end note
+
+note right of work
+Deliberately not OSI open source,
+and the trade is named: fewer users,
+fewer contributors, some directories
+treat noncommercial as unfree.
+The previous MIT + AGPL pair allowed
+the exact thing it was meant to stop.
+Copies taken before 2026-08-31 keep
+the terms they were given.
+end note
+
+caption Full detail in LICENSES.md; provenance of every borrowed line in THIRD-PARTY.md; contribution terms in CLA.md.
+@enduml

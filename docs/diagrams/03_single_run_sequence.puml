@@ -1,0 +1,40 @@
+@startuml
+!include theme.iuml
+title Option desk - One real run (SPY chain snapshot through MCP, measured 2026-08-30)
+
+actor "Agent" as A
+participant "MCP server\n(stdio, JSON-RPC)" as M
+participant "CLI command\nchain.run(args)" as C
+participant "Provider\n(registry pick)" as P
+participant "Engine\n(via engine_bridge)" as E
+database "Disk\n~/TradingDesk/option-desk" as D
+
+A -> M : tools/call option_chain_snapshot {symbol: SPY}
+M -> C : chain.run(args)
+C -> P : resolve(option_chain), then fetch
+P --> C : 607 contracts, spot, listed expiries
+C -> E : implied_vol per contract
+E --> C : 595 solved, 12 refused as unidentified
+note right of E
+The refusals are the feature:
+a contract whose price carries no
+volatility information gets iv: null,
+counted in counts.without_iv.
+A guessed volatility would produce a
+complete, fictional Greek ladder that
+looks exactly as authoritative as a real one.
+end note
+C -> C : validate against chain_snapshot schema
+C -> D : atomic write, tmp then replace\n(previous file archived first)
+C --> M : {artifact, contracts, with_iv, degraded, notes}
+M --> A : JSON summary
+
+note over A, D
+degraded and notes are different fields. Degraded: the output is lower quality than
+the pipeline can produce (provider fell back, rate not fetched, engine absent).
+Notes: ordinary observations. Collapsing them would make every artifact degraded
+and the flag worthless.
+end note
+
+caption Reproducible from shell/tests/test_mcp_server.py, which drives every tool over a real stdio session.
+@enduml

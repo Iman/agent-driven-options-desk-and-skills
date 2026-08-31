@@ -22,6 +22,7 @@ import os
 import stat
 from pathlib import Path
 
+from optiondesk import config as config_module
 from optiondesk.config import (
     PROVIDER_KEY_VARS,
     USER_CONFIG,
@@ -58,22 +59,53 @@ def _mask(value):
                            value[-MASK_VISIBLE:])
 
 
+def _assigns(path, variable):
+    """True when this file assigns this exact variable.
+
+    Written as a per line comparison rather than a substring test because
+    the substring version reported FMP_API_KEY as coming from a file whose
+    only content was EXTRA_FMP_API_KEY, which sends somebody debugging a
+    credential to the wrong place and leaves the real source unnamed.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return False
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, _, _ = line.partition("=")
+        if name.strip() == variable:
+            return True
+    return False
+
+
 def _source_of(variable):
     """Where a key is coming from, without revealing it."""
     if os.environ.get(variable):
         return "environment"
     cwd_env = Path.cwd() / ".env"
-    if cwd_env.exists() and variable in cwd_env.read_text(encoding="utf-8",
-                                                          errors="ignore"):
+    if _assigns(cwd_env, variable):
         return str(cwd_env)
-    if USER_CONFIG.exists() and variable in USER_CONFIG.read_text(
-            encoding="utf-8", errors="ignore"):
+    if _assigns(USER_CONFIG, variable):
         return str(USER_CONFIG)
     return None
 
 
 def _write(variable, value):
-    """Upsert one variable in the user config, owner-readable only."""
+    """Upsert one variable in the user config, owner-readable only.
+
+    The file is opened with mode 0o600 rather than written and then
+    tightened afterwards. The two step version put the key on disk group
+    and world readable for the moment between the write and the chmod, and
+    a backup daemon or a file indexer reading in that window is enough to
+    copy it somewhere with looser permissions than this file ever had.
+
+    The chmod stays, and covers the other case: a config file that already
+    existed with looser permissions, where a creation mode is not applied
+    because nothing is being created.
+    """
     USER_CONFIG.parent.mkdir(parents=True, exist_ok=True)
     lines = []
     if USER_CONFIG.exists():
@@ -82,10 +114,17 @@ def _write(variable, value):
             if not line.startswith(variable + "=")]
     if value is not None:
         lines.append("{}={}".format(variable, value))
-    USER_CONFIG.write_text(
-        "\n".join(line for line in lines if line.strip()) + "\n",
-        encoding="utf-8")
+    body = "\n".join(line for line in lines if line.strip()) + "\n"
+    handle = os.open(str(USER_CONFIG),
+                     os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(handle, "w", encoding="utf-8") as stream:
+        stream.write(body)
     os.chmod(USER_CONFIG, stat.S_IRUSR | stat.S_IWUSR)
+    # Any process that has already resolved a setting holds a parsed copy
+    # of these files. Without this line the value just written is invisible
+    # to the rest of the same process, which would let set report a mask of
+    # null for a key that is on disk and correct.
+    config_module._DOTENV_CACHE = None
     return USER_CONFIG
 
 

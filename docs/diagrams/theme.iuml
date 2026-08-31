@@ -1,0 +1,61 @@
+' Option desk PlantUML house theme, matched to the 2025 MCP article diagram:
+' white ground, black thin borders, teal annotation notes with white text,
+' one green highlighted element per diagram for the load-bearing part.
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 11
+skinparam defaultFontColor #000000
+skinparam TitleFontSize 14
+skinparam TitleBackgroundColor #FFFFFF
+skinparam TitleBorderColor #000000
+skinparam TitleBorderThickness 1
+skinparam ArrowColor #000000
+skinparam ArrowFontSize 10
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  FontColor #000000
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  FontColor #000000
+  FontStyle bold
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  FontColor #000000
+}
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam cloud {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam note {
+  BackgroundColor #17A2B8
+  BorderColor #117A8B
+  FontColor #FFFFFF
+  FontSize 10
+}
+skinparam legend {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  FontSize 10
+}
+skinparam sequence {
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantBorderColor #000000
+  LifeLineBorderColor #000000
+  ActorBorderColor #000000
+  GroupBackgroundColor #FFFFFF
+  GroupBorderColor #000000
+}

@@ -1,0 +1,38 @@
+@startuml
+!include theme.iuml
+title Option desk - One source of truth for four runtimes
+
+component "shell/skills/*/SKILL.md\n6 skills, each carrying the\nreporting rules an agent must\nfollow, not just the commands" as skill #C6E9C6
+component "shell/tools/gen_runtime_docs.py\nreads skills + argparse parsers" as gen
+component "AGENTS.md (4,366 bytes)\nrules + command inventory for Codex,\nwhich loads skills itself\nfrom .agents/skills" as agents
+component "GEMINI.md\nthe same plus all six skills\ncompiled in: Gemini CLI\ndiscovers none" as gemini
+component "Claude Code\nreads SKILL.md directly\n(plugin adds commands + agents)" as claude
+component "optiondesk-mcp\n10 typed tool schemas:\nbetter than prose describing\na command line" as mcpserver
+
+skill --> gen : generate
+gen --> agents
+gen --> gemini
+skill --> claude : read as-is
+skill ..> mcpserver : same capabilities,\ntyped instead of prose
+mcpserver --> claude
+mcpserver --> agents
+mcpserver --> gemini
+
+note right of gen
+Two tests guard this:
+- generated text vs what is on disk:
+  a stale AGENTS.md fails the suite
+- every argparse subcommand must
+  appear in both copies: a command
+  added without documentation fails
+end note
+
+note bottom of agents
+Embedding all skills in AGENTS.md
+took it to 25,851 bytes and defeated
+progressive disclosure. Naming where
+they live instead: 4,366 bytes.
+end note
+
+caption Edit a skill, run the generator, and every runtime gets the change in the same commit.
+@enduml

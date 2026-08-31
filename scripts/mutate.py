@@ -264,6 +264,18 @@ MUTATIONS = [
      '        raise ValueError("no key given, nothing was written")',
      "        pass",
      "shell/tests/test_keys_cli.py"),
+    ("key-created-world-readable", KEYS,
+     "os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)",
+     "os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)",
+     "shell/tests/test_keys_cli.py"),
+    ("settings-cache-not-invalidated", KEYS,
+     "    config_module._DOTENV_CACHE = None",
+     "    pass",
+     "shell/tests/test_keys_cli.py"),
+    ("source-matched-as-substring", KEYS,
+     "        if name.strip() == variable:",
+     "        if variable in line:",
+     "shell/tests/test_keys_cli.py"),
     ("credential-order-dotenv-before-environment", CONFIG,
      "    env = os.environ.get(name)\n"
      "    if env:\n"

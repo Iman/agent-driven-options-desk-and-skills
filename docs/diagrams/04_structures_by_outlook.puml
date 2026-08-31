@@ -1,0 +1,48 @@
+@startuml
+!include theme.iuml
+title Option desk - Seventeen structures, tagged by the directional view each needs
+
+rectangle "-2\nstrong bearish" as sb
+rectangle "-1\nmild bearish" as mb
+rectangle "0\nneutral" as n #C6E9C6
+rectangle "+1\nmild bullish" as mu
+rectangle "+2\nstrong bullish" as su
+
+sb -right- mb
+mb -right- n
+n -right- mu
+mu -right- su
+
+rectangle "long_put\nprotective_put" as lp
+rectangle "bear_put_spread" as bps
+rectangle "iron_condor, iron_butterfly\nlong_call_butterfly\ncash_secured_put, covered_call*" as ic
+rectangle "bull_call_spread\ncovered_call" as bcs
+rectangle "long_call\nstraddle, strangle**" as lc
+
+sb .down.> lp
+mb .down.> bps
+n .down.> ic
+mu .down.> bcs
+su .down.> lc
+
+rectangle "Asymmetric by design:\nratio_spread (uncapped short side)\nbroken_wing_butterfly (one-sided risk,\noften a credit)\njade_lizard (no upside risk only when\ncredit > call-spread width, and it reports\nwhether that actually holds)" as asym
+rectangle "Two expiries, from a pair of snapshots:\ncalendar_spread, diagonal_spread\n(--far-snapshot, or the next expiry\nfound on disk)" as timesp
+
+note bottom of n
+Three of the five outlooks sit inside the
+one-standard-deviation expected move and
+two are extreme: a spread reaches maximum
+profit on a normal move, a naked long option
+needs an extreme one. --recommend ranks
+against these tags.
+end note
+
+note right of lc
+** straddle and strangle are direction-agnostic
+volatility trades listed under the extreme
+buckets because they need a large move.
+* covered_call spans neutral to mild bullish.
+end note
+
+caption Builders return legs; the payoff engine, comparison, backtest and forward test pick every new structure up automatically.
+@enduml

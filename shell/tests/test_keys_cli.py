@@ -239,3 +239,54 @@ def test_list_reports_the_free_provider_as_needing_nothing(store):
     assert row["needs_key"] is False
     assert row["configured"] is True
     assert row["masked"] is None
+
+
+def test_the_key_is_never_on_disk_world_readable(store, monkeypatch):
+    """The permission has to be right at creation, not repaired afterwards.
+
+    The earlier version wrote the file and then tightened it, so the key sat
+    on disk group and world readable for the moment in between. Measured at
+    0o644 with a 0o022 umask. A backup daemon or a file indexer reading in
+    that window copies the key somewhere with permissions this file never
+    had, and no later chmod reaches the copy.
+
+    chmod is disabled here so the assertion sees the mode the content was
+    created with rather than the mode it ends up with.
+    """
+    monkeypatch.setattr(keys.os, "chmod", lambda *a, **k: None)
+    previous = os.umask(0o022)
+    try:
+        keys.run(args(action="set", provider="alphavantage", value=SECRET))
+    finally:
+        os.umask(previous)
+    mode = stat.S_IMODE(os.stat(store).st_mode)
+    assert mode == 0o600, "created at {}, readable by others".format(oct(mode))
+
+
+def test_a_write_is_visible_to_the_rest_of_the_process(store):
+    """Settings are parsed once and cached. A process that had already
+    resolved this variable, and so holds the cache, saw nothing after a set
+    until it restarted: the mask in the reply came back null for a key that
+    was on disk and correct. Safe today only because the one shot CLI
+    resolves nothing before dispatching, which nothing enforces.
+    """
+    config._DOTENV_CACHE = None
+    assert config.provider_key("alphavantage") is None    # warms the cache
+    result = keys.run(args(action="set", provider="alphavantage",
+                           value=SECRET))
+    assert config.provider_key("alphavantage") == SECRET
+    assert result["masked"] == "zz************22"
+
+
+def test_a_longer_variable_name_is_not_mistaken_for_this_one(store):
+    """Provenance was decided by a substring test, so a file holding only
+    EXTRA_FMP_API_KEY was reported as the source of FMP_API_KEY. Wrong file,
+    and the real source left unnamed, for somebody already confused about
+    why a key will not take.
+    """
+    store.write_text("EXTRA_FMP_API_KEY=somethingelse\n", encoding="utf-8")
+    config._DOTENV_CACHE = None
+    assert keys._source_of("FMP_API_KEY") is None
+    store.write_text("FMP_API_KEY=" + SECRET + "\n", encoding="utf-8")
+    config._DOTENV_CACHE = None
+    assert keys._source_of("FMP_API_KEY") == str(store)

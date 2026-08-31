@@ -81,6 +81,29 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+The exposure figures reproduced to 3.5e-16 against an independently coded
+gamma, and the units are dollars of dealer hedging notional per one percent
+move at a multiplier of one hundred. Two things about presentation did not
+survive the audit.
+
+**The gamma flip is anchored at the lowest listed strike**, not at zero, so
+on a chain whose ladder starts far below spot the reported level is an
+artifact of where the listing begins rather than a market level. On one
+live chain it read 306.82 against a spot of 765.68 and was the only
+crossing. Treat it as a shape statement about the cumulative profile, and
+say so rather than quoting it as a level.
+
+**Max pain and the gamma profile use different populations.** Max pain
+needs open interest and a strike; the gamma profile also needs a
+volatility, so contracts without one are absent from it. Two numbers on one
+panel, from two different subsets of the same chain. The artifact now
+reports each skip reason separately, and an earlier version told the reader
+that contracts had no open interest when in fact all of them did and the
+missing thing was volatility.
+
 ## Going deeper
 
 - `reference.md`: the exposure formula and its units, what the walls and the flip level are, why there is often more than one flip, and the limits of max pain and the smile metrics.

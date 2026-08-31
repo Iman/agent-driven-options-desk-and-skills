@@ -84,6 +84,35 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+**Value at risk here is not drift free.** The posterior median drift on the
+live SPY fit was about 26 percent a year, so a 30 day value at risk of 3.92
+percent sits only 3.92 below spot while the distance from the median down
+to the fifth percentile is 6.98 percentage points. Both numbers are
+correct. If a reader hears "the 5 percent worst case is a 3.9 percent
+fall", they are hearing something the artifact did not say, because roughly
+half of that comfort is the fitted upward drift rather than a narrow
+distribution. Quote the median return beside the tail figure.
+
+**Paths are independent draws, not antithetic pairs.** Every artifact
+written before September 2026 said `antithetic: true`. It was never true:
+of ten thousand pairs, none shared a shock sequence. The construction has
+been removed and the flag now reads false. If you are reading an older
+artifact, treat that field as unreliable rather than as history.
+
+**The effective sample size is the minimum over single chains**, not the
+pooled figure the name suggests, so it understates by roughly a factor of
+two on this posterior. The convergence gate is therefore stricter than it
+looks, which is the safe direction, but do not quote the number as a
+standard ESS.
+
+**Persistence is the sum of the medians of alpha and beta**, not the median
+of their sum. On this posterior the two differ by 7e-05, which is nothing,
+but they are different quantities and the artifact stores no joint draws
+for a reader to check.
+
 ## Going deeper
 
 - `reference.md`: the model written out, the convergence gate and why the effective sample size estimator overstates, what the risk numbers are, and how the antithetic pairs behave.

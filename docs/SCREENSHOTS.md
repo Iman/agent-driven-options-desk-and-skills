@@ -1,13 +1,17 @@
 # Screenshot gallery
 
 Every panel and every chart the dashboard renders, captured from one
-live run: SPY at the 2026-10-16 expiry with the 2026-12-18 expiry also
-on disk, 394 and 303 contracts, all twenty-three structures built and
-seventeen of them backtested over five years. The two expiry structures
-are priced at the rate and dividend yield the snapshot measured, which
-the time spread panel names. Free data, delayed, with two of 394
-contracts falling back to the provider's volatility and fourteen
-carrying none, which the page says for itself.
+live run after three independent verifications corrected eleven defects
+in the numbers: SPY at the 2026-10-16 expiry with 2026-12-18 also on
+disk, 394 and 303 contracts, all twenty-three structures built and
+seventeen backtested over five years.
+
+What is visible here that was not before: the chain solves 380 of 394
+contracts rather than 338 and is no longer degraded, the backtest
+p-values are block p-values that respect the overlap between windows,
+the two-expiry rows say where their maximum sits and how wide the scan
+is in standard deviations, and every time spread names the rate and
+dividend yield it was priced at.
 
 Each image is clipped to the element's own bounding box read from the
 live DOM, so a panel image is exactly that panel.

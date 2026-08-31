@@ -267,6 +267,12 @@ MUTATIONS = [
      '        raise ValueError("no key given, nothing was written")',
      "        pass",
      "shell/tests/test_keys_cli.py"),
+    ("graph-hides-degradation", "agent/src/optiondesk_agent/graph.py",
+     "        if degraded:\n            body += [\"\", \"Degraded stages, "
+     "which the figures above inherit:\"]",
+     "        if False:\n            body += [\"\", \"Degraded stages, "
+     "which the figures above inherit:\"]",
+     "agent/tests/test_graph.py"),
     ("scan-boundary-never-flagged", ENGINE + "/strategies/timespread.py",
      "    gain_on_boundary = on_boundary(best_index)",
      "    gain_on_boundary = False",

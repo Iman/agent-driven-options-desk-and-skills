@@ -566,11 +566,11 @@ The artifact directory as retrievable documents.
 
 A desk routine as a state graph, with a bounded loop.
 
-310 lines.
+341 lines.
 
-- class **DeskState** (line 39): What flows through the graph
-- **build_desk_graph()** (line 75): Compile the routine
-- **open_desk()** (line 300): Run the routine to completion and return the final state
+- class **DeskState** (line 54): What flows through the graph
+- **build_desk_graph()** (line 90): Compile the routine
+- **open_desk()** (line 331): Run the routine to completion and return the final state
 
 ### `agent/src/optiondesk_agent/prompts.py`
 
@@ -602,31 +602,31 @@ Roughly 904 tokens in SKILL.md. Bundled: nothing.
 
 Test an option structure against real price history with modelled premiums, and run a paper forward test that records positions before their outcome is known and marks them against later chains. Reports win rate, mean return on capital at risk, drawdown, a permutation test, a bootstrap interval and a buy-and-hold benchmark. Use when the user asks whether a strategy has worked historically, to backtest or forward test something, whether an edge is real or chance, how a structure performed, or asks to paper trade, track a position, or mark a trade. Not for order placement and not for recommendations, and a backtest result is not a forecast.
 
-Roughly 1168 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/evaluate-a-rule.md`.
+Roughly 1516 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/evaluate-a-rule.md`.
 
 ### options-greeks
 
 Retrieve an option chain from free market data and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
 
-Roughly 1514 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `scripts/check_artifact.py`, `workflows/pull-and-grade.md`.
+Roughly 1841 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `scripts/check_artifact.py`, `workflows/pull-and-grade.md`.
 
 ### options-positioning
 
 Dealer gamma exposure by strike, call and put walls, the gamma flip level, max pain, put-call ratios, and volatility smile geometry including at-the-money implied volatility, 25-delta risk reversal, butterfly, skew slope and the implied expected move. Use when the user asks where the walls are, whether dealers are long or short gamma, what the gamma flip level is, where max pain sits, what the put-call ratio is, how steep the skew is, what the market implies for a move, or asks about positioning and dealer hedging. This is chain-wide geometry rather than per-contract Greeks. Not for order placement and not for recommendations.
 
-Roughly 1040 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/read-the-book.md`.
+Roughly 1335 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/read-the-book.md`.
 
 ### options-simulation
 
 Simulate an underlying forward from its own realised behaviour using a Bayesian GARCH(1,1) model with Student-t innovations sampled by MCMC, then report the posterior predictive fan, value at risk, expected shortfall, and the profit distribution of any structures already built. Use when the user asks what the underlying might do, what the downside is, what value at risk or expected shortfall looks like, how likely a structure is to profit given how the stock actually moves, or asks for a Monte Carlo, a simulation, an MCMC, or a distribution of outcomes. Not for order placement and not for recommendations.
 
-Roughly 1075 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/run-a-projection.md`.
+Roughly 1462 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/run-a-projection.md`.
 
 ### options-strategy
 
 "Build and compare multi-leg option structures from a chain: iron condors, iron butterflies, call butterflies, vertical spreads both debit and credit including bull put and bear call spreads, straddles, strangles, covered calls, cash-secured puts, protective puts, and the two-expiry family of calendars, diagonals and ratio diagonals. Produces legs, breakevens, maximum gain and loss, reward to risk, model probability of profit, net position Greeks and an estimate of what the round trip costs at quoted spreads, then ranks every structure side by side. Use when the user asks what structure fits a view, what an iron condor would pay, which spread is better, what the breakevens are, how much a trade can lose, what a calendar or a diagonal or a ratio diagonal would do, or asks to compare strategies. Not for order placement and not for recommendations."
 
-Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/choose-a-structure.md`.
+Roughly 1493 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/choose-a-structure.md`.
 
 ## Commands
 
@@ -695,17 +695,17 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_summary_degraded_contract.py`: 4
 - `shell/tests/test_yahoo_provider.py`: 26
 
-### agent/tests (114 test functions)
+### agent/tests (115 test functions)
 
 - `agent/tests/test_artifacts.py`: 36
-- `agent/tests/test_graph.py`: 38
+- `agent/tests/test_graph.py`: 39
 - `agent/tests/test_package_import.py`: 9
 - `agent/tests/test_prompts.py`: 13
 - `agent/tests/test_tools.py`: 18
 
 ## Totals
 
-56 modules, 14064 lines of source, 159 public functions, 14 public classes, 721 test functions.
+56 modules, 14095 lines of source, 159 public functions, 14 public classes, 722 test functions.
 
 Every public name carries a docstring.
 

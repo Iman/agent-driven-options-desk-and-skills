@@ -174,3 +174,49 @@ Install it with the optional extra:
 ```
 pip install -e "agent[graph]"
 ```
+
+
+## The loop this project was missing
+
+Every loop above repeats work. None of them checks the work, and in
+September 2026 that gap cost eleven defects.
+
+The desk had 900 passing tests, ten green refresh stages and a mutation
+harness with no survivors. Three agents then recomputed the same numbers
+from scratch, against independently written implementations, and found
+eleven things wrong: a solver refusing contracts it could identify, a rate
+of exactly zero silently replaced, a payoff curve drawn at different rates
+from the analysis beside it in the same file, an antithetic construction
+that had never run while every artifact claimed it had, significance tests
+assuming independence that overlapping windows do not have, and five more.
+Not one was caught by a test, because a test checks what its author thought
+to check, and all eleven lived where nobody had thought to look.
+
+So there is a fourth kind of loop worth running here, and it is not on a
+timer. Run it when the numbers start being quoted, when a figure gets
+published, or when you have been staring at the same code long enough to
+stop seeing it:
+
+```
+Recompute, independently, and report only what disagrees.
+```
+
+Three properties make it work, and all three are easy to lose:
+
+**It must not call the code it is checking.** An independent
+implementation, written from the definition rather than from the source.
+Two of the eleven were found only because the checker used a different
+normal CDF.
+
+**It must be adversarial about claims, not just arithmetic.** Most of the
+arithmetic was right, to between 1e-11 and 1e-16. What was wrong was what
+the numbers were said to mean: a flag asserting a property that was not
+there, a maximum that was a property of its window, a p-value from a null
+the structure cannot produce.
+
+**It must be allowed to report that a test is the problem.** Five tests in
+this repository passed against deliberately broken code. A verification
+that assumes the suite is the reference cannot find those.
+
+This is not a substitute for the tests. It is the thing that tells you
+which tests you never wrote.

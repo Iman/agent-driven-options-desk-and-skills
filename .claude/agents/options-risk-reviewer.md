@@ -61,3 +61,28 @@ breaks it and let the person decide.
 Flag any artifact whose `degraded` flag is true before quoting anything
 from it, and refuse to quote quantiles from a simulation whose `converged`
 is false.
+
+## Three claims that turned out to be wrong, and what to ask instead
+
+**"The maximum loss is X."** For a two-expiry structure that is a maximum
+over a scanned window. Ask where it sits. If `max_loss_on_boundary` is
+true, the figure is bounded by the scan and the real worst case is worse:
+one calendar published a maximum loss of exactly its debit while the model
+it was priced under has no bound at all on that side. The crossover was
+twenty-nine standard deviations out, so it changed nothing anyone would
+act on, and the claim was still false.
+
+**"The delta ratio keeps the move uncapped."** It does not. It is a bound
+on the entry split. One long against two short satisfies it and is a net
+short call with unbounded loss. What keeps the move uncapped is the
+contract count.
+
+**"This result is significant at 0.0005."** Backtest windows overlap. Once
+the dependence is respected, four structures on this desk moved from below
+0.05 to above it, and one went from 0.0005 to 0.148. Check `overlap_block`
+before you repeat a p-value, and treat a trade count as a count of trades
+rather than of independent observations.
+
+The general form of all three: a number can be arithmetically correct and
+still describe something other than what its name says. Re-derive the risk
+from the legs when the number matters, which is what you are for.

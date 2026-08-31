@@ -117,6 +117,31 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+An independent verification recomputed all sixteen Greeks for every row of
+a live ladder against high-precision finite differences. Worst relative
+disagreement was 9.95e-13, and every scaling convention held: theta, charm,
+veta and color per calendar day, vega and rho per 1.00 rather than per
+point, delta carrying the dividend discount. You can quote these.
+
+Two things worth knowing when a contract is missing.
+
+**A refusal to imply a volatility is now made at the answer, not the
+seed.** The solver used to test sensitivity at its 0.30 starting guess and
+give up when it was small, which refused deep in the money contracts it
+could solve perfectly well: on one live chain that was 41 contracts, and it
+was the sole reason the chain was flagged degraded. If you are reading a
+chain snapshot written before September 2026, a high provider-volatility
+share may be the solver rather than the market.
+
+**The rate and the dividend yield come from the snapshot.** They are not
+assumed, and a stated rate of exactly zero is now honoured rather than
+being silently replaced by four percent. At the defaults instead of the
+measured values, the live at-the-money call moved 4.3 percent in price and
+8.1 percent in theta, and vanna changed sign.
+
 ## Going deeper
 
 - `reference.md`: every field a row carries with its unit, the two conversions people get wrong, which signs are not invariants, what the model assumes, and what is refused rather than estimated. Read it when a number has to be interpreted or defended.

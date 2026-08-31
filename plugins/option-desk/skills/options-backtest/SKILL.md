@@ -90,6 +90,33 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+Three independent verifications recomputed this project's arithmetic in
+2026. The backtest statistics reproduced bit for bit. Two things about how
+they are read did not, and both change what a result means.
+
+**The windows overlap.** A thirty day hold entered every five trading days
+shares twenty-five of its thirty days with its neighbour. Measured
+autocorrelation is positive through lag five and collapses at lag six, and
+the effective sample is 64 to 88 rather than 233. The significance test and
+the interval now resample blocks rather than single trades, and every
+artifact carries `overlap_block`. When it is above one, say so: the
+p-value beside it is a block p-value, and the trade count is not the number
+of independent observations. Correcting this moved four structures from
+below 0.05 to above it, one from 0.0005 to 0.148.
+
+**A structure can enter trades and report no statistics.** When the maximum
+loss is unbounded there is no capital at risk to divide by, so every return
+on risk is undefined and the statistics object is empty. Read
+`trades_entered`, not a trade count of zero. The run worked; the ratio has
+no denominator. Saying "no trades" there is wrong and sends a reader
+looking for missing price history.
+
+Both are in the artifact. Neither is in the headline figure, so it falls to
+you to say them.
+
 ## Going deeper
 
 - `reference.md`: the honesty rule in full, how the statistics are computed, and the caveat that outranks all of them.

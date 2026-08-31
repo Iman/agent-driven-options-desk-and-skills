@@ -194,6 +194,33 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+Three independent verifications recomputed this project's arithmetic in
+2026. The backtest statistics reproduced bit for bit. Two things about how
+they are read did not, and both change what a result means.
+
+**The windows overlap.** A thirty day hold entered every five trading days
+shares twenty-five of its thirty days with its neighbour. Measured
+autocorrelation is positive through lag five and collapses at lag six, and
+the effective sample is 64 to 88 rather than 233. The significance test and
+the interval now resample blocks rather than single trades, and every
+artifact carries `overlap_block`. When it is above one, say so: the
+p-value beside it is a block p-value, and the trade count is not the number
+of independent observations. Correcting this moved four structures from
+below 0.05 to above it, one from 0.0005 to 0.148.
+
+**A structure can enter trades and report no statistics.** When the maximum
+loss is unbounded there is no capital at risk to divide by, so every return
+on risk is undefined and the statistics object is empty. Read
+`trades_entered`, not a trade count of zero. The run worked; the ratio has
+no denominator. Saying "no trades" there is wrong and sends a reader
+looking for missing price history.
+
+Both are in the artifact. Neither is in the headline figure, so it falls to
+you to say them.
+
 ## Going deeper
 
 - `reference.md`: the honesty rule in full, how the statistics are computed, and the caveat that outranks all of them.
@@ -319,6 +346,31 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+An independent verification recomputed all sixteen Greeks for every row of
+a live ladder against high-precision finite differences. Worst relative
+disagreement was 9.95e-13, and every scaling convention held: theta, charm,
+veta and color per calendar day, vega and rho per 1.00 rather than per
+point, delta carrying the dividend discount. You can quote these.
+
+Two things worth knowing when a contract is missing.
+
+**A refusal to imply a volatility is now made at the answer, not the
+seed.** The solver used to test sensitivity at its 0.30 starting guess and
+give up when it was small, which refused deep in the money contracts it
+could solve perfectly well: on one live chain that was 41 contracts, and it
+was the sole reason the chain was flagged degraded. If you are reading a
+chain snapshot written before September 2026, a high provider-volatility
+share may be the solver rather than the market.
+
+**The rate and the dividend yield come from the snapshot.** They are not
+assumed, and a stated rate of exactly zero is now honoured rather than
+being silently replaced by four percent. At the defaults instead of the
+measured values, the live at-the-money call moved 4.3 percent in price and
+8.1 percent in theta, and vanna changed sign.
+
 ## Going deeper
 
 - `reference.md`: every field a row carries with its unit, the two conversions people get wrong, which signs are not invariants, what the model assumes, and what is refused rather than estimated. Read it when a number has to be interpreted or defended.
@@ -408,6 +460,29 @@ The full terms are in DISCLAIMER.md, which ships beside this skill when it
 is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
+
+
+## What an audit found in these numbers, and what to say about it
+
+The exposure figures reproduced to 3.5e-16 against an independently coded
+gamma, and the units are dollars of dealer hedging notional per one percent
+move at a multiplier of one hundred. Two things about presentation did not
+survive the audit.
+
+**The gamma flip is anchored at the lowest listed strike**, not at zero, so
+on a chain whose ladder starts far below spot the reported level is an
+artifact of where the listing begins rather than a market level. On one
+live chain it read 306.82 against a spot of 765.68 and was the only
+crossing. Treat it as a shape statement about the cumulative profile, and
+say so rather than quoting it as a level.
+
+**Max pain and the gamma profile use different populations.** Max pain
+needs open interest and a strike; the gamma profile also needs a
+volatility, so contracts without one are absent from it. Two numbers on one
+panel, from two different subsets of the same chain. The artifact now
+reports each skip reason separately, and an earlier version told the reader
+that contracts had no open interest when in fact all of them did and the
+missing thing was volatility.
 
 ## Going deeper
 
@@ -501,6 +576,35 @@ is installed from a package and sits at the repository root otherwise. The
 substance is already above: research software, not advice, modelled numbers
 that are not fills.
 
+
+## What an audit found in these numbers, and what to say about it
+
+**Value at risk here is not drift free.** The posterior median drift on the
+live SPY fit was about 26 percent a year, so a 30 day value at risk of 3.92
+percent sits only 3.92 below spot while the distance from the median down
+to the fifth percentile is 6.98 percentage points. Both numbers are
+correct. If a reader hears "the 5 percent worst case is a 3.9 percent
+fall", they are hearing something the artifact did not say, because roughly
+half of that comfort is the fitted upward drift rather than a narrow
+distribution. Quote the median return beside the tail figure.
+
+**Paths are independent draws, not antithetic pairs.** Every artifact
+written before September 2026 said `antithetic: true`. It was never true:
+of ten thousand pairs, none shared a shock sequence. The construction has
+been removed and the flag now reads false. If you are reading an older
+artifact, treat that field as unreliable rather than as history.
+
+**The effective sample size is the minimum over single chains**, not the
+pooled figure the name suggests, so it understates by roughly a factor of
+two on this posterior. The convergence gate is therefore stricter than it
+looks, which is the safe direction, but do not quote the number as a
+standard ESS.
+
+**Persistence is the sum of the medians of alpha and beta**, not the median
+of their sum. On this posterior the two differ by 7e-05, which is nothing,
+but they are different quantities and the artifact stores no joint draws
+for a reader to check.
+
 ## Going deeper
 
 - `reference.md`: the model written out, the convergence gate and why the effective sample size estimator overstates, what the risk numbers are, and how the antithetic pairs behave.
@@ -584,6 +688,33 @@ Read `degraded` before quoting anything. When it is true, give
 `degraded_reason` first, in the same breath as the number rather than as a
 footnote. Both fields are in the summary the command prints, not only in
 the artifact.
+
+
+## What an audit found in these numbers, and what to say about it
+
+**A two-expiry maximum can be a property of the scan, not the structure.**
+Calendars, diagonals and ratio diagonals have no closed-form maximum, so
+the analysis scans a window around spot. When the payoff is monotone in the
+trade's own direction the maximum lands on the window edge, and the figure
+grows as the window widens: one live ratio diagonal reads 1.47 reward to
+risk at a tenth of the width, 4.90 at the shipped width and 12.02 at two
+and a half times it. Every plan now carries
+`reward_risk_bounded_by_scan`, `max_gain_on_boundary` and `scan_range_sd`.
+When the flag is true, say where the maximum sits: on the live pair the
+edges are about ten standard deviations out, which is arithmetic rather
+than a scenario.
+
+**`delta_ratio` is a bound on the entry split, not a guarantee.** It was
+documented for a while as the thing that keeps a large move uncapped. It is
+not: one long against two short satisfies it at 0.76 and is a net short
+call with unbounded loss. What keeps the move uncapped is holding more
+back-month contracts than front-month ones, which the builder checks first.
+Do not repeat the older claim.
+
+**Every figure names the carry it used.** Plans carry `risk_free_rate` and
+`dividend_yield` read from the chain rather than assumed. They matter: at
+the module defaults instead of the measured values, three of the four legs
+of a ratio diagonal land on different strikes.
 
 ## Going deeper
 

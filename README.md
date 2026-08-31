@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-925%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-73%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-926%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-74%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -890,7 +890,7 @@ Or one suite at a time:
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
 ./shell/.venv/bin/python -m pytest shell/tests -q     # 421 tests
-./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
+./shell/.venv/bin/python -m pytest agent/tests -q     # 159 tests
 ```
 
 Those three counts are checked by `shell/tests/test_documented_counts.py`, which
@@ -910,7 +910,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           seventy-three mutations, killed or survived
+python3 scripts/mutate.py           seventy-four mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 

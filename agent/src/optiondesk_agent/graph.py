@@ -22,6 +22,21 @@ failure is reproducible. A language model belongs at the edges, deciding
 what to ask for and how to say what came back, and there is a node for that
 which stays inert unless you pass one in.
 
+WHAT COMPLETE DOES NOT MEAN. This graph reports that every stage produced
+an artifact. It does not report that the artifacts are right, and those are
+different claims. Three independent verifications in September 2026 found
+eleven defects in numbers that every stage of this graph would have called
+complete: a solver refusing contracts it could identify, significance tests
+assuming an independence that overlapping windows do not have, a maximum
+that was a property of its own scan window. The gather node checks that a
+file appeared. Nothing here checks what is in it.
+
+The report node carries degradation through for that reason. When a stage
+writes an artifact marked degraded, the summary says so rather than
+presenting a complete run, because "every stage finished" and "the figures
+can be relied on" are the two claims most easily confused by anything
+reading this output, human or otherwise.
+
 Requires langgraph, which is an optional extra of this package.
 """
 
@@ -211,7 +226,23 @@ def build_desk_graph(store=None, runners=None, model=None):
             "failed": "Desk did not open on {}. A step failed.",
         }[outcome].format(state["underlying"])
 
+        # Degradation is carried into the summary rather than left in the
+        # artifacts for someone to find. "Every stage has an artifact" and
+        # "the figures can be relied on" are two claims, and a reader who
+        # sees only the first will hear the second. An audit of this
+        # project found eleven defects in numbers every stage of this graph
+        # would have called complete.
+        degraded = []
+        for kind, payload, _ in store.records(underlying=state["underlying"]):
+            meta = (payload or {}).get("meta") or {}
+            if meta.get("degraded"):
+                degraded.append("  {}: {}".format(
+                    kind, meta.get("degraded_reason") or "degraded"))
+
         body = [header, "", context]
+        if degraded:
+            body += ["", "Degraded stages, which the figures above inherit:"]
+            body += sorted(set(degraded))
         if failures:
             body += ["", "Failures:"] + ["  " + f for f in failures]
         summary = "\n".join(body)

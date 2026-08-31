@@ -76,6 +76,33 @@ Read `degraded` before quoting anything. When it is true, give
 footnote. Both fields are in the summary the command prints, not only in
 the artifact.
 
+
+## What an audit found in these numbers, and what to say about it
+
+**A two-expiry maximum can be a property of the scan, not the structure.**
+Calendars, diagonals and ratio diagonals have no closed-form maximum, so
+the analysis scans a window around spot. When the payoff is monotone in the
+trade's own direction the maximum lands on the window edge, and the figure
+grows as the window widens: one live ratio diagonal reads 1.47 reward to
+risk at a tenth of the width, 4.90 at the shipped width and 12.02 at two
+and a half times it. Every plan now carries
+`reward_risk_bounded_by_scan`, `max_gain_on_boundary` and `scan_range_sd`.
+When the flag is true, say where the maximum sits: on the live pair the
+edges are about ten standard deviations out, which is arithmetic rather
+than a scenario.
+
+**`delta_ratio` is a bound on the entry split, not a guarantee.** It was
+documented for a while as the thing that keeps a large move uncapped. It is
+not: one long against two short satisfies it at 0.76 and is a net short
+call with unbounded loss. What keeps the move uncapped is holding more
+back-month contracts than front-month ones, which the builder checks first.
+Do not repeat the older claim.
+
+**Every figure names the carry it used.** Plans carry `risk_free_rate` and
+`dividend_yield` read from the chain rather than assumed. They matter: at
+the module defaults instead of the measured values, three of the four legs
+of a ratio diagonal land on different strikes.
+
 ## Going deeper
 
 - `reference.md`: all twenty-three structures in a table with what each needs and when it pays, the five direction framework, the friction verdicts, and the fields that are not numbers.

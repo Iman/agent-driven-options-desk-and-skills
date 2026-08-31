@@ -853,3 +853,46 @@ def test_every_gather_visit_sees_at_least_one_missing_stage(store,
     assert final["outcome"] == "complete"
     assert len(seen) == len(PIPELINE)
     assert all(missing for missing in seen)
+
+
+def test_the_report_names_a_degraded_stage(tmp_path):
+    """Complete and reliable are two claims, and a reader who sees only the
+    first will hear the second.
+
+    An audit of this project found eleven defects in numbers that every
+    stage of this graph would have called complete, so a stage that marks
+    its own artifact degraded has to reach the summary rather than sitting
+    in a file for someone to find.
+    """
+    import json
+
+    from optiondesk_agent.artifacts import ArtifactStore
+    from optiondesk_agent.graph import build_desk_graph
+
+    store = ArtifactStore(tmp_path)
+
+    def runner_for(kind):
+        def run(state):
+            payload = {
+                "meta": {"schema": kind, "generated_utc": "2026-09-01T00:00:00Z",
+                         "degraded": kind == "greeks",
+                         "degraded_reason": ("48 of 394 contracts use the "
+                                             "provider's volatility")
+                         if kind == "greeks" else None},
+                "underlying": state["underlying"],
+                "expiry": state.get("expiry"),
+            }
+            (tmp_path / "{}_{}.json".format(kind, state["underlying"])).write_text(
+                json.dumps(payload), encoding="utf-8")
+            return {"built": True}
+        return run
+
+    runners = {kind: runner_for(kind)
+               for kind in ("chain", "greeks", "exposure", "comparison")}
+    graph = build_desk_graph(store=store, runners=runners)
+    final = graph.invoke({"underlying": "TEST", "expiry": None, "budget": 8,
+                          "log": [], "failures": []})
+
+    assert final["outcome"] == "complete"
+    assert "Degraded stages" in final["summary"], final["summary"]
+    assert "provider's volatility" in final["summary"]

@@ -56,6 +56,7 @@ every command without running one, and `--help` lists the rest.
 Free for any noncommercial purpose. Commercial use needs a written
 agreement: see [LICENSES.md](LICENSES.md).
 [Contributing](CONTRIBUTING.md) ·
+[Backlog](docs/BACKLOG.md) ·
 [Code of conduct](CODE_OF_CONDUCT.md) ·
 [Security](SECURITY.md)
 
@@ -1001,6 +1002,8 @@ gone, replaced by the test above, which anyone can run.
 | `README.md` | this: architecture, flow, conventions, the reasoning |
 | `docs/CAPABILITIES.md` | the complete catalogue of every feature and surface |
 | `docs/INVENTORY.md` | every public function and class, generated from the source |
+| `docs/BACKLOG.md` | what is known, measured and not done, with the evidence and what finished means |
+| `docs/SCREENSHOTS.md` | every panel and chart the dashboard renders, from one live run |
 | `scripts/refresh.py` | rebuild everything generated, then prove it holds |
 | `scripts/mutate.py` | break the code on purpose and check the tests notice |
 | `INSTALL.md` | eight install paths, each verified |

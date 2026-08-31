@@ -1,5 +1,7 @@
 # Contributing
 
+**Looking for something to work on?** [docs/BACKLOG.md](docs/BACKLOG.md) lists what is known, measured and not done, with the evidence for each item and what finished means. Items marked good first issue are self-contained. Everything there came out of adversarial verification of this project's own numbers, so none of it is speculative.
+
 Issues and pull requests are welcome. This file says what makes them
 land quickly, and what will get them sent back.
 

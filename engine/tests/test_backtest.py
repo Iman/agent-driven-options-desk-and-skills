@@ -1,6 +1,6 @@
 """Backtest runner and its statistics.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 
 The runner's honesty properties are tested as behaviour, not as prose: a
 result that omits the modelled-premium statement, or that prices an entry

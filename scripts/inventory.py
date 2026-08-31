@@ -25,12 +25,12 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "INVENTORY.md"
 
 PACKAGES = [
-    ("engine", "engine/src/optiondesk_engine", "AGPL-3.0-only",
+    ("engine", "engine/src/optiondesk_engine", "PolyForm-Noncommercial-1.0.0",
      "Every number the desk reports. Standard library only, no network."),
-    ("shell", "shell/src/optiondesk", "MIT",
+    ("shell", "shell/src/optiondesk", "PolyForm-Noncommercial-1.0.0",
      "Data, contracts, CLI, dashboard, MCP. Runs without the engine, and "
      "says so rather than guessing."),
-    ("agent", "agent/src/optiondesk_agent", "MIT",
+    ("agent", "agent/src/optiondesk_agent", "PolyForm-Noncommercial-1.0.0",
      "LangChain tool bindings and a LangGraph desk routine. Optional, and "
      "never in the compute path."),
 ]

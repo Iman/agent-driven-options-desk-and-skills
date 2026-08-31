@@ -1,6 +1,7 @@
 # optiondesk-agent
 
-LangChain bindings for the desk. MIT, like the shell it wraps.
+LangChain bindings for the desk. PolyForm Noncommercial 1.0.0, like the
+rest of the project.
 
 ## What this is, and what it deliberately is not
 

@@ -1,7 +1,7 @@
 # Disclaimer and terms of use
 
-This document applies to the entire repository, to both the MIT licensed
-shell and the AGPL licensed engine, to every artifact either of them writes,
+This document applies to the entire repository, to the shell and to the
+analytics engine, to every artifact either of them writes,
 and to every response produced by an AI agent that invokes them. Using,
 copying or running this software means you accept what follows. If you do not
 accept it, do not use the software.

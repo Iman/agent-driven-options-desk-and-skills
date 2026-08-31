@@ -5,7 +5,7 @@ rather than properties. The closed-form probability and tail statistics are
 cross-checked against a seeded Monte Carlo draw from the same distribution:
 if the algebra is wrong, the two disagree.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 """
 
 import math

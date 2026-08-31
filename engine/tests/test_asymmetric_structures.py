@@ -24,7 +24,7 @@ and a builder that agrees with itself cannot pass. The builder tests then
 check that the legs it selects satisfy the definition, on a chain listed
 finely enough to carry the structures.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 """
 
 import pytest

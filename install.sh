@@ -2,7 +2,7 @@
 #
 # Option desk installer.
 #
-# Installs the MIT shell, optionally the AGPL engine, the agent skills, and
+# Installs the shell, optionally the analytics engine, the agent skills, and
 # registers the MCP server with whichever agent runtimes are present.
 #
 # From a checkout:
@@ -89,7 +89,7 @@ Options:
                         .agents convention (default ~/.agents/skills)
   --repo URL            git URL to clone when not run from a checkout
   --ref REF             branch or tag to clone (default main)
-  --no-engine           install the MIT shell only, without the AGPL engine.
+  --no-engine           install the shell only, without the analytics engine.
                         Greeks are unavailable; the shell says so and keeps
                         working
   --no-skills           do not copy skills into either skills directory
@@ -289,17 +289,19 @@ python_bin() {
 licence_notice() {
   cat <<'NOTICE'
 
-  The analytics engine is licensed AGPL-3.0, separately from the MIT shell.
-  Running it privately carries no obligation. Running a MODIFIED version as
-  a network service obliges you to offer that modified source to its users.
+  This project, engine included, is licensed under the PolyForm
+  Noncommercial License 1.0.0. Personal use, research, teaching and any
+  other noncommercial use are permitted. Use for or within a business, or
+  any use that makes money, requires a separate written agreement with the
+  author.
 
-  Install the shell alone with --no-engine if that does not suit you. The
-  shell still runs; it reports that Greeks are unavailable rather than
+  Install the shell alone with --no-engine if you do not want the engine.
+  The shell still runs; it reports that Greeks are unavailable rather than
   guessing them.
 
 NOTICE
   if [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ] && [ "$DRY_RUN" -eq 0 ]; then
-    printf '  Continue and install the AGPL engine? [Y/n] '
+    printf '  Continue and install the analytics engine? [Y/n] '
     read -r reply || reply=""
     case "$reply" in
       [Nn]*) WITH_ENGINE=0; say "  Continuing without the engine." ;;
@@ -322,14 +324,14 @@ install_packages() {
   local pip="$VENV/bin/pip"
   run "$pip" install --quiet --upgrade pip
 
-  say "Installing the MIT shell with the free Yahoo provider"
+  say "Installing the shell with the free Yahoo provider"
   run "$pip" install --quiet -e "$SOURCE/shell[yahoo]"
 
   if [ "$WITH_ENGINE" -eq 1 ]; then
     licence_notice
   fi
   if [ "$WITH_ENGINE" -eq 1 ]; then
-    say "Installing the AGPL analytics engine"
+    say "Installing the analytics engine"
     run "$pip" install --quiet -e "$SOURCE/engine"
   else
     say "Skipping the analytics engine, as requested"
@@ -545,7 +547,8 @@ import json, sys
 report = json.load(sys.stdin)
 engine = report["engine"]
 providers = [name for name, p in report["providers"].items() if p["available"]]
-print("  engine:    " + ("available " + str(engine["version"]) + " (AGPL-3.0)"
+print("  engine:    " + ("available " + str(engine["version"])
+                         + " (" + str(engine["license"]) + ")"
                          if engine["available"] else "not installed"))
 print("  providers: " + (", ".join(providers) or "none available"))
 print("  artifacts: " + report["artifact_dir"])

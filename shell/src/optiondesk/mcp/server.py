@@ -124,7 +124,7 @@ TOOLS = [
             "speed, zomma, color, ultima, dual delta, dual gamma) from a "
             "chain snapshot, using each contract's own implied volatility. "
             "Contracts without a usable volatility are skipped and counted, "
-            "never defaulted. Requires the AGPL analytics engine."),
+            "never defaulted. Requires the analytics engine."),
         "inputSchema": {
             "type": "object",
             "properties": {

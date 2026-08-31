@@ -1,15 +1,15 @@
 # optiondesk-engine
 
-Pricing and analytics for the option desk. Licensed under AGPL-3.0. See
-`LICENSE` for the full text, and `../LICENSES.md` for why this component is
-licensed differently from the shell.
+Pricing and analytics for the option desk. Licensed under the PolyForm
+Noncommercial License 1.0.0, the same terms as the rest of the project. See
+`LICENSE` for the full text and `../LICENSES.md` for what that permits.
 
 The engine is pure computation. It has no network access, no data providers,
 no file system layout opinions and no dependencies outside the standard
 library. It takes numbers and returns numbers, which is what makes it testable
 against closed-form and finite-difference benchmarks.
 
-The shell (MIT) fetches data and writes artifacts. The engine turns the data
+The shell fetches data and writes artifacts. The engine turns the data
 into analytics. Neither imports the other's internals: the shell reaches the
 engine through one adapter module, and degrades with an explicit message when
 the engine is not installed.

@@ -1,6 +1,6 @@
 """Forward-test marking.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 
 The property that matters most here is the refusal: a position with a leg
 that has no later quote must not be marked. Treating a missing leg as

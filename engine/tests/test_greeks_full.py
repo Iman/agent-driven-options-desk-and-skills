@@ -7,7 +7,7 @@ Greek can be transcribed with a sign error or a missing carry term and still
 look plausible in a dashboard. Differentiating bs_price numerically is the
 only cheap way to catch that.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 """
 
 import math

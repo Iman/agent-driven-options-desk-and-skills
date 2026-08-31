@@ -281,8 +281,8 @@ a solicitation. Do not phrase results as what the user should buy or sell.
 ## Failure modes worth recognising
 
 If the summary reports the analytics engine is missing, the ladder cannot be
-computed. Tell the user to install `optiondesk-engine`, and mention that it
-is licensed AGPL-3.0 separately from the MIT shell.
+computed. Tell the user to install `optiondesk-engine`, which carries the
+same noncommercial licence as the rest of the project.
 
 If no provider is available, the message names each candidate and why it was
 skipped, which is usually a missing `yfinance` install.

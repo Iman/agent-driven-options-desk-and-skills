@@ -1,6 +1,6 @@
 """Regressions for defects found by adversarial audit.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 
 Every test here uses the failing input the audit actually produced. They
 are kept together rather than scattered because each one guards a claim

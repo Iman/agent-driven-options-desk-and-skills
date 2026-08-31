@@ -50,12 +50,17 @@ def test_dry_run_changes_nothing(tmp_path):
 
 
 def test_dry_run_states_the_engine_licence():
+    """The notice has to name the licence that actually applies. It said
+    AGPL, and a network service obligation that no longer exists, for as
+    long as this assertion asked for that string.
+    """
     result = _run("--dry-run", "--no-mcp")
-    assert "AGPL-3.0" in result.stdout
-    assert "network service" in result.stdout
+    assert "PolyForm" in result.stdout
+    assert "noncommercial" in result.stdout.lower()
+    assert "AGPL" not in result.stdout
 
 
-def test_no_engine_skips_the_agpl_component(tmp_path):
+def test_no_engine_skips_the_engine_component(tmp_path):
     result = _run("--dry-run", "--no-engine", "--no-mcp",
                   "--prefix", str(tmp_path / "opt"))
     assert "Skipping the analytics engine" in result.stdout

@@ -1,6 +1,6 @@
 """Two-expiry structures.
 
-Copyright (C) 2026 Iman Samizadeh. Licensed under AGPL-3.0-only.
+Copyright (C) 2026 Iman Samizadeh. Licensed under the PolyForm Noncommercial License 1.0.0.
 
 The properties tested here are the ones that distinguish a calendar from
 every other structure: the surviving leg still has value at the near

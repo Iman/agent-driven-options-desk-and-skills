@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "optiondesk/greeks_ladder/v1",
   "title": "Analytic Greek ladder",
-  "description": "First to third order Black-Scholes-Merton Greeks for the contracts of one chain snapshot. Computed by the AGPL engine from the snapshot's own per-contract implied volatility. Contracts without a usable volatility are counted in skipped, never estimated.",
+  "description": "First to third order Black-Scholes-Merton Greeks for the contracts of one chain snapshot. Computed by the analytics engine from the snapshot's own per-contract implied volatility. Contracts without a usable volatility are counted in skipped, never estimated.",
   "type": "object",
   "required": [
     "meta",

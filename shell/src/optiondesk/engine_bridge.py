@@ -1,12 +1,12 @@
-"""The single seam between the shell and the AGPL engine.
+"""The single seam between the shell and the analytics engine.
 
 Only this module imports the engine. Every other part of the shell asks it
-for analytics. That keeps the licence boundary auditable with one grep, and
-it means the shell still runs, and still writes an honest degraded artifact,
+for analytics. That keeps the dependency auditable with one grep, and it
+means the shell still runs, and still writes an honest degraded artifact,
 when the engine is not installed.
 
-Installing the engine is a deliberate act by the user, and it brings AGPL
-obligations with it. The shell never installs it silently.
+Installing the engine is a deliberate act by the user. The shell never
+installs it silently.
 """
 
 ENGINE_PACKAGE = "optiondesk-engine"
@@ -14,14 +14,14 @@ ENGINE_PACKAGE = "optiondesk-engine"
 MISSING_MESSAGE = (
     "The analytics engine is not installed, so no Greeks were computed. "
     "Install it with 'pip install optiondesk-engine' (or 'pip install -e "
-    "engine' from a source checkout). It is licensed AGPL-3.0, separately "
-    "from this shell; see LICENSES.md before deploying it as a network "
-    "service."
+    "engine' from a source checkout). It carries the same noncommercial "
+    "licence as the rest of the project; see LICENSES.md."
 )
 
 try:  # pragma: no cover - trivially environment dependent
     from optiondesk_engine import (
         GREEK_KEYS,
+        LICENSE as engine_license,
         __version__ as engine_version,
         all_greeks,
         bs_price,
@@ -106,6 +106,6 @@ def status():
         "available": AVAILABLE,
         "package": ENGINE_PACKAGE,
         "version": engine_version,
-        "license": "AGPL-3.0-only" if AVAILABLE else None,
+        "license": engine_license if AVAILABLE else None,
         "message": None if AVAILABLE else MISSING_MESSAGE,
     }

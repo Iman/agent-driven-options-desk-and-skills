@@ -39,6 +39,16 @@ The absence of authentication. Everything here runs locally as you, and the
 dashboard binds to 127.0.0.1 deliberately. If you expose it to a network,
 that is a decision you have made and its consequences are yours.
 
+## Reporting without identifying yourself
+
+You do not need to tell me where you are or how you reach the internet to
+report a bug or a vulnerability, and you should not be asked. If a
+maintainer asks, point them at the rule in `CODE_OF_CONDUCT.md`.
+
+A reproduction that runs anywhere is worth more than a description of your
+network, and every diagnostic question worth asking has a form that does
+not require you to identify yourself.
+
 ## What this software does with your data
 
 It writes artifacts to your disk and reads them back. It fetches market

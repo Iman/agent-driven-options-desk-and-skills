@@ -668,3 +668,39 @@ def test_the_argument_hint_matches_the_declared_arguments():
         assert len(shown) == len(names), (
             "{}: the hint shows {} and the command declares {}".format(
                 path.name, shown, names))
+
+
+def test_the_community_files_github_turns_into_tabs_all_exist():
+    """GitHub renders a tab strip from five specific root files.
+
+    README.md, LICENSE, SECURITY.md, CODE_OF_CONDUCT.md and CONTRIBUTING.md.
+    A missing one is a missing tab, and the repository looks less cared for
+    than it is.
+    """
+    for name in ("README.md", "LICENSE", "SECURITY.md",
+                 "CODE_OF_CONDUCT.md", "CONTRIBUTING.md"):
+        path = ROOT / name
+        assert path.exists(), "{} is missing, so its tab will not appear".format(name)
+        assert len(path.read_text(encoding="utf-8").split()) > 80, (
+            "{} is too thin to be worth a tab".format(name))
+
+
+def test_the_privacy_rule_is_stated_where_it_will_be_read():
+    """A rule only in the code of conduct is a rule nobody reads in time.
+
+    Someone whose install failed opens SECURITY.md or the README, not the
+    code of conduct, and the moment they are most likely to be asked where
+    they are is while a maintainer is debugging their network.
+    """
+    conduct = read("CODE_OF_CONDUCT.md")
+    assert "name their country" in conduct or "which country" in conduct.lower(), (
+        "the code of conduct no longer carries the rule about not asking "
+        "where someone is")
+    assert "network" in conduct, (
+        "the rule should cover network conditions, not only location")
+
+    security = read("SECURITY.md")
+    assert "without identifying yourself" in security.lower() or \
+        "where you are" in security.lower(), (
+        "SECURITY.md does not tell a reporter they need not identify "
+        "themselves, which is where they will look first")

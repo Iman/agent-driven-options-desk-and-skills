@@ -140,6 +140,42 @@ def sync_readme_counts(interpreter):
             changed.append("{} {} to {}".format(suite, match.group(2), count))
         updated = pattern.sub(
             lambda m: "{}{}{}".format(m.group(1), count, m.group(3)), updated)
+    # The badges at the top carry the same numbers. A badge is the first
+    # thing a visitor reads and the last thing anyone remembers to update,
+    # so it is generated rather than typed.
+    total = 0
+    for suite in ("engine/tests", "shell/tests", "agent/tests"):
+        found = re.search(r"pytest {} -q\s+# (\d+) tests".format(
+            re.escape(suite)), updated)
+        if found:
+            total += int(found.group(1))
+    if total:
+        badge = re.compile(r"(tests-)\d+(%20passing)")
+        if badge.search(updated):
+            before = badge.search(updated).group(0)
+            updated = badge.sub(r"\g<1>{}\g<2>".format(total), updated)
+            if before != "tests-{}%20passing".format(total):
+                changed.append("tests badge to {}".format(total))
+
+    mutate = ROOT / "scripts" / "mutate.py"
+    if mutate.exists():
+        import ast
+
+        tree = ast.parse(mutate.read_text(encoding="utf-8"))
+        count = None
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and any(
+                    isinstance(x, ast.Name) and x.id == "MUTATIONS"
+                    for x in node.targets):
+                count = len(node.value.elts)
+        if count:
+            badge = re.compile(r"(mutations-)\d+(%20run)")
+            if badge.search(updated):
+                before = badge.search(updated).group(0)
+                updated = badge.sub(r"\g<1>{}\g<2>".format(count), updated)
+                if before != "mutations-{}%20run".format(count):
+                    changed.append("mutation badge to {}".format(count))
+
     if updated != text:
         readme.write_text(updated, encoding="utf-8")
     return True, ("README counts updated: " + ", ".join(changed)

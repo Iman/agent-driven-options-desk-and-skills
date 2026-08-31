@@ -27,6 +27,39 @@ Presenting this software's output as investment advice, or using an issue
 thread to promote a service. That is both a conduct problem and a
 regulatory one, and DISCLAIMER.md explains why.
 
+## One rule specific to this project
+
+**Do not ask anyone to name their country, or to describe their network
+conditions.**
+
+Not in an issue, not in a pull request review, not while diagnosing a
+failure. Not "which country are you in?", not "is your ISP blocking it?",
+not "can you reach GitHub directly?"
+
+This project is about markets, and the people who find it useful are spread
+across places where answering that question is anything from tedious to
+dangerous. Someone debugging a failed clone should not have to choose
+between getting help and disclosing where they are or how they reach the
+internet. The question also tends to arrive with an assumption attached,
+and the assumption is usually wrong.
+
+It is nearly always unnecessary. Almost every question that seems to need
+it has a better form:
+
+| Do not ask | Ask instead |
+|---|---|
+| Which country are you in? | What is the exact error, in full? |
+| Is your network blocking it? | Does `curl -sI https://pypi.org` return a status line? |
+| Are you behind a proxy or VPN? | Does the failure happen with `--provider yahoo` and also without it? |
+| Can you reach GitHub? | Does `git clone https://github.com/...` succeed on its own? |
+
+The answers to the right-hand column are what actually diagnose the fault.
+The left-hand column collects a fact about a person instead of a fact about
+the software.
+
+If someone volunteers where they are, that is theirs to volunteer. Do not
+repeat it, and do not build it into an issue title.
+
 ## Scope and enforcement
 
 This applies to issues, pull requests, discussions and any other space

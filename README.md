@@ -1,6 +1,12 @@
 # Option desk
 
-Option analytics that an AI agent can drive, and that a person can read.
+**Option analytics that an AI agent can drive, and that a person can read.**
+
+[![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-811%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-43%20run%2C%200%20survived-brightgreen)](#development)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
+[![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
 Pull a chain from free market data, compute the full Greek ladder, measure
 where dealer hedging concentrates, build and rank multi-leg structures,
@@ -8,8 +14,25 @@ simulate the underlying forward from its own behaviour, test a rule against
 history, and track what you actually took. Every step writes a
 schema-validated artifact. A local dashboard renders them.
 
-Research software. Not investment advice, not a recommendation, not a
-solicitation. Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
+```
+curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-skills/main/install.sh | bash
+optiondesk chain SPY && optiondesk greeks && optiondesk dashboard
+```
+
+Then ask your agent "where are the gamma walls on SPY?" and it will use the
+skills this installs. Eight other ways in, including Codex and ChatGPT, are
+in [INSTALL.md](INSTALL.md).
+
+> **Research software. Not investment advice, not a recommendation, not a
+> solicitation.** Modelled premiums are not fills, backtested results are
+> not achievable results, and nothing here knows your circumstances. Read
+> [DISCLAIMER.md](DISCLAIMER.md) first.
+
+Free for any noncommercial purpose. Commercial use needs a written
+agreement: see [LICENSES.md](LICENSES.md).
+[Contributing](CONTRIBUTING.md) ·
+[Code of conduct](CODE_OF_CONDUCT.md) ·
+[Security](SECURITY.md)
 
 ---
 
@@ -776,7 +799,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 359 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 361 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -901,7 +924,8 @@ gone, replaced by the test above, which anyone can run.
 | `THIRD-PARTY.md` | what is vendored and under what terms |
 | `CLA.md`, `CONTRIBUTORS.md` | contribution terms |
 | `SECURITY.md` | what is in scope, and how to report it privately |
-| `CODE_OF_CONDUCT.md` | how to disagree here |
+| `CODE_OF_CONDUCT.md` | how to disagree here, and the one rule about not asking where anyone is |
+| `CONTRIBUTING.md` | measure first, test what you claim, and what gets sent back |
 
 The generated ones are rebuilt by `python3 scripts/refresh.py`. Editing
 them by hand is wasted work.

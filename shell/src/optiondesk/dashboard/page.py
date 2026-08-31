@@ -977,28 +977,41 @@ def _time_spread_section(plans):
             "net": _num(analysis.get("net_cash")),
             "max gain": _num(analysis.get("max_gain")),
             "max loss": _num(analysis.get("max_loss")),
+            # The carry these legs were selected and priced at. Shown
+            # because the strikes depend on it: at the module defaults
+            # rather than the snapshot's own rate and yield, three of the
+            # four legs of the ratio structures land elsewhere.
+            "rate": _num(plan.get("risk_free_rate"), 5),
+            "dividend": _num(plan.get("dividend_yield"), 5),
         })
     if not spreads:
         return ""
     spreads.sort(key=lambda row: row["structure"])
     columns = ["structure", "side", "near days", "far days", "long strike",
                "short strike", "long qty", "short qty", "delta ratio",
-               "giveback", "net", "max gain", "max loss"]
+               "giveback", "net", "max gain", "max loss", "rate",
+               "dividend"]
     return (
         "<h2 class='section'>Time spreads</h2>"
         + _panel(
             "Structures with legs on two expiries",
             "Marked at the near expiry with the surviving leg priced at "
             "the volatility it carries today. Delta ratio is the short "
-            "delta mass over the long: below one is what keeps a large "
-            "move from being capped. Giveback is how much of the peak "
-            "profit is handed back at the far end of the scanned range.",
+            "delta mass over the long at entry, a bound on the split and "
+            "not the reason a move stays uncapped: that comes from "
+            "holding more back-month contracts than front-month ones. "
+            "Giveback is how much of the peak profit is handed back at "
+            "the far end of the scanned range.",
             _table(spreads, columns)
             + "<p class='assume'>Maximum gain and loss here are over the "
               "scanned range rather than over all prices, because the "
               "surviving leg makes the profit a curve with no closed "
               "form. A blank delta ratio means the structure is a 1x1 and "
-              "does not hold one.</p>"))
+              "does not hold one. The rate and dividend columns are the "
+              "carry each plan was selected and priced at, read from the "
+              "chain rather than assumed: at four percent and no dividend "
+              "three of the four legs of the ratio structures land on "
+              "different strikes.</p>"))
 
 
 def _gamma_scalp_section(simulation, ladder, plans, expiry):

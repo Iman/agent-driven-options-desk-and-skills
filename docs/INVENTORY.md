@@ -443,7 +443,7 @@ Local dashboard over the artifacts on disk.
 
 The dashboard's client-side chart code.
 
-1103 lines.
+1117 lines.
 
 
 ### `shell/src/optiondesk/dashboard/data.py`
@@ -465,9 +465,9 @@ Collect artifacts from disk into the shape the dashboard page needs.
 
 The dashboard page: markup, tiles and tables.
 
-1345 lines.
+1358 lines.
 
-- **render()** (line 1112): Render the complete dashboard document from one payload
+- **render()** (line 1125): Render the complete dashboard document from one payload
 
 ### `shell/src/optiondesk/dashboard/style.py`
 
@@ -660,7 +660,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 28
 - `engine/tests/test_timespread.py`: 23
 
-### shell/tests (377 test functions)
+### shell/tests (378 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -671,7 +671,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_contracts.py`: 8
 - `shell/tests/test_dashboard_app.py`: 9
 - `shell/tests/test_dashboard_data.py`: 25
-- `shell/tests/test_dashboard_page.py`: 34
+- `shell/tests/test_dashboard_page.py`: 35
 - `shell/tests/test_dashboard_server.py`: 7
 - `shell/tests/test_dividend_yield.py`: 9
 - `shell/tests/test_documented_counts.py`: 23
@@ -704,7 +704,7 @@ Roughly 1126 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-56 modules, 13783 lines of source, 159 public functions, 14 public classes, 707 test functions.
+56 modules, 13810 lines of source, 159 public functions, 14 public classes, 708 test functions.
 
 Every public name carries a docstring.
 

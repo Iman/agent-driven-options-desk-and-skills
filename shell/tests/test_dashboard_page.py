@@ -761,3 +761,20 @@ def test_the_composite_needs_the_engine_and_says_nothing_without_it():
     assert "Composite support" not in html
     # And the rest of the page is unharmed.
     assert "Every structure, side by side" in html
+
+
+def test_tooltips_round_their_numbers():
+    """A drawdown of -26.32 reached the screen as -26.320660417060417.
+
+    ECharts prints the raw float unless told otherwise, and on a chart
+    carrying one series per structure that is fifteen lines of digits under
+    the cursor. A string assertion against the emitted script, for the same
+    reason as the axis test: there is no JavaScript runtime in this suite.
+    """
+    from optiondesk.dashboard.charts import SCRIPT
+
+    # The colon matters. Asserting the bare name passes against a config
+    # key renamed to valueFormatterDisabled, which is exactly how a
+    # formatter stops being applied while the word survives.
+    assert "valueFormatter: function" in SCRIPT
+    assert "axisPointer" in SCRIPT

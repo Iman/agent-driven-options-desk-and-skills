@@ -99,8 +99,22 @@ function frame(extra) {
     grid: { left: 68, right: 24, top: 30, bottom: 62, containLabel: false },
     tooltip: { trigger: 'axis', backgroundColor: panel, borderColor: line,
       borderWidth: 1, textStyle: { color: ink, fontSize: 11.5 },
+      // Without this the default tooltip prints the raw float, so a
+      // drawdown of -26.32 arrived on screen as -26.320660417060417 and a
+      // fifteen series chart became a wall of digits. Two decimals, or
+      // the compact form for the exposure charts that run to billions.
+      valueFormatter: function (v) {
+        if (v === null || v === undefined) return 'n/a';
+        if (typeof v !== 'number') return v;
+        return Math.abs(v) >= 1e5 ? compact(v) : fmt(v);
+      },
       axisPointer: { type: 'cross', label: { backgroundColor: muted,
-        color: dark ? '#000' : '#fff' } } },
+        color: dark ? '#000' : '#fff',
+        formatter: function (p) {
+          const v = p.value;
+          return typeof v === 'number' ? String(Math.round(v * 100) / 100)
+                                       : v;
+        } } } },
     // Scrolling rather than wrapping. With one series per structure the
     // legend runs to fifteen entries, and a wrapped second row is drawn
     // over the plot: the drawdown chart lost its top third to it.

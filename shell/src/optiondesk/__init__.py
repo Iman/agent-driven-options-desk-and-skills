@@ -7,5 +7,5 @@ licensed engine component; see LICENSES.md at the repository root.
 Nothing in this package is investment advice. See DISCLAIMER.md.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 LICENSE = "PolyForm-Noncommercial-1.0.0"

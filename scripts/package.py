@@ -32,7 +32,7 @@ AGENTS = ROOT / ".claude" / "agents"
 DIST = ROOT / "dist"
 PLUGIN = ROOT / "plugins" / "option-desk"
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 AUTHOR = {"name": "Iman Samizadeh"}
 REPOSITORY = "https://github.com/Iman/agent-driven-options-desk-and-skills"
 DESCRIPTION = (

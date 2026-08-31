@@ -1077,6 +1077,7 @@ gone, replaced by the test above, which anyone can run.
 | `docs/CAPABILITIES.md` | the complete catalogue of every feature and surface |
 | `docs/INVENTORY.md` | every public function and class, generated from the source |
 | `docs/BACKLOG.md` | what is known, measured and not done, with the evidence and what finished means |
+| `CHANGELOG.md` | what changed between releases, and which published figures moved |
 | `docs/SCREENSHOTS.md` | every panel and chart the dashboard renders, from one live run |
 | `scripts/refresh.py` | rebuild everything generated, then prove it holds |
 | `scripts/mutate.py` | break the code on purpose and check the tests notice |

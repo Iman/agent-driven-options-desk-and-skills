@@ -1,6 +1,6 @@
 [project]
 name = "optiondesk-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "LangChain bindings for the option desk: tools, artifact retrieval, and a grounded answer chain"
 requires-python = ">=3.11"
 license = { text = "PolyForm-Noncommercial-1.0.0" }

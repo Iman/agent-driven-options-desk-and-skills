@@ -172,6 +172,16 @@ MUTATIONS = [
      '  require_remote_repo "$REPO"\n',
      "",
      "shell/tests/test_installer.py"),
+    ("packaging-drops-a-resource", "scripts/package.py",
+     "            for item in sorted(skill.rglob(\"*\")):\n"
+     "                if item.is_dir() or item.name == "
+     "\".installed-by-optiondesk\":\n"
+     "                    continue\n",
+     "            for item in sorted(skill.glob(\"*\")):\n"
+     "                if item.is_dir() or item.name == "
+     "\".installed-by-optiondesk\":\n"
+     "                    continue\n",
+     "shell/tests/test_packaging.py"),
     ("strategy-not-built-degraded", "shell/src/optiondesk/cli/strategy.py",
      '            "built": False,\n'
      '            "degraded": bool(source_meta.get("degraded")),\n'

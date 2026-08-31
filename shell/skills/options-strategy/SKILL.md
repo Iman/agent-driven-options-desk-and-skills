@@ -7,6 +7,15 @@ description: "Build and compare multi-leg option structures from a chain: iron c
 
 Three commands. Build one structure, list what exists, or compare them all.
 
+## Execution route
+
+Prefer `option_strategy_build` to list or build structures and
+`option_strategy_compare` to compare them. Use `option_chain_snapshot` first
+when a fresh chain is needed. If a matching MCP tool is not available, use
+the `optiondesk` commands below. If neither MCP nor the CLI is available,
+say that no fresh structure analysis can be produced; do not invent figures
+or present example or remembered values as current.
+
 ## Run it
 
 ```
@@ -53,6 +62,10 @@ rendered as a number.
 Nothing here is advice. Present structures as analysis of what a shape
 would pay under stated assumptions, never as what the user should do, and
 never recommend an entry, an exit or a size.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 Cite the artifact path when reporting from it. The artifact is the record;
 prose is a summary of it, and a number quoted without its source cannot be

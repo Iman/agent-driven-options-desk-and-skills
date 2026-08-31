@@ -16,6 +16,14 @@ Two different questions. A backtest asks what a rule would have done. A
 forward test asks what a position actually did from the moment it was
 written down.
 
+## Execution route
+
+Prefer the `option_backtest` MCP tool for a backtest and the
+`option_forward_test` MCP tool for the paper ledger. If the matching tool is
+not available, use the `optiondesk` commands below. If neither MCP nor the
+CLI is available, say that no fresh result can be produced; do not invent
+figures or present an example or remembered result as a new analysis.
+
 ## Backtest
 
 ```
@@ -84,6 +92,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 
@@ -112,6 +124,15 @@ strike, or what a specific contract is worth under Black-Scholes-Merton.
 
 Do not use for order placement, position sizing against a live account, or
 anything that amounts to a recommendation to trade.
+
+## Execution route
+
+Prefer `option_chain_snapshot` to retrieve the chain and
+`option_greeks_ladder` to grade it. Use `option_desk_status` for the
+availability check when needed. If a matching MCP tool is not available,
+use the `optiondesk` commands below. If neither MCP nor the CLI is
+available, say that no fresh chain or Greek ladder can be produced; do not
+invent figures or present example or remembered values as current.
 
 ## Run it
 
@@ -159,7 +180,6 @@ presenting them.
 
 This is research output, not investment advice, not a recommendation and not
 a solicitation. Do not phrase results as what the user should buy or sell.
-See DISCLAIMER.md at the repository root.
 
 ## Failure modes worth recognising
 
@@ -197,6 +217,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 
@@ -214,6 +238,14 @@ Dealer gamma exposure by strike, call and put walls, the gamma flip level, max p
 
 One command over a whole chain, not a band around spot, because a wall
 three hundred points away is exactly what a band would hide.
+
+## Execution route
+
+Prefer `option_chain_snapshot` to retrieve the whole chain and
+`option_positioning` to analyse it. If a matching MCP tool is not available,
+use the `optiondesk` commands below. If neither MCP nor the CLI is available,
+say that no fresh positioning result can be produced; do not invent figures
+or present example or remembered values as current.
 
 ## Run it
 
@@ -275,6 +307,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 
@@ -292,6 +328,13 @@ Simulate an underlying forward from its own realised behaviour using a Bayesian 
 A second opinion on probability. Everything else in this desk prices from
 the volatility the options are quoted at; this prices from the volatility
 the underlying has actually shown.
+
+## Execution route
+
+Prefer the `option_simulate` MCP tool. If it is not available, use the
+`optiondesk` command below. If neither MCP nor the CLI is available, say
+that no fresh simulation can be produced; do not invent figures or present
+an example or remembered result as a new analysis.
 
 ## Run it
 
@@ -356,6 +399,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 
@@ -371,6 +418,15 @@ Build and compare multi-leg option structures from a chain: iron condors, iron b
 # Option strategies
 
 Three commands. Build one structure, list what exists, or compare them all.
+
+## Execution route
+
+Prefer `option_strategy_build` to list or build structures and
+`option_strategy_compare` to compare them. Use `option_chain_snapshot` first
+when a fresh chain is needed. If a matching MCP tool is not available, use
+the `optiondesk` commands below. If neither MCP nor the CLI is available,
+say that no fresh structure analysis can be produced; do not invent figures
+or present example or remembered values as current.
 
 ## Run it
 
@@ -418,6 +474,10 @@ rendered as a number.
 Nothing here is advice. Present structures as analysis of what a shape
 would pay under stated assumptions, never as what the user should do, and
 never recommend an entry, an exit or a size.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 Cite the artifact path when reporting from it. The artifact is the record;
 prose is a summary of it, and a number quoted without its source cannot be

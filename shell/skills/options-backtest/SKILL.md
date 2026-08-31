@@ -9,6 +9,14 @@ Two different questions. A backtest asks what a rule would have done. A
 forward test asks what a position actually did from the moment it was
 written down.
 
+## Execution route
+
+Prefer the `option_backtest` MCP tool for a backtest and the
+`option_forward_test` MCP tool for the paper ledger. If the matching tool is
+not available, use the `optiondesk` commands below. If neither MCP nor the
+CLI is available, say that no fresh result can be produced; do not invent
+figures or present an example or remembered result as a new analysis.
+
 ## Backtest
 
 ```
@@ -77,6 +85,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 

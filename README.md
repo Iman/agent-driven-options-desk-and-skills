@@ -49,8 +49,9 @@ curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-
 Or from a checkout, `./install.sh`. Either way it creates a virtualenv
 under `~/.optiondesk`, installs the MIT shell and the AGPL engine, links
 `optiondesk` and `optiondesk-mcp` into `~/.local/bin`, copies the skills
-into `~/.claude/skills`, and registers the MCP server with every agent
-runtime CLI it finds. Re-running is safe. `./install.sh --uninstall`
+into `~/.claude/skills` and `~/.agents/skills`, so Claude Code and Codex
+each find them, and registers the MCP server with every agent runtime CLI
+it finds. Re-running is safe. `./install.sh --uninstall`
 reverses it and removes only what it created.
 
 Useful flags: `--dry-run` to see the plan and change nothing, `--no-engine`
@@ -77,6 +78,21 @@ to `.agents/skills/`, which Claude Code does not read. Name the agent:
 ```
 npx skills add Iman/agent-driven-options-desk-and-skills -a claude-code
 ```
+
+### In Codex or ChatGPT
+
+```
+codex plugin marketplace add Iman/agent-driven-options-desk-and-skills
+codex plugin add option-desk@option-desk
+```
+
+Codex also finds the skills with no plugin at all: it scans
+`.agents/skills` in a repository and `~/.agents/skills` for your user, and
+this repository symlinks the first to `shell/skills`. Cloning it is enough.
+
+Browser ChatGPT is the one place the tools cannot follow. The MCP server is
+a local process and a web page cannot run one on your machine, so there the
+skills are knowledge and instructions. Each skill says so itself.
 
 ### As a Claude Code plugin, which also brings the commands and agents
 
@@ -173,7 +189,7 @@ reads artifacts and writes nothing.
 
 ## Architecture
 
-Three packages under two licences, joined by one adapter. Seven ways in,
+Three packages under two licences, joined by one adapter. Eight ways in,
 one
 set of artifacts out.
 
@@ -181,7 +197,7 @@ set of artifacts out.
 flowchart TB
     subgraph clients["Ways in"]
         claude["Claude Code<br/>reads SKILL.md"]
-        codex["Codex<br/>reads AGENTS.md"]
+        codex["Codex<br/>reads .agents/skills"]
         gemini["Gemini CLI<br/>reads GEMINI.md"]
         human["A person<br/>types commands"]
     end
@@ -378,7 +394,7 @@ The same capabilities reach every runtime, three different ways.
 flowchart TB
     skill["shell/skills/*/SKILL.md<br/>one source of truth"]
     gen["shell/tools/gen_runtime_docs.py"]
-    agents["AGENTS.md<br/>for Codex"]
+    agents["AGENTS.md<br/>rules and commands<br/>for Codex"]
     gemini["GEMINI.md<br/>for Gemini CLI"]
     claude["Claude Code reads<br/>SKILL.md directly"]
     mcpserver["optiondesk-mcp<br/>typed tool schemas"]
@@ -399,11 +415,18 @@ compares the generated text against what is on disk, so a stale
 
 Those files also carry a command reference read from the argparse parsers
 themselves rather than written by hand. Three commands, `expiries`, `keys`
-and `dashboard`, have no skill of their own, so until that section existed
-a Codex or Gemini user had no way to learn they were there: those runtimes
-get no skills, and these two files are their entire instruction surface. A
-test asserts every subcommand the real parser exposes appears in both
-copies, so a command added later without documentation fails the suite.
+and `dashboard`, have no skill of their own, so without that section a
+Codex or Gemini user had no way to learn they were there. A test asserts
+every subcommand the real parser exposes appears in both copies, so a
+command added later without documentation fails the suite.
+
+The two files differ in what else they carry, and the difference is the
+point. Gemini CLI has no skill discovery, so `GEMINI.md` compiles all five
+skills into itself. Codex scans `.agents/skills`, which this repository
+symlinks to `shell/skills`, so it loads them progressively on its own and
+`AGENTS.md` names where they are instead of repeating them. That took it
+from 25,851 bytes to 4,366. Embedding them was not merely wasteful, it
+defeated the progressive disclosure the skill format exists for.
 
 MCP is the better path where the runtime supports it, because it gives
 typed tool schemas instead of prose describing a command line:
@@ -748,7 +771,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 329 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 354 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -769,7 +792,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           forty-two mutations, killed or survived
+python3 scripts/mutate.py           forty-three mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -802,9 +825,9 @@ version scaled by `max(1, |expected|)`, which left three Greeks untested
 with nothing to show for it, and mutation testing found fourteen surviving
 defects.
 That harness is in the tree as `scripts/mutate.py`, so it is checkable
-rather than a claim about the past. It breaks the code forty-two ways and
+rather than a claim about the past. It breaks the code forty-three ways and
 reports
-which breakages the tests notice. Run it. Its current result is forty-one
+which breakages the tests notice. Run it. Its current result is forty-two
 killed and one proven equivalent, and getting there closed two real holes
 it found, the inner vega guard in the implied volatility solver and the
 ranking of a non-finite expectation. Every defect fixed since then has a
@@ -863,10 +886,11 @@ gone, replaced by the test above, which anyone can run.
 | `docs/INVENTORY.md` | every public function and class, generated from the source |
 | `scripts/refresh.py` | rebuild everything generated, then prove it holds |
 | `scripts/mutate.py` | break the code on purpose and check the tests notice |
-| `INSTALL.md` | seven install paths, each verified |
+| `INSTALL.md` | eight install paths, each verified |
 | `LOOPS.md` | the four loop kinds, and what makes a good loop here |
 | `FAQ.md` | the questions people actually ask |
-| `AGENTS.md`, `GEMINI.md` | runtime instructions for Codex and Gemini CLI, generated from the skills, written to both the repository root and `shell/` because a runtime looks upward from where it was opened |
+| `AGENTS.md` | project rules and the command inventory for Codex, which loads the skills itself from `.agents/skills` |
+| `GEMINI.md` | the same plus all five skills compiled in, because Gemini CLI discovers none |
 | `DISCLAIMER.md` | what this is not, and what you are responsible for |
 | `LICENSES.md` | the two licences and where the boundary sits |
 | `THIRD-PARTY.md` | what is vendored and under what terms |

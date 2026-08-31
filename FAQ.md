@@ -153,6 +153,25 @@ narrower brief, such as the adversarial risk reviewer. MCP tools are the
 typed capability surface any runtime can call. They are four ways to reach
 the same commands, and each suits a different moment.
 
+**Does this work in ChatGPT or Codex, or only Claude?**
+
+Both. Codex scans `.agents/skills` in a repository and `~/.agents/skills`
+for your user, and this repository symlinks the first to `shell/skills`, so
+a clone is enough and `npx skills add` covers the second. There is a plugin
+for Codex too, registered with `codex plugin marketplace add`, carrying the
+same five skills as the Claude bundle.
+
+What differs is the tools, not the skills. Codex on your machine can run
+the local MCP server; ChatGPT in a browser cannot execute a binary on your
+computer, so there the skills are knowledge and instructions. Each skill
+states that itself rather than leaving you to find out: prefer the MCP
+tool, fall back to the command line, and if neither exists say that no
+fresh figures can be produced instead of inventing them.
+
+The six commands and two agents are Claude-only. A Codex install is five
+skills plus the MCP declaration, and the documentation says so rather than
+implying parity.
+
 **Why LangChain as well as MCP?**
 
 MCP serves a runtime that already exists, such as Claude Code, Codex or

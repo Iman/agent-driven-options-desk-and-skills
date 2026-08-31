@@ -8,6 +8,14 @@ description: Dealer gamma exposure by strike, call and put walls, the gamma flip
 One command over a whole chain, not a band around spot, because a wall
 three hundred points away is exactly what a band would hide.
 
+## Execution route
+
+Prefer `option_chain_snapshot` to retrieve the whole chain and
+`option_positioning` to analyse it. If a matching MCP tool is not available,
+use the `optiondesk` commands below. If neither MCP nor the CLI is available,
+say that no fresh positioning result can be produced; do not invent figures
+or present example or remembered values as current.
+
 ## Run it
 
 ```
@@ -68,6 +76,10 @@ are not fills, and a real entry crosses the spread on every leg.
 Never recommend a trade, an entry, an exit or a size. This is research
 software and it is not investment advice. Present the analysis and let the
 reader decide.
+The full terms are in DISCLAIMER.md, which ships beside this skill when it
+is installed from a package and sits at the repository root otherwise. The
+substance is already above: research software, not advice, modelled numbers
+that are not fills.
 
 ## Going deeper
 

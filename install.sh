@@ -20,6 +20,8 @@
 #   $PREFIX/venv, $PREFIX/src   (default ~/.optiondesk)
 #   ~/.local/bin                two symlinks, never overwriting your files
 #   ~/.claude/skills/<name>     skill files, marked so uninstall knows them
+#   ~/.agents/skills/<name>     the same files again, where Codex and
+#                               ChatGPT look for them
 #   agent runtime configs       one MCP entry each, only when the CLI exists
 #
 # pip also writes its own cache (~/Library/Caches/pip or ~/.cache/pip) and
@@ -34,6 +36,12 @@ VERSION="0.1.0"
 PREFIX="${OPTIONDESK_PREFIX:-$HOME/.optiondesk}"
 BIN_DIR="${OPTIONDESK_BIN_DIR:-$HOME/.local/bin}"
 CLAUDE_SKILLS_DIR="${OPTIONDESK_CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
+# Claude Code reads ~/.claude/skills and nowhere else. Codex and ChatGPT
+# read ~/.agents/skills, the convention the universal agents share. The
+# same five skills go to both: installing to one only leaves whichever
+# runtime the user actually has possibly seeing nothing, from a script
+# that reported success.
+AGENTS_SKILLS_DIR="${OPTIONDESK_AGENTS_SKILLS_DIR:-$HOME/.agents/skills}"
 # A full URL, never a bare owner/name. `git clone owner/name` resolves
 # against the current working directory, so a bare identifier turns a
 # remote install into a local one silently: reproduced by planting
@@ -76,12 +84,15 @@ Options:
   --prefix DIR          install root (default ~/.optiondesk)
   --bin-dir DIR         where the commands are linked (default ~/.local/bin)
   --skills-dir DIR      Claude skills directory (default ~/.claude/skills)
+  --agents-skills-dir DIR
+                        Codex and ChatGPT skills directory, the shared
+                        .agents convention (default ~/.agents/skills)
   --repo URL            git URL to clone when not run from a checkout
   --ref REF             branch or tag to clone (default main)
   --no-engine           install the MIT shell only, without the AGPL engine.
                         Greeks are unavailable; the shell says so and keeps
                         working
-  --no-skills           do not copy skills into the Claude skills directory
+  --no-skills           do not copy skills into either skills directory
   --skills-only         install just the skills, with no Python, no engine,
                         no commands linked and no MCP registration
   --no-mcp              do not register the MCP server with any runtime
@@ -93,7 +104,8 @@ Options:
   -h, --help            this message
 
 Environment equivalents: OPTIONDESK_PREFIX, OPTIONDESK_BIN_DIR,
-OPTIONDESK_CLAUDE_SKILLS_DIR, OPTIONDESK_REPO, OPTIONDESK_REF.
+OPTIONDESK_CLAUDE_SKILLS_DIR, OPTIONDESK_AGENTS_SKILLS_DIR,
+OPTIONDESK_REPO, OPTIONDESK_REF.
 USAGE
 }
 
@@ -102,6 +114,7 @@ while [ $# -gt 0 ]; do
     --prefix) PREFIX="${2:?--prefix needs a directory}"; shift 2 ;;
     --bin-dir) BIN_DIR="${2:?--bin-dir needs a directory}"; shift 2 ;;
     --skills-dir) CLAUDE_SKILLS_DIR="${2:?--skills-dir needs a directory}"; shift 2 ;;
+    --agents-skills-dir) AGENTS_SKILLS_DIR="${2:?--agents-skills-dir needs a directory}"; shift 2 ;;
     --repo) REPO="${2:?--repo needs a URL}"; shift 2 ;;
     --ref) REF="${2:?--ref needs a ref}"; shift 2 ;;
     --no-engine) WITH_ENGINE=0; shift ;;
@@ -123,6 +136,29 @@ SRC="$PREFIX/src"
 
 # ---------------------------------------------------------------- uninstall
 
+# Every skill directory is considered, not only those named options-*, and
+# only the marker this installer writes authorises removal. A symlink is
+# never removed: this script only ever copies, so a link here was made by
+# someone else.
+#
+# Both destinations go through this one function rather than through two
+# copies of the rule. Two copies are two places for the marker check to
+# rot, and the one that rotted would delete a directory the user wrote.
+uninstall_skills_from() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+  for skill in "$dir"/*; do
+    [ -d "$skill" ] || continue
+    if [ -L "$skill" ]; then
+      continue
+    fi
+    if [ -f "$skill/.installed-by-optiondesk" ]; then
+      run rm -rf "$skill"
+      say "  removed $skill"
+    fi
+  done
+}
+
 uninstall() {
   say "Removing the option desk."
 
@@ -140,22 +176,8 @@ uninstall() {
     fi
   done
 
-  # Every skill directory is considered, not only those named options-*,
-  # and only the marker this installer writes authorises removal. A
-  # symlink is never removed: this script only ever copies, so a link
-  # here was made by someone else.
-  if [ -d "$CLAUDE_SKILLS_DIR" ]; then
-    for skill in "$CLAUDE_SKILLS_DIR"/*; do
-      [ -d "$skill" ] || continue
-      if [ -L "$skill" ]; then
-        continue
-      fi
-      if [ -f "$skill/.installed-by-optiondesk" ]; then
-        run rm -rf "$skill"
-        say "  removed $skill"
-      fi
-    done
-  fi
+  uninstall_skills_from "$CLAUDE_SKILLS_DIR"
+  uninstall_skills_from "$AGENTS_SKILLS_DIR"
   if [ "$WITH_MCP" -eq 1 ]; then
     # Only ever removes an entry under this script's own server name, so a
     # differently named server pointing at the same binary is left alone.
@@ -358,36 +380,67 @@ link_commands() {
   esac
 }
 
-install_skills() {
-  [ "$WITH_SKILLS" -eq 1 ] || { say "Skipping skills, as requested"; return; }
-  run mkdir -p "$CLAUDE_SKILLS_DIR"
+install_skills_into() {
+  # One destination, one mechanism. The Claude directory and the .agents
+  # directory both come through here, so the marker, the refusal to adopt
+  # a directory this script did not create, and the dry run wording cannot
+  # drift apart between them.
+  local dest="$1"
   local count=0
+  run mkdir -p "$dest"
   for skill in "$SOURCE"/shell/skills/*/; do
     [ -f "$skill/SKILL.md" ] || continue
     local name target
     name="$(basename "$skill")"
-    target="$CLAUDE_SKILLS_DIR/$name"
+    target="$dest/$name"
     if [ -e "$target" ] && [ ! -f "$target/.installed-by-optiondesk" ]; then
       warn "$target exists and was not installed by this script; leaving it alone"
       continue
     fi
+    # rm against the path unlinks a symlink rather than descending through
+    # it, so a link someone else left here cannot turn the copy below into
+    # a write outside $dest.
     run rm -rf "$target"
     run cp -R "$skill" "$target"
+    if [ -f "$SOURCE/DISCLAIMER.md" ]; then
+      run cp "$SOURCE/DISCLAIMER.md" "$target/DISCLAIMER.md"
+    fi
     run touch "$target/.installed-by-optiondesk"
     if [ "$DRY_RUN" -eq 1 ]; then
-      say "  would install skill $name"
+      say "  would install skill $name into $dest"
     else
-      say "  installed skill $name"
+      say "  installed skill $name into $dest"
     fi
     count=$((count + 1))
   done
   if [ "$count" -eq 0 ]; then
-    if [ -n "$(find "$SOURCE/shell/skills" -name SKILL.md -print -quit 2>/dev/null)" ]; then
-      warn "no skills installed: every one was skipped, see the warnings above"
-    else
-      warn "no skills found under $SOURCE/shell/skills"
-    fi
+    warn "no skills installed into $dest: every one was skipped, see the warnings above"
   fi
+}
+
+install_skills() {
+  [ "$WITH_SKILLS" -eq 1 ] || { say "Skipping skills, as requested"; return; }
+  if [ -z "$(find "$SOURCE/shell/skills" -name SKILL.md -print -quit 2>/dev/null)" ]; then
+    warn "no skills found under $SOURCE/shell/skills"
+    return
+  fi
+  # Every SKILL.md ends by pointing at DISCLAIMER.md, saying it "ships
+  # beside this skill when it is installed from a package and sits at the
+  # repository root otherwise". An install from here is neither: the skill
+  # lands in a skills directory with no repository around it, so that
+  # pointer resolved to nothing. scripts/package.py already carries the
+  # file into the zips and the plugin bundle. The copy in
+  # install_skills_into is the same fix for the path this script owns.
+  #
+  # Its absence is a warning and not a failure. The substance of the
+  # disclaimer is already inline in every skill, so the skill is still
+  # usable, and refusing to install over a missing document would be a
+  # worse outcome than installing without it.
+  if [ ! -f "$SOURCE/DISCLAIMER.md" ]; then
+    warn "no DISCLAIMER.md under $SOURCE; installing the skills without it. Each SKILL.md still carries the substance inline."
+  fi
+  install_skills_into "$CLAUDE_SKILLS_DIR"
+  install_skills_into "$AGENTS_SKILLS_DIR"
 }
 
 register_mcp() {

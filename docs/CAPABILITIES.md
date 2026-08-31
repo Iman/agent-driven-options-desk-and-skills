@@ -55,6 +55,23 @@ all call the same commands.
 | MCP tools | any runtime that speaks the protocol | `optiondesk-mcp` over stdio |
 | LangChain tools | an application you are building yourself | `desk_tools()` |
 
+Two runtimes, one set of files. Claude Code loads skills from
+`.claude/skills` and reads `.claude-plugin/marketplace.json`; Codex and
+ChatGPT scan `.agents/skills` and read `.agents/plugins/marketplace.json`.
+This repository symlinks `.agents/skills` to `shell/skills`, and the plugin
+bundle at `plugins/option-desk` carries both manifests over one copy of the
+skills, so neither host gets a stale or partial set. A test asserts the two
+discovery paths see the same five.
+
+The MCP server is a local stdio process, which Codex on your own machine
+can run and browser ChatGPT cannot, because it has no way to execute a
+binary on your computer. Reaching that would need a hosted Streamable HTTP
+service with authentication and per-user credentials, and none exists here.
+In browser ChatGPT the skills are knowledge and instructions, and each one
+says so: its execution route tells the agent to prefer the MCP tool, fall
+back to the command line, and if neither is available to say that no fresh
+figures can be produced rather than inventing them.
+
 ---
 
 ## 3. The command line
@@ -381,11 +398,14 @@ anything from it, and never recommend a trade.
 They work with no Python installed at all, as domain knowledge rather than
 automation. `./install.sh --skills-only` does exactly that.
 
-For Codex and Gemini CLI, which load no skills, the same five are compiled
-into `AGENTS.md` and `GEMINI.md` along with a command reference generated
-from the argparse parsers. Both files are written to the repository root
-and to `shell/`, because those runtimes look upward from where they were
-opened and a copy in only one place is a file nobody reads.
+Gemini CLI loads no skills, so the five are compiled into `GEMINI.md` in
+full. Codex discovers them itself in `.agents/skills`, so `AGENTS.md`
+points at them rather than repeating them, which took it from 25,851 bytes
+to 4,366 and restored the progressive disclosure that embedding had
+defeated. Both files carry a command reference generated from the argparse
+parsers, and both are written to the repository root and to `shell/`,
+because those runtimes look upward from where they were opened and a copy
+in only one place is a file nobody reads.
 
 ---
 
@@ -629,7 +649,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies forty-two breakages to a copy of
+everywhere else. It applies forty-three breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The current result is twenty-two, three and zero, plus
@@ -655,7 +675,7 @@ non-finite expectation stays out of the ranking. Both are now covered.
 
 ## 16. Installing
 
-Seven paths, each verified rather than written from memory. See
+Eight paths, each verified rather than written from memory. See
 `INSTALL.md`.
 
 One command for everything (`./install.sh`), as a Claude Code plugin with

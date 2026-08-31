@@ -1,13 +1,30 @@
 """The generated runtime files must stay derived from the skills.
 
-They also have to stay derived from the CLI. Codex and Gemini CLI get no
-skills at all, so AGENTS.md and GEMINI.md are their entire instruction
-surface, and for a while three shipped commands (expiries, keys and
-dashboard) had no skill and so appeared in neither file. A user of those
-runtimes could not find out they existed.
+WHY THE PREMISE CHANGED. This file used to open by asserting that "Codex
+and Gemini CLI get no skills at all", and the generator acted on it by
+copying all five SKILL.md bodies into both AGENTS.md and GEMINI.md. That
+was false for Codex. OpenAI documents Codex discovering skills from
+$CWD/.agents/skills, its parents up to $REPO_ROOT/.agents/skills, and
+$HOME/.agents/skills, and it loads them progressively: name and
+description first, the full body only once a skill is selected. This
+repository has .agents/skills symlinked to shell/skills, so Codex already
+had the five natively. Repeating them in AGENTS.md added roughly 24 KB of
+duplication and defeated the progressive disclosure that is the point of
+the skill format.
 
-The fix was to generate the command list from the parser instead of
-writing it down, and these tests are what stops it regressing: they ask
+So AGENTS.md now points at .agents/skills instead of inlining it, and the
+tests below pin that: no skill body in AGENTS.md, the directory named, and
+the pointer aimed at a path that really does hold the same five skills.
+
+GEMINI.md keeps the full compiled bodies. No equivalent discovery path for
+Gemini CLI has been verified, and dropping the bodies on an unverified
+guess would silently remove that runtime's only instruction surface.
+
+The files also have to stay derived from the CLI. For a while three
+shipped commands (expiries, keys and dashboard) had no skill and so
+appeared in neither file. A user of those runtimes could not find out they
+existed. The fix was to generate the command list from the parser instead
+of writing it down, and these tests are what stops it regressing: they ask
 the real parser for its subcommands and require every one of them in both
 copies of both files. A command added without regenerating fails here.
 """
@@ -46,6 +63,26 @@ def _reference(target):
     return text.split("## Command reference", 1)[1]
 
 
+def _body_fingerprints():
+    """One line from each skill body that would not appear by coincidence.
+
+    Used to tell "the body is in this file" from "the skill is mentioned in
+    this file". A name or a heading proves neither, because the lean
+    AGENTS.md names all five on purpose; a forty-character sentence out of
+    the body proves the body itself was copied in.
+    """
+    generator = _generator()
+    prints = {}
+    for path in sorted((ROOT / "skills").glob("*/SKILL.md")):
+        _fields, body = generator.parse_skill(path)
+        longest = max(body.splitlines(), key=len)
+        assert len(longest) > 40, (
+            "{} has no line long enough to fingerprint".format(path))
+        prints[path.parent.name] = longest
+    assert prints, "no skills found"
+    return prints
+
+
 def test_runtime_files_are_in_sync_with_the_skills():
     """Compare generated text against what is on disk.
 
@@ -64,8 +101,21 @@ def test_runtime_files_are_in_sync_with_the_skills():
             assert on_disk == expected, (
                 "{} is stale. Run python tools/gen_runtime_docs.py".format(
                     target))
-            assert "## Skill: options-greeks" in on_disk
-            assert "not investment advice" in on_disk
+            # Both files still carry the standing rules and name every
+            # skill. The compiled bodies are GEMINI.md only now, so the
+            # assertion that used to require "## Skill: options-greeks" in
+            # both encoded the old premise that Codex could not load a
+            # skill; the two tests below check each file separately.
+            #
+            # The disclaimer assertion moved with it. It used to read
+            # "not investment advice", which is wording from the skill
+            # bodies rather than from FOOTER, so on the lean AGENTS.md it
+            # failed. FOOTER says "Nothing here is investment advice ...
+            # See DISCLAIMER.md", and that is what both files really
+            # guarantee.
+            assert "investment advice" in on_disk
+            assert "DISCLAIMER.md" in on_disk
+            assert "options-greeks" in on_disk
 
 
 def test_the_header_paths_resolve_from_the_file_that_carries_them():
@@ -289,3 +339,80 @@ def test_the_generator_and_a_yaml_parser_agree():
         assert ours["description"] == strict["description"], (
             "{}: the generator and a YAML parser disagree about the "
             "description".format(path.parent.name))
+
+
+def test_agents_md_does_not_embed_the_skill_bodies():
+    """Codex loads the skills itself, so copying them in is dead weight.
+
+    THE PREMISE THAT CHANGED. The generator inlined all five SKILL.md
+    bodies into AGENTS.md because it assumed Codex could not load a skill.
+    OpenAI documents the opposite: Codex scans .agents/skills from the
+    working directory up to the repository root, and reads a body only once
+    the skill is selected. Inlining all five cost roughly 24 KB and forced
+    every body into context whether or not it was relevant, which is the
+    exact cost progressive disclosure exists to avoid.
+
+    This checks the bodies are gone, not merely shortened.
+    """
+    generator = _generator()
+    prints = _body_fingerprints()
+    for target in generator.targets("AGENTS.md"):
+        text = target.read_text(encoding="utf-8")
+        assert "## Skill:" not in text, (
+            "{} still compiles skill bodies in. Codex reads them from "
+            ".agents/skills already".format(target))
+        for name, fingerprint in prints.items():
+            assert fingerprint not in text, (
+                "{} still contains the body of {}: {!r}".format(
+                    target, name, fingerprint[:60]))
+
+
+def test_agents_md_names_where_codex_finds_the_skills():
+    """A file that drops the bodies must say where they went.
+
+    Otherwise the reader is worse off than before: no skills in the file
+    and no pointer either. The path has to be the one Codex actually scans,
+    and it has to hold the same five skills the generator read.
+    """
+    generator = _generator()
+    prints = _body_fingerprints()
+    for target in generator.targets("AGENTS.md"):
+        text = target.read_text(encoding="utf-8")
+        assert ".agents/skills" in text, (
+            "{} does not tell Codex that the skills live in "
+            ".agents/skills".format(target))
+        for name in prints:
+            assert name in text, (
+                "{} does not name the {} skill".format(target, name))
+
+    # The pointer must not aim at nothing. ROOT is the shell package, so
+    # the repository root, where Codex resolves $REPO_ROOT/.agents/skills,
+    # is its parent.
+    discovered = {path.parent.name
+                  for path in (ROOT.parent / ".agents" / "skills").glob(
+                      "*/SKILL.md")}
+    assert discovered == set(prints), (
+        ".agents/skills reaches {} but the generator compiled from "
+        "{}".format(sorted(discovered), sorted(prints)))
+
+
+def test_gemini_md_still_embeds_every_skill_body():
+    """Gemini CLI keeps the compiled copy until a discovery path is proven.
+
+    No equivalent of .agents/skills has been verified for Gemini CLI, so
+    GEMINI.md remains that runtime's entire instruction surface. Dropping
+    the bodies from it on the strength of the Codex finding would remove
+    the only thing Gemini has, which is why the two files are asserted
+    separately rather than together.
+    """
+    generator = _generator()
+    prints = _body_fingerprints()
+    for target in generator.targets("GEMINI.md"):
+        text = target.read_text(encoding="utf-8")
+        for name, fingerprint in prints.items():
+            assert "## Skill: {}".format(name) in text, (
+                "{} lost the {} section. Run python "
+                "tools/gen_runtime_docs.py".format(target, name))
+            assert fingerprint in text, (
+                "{} names {} but does not carry its body".format(target,
+                                                                 name))

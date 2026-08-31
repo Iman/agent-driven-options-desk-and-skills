@@ -1,0 +1,186 @@
+"""What gets published has to be what we think it is.
+
+WHAT WOULD BREAK. The zips and the plugin bundle are what other people
+install. Nothing else in the suite opens them, so a marker file, a stale
+copy, a manifest that is valid JSON but wrong, or frontmatter that only our
+own parser accepts would all ship without complaint. Two of those have
+already happened once each in this project.
+"""
+
+import json
+import pathlib
+import zipfile
+
+import pytest
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
+DIST = ROOT / "dist"
+BUNDLE = ROOT / "plugins" / "option-desk"
+SOURCE = ROOT / "shell" / "skills"
+
+# Written by install.sh into an installed skill so its uninstall knows what
+# it owns. It has no business inside anything we publish.
+MARKER = ".installed-by-optiondesk"
+
+
+def _skill_names():
+    return sorted(p.parent.name for p in SOURCE.glob("*/SKILL.md"))
+
+
+@pytest.fixture(scope="module")
+def built(tmp_path_factory):
+    """Build with the CURRENT packager, into a directory of our own.
+
+    Reading the committed dist/ and plugins/ instead would test whatever
+    was last built rather than what the code now builds: mutation testing
+    broke the packager so it dropped every nested resource, and this file
+    passed, because the artifacts on disk were still the good ones.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "desk_package", ROOT / "scripts" / "package.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    out = tmp_path_factory.mktemp("packaged")
+    module.DIST = out / "dist"
+    module.PLUGIN = out / "plugins" / "option-desk"
+    module.build_zips()
+    module.build_plugin()
+    return module
+
+
+@pytest.fixture(scope="module")
+def dist(built):
+    return built.DIST
+
+
+@pytest.fixture(scope="module")
+def bundle(built):
+    return built.PLUGIN
+
+
+def test_there_is_one_archive_per_skill_plus_the_bundle(dist):
+    archives = sorted(p.stem for p in (dist / "skills").glob("*.zip"))
+    assert archives == _skill_names(), (
+        "the archives and the skills have diverged: {} against {}".format(
+            archives, _skill_names()))
+
+
+def test_every_archive_holds_the_skill_under_its_own_directory(dist):
+    """The uploader takes the directory name as the skill name.
+
+    Loose files, or a nested extra level, produce a skill named after
+    whatever the first path component happens to be.
+    """
+    for archive in sorted((dist / "skills").glob("*.zip")):
+        with zipfile.ZipFile(archive) as zipped:
+            names = zipped.namelist()
+        assert names, "{} is empty".format(archive.name)
+        tops = {n.split("/")[0] for n in names}
+        assert tops == {archive.stem}, (
+            "{} contains {} rather than one directory named {}".format(
+                archive.name, sorted(tops), archive.stem))
+        assert "{}/SKILL.md".format(archive.stem) in names, (
+            "{} has no SKILL.md at its root".format(archive.name))
+
+
+def test_the_frontmatter_in_every_archive_is_valid_yaml(dist):
+    """Not our line splitter: the parser everyone else uses.
+
+    options-strategy once carried an unquoted colon in its description,
+    which our generator accepted and every real YAML parser rejected. It
+    was invisible until a third-party CLI listed four skills of five.
+    """
+    yaml = pytest.importorskip("yaml")
+
+    for archive in sorted((dist / "skills").glob("*.zip")):
+        with zipfile.ZipFile(archive) as zipped:
+            text = zipped.read("{}/SKILL.md".format(archive.stem)).decode()
+        fields = yaml.safe_load(text.split("---", 2)[1])
+        assert fields["name"] == archive.stem, (
+            "{} declares the name {}".format(archive.name, fields["name"]))
+        assert fields.get("description"), (
+            "{} has no description, so nothing will trigger it".format(
+                archive.name))
+
+
+def test_the_bundled_resources_survive_packaging(dist):
+    """A skill that references a workflow it does not carry is broken."""
+    for archive in sorted((dist / "skills").glob("*.zip")):
+        source = SOURCE / archive.stem
+        expected = {str(p.relative_to(source)) for p in source.rglob("*")
+                    if p.is_file() and p.name != MARKER
+                    and "__pycache__" not in str(p)}
+        with zipfile.ZipFile(archive) as zipped:
+            got = {n.split("/", 1)[1] for n in zipped.namelist()
+                   if "/" in n}
+        missing = expected - got
+        assert not missing, (
+            "{} left behind {}".format(archive.name, sorted(missing)))
+
+
+def test_no_installer_marker_reaches_anything_published(dist, bundle):
+    """The marker tells install.sh what it may delete.
+
+    Shipping it means a later uninstall believes it owns a directory a user
+    put there, which is the one mistake an uninstaller must never make.
+    """
+    for archive in sorted(dist.rglob("*.zip")):
+        with zipfile.ZipFile(archive) as zipped:
+            leaked = [n for n in zipped.namelist() if n.endswith(MARKER)]
+        assert not leaked, "{} carries {}".format(archive.name, leaked)
+
+    leaked = [str(p.relative_to(ROOT)) for p in bundle.rglob(MARKER)]
+    assert not leaked, "the plugin bundle carries {}".format(leaked)
+
+
+def test_both_manifests_parse_and_agree_on_the_essentials(bundle):
+    claude = json.loads(
+        (bundle / ".claude-plugin" / "plugin.json").read_text())
+    codex = json.loads(
+        (bundle / ".codex-plugin" / "plugin.json").read_text())
+
+    for name, manifest in (("claude", claude), ("codex", codex)):
+        for field in ("name", "version", "description"):
+            assert manifest.get(field), (
+                "the {} manifest has no {}".format(name, field))
+    assert claude["name"] == codex["name"] == bundle.name, (
+        "the manifests and the directory disagree about the plugin name")
+    assert claude["version"] == codex["version"], (
+        "the two manifests declare different versions")
+
+    # The Codex manifest points at its parts by path. They have to exist.
+    for field in ("skills", "mcpServers"):
+        target = codex.get(field)
+        if not target:
+            continue
+        # Strip the "./" prefix, not the character set: lstrip("./") turns
+        # "./.mcp.json" into "mcp.json", because it removes every leading
+        # dot and slash rather than the two-character prefix.
+        relative = target[2:] if target.startswith("./") else target
+        assert (bundle / relative).exists(), (
+            "the codex manifest points at {}, which is not in the "
+            "bundle".format(target))
+
+
+def test_the_bundle_carries_every_skill_the_source_has(bundle):
+    packaged = sorted(p.parent.name
+                      for p in (bundle / "skills").glob("*/SKILL.md"))
+    assert packaged == _skill_names(), (
+        "the bundle has {} and the source has {}".format(packaged,
+                                                         _skill_names()))
+
+
+def test_the_mcp_descriptor_names_a_command_the_installer_creates(bundle):
+    """A descriptor naming a binary nothing installs is a dead tool entry."""
+    descriptor = json.loads((bundle / ".mcp.json").read_text())
+    servers = descriptor.get("mcpServers") or {}
+    assert servers, "the bundle declares no MCP server"
+    commands = {entry.get("command") for entry in servers.values()}
+    installer = (ROOT / "install.sh").read_text(encoding="utf-8")
+    for command in commands:
+        assert command in installer, (
+            "{} is declared in .mcp.json and install.sh never creates "
+            "it".format(command))

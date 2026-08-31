@@ -140,6 +140,28 @@ how it is published.
   reason as `financial-data`'s package code.
 - `Bellman-Form-BTCe-Arbitrager` (a-r-d) and `FX-Analysis` (Ste11a-star),
   no licence. Not used.
+- `claude-trading-skills` (tradermonty), MIT, Copyright 2026 TraderMonty.
+  Named at the outset as an example of what a trading skill set for an
+  agent looks like, alongside `marketingskills` (coreyhaines31) and
+  `LangAlpha` (ginlix-ai). Nothing was copied from any of them, and that
+  is a measurement rather than a recollection: an eight-word shingle
+  comparison against all 4,844 markdown and Python files in
+  `claude-trading-skills` found no shared run in any skill, workflow or
+  document here, and the only matches anywhere in the tree were import
+  lines, HTML boilerplate, and the standard idiom for computing a mean.
+  The largest overlap in any file was 1.7 percent, all of it of that kind.
+
+  Its MIT terms would have permitted reuse with attribution, so the
+  absence of reuse is a fact about how this was built and not about what
+  the licence allowed. Recorded here so that anyone asking the question
+  later finds the answer instead of having to redo the comparison.
+
+  One thing worth knowing for anyone running both: its
+  `options-strategy-advisor` claims six of the same trigger phrases as the
+  options skills here, including iron condors, covered calls, protective
+  puts, spreads, Greeks and simulation. The two are not equivalent, since
+  that one is a Black-Scholes teaching simulator with no chain behind it,
+  so having both installed makes which one answers a matter of chance.
 
 ## Market data is not covered by this licence
 

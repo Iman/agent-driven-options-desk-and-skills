@@ -300,7 +300,7 @@ def test_the_marketplace_manifest_matches_what_is_packaged():
     """The plugin is generated, so its manifest must not be edited by hand."""
     manifest = json.loads(read(".claude-plugin/marketplace.json"))
     assert manifest["plugins"], "no plugins declared"
-    plugin = ROOT / "plugin"
+    plugin = ROOT / "plugins" / "option-desk"
     if not plugin.exists():
         return
     assert len(list((plugin / "skills").glob("*/SKILL.md"))) == len(
@@ -313,12 +313,13 @@ def test_the_plugin_is_not_stale_against_its_sources():
     """A copied file drifts; a symlinked one cannot.
 
     Skills reach the plugin by copy, and so do commands and agents. During
-    one audit two command files in plugin/ were older than their sources,
+    one audit two command files in the bundle were older than their
+    sources,
     and nothing failed. Anyone installing the plugin in that window would
     have got the previous instructions with no sign that they were not the
     current ones.
     """
-    plugin = ROOT / "plugin"
+    plugin = ROOT / "plugins" / "option-desk"
     if not plugin.exists():
         return
     stale = []
@@ -410,3 +411,99 @@ def test_every_package_carries_the_licence_it_declares():
         assert package + "/" in text, (
             "the root LICENSE does not say what applies to {}/".format(
                 package))
+
+
+def test_every_repository_named_as_an_influence_states_its_licence():
+    """An acknowledgement without terms is not an acknowledgement.
+
+    THIRD-PARTY.md names other people's work, and the point of naming it
+    is that a reader can tell what they are allowed to do. An entry that
+    gives a project name and no licence leaves them worse off than no
+    entry, because it implies the question was considered.
+    """
+    text = read("THIRD-PARTY.md")
+    section = text.split("## Referenced for ideas", 1)
+    assert len(section) == 2, "the acknowledgements section is gone"
+    body = section[1].split("\n## ", 1)[0]
+
+    # An entry runs from its bullet to the next one, not to the end of the
+    # line: these are wrapped prose, and the licence often lands on the
+    # continuation. Reading one line only reported a false gap.
+    entries = [e for e in re.split(r"\n(?=- `)", body.strip())
+               if e.startswith("- `")]
+    assert entries, "no acknowledgements found"
+
+    silent = []
+    for entry in entries:
+        name = re.match(r"- `([^`]+)`", entry).group(1)
+        licensed = re.search(
+            r"MIT|Apache|GPL|BSD|ODC|no licence|not used|Unlicense", entry,
+            re.I)
+        if not licensed:
+            silent.append(name)
+    assert not silent, (
+        "these are named without saying what their licence is: "
+        "{}".format(silent))
+
+
+def test_both_hosts_can_find_the_plugin_and_the_skills():
+    """One bundle, two manifests, and a discovery path for each runtime.
+
+    Claude Code reads .claude-plugin/marketplace.json and loads skills from
+    .claude/skills. Codex and ChatGPT read .agents/plugins/marketplace.json
+    and scan .agents/skills, verified against OpenAI's documentation. Both
+    marketplaces have to point at the same bundle, and both discovery paths
+    have to reach the same five skills, or one host silently gets less than
+    the other.
+    """
+    bundle = ROOT / "plugins" / "option-desk"
+    assert (bundle / ".claude-plugin" / "plugin.json").exists(), (
+        "the bundle has no Claude manifest")
+    assert (bundle / ".codex-plugin" / "plugin.json").exists(), (
+        "the bundle has no Codex manifest, so ChatGPT and Codex cannot "
+        "install it")
+
+    for marketplace, key in ((".claude-plugin/marketplace.json", "source"),
+                             (".agents/plugins/marketplace.json", "source")):
+        manifest = json.loads(read(marketplace))
+        entry = manifest["plugins"][0]
+        source = entry[key]
+        path = source if isinstance(source, str) else source["path"]
+        assert (ROOT / path).is_dir(), (
+            "{} points at {}, which is not a directory".format(marketplace,
+                                                               path))
+        assert path.endswith("option-desk"), (
+            "{} points somewhere other than the bundle".format(marketplace))
+
+    # Both discovery paths, and they must agree.
+    claude = {p.parent.name for p in (SHELL / "skills").glob("*/SKILL.md")}
+    codex = {p.parent.name
+             for p in (ROOT / ".agents" / "skills").glob("*/SKILL.md")}
+    assert codex == claude, (
+        "the two runtimes see different skills: Codex {}, Claude {}".format(
+            sorted(codex), sorted(claude)))
+    assert codex, "no skills are discoverable at all"
+
+
+def test_every_skill_points_at_a_disclaimer_that_travels_with_it():
+    """A pointer to a file the reader does not have is worse than none.
+
+    The skills are installed standalone, uploaded as zips, and bundled into
+    a plugin. A reference to the repository root resolves in exactly one of
+    those cases.
+    """
+    import zipfile
+
+    for skill in sorted((SHELL / "skills").glob("*/SKILL.md")):
+        assert "DISCLAIMER.md" in skill.read_text(encoding="utf-8"), (
+            "{} points at no disclaimer".format(skill.parent.name))
+
+    dist = ROOT / "dist" / "skills"
+    if not dist.exists():
+        return
+    for archive in sorted(dist.glob("*.zip")):
+        with zipfile.ZipFile(archive) as zipped:
+            names = zipped.namelist()
+        assert any(n.endswith("DISCLAIMER.md") for n in names), (
+            "{} references a disclaimer it does not carry".format(
+                archive.name))

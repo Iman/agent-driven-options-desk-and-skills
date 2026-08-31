@@ -5,6 +5,25 @@ Codex reads AGENTS.md. Gemini CLI reads GEMINI.md. Rather than maintaining
 three copies that drift apart, this script derives the other two from the
 skills, so a change to a skill reaches every runtime in one commit.
 
+WHAT EACH RUNTIME GETS, AND WHY THEY DIFFER. This script used to compile
+all five skill bodies into both files, on the premise that neither runtime
+could load a skill. That premise was false for Codex. OpenAI documents
+Codex discovering skills from $CWD/.agents/skills, its parents up to
+$REPO_ROOT/.agents/skills, and $HOME/.agents/skills, loading them
+progressively: name and description first, the body only once the skill is
+selected. This repository symlinks .agents/skills to shell/skills, so
+Codex already had all five. Copying them into AGENTS.md as well duplicated
+them and forced every body into context whether or not it was relevant,
+which is the cost progressive disclosure exists to avoid.
+
+So AGENTS.md is lean: the standing rules, the generated command reference,
+and a pointer to .agents/skills. GEMINI.md keeps the compiled bodies,
+because no equivalent discovery path has been verified for Gemini CLI and
+that file is still its whole instruction surface. EMBED_SKILL_BODIES below
+is the single switch, so adding a runtime is one entry rather than a
+second code path. If Gemini CLI ever grows a documented skills directory,
+flip its entry and say so here; do not flip it on an assumption.
+
 Run it from the shell directory:
 
     python tools/gen_runtime_docs.py
@@ -57,9 +76,22 @@ HEADER = {
         "supports it. The command line below is the fallback.\n"),
 }
 
+# Which runtimes get the skill bodies copied into their file. Codex does
+# not, because it loads them itself from .agents/skills; Gemini CLI does,
+# because nothing equivalent has been verified for it. See the module
+# docstring for the evidence behind each entry.
+EMBED_SKILL_BODIES = {"AGENTS.md": False, "GEMINI.md": True}
+
+# How the next section refers back to whatever the file just showed: five
+# full sections in GEMINI.md, five names in AGENTS.md. One string cannot be
+# accurate in both, and "above" pointing at something that is not there is
+# how a generated file starts lying about itself.
+SKILLS_LEAD = {"AGENTS.md": "The skills listed above",
+               "GEMINI.md": "The skills above"}
+
 SURFACES = (
     "\n## What else is here\n\n"
-    "The skills above are the knowledge. The capabilities they describe are "
+    "{lead} are the knowledge. The capabilities they describe are "
     "reachable four other ways, all calling the same commands: the command "
     "line (`optiondesk --help`), the MCP server (`optiondesk-mcp`, ten typed "
     "tools), the LangChain bindings in the optional `optiondesk-agent` "
@@ -112,6 +144,63 @@ def parse_skill(path):
             raise ValueError("{}: frontmatter has no {}".format(path,
                                                                 required))
     return fields, body.strip()
+
+
+def skill_sections(skills):
+    """(name, section) for each skill, as it appears in a compiled file.
+
+    Built here rather than inline so the pointer can measure exactly the
+    text it is replacing. A number quoted from memory in a generated file
+    is a number that goes stale the first time a skill is edited.
+    """
+    sections = []
+    for path in skills:
+        fields, body = parse_skill(path)
+        sections.append((fields["name"],
+                         "\n---\n\n## Skill: {}\n\n{}\n\n{}\n".format(
+                             fields["name"], fields["description"], body)))
+    return sections
+
+
+def skills_pointer(skills, prefix):
+    """Where the skills are, for a runtime that loads them on its own.
+
+    A file that drops the bodies has to say where they went, or its reader
+    is worse off than before: no skills and no pointer either. The names
+    are listed because they cost almost nothing and let a reader see the
+    whole set at a glance; the bodies are not, because Codex reads those
+    itself once it has picked one.
+
+    The `.agents/skills` path is deliberately not prefixed the way the
+    others are. It is resolved against the repository root by Codex rather
+    than against this file, so it is the same string in both copies, and
+    the sentence says so to stop someone "fixing" it into a relative path.
+
+    Nothing here hardcodes how many skills there are, and the heading says
+    no number. A count written into generated prose is wrong the day a
+    sixth skill lands, and the list beside it would contradict it.
+    "resolves to" rather than "is a symlink to" for the same reason: the
+    link could become a real directory without the sentence becoming false.
+    """
+    sections = skill_sections(skills)
+    saved = sum(len(section.encode("utf-8")) for _name, section in sections)
+    parts = ["\n## The skills, which you load yourself\n\n",
+             "They are not copied into this file. You discover skills in "
+             "`.agents/skills`, scanning from the working directory up to "
+             "the repository root, and read a skill's body only once you "
+             "have selected it. Here `.agents/skills` resolves to "
+             "`{}skills/`, so all of these are already available to "
+             "you:\n\n".format(prefix)]
+    for name, _section in sections:
+        parts.append("- `{}`\n".format(name))
+    parts.append(
+        "\nCompiling their bodies into this file as well would add about "
+        "{} KB to every session, relevant or not, which is the cost "
+        "progressive disclosure exists to avoid. Read the one you need "
+        "from `.agents/skills/<name>/SKILL.md`. That path is relative to "
+        "the repository root, where you resolve it, not to this "
+        "file.\n".format(round(saved / 1024)))
+    return "".join(parts)
 
 
 def load_parser():
@@ -213,6 +302,12 @@ def generate(filename, root=None, parser=None):
     single hardcoded string is therefore correct in one copy and wrong in
     the other, which is what it was. The command reference carries the same
     problem and takes the same prefix.
+
+    Whether the skill bodies are compiled in is per file, from
+    EMBED_SKILL_BODIES: Codex loads them itself from .agents/skills and
+    gets a pointer, Gemini CLI has no verified equivalent and gets the
+    bodies. Everything else in the two files is identical by construction,
+    which is the point of generating them together.
     """
     skills = sorted(SKILLS_DIR.glob("*/SKILL.md"))
     if not skills:
@@ -226,11 +321,11 @@ def generate(filename, root=None, parser=None):
     parts = [HEADER[filename].format(
         generator="{}tools/gen_runtime_docs.py".format(prefix),
         skills="{}skills/".format(prefix))]
-    for path in skills:
-        fields, body = parse_skill(path)
-        parts.append("\n---\n\n## Skill: {}\n\n{}\n\n{}\n".format(
-            fields["name"], fields["description"], body))
-    parts.append(SURFACES)
+    if EMBED_SKILL_BODIES[filename]:
+        parts.extend(section for _name, section in skill_sections(skills))
+    else:
+        parts.append(skills_pointer(skills, prefix))
+    parts.append(SURFACES.format(lead=SKILLS_LEAD[filename]))
     parts.append(command_reference(parser, prefix))
     parts.append(FOOTER)
     return "".join(parts)

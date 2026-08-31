@@ -1,0 +1,20 @@
+{
+  "name": "option-desk",
+  "interface": {
+    "displayName": "Option Desk"
+  },
+  "plugins": [
+    {
+      "name": "option-desk",
+      "source": {
+        "source": "local",
+        "path": "./plugins/option-desk"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Finance"
+    }
+  ]
+}

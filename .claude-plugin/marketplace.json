@@ -9,7 +9,7 @@
     {
       "name": "option-desk",
       "description": "Option analytics an agent can drive: chains, the full Greek ladder, dealer positioning, seventeen structures with ranking, a GARCH-t simulation, backtests with modelled premiums, and a paper forward test. Research software, not investment advice.",
-      "source": "./plugin",
+      "source": "./plugins/option-desk",
       "category": "finance"
     }
   ]

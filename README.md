@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-811%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-43%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-829%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-48%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 
@@ -799,7 +799,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 292 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 361 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 379 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 158 tests
 ```
 
@@ -820,7 +820,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           forty-three mutations, killed or survived
+python3 scripts/mutate.py           forty-eight mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -853,7 +853,7 @@ version scaled by `max(1, |expected|)`, which left three Greeks untested
 with nothing to show for it, and mutation testing found fourteen surviving
 defects.
 That harness is in the tree as `scripts/mutate.py`, so it is checkable
-rather than a claim about the past. It breaks the code forty-three ways and
+rather than a claim about the past. It breaks the code forty-eight ways and
 reports
 which breakages the tests notice. Run it. Its current result is forty-two
 killed and one proven equivalent, and getting there closed two real holes

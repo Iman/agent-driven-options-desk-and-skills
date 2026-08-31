@@ -39,6 +39,8 @@ ROOT = Path(__file__).resolve().parent.parent
 ENGINE = "engine/src/optiondesk_engine"
 DASHBOARD = "shell/src/optiondesk/dashboard/data.py"
 PAGE = "shell/src/optiondesk/dashboard/page.py"
+KEYS = "shell/src/optiondesk/cli/keys.py"
+CONFIG = "shell/src/optiondesk/config.py"
 
 # name, file, what to find, what to replace it with, which tests must fail
 MUTATIONS = [
@@ -246,6 +248,36 @@ MUTATIONS = [
      '        "surface": payload.get("surface"),',
      '        "surface": None,',
      "shell/tests/test_dashboard_page.py"),
+    ("key-mask-disabled", KEYS,
+     "    if len(value) <= MASK_VISIBLE * 2:",
+     "    if False:",
+     "shell/tests/test_keys_cli.py"),
+    ("key-file-left-world-readable", KEYS,
+     "    os.chmod(USER_CONFIG, stat.S_IRUSR | stat.S_IWUSR)",
+     "    pass",
+     "shell/tests/test_keys_cli.py"),
+    ("key-unset-keeps-the-line", KEYS,
+     '            if not line.startswith(variable + "=")]',
+     "            if True]",
+     "shell/tests/test_keys_cli.py"),
+    ("empty-key-written", KEYS,
+     '        raise ValueError("no key given, nothing was written")',
+     "        pass",
+     "shell/tests/test_keys_cli.py"),
+    ("credential-order-dotenv-before-environment", CONFIG,
+     "    env = os.environ.get(name)\n"
+     "    if env:\n"
+     "        return env\n"
+     "    dotenv = _load_dotenv_files().get(name)\n"
+     "    if dotenv:\n"
+     "        return dotenv",
+     "    dotenv = _load_dotenv_files().get(name)\n"
+     "    if dotenv:\n"
+     "        return dotenv\n"
+     "    env = os.environ.get(name)\n"
+     "    if env:\n"
+     "        return env",
+     "shell/tests/test_keys_cli.py"),
 ]
 
 

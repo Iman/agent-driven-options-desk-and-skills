@@ -643,7 +643,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 25
 - `engine/tests/test_timespread.py`: 15
 
-### shell/tests (340 test functions)
+### shell/tests (354 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -664,6 +664,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_greeks_cli.py`: 5
 - `shell/tests/test_house_rules.py`: 6
 - `shell/tests/test_installer.py`: 22
+- `shell/tests/test_keys_cli.py`: 14
 - `shell/tests/test_main_cli.py`: 10
 - `shell/tests/test_mcp_server.py`: 37
 - `shell/tests/test_packaging.py`: 8
@@ -684,7 +685,7 @@ Roughly 1083 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-55 modules, 12540 lines of source, 150 public functions, 14 public classes, 631 test functions.
+55 modules, 12540 lines of source, 150 public functions, 14 public classes, 645 test functions.
 
 Every public name carries a docstring.
 

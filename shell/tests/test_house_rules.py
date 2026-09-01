@@ -167,3 +167,71 @@ def test_ordinary_option_prose_does_not_trip_the_personal_scan(
     monkeypatch.setattr(refresh, "tracked_text_files", lambda: [planted])
     monkeypatch.setattr(refresh, "ROOT", tmp_path)
     assert refresh.check_rules() == []
+
+
+def test_no_mutant_is_left_in_the_source():
+    """An interrupted mutation run leaves the tree mutated, and the next
+    `git add -A` commits it.
+
+    That is not hypothetical. On 2026-08-31 a run of scripts/mutate.py was
+    interrupted between applying a mutation and its finally block, and the
+    ratio diagonal's entry-time delta bound went to origin as `if False:`
+    inside the commit that added the sampler notice. The suite stayed green,
+    because the mutation was recorded as an equivalent mutant and no test
+    could kill it, and the harness reported it as SKIPPED rather than as
+    damage: pattern not present, which reads like a stale entry rather than
+    a deleted guard.
+
+    This is the check that turns that into a failure. For every mutation,
+    if the original text is gone and the replacement is present, the source
+    is carrying a mutant.
+    """
+    import importlib.util
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[2]
+    spec = importlib.util.spec_from_file_location(
+        "mutate_module", root / "scripts" / "mutate.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    stuck = []
+    for name, path, find, replace, _tests in module.MUTATIONS:
+        text = (root / path).read_text(encoding="utf-8")
+        if find not in text and replace in text:
+            stuck.append("{} in {}".format(name, path))
+
+    assert not stuck, (
+        "the working tree is carrying mutated source: {}".format(stuck))
+
+
+def test_every_mutation_still_matches_its_target():
+    """A mutation whose pattern is gone proves nothing and says so quietly.
+
+    The harness prints SKIPPED and carries on, so the count in the
+    documentation stays right while the guard behind it has evaporated. One
+    entry was found dead this way in an audit, naming a sentence in
+    CAPABILITIES.md that had been reworded, and a second was a genuinely
+    deleted guard. Neither failed anything.
+    """
+    import importlib.util
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parents[2]
+    spec = importlib.util.spec_from_file_location(
+        "mutate_module", root / "scripts" / "mutate.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    missing = []
+    for name, path, find, _replace, _tests in module.MUTATIONS:
+        target = root / path
+        if not target.exists():
+            missing.append("{}: {} does not exist".format(name, path))
+            continue
+        if find not in target.read_text(encoding="utf-8"):
+            missing.append("{}: pattern gone from {}".format(name, path))
+
+    assert not missing, (
+        "mutations that can no longer be applied, so they guard nothing: "
+        "{}".format(missing))

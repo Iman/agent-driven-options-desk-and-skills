@@ -517,7 +517,7 @@ def _ratio_diagonal(near, far, kind, size=1.0, long_delta=0.65,
     # of the shape. A three-leg variant, or a caller passing its own
     # quantities, would make this the only thing standing between a reader
     # and a structure that caps the move it was opened for.
-    if False:
+    if short_mass >= long_mass:
         return None
 
     legs = [

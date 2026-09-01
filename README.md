@@ -7,6 +7,7 @@
 [![Mutation testing](https://img.shields.io/badge/mutations-74%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills)
 
 Pull a chain from free market data, compute the full Greek ladder, measure
 where dealer hedging concentrates, build and rank multi-leg structures,

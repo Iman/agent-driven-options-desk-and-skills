@@ -38,7 +38,11 @@ jobs:
       - name: Install the three packages
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e "shell[yahoo,dashboard,dev]" -e engine -e agent
+          # agent[dev] carries langgraph. Installing the agent bare makes
+          # 49 graph tests fail on an import, which reads like a broken
+          # graph rather than a missing extra.
+          python -m pip install -e "shell[yahoo,dashboard,dev]" -e engine \
+              -e "agent[graph,dev]"
 
       - name: Refresh, which is the whole check
         # No network in CI, so the stages that would reach a provider skip

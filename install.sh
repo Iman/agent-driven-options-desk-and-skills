@@ -219,11 +219,25 @@ uninstall() {
 # ------------------------------------------------------------------ sources
 
 script_dir() {
-  # Empty when the script is piped from a URL, which is how the installer
-  # tells "run from a checkout" from "run from curl".
+  # Where this file lives, or failure when it does not live anywhere,
+  # which is what "piped from a URL" means.
+  #
+  # The list of names below is not sufficient on its own and was not
+  # discovered by reading: CI caught it. Bash on Linux reports
+  # BASH_SOURCE[0] as "main" for a script read from standard input, which
+  # matches none of these, so `dirname main` gave "." and the installer
+  # decided the CURRENT DIRECTORY was a checkout. A piped install run from
+  # inside any directory holding a shell/pyproject.toml then installed that
+  # directory instead of cloning the repository the user asked for. That is
+  # the same failure as `git clone owner/name` resolving against the
+  # working directory, which this file already refuses further down.
+  #
+  # The check that actually holds is the last one: a real script is a file
+  # that exists. Anything else is stdin.
   case "${BASH_SOURCE[0]:-}" in
-    ""|bash|/dev/fd/*|/proc/self/fd/*) return 1 ;;
+    ""|bash|sh|main|-|/dev/fd/*|/proc/self/fd/*|/dev/stdin) return 1 ;;
   esac
+  [ -f "${BASH_SOURCE[0]}" ] || return 1
   ( cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )
 }
 

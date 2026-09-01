@@ -679,7 +679,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies seventy-seven breakages to a copy of
+everywhere else. It applies seventy-eight breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The last full run recorded here, on 2026-08-31 and

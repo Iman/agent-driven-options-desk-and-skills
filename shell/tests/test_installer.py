@@ -486,3 +486,85 @@ def test_uninstall_leaves_a_directory_it_did_not_install(tmp_path):
             "uninstall deleted an unmarked directory in {}".format(
                 destination))
         assert kept.read_text(encoding="utf-8") == "hand written\n"
+
+
+def test_a_piped_install_never_uses_the_current_directory(tmp_path):
+    """CI found this, and it is the same failure as `git clone owner/name`.
+
+    Bash on Linux reports BASH_SOURCE[0] as "main" for a script read from
+    standard input. That matched none of the names the installer checked,
+    so `dirname main` gave "." and a piped install decided the CURRENT
+    DIRECTORY was a checkout. Run from inside any directory holding a
+    shell/pyproject.toml, it installed that directory instead of cloning
+    the repository the user named. On macOS the same command reported an
+    empty BASH_SOURCE and cloned correctly, which is why it survived every
+    local run.
+
+    The check that holds is that a real script is a file that exists.
+    """
+    checkout_shaped = tmp_path / "looks-like-a-checkout"
+    (checkout_shaped / "shell").mkdir(parents=True)
+    (checkout_shaped / "shell" / "pyproject.toml").write_text(
+        "[project]\nname = 'not-really'\n", encoding="utf-8")
+
+    piped = tmp_path / "piped.sh"
+    piped.write_text(INSTALLER.read_text(encoding="utf-8"), encoding="utf-8")
+    missing = tmp_path / "no-such-checkout"
+
+    result = subprocess.run(
+        ["bash", "-c", "cat {} | bash -s -- --repo {} --prefix {} "
+                       "--no-mcp".format(piped, missing, tmp_path / "opt")],
+        capture_output=True, text=True, cwd=str(checkout_shaped),
+        env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
+
+    output = result.stdout + result.stderr
+    assert "Installing from the checkout" not in output, (
+        "a piped install used the directory it happened to be run from:\n"
+        + output[-500:])
+    assert result.returncode != 0
+    assert str(missing) in output, output[-400:]
+
+
+def test_the_source_rule_rejects_every_name_that_is_not_a_file(tmp_path):
+    """The rule itself, on any platform.
+
+    The test above only fails where bash reports BASH_SOURCE[0] as "main",
+    which is Linux. On macOS it reports empty, the earlier name check
+    catches it, and the file check that actually fixed the bug is invisible.
+    A guard that can only be exercised on one operating system is a guard
+    that rots on the other.
+
+    So this runs the rule directly against the values bash is known to
+    produce, and against a real file, which is the only case that may pass.
+    """
+    rule = tmp_path / "rule.sh"
+    rule.write_text(
+        'candidate="$1"\n'
+        'case "$candidate" in\n'
+        '  ""|bash|sh|main|-|/dev/fd/*|/proc/self/fd/*|/dev/stdin)'
+        ' echo piped; exit 0 ;;\n'
+        'esac\n'
+        '[ -f "$candidate" ] || { echo piped; exit 0; }\n'
+        'echo file\n', encoding="utf-8")
+
+    real = tmp_path / "install-copy.sh"
+    real.write_text("# a real file\n", encoding="utf-8")
+
+    for candidate in ("", "bash", "sh", "main", "-", "/dev/fd/63",
+                      "/proc/self/fd/11", "/dev/stdin",
+                      str(tmp_path / "does-not-exist")):
+        result = subprocess.run(["bash", str(rule), candidate],
+                                capture_output=True, text=True)
+        assert result.stdout.strip() == "piped", (
+            "{!r} was treated as a checkout".format(candidate))
+
+    result = subprocess.run(["bash", str(rule), str(real)],
+                            capture_output=True, text=True)
+    assert result.stdout.strip() == "file"
+
+    # And the rule in the test matches the rule in the installer, or this
+    # proves something about a copy nobody ships.
+    installer = INSTALLER.read_text(encoding="utf-8")
+    assert '[ -f "${BASH_SOURCE[0]}" ] || return 1' in installer
+    assert '""|bash|sh|main|-|/dev/fd/*|/proc/self/fd/*|/dev/stdin)' in \
+        installer

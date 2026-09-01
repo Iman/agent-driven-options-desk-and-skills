@@ -1,0 +1,12 @@
+.git
+.github
+dist
+docs/screenshots
+archive
+**/__pycache__
+**/*.pyc
+.venv
+shell/.venv
+.coverage
+.codegraph
+node_modules

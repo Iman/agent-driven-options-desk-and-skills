@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-928%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-76%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-933%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-77%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills)
@@ -21,8 +21,18 @@ optiondesk chain SPY && optiondesk greeks && optiondesk dashboard
 ```
 
 Then ask your agent "where are the gamma walls on SPY?" and it will use the
-skills this installs. Eight other ways in, including Codex and ChatGPT, are
-in [INSTALL.md](INSTALL.md).
+skills this installs. Eight other ways in, including Codex, ChatGPT and a
+container, are in [INSTALL.md](INSTALL.md).
+
+```
+docker run --rm -v "$PWD/artifacts:/artifacts" \
+    ghcr.io/iman/agent-driven-options-desk-and-skills chain SPY
+```
+
+The image is the CLI and the dashboard, for a machine with no Python. It
+cannot install skills into an agent running outside it, and it refuses to
+run without a mounted artifact directory rather than writing your results
+into a container that is about to be deleted.
 
 ![All twenty-three structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
 
@@ -926,7 +936,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 423 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 428 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 159 tests
 ```
 
@@ -947,7 +957,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           seventy-six mutations, killed or survived
+python3 scripts/mutate.py           seventy-seven mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 
@@ -1106,7 +1116,7 @@ gone, replaced by the test above, which anyone can run.
 | `docs/SCREENSHOTS.md` | every panel and chart the dashboard renders, from one live run |
 | `scripts/refresh.py` | rebuild everything generated, then prove it holds |
 | `scripts/mutate.py` | break the code on purpose and check the tests notice |
-| `INSTALL.md` | eight install paths, each verified |
+| `INSTALL.md` | nine install paths, each verified |
 | `LOOPS.md` | the four loop kinds, and what makes a good loop here |
 | `FAQ.md` | the questions people actually ask |
 | `AGENTS.md` | project rules and the command inventory for Codex, which loads the skills itself from `.agents/skills` |

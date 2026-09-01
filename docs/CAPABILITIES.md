@@ -679,7 +679,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies seventy-six breakages to a copy of
+everywhere else. It applies seventy-seven breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The last full run recorded here, on 2026-08-31 and
@@ -706,13 +706,21 @@ non-finite expectation stays out of the ranking. Both are now covered.
 
 ## 16. Installing
 
-Eight paths, each verified rather than written from memory. See
+Nine paths, each verified rather than written from memory. See
 `INSTALL.md`.
 
 One command for everything (`./install.sh`), as a Claude Code plugin with
 the commands and agents, from a checkout by hand, skills only with no
-Python, zip upload for claude.ai in the browser, or the MCP server alone
-for a runtime that has its own conventions.
+Python, zip upload for claude.ai in the browser, a container for the CLI
+and the dashboard on a machine with no Python, or the MCP server alone for
+a runtime that has its own conventions.
+
+The container is the tools and the page, not the agent surfaces: skills
+have to sit on the host where the host's agent reads them, and the MCP
+server is a stdio process a runtime launches itself. It also refuses to run
+a writing command without a mounted artifact directory, because a container
+that writes its output into itself and is then deleted is a failure that
+looks exactly like a success.
 
 `./install.sh --uninstall` removes exactly what it created and nothing
 else: the virtualenv and source it made, the two symlinks if they still

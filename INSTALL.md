@@ -1,6 +1,6 @@
 # Installing
 
-Eight ways in, depending on what you want and which runtime you use. Every
+Nine ways in, depending on what you want and which runtime you use. Every
 one of them has been run and verified; none is written from memory.
 
 If you only want to try it, use the first. If you only want the skills and
@@ -188,7 +188,40 @@ them centrally. And the runtime there has no access to your machine, so the
 skills work as knowledge and instructions rather than as tools, the same
 as options 2 and 6.
 
-## 8. MCP only, without skills
+## 8. Docker, for the CLI and the dashboard
+
+```
+docker run --rm -v "$PWD/artifacts:/artifacts" \
+    ghcr.io/iman/agent-driven-options-desk-and-skills chain SPY
+
+docker run --rm -p 8787:8787 -v "$PWD/artifacts:/artifacts" \
+    ghcr.io/iman/agent-driven-options-desk-and-skills dashboard --host 0.0.0.0
+```
+
+No Python on the machine, a pinned interpreter and pinned optional
+dependencies, and the same behaviour on Windows as on anything else. The
+image runs as an unprivileged user and carries the licence, the disclaimer
+and the six skills as files you can read from inside it.
+
+**Mount a volume.** Artifacts are the product: every command writes a
+schema-validated JSON file, and those are what the dashboard renders and
+what an agent reads. Without `-v` they are written inside the container and
+lost when it exits. The entrypoint refuses to run a writing command without
+a mount rather than working and discarding the result, and exits 64.
+`OPTIONDESK_ALLOW_EPHEMERAL=1` overrides it for a deliberate throwaway run.
+
+**What this path does not give you**, and it is most of the project. The
+six skills have to sit in `~/.claude/skills` or `~/.agents/skills` on the
+HOST, because the host's agent reads them. The MCP server is a stdio
+process an agent runtime launches itself. Neither reaches an agent outside
+the container. Use `./install.sh` or one of the plugin paths above for
+those; this image is the tools and the page.
+
+Keys, if you use a paid provider, come in as environment variables:
+`-e ALPHAVANTAGE_API_KEY=...`, or mount your config with
+`-v ~/.optiondesk:/home/desk/.optiondesk:ro`.
+
+## 9. MCP only, without skills
 
 If you want the tools in a runtime and nothing else:
 

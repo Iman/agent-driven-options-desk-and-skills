@@ -1,0 +1,52 @@
+name: refresh
+
+# The ten stages that this project already runs by hand before every push.
+# Nothing new is checked here: the point is that it stops depending on
+# somebody remembering. Every figure in the documentation, every generated
+# file, and all three test suites are verified by the same script a
+# contributor runs locally, so a green tick here and a green run there mean
+# the same thing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor and a current release. The engine is standard library
+        # only, so a version difference here is a real signal rather than a
+        # dependency resolving differently.
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the three packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "shell[yahoo,dashboard,dev]" -e engine -e agent
+
+      - name: Refresh, which is the whole check
+        # No network in CI, so the stages that would reach a provider skip
+        # themselves the same way they do offline. Everything else runs.
+        run: python scripts/refresh.py
+
+      - name: Mutation harness
+        # Slower than the suite and worth its own step, because a survivor
+        # is a hole in the tests rather than a broken build, and the
+        # distinction should be visible in the log.
+        run: python scripts/mutate.py

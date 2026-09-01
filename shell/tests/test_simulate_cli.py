@@ -211,3 +211,46 @@ def test_histogram_handles_a_degenerate_range():
     assert simulate_cmd._histogram([]) == []
     assert simulate_cmd._histogram([5.0, 5.0, 5.0]) == [
         {"lo": 5.0, "hi": 5.0, "count": 3}]
+
+
+@needs_engine
+def test_the_sampler_says_it_is_working_before_it_starts(
+        stub_provider, log_returns, capsys, args_factory, tmp_path):
+    """A run that prints nothing for minutes looks exactly like a hang.
+
+    The sampler is pure Python and single threaded: it walks
+    (draws + burn) x chains iterations over every observation with no
+    vectorisation. On an eighteen core arm64 machine the default settings
+    take about eight seconds and the heaviest sensible ones about
+    twenty-seven, and a slower machine takes proportionally longer with no
+    output and one busy core. Somebody will kill it and conclude the tool
+    is broken.
+
+    The notice goes to stderr, never stdout, because stdout is JSON that a
+    caller parses.
+    """
+    stub_provider(history=log_returns)
+    result = simulate_cmd.run(simulate_args(args_factory, tmp_path))
+    captured = capsys.readouterr()
+
+    assert "Let it run" in captured.err
+    assert "single threaded" in captured.err
+    assert "iterations over" in captured.err
+    assert "Let it run" not in captured.out, (
+        "the notice reached stdout, which a caller parses as JSON")
+    assert result["artifact"]
+
+
+def test_the_estimate_grows_with_the_work():
+    """A fixed phrase would be worse than none: it would say a few seconds
+    for a run that takes ten minutes. The estimate is linear in iterations
+    times observations, from one measured constant, and deliberately vague
+    above a minute because one machine's constant cannot carry more
+    precision than that.
+    """
+    from optiondesk.cli.simulate import _rough_duration
+
+    assert _rough_duration(8000, 1253) == "a few seconds"
+    assert _rough_duration(32000, 1253) == "under a minute"
+    assert _rough_duration(200000, 1253) == "a few minutes"
+    assert _rough_duration(2000000, 5000) == "ten minutes or more"

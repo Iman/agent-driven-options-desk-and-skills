@@ -267,6 +267,16 @@ MUTATIONS = [
      '        raise ValueError("no key given, nothing was written")',
      "        pass",
      "shell/tests/test_keys_cli.py"),
+    ("sampler-runs-silently", "shell/src/optiondesk/cli/simulate.py",
+     "          file=sys.stderr)",
+     "          file=open(os.devnull, \"w\"))",
+     "shell/tests/test_simulate_cli.py"),
+    ("duration-estimate-is-a-constant",
+     "shell/src/optiondesk/cli/simulate.py",
+     "    seconds = iterations * observations * "
+     "SECONDS_PER_ITERATION_OBSERVATION",
+     "    seconds = 1.0",
+     "shell/tests/test_simulate_cli.py"),
     ("graph-hides-degradation", "agent/src/optiondesk_agent/graph.py",
      "        if degraded:\n            body += [\"\", \"Degraded stages, "
      "which the figures above inherit:\"]",

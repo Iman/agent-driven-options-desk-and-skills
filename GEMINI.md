@@ -605,6 +605,31 @@ of their sum. On this posterior the two differ by 7e-05, which is nothing,
 but they are different quantities and the artifact stores no joint draws
 for a reader to check.
 
+## It is slow, and that is not a hang
+
+The sampler is a Metropolis-Hastings walk written in pure Python. It is
+single threaded, it uses no vectorisation and no C extension, and it prints
+nothing between starting and finishing. The work is
+(draws + burn) x chains iterations over every observation in the history.
+
+Measured on an eighteen core arm64 machine with 1253 daily observations:
+the default settings take about eight seconds, and draws 6000 with burn
+2000 across four chains takes about twenty-seven. A slower or single core
+machine takes proportionally longer, and a long history with a high draw
+count can run for minutes.
+
+The command prints one line to stderr before it starts, saying how many
+iterations it is about to run and roughly how long that should take. When
+you see it, wait. Do not kill the run, do not retry it with a smaller draw
+count to make it finish, and do not report the tool as hung. A run
+interrupted partway writes nothing, and a run cut short by lowering
+`--draws` is the one thing guaranteed to produce `converged: false`.
+
+If a user asks why it is taking so long, the answer is the iteration count
+and the observation count, both of which are in the notice on stderr and in
+the artifact's inputs block.
+
+
 ## Going deeper
 
 - `reference.md`: the model written out, the convergence gate and why the effective sample size estimator overstates, what the risk numbers are, and how the antithetic pairs behave.

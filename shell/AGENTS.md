@@ -15,7 +15,7 @@ They are not copied into this file. You discover skills in `.agents/skills`, sca
 - `options-simulation`
 - `options-strategy`
 
-Compiling their bodies into this file as well would add about 33 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
+Compiling their bodies into this file as well would add about 35 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
 
 ## What else is here
 

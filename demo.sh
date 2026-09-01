@@ -172,6 +172,8 @@ for symbol in $SYMBOLS; do
   run "$DESK" compare --snapshot "$snapshot" --include-underlying --rebuild
 
   say "$symbol: the underlying simulated forward from its own behaviour"
+  note "this one fits a GARCH posterior by MCMC and can take a while on a"
+  note "slow machine, with no output until it finishes. Let it run."
   run "$DESK" simulate "$symbol" --horizon "$HORIZON" --period "$PERIOD"
 
   say "$symbol: every structure across real history, with modelled premiums"

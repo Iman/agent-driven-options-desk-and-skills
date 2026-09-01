@@ -381,11 +381,11 @@ optiondesk keys: see, set and locate provider credentials.
 
 optiondesk simulate: what the underlying's own behaviour implies.
 
-274 lines.
+322 lines.
 
-- **add_arguments()** (line 32): Register simulation controls: horizon, path count, draws, burn-in, chain
-- **run()** (line 74): Fit the GARCH(1,1)-t posterior by MCMC, simulate paths from it and write
-- **main()** (line 266): Parse argv for this command alone and run it, so the command works when
+- **add_arguments()** (line 33): Register simulation controls: horizon, path count, draws, burn-in, chain
+- **run()** (line 102): Fit the GARCH(1,1)-t posterior by MCMC, simulate paths from it and write
+- **main()** (line 314): Parse argv for this command alone and run it, so the command works when
 
 ### `shell/src/optiondesk/cli/strategy.py`
 
@@ -620,7 +620,7 @@ Roughly 1335 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 Simulate an underlying forward from its own realised behaviour using a Bayesian GARCH(1,1) model with Student-t innovations sampled by MCMC, then report the posterior predictive fan, value at risk, expected shortfall, and the profit distribution of any structures already built. Use when the user asks what the underlying might do, what the downside is, what value at risk or expected shortfall looks like, how likely a structure is to profit given how the stock actually moves, or asks for a Monte Carlo, a simulation, an MCMC, or a distribution of outcomes. Not for order placement and not for recommendations.
 
-Roughly 1462 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/run-a-projection.md`.
+Roughly 1773 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflows/run-a-projection.md`.
 
 ### options-strategy
 
@@ -660,7 +660,7 @@ Roughly 1493 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 28
 - `engine/tests/test_timespread.py`: 25
 
-### shell/tests (385 test functions)
+### shell/tests (387 test functions)
 
 - `shell/tests/test_agent_findings.py`: 7
 - `shell/tests/test_artifact_archive.py`: 8
@@ -690,7 +690,7 @@ Roughly 1493 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_providers.py`: 8
 - `shell/tests/test_runtime_docs.py`: 14
 - `shell/tests/test_screenshots.py`: 3
-- `shell/tests/test_simulate_cli.py`: 10
+- `shell/tests/test_simulate_cli.py`: 12
 - `shell/tests/test_strategy_cli.py`: 18
 - `shell/tests/test_summary_degraded_contract.py`: 4
 - `shell/tests/test_yahoo_provider.py`: 26
@@ -705,7 +705,7 @@ Roughly 1493 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-56 modules, 14095 lines of source, 159 public functions, 14 public classes, 722 test functions.
+56 modules, 14143 lines of source, 159 public functions, 14 public classes, 724 test functions.
 
 Every public name carries a docstring.
 

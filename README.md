@@ -3,8 +3,8 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-926%20passing%2C%200%20skipped-brightgreen)](#development)
-[![Mutation testing](https://img.shields.io/badge/mutations-74%20run%2C%200%20survived-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-928%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Mutation testing](https://img.shields.io/badge/mutations-76%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills)
@@ -382,6 +382,30 @@ guessed volatility produces a complete and entirely fictional Greek ladder
 that looks exactly as authoritative as a real one.
 
 ---
+
+### The simulation is slow, and silence is not a hang
+
+`optiondesk simulate` fits a GARCH(1,1)-t posterior by Metropolis-Hastings
+in pure Python: single threaded, no vectorisation, no progress output
+between starting and finishing. The work is `(draws + burn) x chains`
+iterations, each walking every observation in the history.
+
+Measured here, on an eighteen core arm64 machine with 1253 daily
+observations:
+
+```
+draws 3000  burn 1000  chains 2     about 8 seconds
+draws 6000  burn 2000  chains 4     about 27 seconds
+```
+
+A slower or single core machine takes proportionally longer, and a long
+history at a high draw count runs for minutes. The command prints one line
+to stderr before it starts, naming the iteration count and a rough
+duration, so you can tell a working run from a stuck one. Wait for it.
+
+Killing the run writes nothing. Lowering `--draws` to make it finish
+sooner is the surest way to produce `converged: false`, and an unconverged
+posterior is one whose quantiles must not be quoted.
 
 ## Command reference
 
@@ -902,7 +926,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 421 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 423 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 159 tests
 ```
 
@@ -923,7 +947,7 @@ rules stage catch what slips through.
 Breaking the code on purpose, to check the tests notice:
 
 ```
-python3 scripts/mutate.py           seventy-four mutations, killed or survived
+python3 scripts/mutate.py           seventy-six mutations, killed or survived
 python3 scripts/mutate.py --list    what it would try
 ```
 

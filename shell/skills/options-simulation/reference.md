@@ -15,6 +15,26 @@ persistence enough to lift effective sample size by a factor of ten or so.
 Each simulated path draws its own parameter set, so the fan carries
 parameter uncertainty rather than being narrower than the data supports.
 
+## Run time
+
+(draws + burn) x chains iterations, each walking every observation. Pure
+Python, single threaded, no progress output.
+
+Measured, 18 core arm64, 1253 observations:
+
+| draws | burn | chains | wall clock |
+|---|---|---|---|
+| 3000 | 1000 | 2 | about 8 seconds |
+| 6000 | 2000 | 4 | about 27 seconds |
+
+That is roughly 1.6 microseconds per iteration-observation on that machine.
+Scale it by your own hardware and by your history length. Ten years of
+daily data at 6000 draws across four chains is four times the work of the
+second row.
+
+The command warns before it starts. Nothing is wrong when it goes quiet.
+
+
 ## Diagnostics, and the gate
 
 converged is true only when split R-hat is below 1.05 and effective sample

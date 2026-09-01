@@ -120,6 +120,21 @@ number changed, but the field was a false statement about how they were
 produced. The construction is gone and each path now draws its own
 parameters, which matters more for the tail than mirroring would have.
 
+**The simulation has been sitting there for a minute. Has it hung?**
+
+Almost certainly not. The sampler is a Metropolis-Hastings walk in pure
+Python, single threaded, with no progress output between start and finish.
+It runs `(draws + burn) x chains` iterations and each one walks every
+observation in the history. On an eighteen core arm64 machine with 1253
+daily observations the defaults take about eight seconds and the heaviest
+sensible settings about twenty-seven; a slower machine takes proportionally
+longer, and a long history at a high draw count runs for minutes.
+
+The command prints a line to stderr before it starts, naming the iteration
+count and a rough duration. Wait for it. Killing the run writes nothing at
+all, and lowering `--draws` to make it finish faster is the surest way to
+get `converged: false`, which means the numbers cannot be quoted.
+
 **The simulation says `converged: false`. Can I use the numbers?**
 
 No. It means the chains did not agree, by split R-hat above 1.05 or an

@@ -61,7 +61,7 @@ ChatGPT scan `.agents/skills` and read `.agents/plugins/marketplace.json`.
 This repository symlinks `.agents/skills` to `shell/skills`, and the plugin
 bundle at `plugins/option-desk` carries both manifests over one copy of the
 skills, so neither host gets a stale or partial set. A test asserts the two
-discovery paths see the same five.
+discovery paths see the same six.
 
 The MCP server is a local stdio process, which Codex on your own machine
 can run and browser ChatGPT cannot, because it has no way to execute a
@@ -71,6 +71,11 @@ In browser ChatGPT the skills are knowledge and instructions, and each one
 says so: its execution route tells the agent to prefer the MCP tool, fall
 back to the command line, and if neither is available to say that no fresh
 figures can be produced rather than inventing them.
+
+`scripts/package.py` builds `dist/option-desk-openai-skills.zip` for an
+OpenAI skills-only submission. The archive contains the six skills and the
+OpenAI manifest. It excludes the local MCP configuration. A future release
+with live browser analytics needs a hosted Streamable HTTP MCP service.
 
 ---
 
@@ -420,6 +425,7 @@ work needs them.
 | `options-positioning` | where the walls are, gamma flip, max pain, put-call ratio, skew | `reference.md`, `workflows/read-the-book.md` |
 | `options-simulation` | what the underlying might do, value at risk, Monte Carlo, MCMC | `reference.md`, `workflows/run-a-projection.md` |
 | `options-backtest` | has this worked historically, is the edge real, paper trade this | `reference.md`, `workflows/evaluate-a-rule.md` |
+| `desk-setup` | installation, PATH faults, missing commands, MCP setup | `SKILL.md` only |
 
 Every skill carries the same reporting rules: cite the artifact path, never
 re-derive a number in prose, say when something is degraded before quoting
@@ -428,7 +434,7 @@ anything from it, and never recommend a trade.
 They work with no Python installed at all, as domain knowledge rather than
 automation. `./install.sh --skills-only` does exactly that.
 
-Gemini CLI loads no skills, so the five are compiled into `GEMINI.md` in
+Gemini CLI loads no skills, so the six are compiled into `GEMINI.md` in
 full. Codex discovers them itself in `.agents/skills`, so `AGENTS.md`
 points at them rather than repeating them, which took it from 25,851 bytes
 to 4,366 and restored the progressive disclosure that embedding had
@@ -605,7 +611,7 @@ is one per suite, and the exit code reflects all of them.
 | inventory | regenerates `docs/INVENTORY.md` from the source |
 | counts | rewrites the test counts the README quotes, which rot on every commit that adds a test |
 | evidence | checks, never records, that documented figures still match `docs/evidence.json` |
-| package | rebuilds `dist/`, `plugin/` and the marketplace manifest |
+| package | rebuilds `dist/`, `plugins/option-desk/` and the marketplace manifest |
 | index | refreshes the CodeGraph index so an agent can navigate by symbol |
 | engine | runs the engine suite |
 | shell | runs the shell suite |

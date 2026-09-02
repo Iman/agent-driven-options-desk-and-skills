@@ -4,7 +4,7 @@
 WHAT THIS IS. One entry point for the whole project, so nothing generated
 drifts from its source. It regenerates the runtime documentation, the
 inventory, and every installable form of the skills, refreshes the code
-index, runs both test suites, and checks the house rules that no test can
+index, runs all three test suites, and checks the house rules that no test can
 see.
 
 WHY IT ENDS WITH CHECKS RATHER THAN STARTING WITH THEM. A refresh that
@@ -21,7 +21,7 @@ Stages, in order, because each depends on the one before:
 
   docs      AGENTS.md and GEMINI.md, from the skills
   inventory docs/INVENTORY.md, from the source
-  package   dist/, plugin/, .claude-plugin/, from the skills and commands
+  package   dist/, plugins/option-desk/, and marketplace files
   index     .codegraph/, so an agent can navigate the tree by symbol
   tests     engine, shell and agent suites
   rules     no ANSI, no emoji, no em dash, no key material
@@ -65,7 +65,7 @@ TEXT_SUFFIXES = {".py", ".md", ".json", ".sh", ".txt", ".toml", ".yaml",
                  ".yml", ".cfg", ".html", ".css"}
 
 SKIP_DIRS = {".git", ".venv", "node_modules", "__pycache__", "dist",
-             ".codegraph", ".pytest_cache", ".tmp", "plugin",
+             ".codegraph", ".pytest_cache", ".tmp", "plugins",
              ".claude-plugin"}
 
 
@@ -150,6 +150,14 @@ def sync_readme_counts(interpreter):
         if found:
             total += int(found.group(1))
     if total:
+        aggregate = re.compile(r"(python -m pytest -q\s+# )(\d+)( tests)")
+        match = aggregate.search(updated)
+        if match and match.group(2) != str(total):
+            changed.append("aggregate test count to {}".format(total))
+        updated = aggregate.sub(
+            lambda m: "{}{}{}".format(m.group(1), total, m.group(3)),
+            updated)
+
         badge = re.compile(r"(tests-)\d+(%20passing)")
         if badge.search(updated):
             before = badge.search(updated).group(0)

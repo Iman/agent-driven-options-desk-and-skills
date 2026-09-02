@@ -6,7 +6,9 @@ places people install from. Rather than maintaining copies by hand, this
 builds them:
 
   dist/skills/<name>.zip      one portable archive per agent skill
-  dist/option-desk-skills.zip all five together for Claude skill upload
+  dist/option-desk-skills.zip all six together for Claude skill upload
+  dist/option-desk-openai-skills.zip
+                              one skills-only OpenAI plugin archive
   plugins/option-desk/        one dual-host plugin: OpenAI/Codex plus Claude
   .claude-plugin/marketplace.json
                               the Claude Code marketplace entry
@@ -31,6 +33,13 @@ COMMANDS = ROOT / ".claude" / "commands"
 AGENTS = ROOT / ".claude" / "agents"
 DIST = ROOT / "dist"
 PLUGIN = ROOT / "plugins" / "option-desk"
+ASSETS = ROOT / "assets"
+
+BRANDING = {
+    "logo": "option-desk-logo.png",
+    "composerIcon": "option-desk-icon.png",
+}
+PUBLISH_IGNORES = {".DS_Store", ".installed-by-optiondesk", "__pycache__"}
 
 VERSION = "0.2.0"
 AUTHOR = {"name": "Iman Samizadeh"}
@@ -52,8 +61,14 @@ def _copy_tree(source, target):
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(source, target,
-                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc",
-                                                  ".installed-by-optiondesk"))
+                    ignore=shutil.ignore_patterns(*PUBLISH_IGNORES, "*.pyc"))
+
+
+def _publishable(path):
+    """Return whether a source file belongs in a release artifact."""
+    return (path.is_file()
+            and not PUBLISH_IGNORES.intersection(path.parts)
+            and path.suffix != ".pyc")
 
 
 # Every skill tells the reader to see DISCLAIMER.md at the repository root.
@@ -70,8 +85,88 @@ def _carry_into(archive, prefix):
             archive.write(source, Path(prefix) / name)
 
 
+def _codex_manifest(include_mcp):
+    """Return the shared Codex manifest, with optional local MCP wiring."""
+    keywords = ["options", "greeks", "volatility", "risk", "trading",
+                "quantitative-finance", "backtesting", "mcp", "skills",
+                "claude-skills", "agent-skills", "langgraph",
+                "options-pricing"]
+    if include_mcp:
+        description = DESCRIPTION
+        long_description = (
+            "Build option-chain research artifacts, inspect Greeks and "
+            "positioning, compare structures, simulate outcomes, and "
+            "backtest rules. Research software, not investment advice."
+        )
+        default_prompts = [
+            "Show the Greek ladder for SPY's nearest expiry.",
+            "Read dealer positioning for QQQ.",
+            "Compare option structures for a neutral TLT view.",
+        ]
+    else:
+        keywords.remove("mcp")
+        description = (
+            "Interpret user-provided option-chain data and research artifacts "
+            "using focused workflows for Greeks, positioning, strategy, "
+            "simulation, and backtests. Research software, not investment "
+            "advice."
+        )
+        long_description = (
+            "Interpret user-provided option research without fetching live "
+            "data. Review Greeks and positioning, compare structures, and "
+            "assess simulations and backtests. Research software, not "
+            "investment advice."
+        )
+        default_prompts = [
+            "Explain the main risks in this option-chain snapshot.",
+            "Compare these option structures and their trade-offs.",
+            "Review this backtest for weak evidence and overlap.",
+        ]
+    interface = {
+        "displayName": "Option Desk",
+        "shortDescription": "Research listed options.",
+        "longDescription": long_description,
+        "developerName": AUTHOR["name"],
+        "category": "Finance",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": REPOSITORY,
+        "logo": "./assets/{}".format(BRANDING["logo"]),
+        "composerIcon": "./assets/{}".format(BRANDING["composerIcon"]),
+        "brandColor": "#2F6FEB",
+        # Codex enforces MAX_DEFAULT_PROMPT_COUNT = 3 and
+        # MAX_DEFAULT_PROMPT_LEN = 128, neither of which appears in the
+        # prose documentation. A fourth entry is rejected outright.
+        "defaultPrompt": default_prompts,
+    }
+    manifest = {
+        "name": "option-desk",
+        "version": VERSION,
+        "description": description,
+        "author": AUTHOR,
+        "homepage": REPOSITORY,
+        "repository": REPOSITORY,
+        "license": "PolyForm-Noncommercial-1.0.0",
+        "keywords": keywords,
+        "skills": "./skills/",
+        "interface": interface,
+    }
+    if include_mcp:
+        manifest["mcpServers"] = "./.mcp.json"
+    return manifest
+
+
+def _branding_sources():
+    """Return required branding paths, failing before an invalid release."""
+    sources = [ASSETS / name for name in BRANDING.values()]
+    missing = [path for path in sources if not path.is_file()]
+    if missing:
+        raise SystemExit("missing plugin branding: {}".format(
+            ", ".join(str(path.relative_to(ROOT)) for path in missing)))
+    return sources
+
+
 def build_zips():
-    """One portable zip per skill plus the legacy all-skills bundle.
+    """Build portable skill zips and host-specific aggregate archives.
 
     The zip contains the skill directory, not its contents loose, because
     the uploader takes the directory name as the skill name.
@@ -84,7 +179,7 @@ def build_zips():
         path = target / "{}.zip".format(skill.name)
         with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
             for item in sorted(skill.rglob("*")):
-                if item.is_dir() or item.name == ".installed-by-optiondesk":
+                if not _publishable(item):
                     continue
                 archive.write(item, Path(skill.name) / item.relative_to(skill))
             _carry_into(archive, skill.name)
@@ -94,12 +189,29 @@ def build_zips():
     with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as archive:
         for skill in _skill_dirs():
             for item in sorted(skill.rglob("*")):
-                if item.is_dir() or item.name == ".installed-by-optiondesk":
+                if not _publishable(item):
                     continue
                 archive.write(item,
                               Path(skill.name) / item.relative_to(skill))
             _carry_into(archive, skill.name)
     written.append(bundle)
+
+    # Public OpenAI skills-only submissions need the plugin manifest and
+    # skills/ layout, but must not carry an MCP descriptor or declaration.
+    openai = DIST / "option-desk-openai-skills.zip"
+    with zipfile.ZipFile(openai, "w", zipfile.ZIP_DEFLATED) as archive:
+        manifest = json.dumps(_codex_manifest(include_mcp=False), indent=2)
+        archive.writestr(".codex-plugin/plugin.json", manifest + "\n")
+        for skill in _skill_dirs():
+            prefix = Path("skills") / skill.name
+            for item in sorted(skill.rglob("*")):
+                if not _publishable(item):
+                    continue
+                archive.write(item, prefix / item.relative_to(skill))
+        _carry_into(archive, "")
+        for source in _branding_sources():
+            archive.write(source, Path("assets") / source.name)
+    written.append(openai)
 
     # A zip that cannot be opened is worse than no zip, so each is read back.
     for path in written:
@@ -138,39 +250,7 @@ def build_plugin():
     (PLUGIN / ".claude-plugin" / "plugin.json").write_text(
         json.dumps(claude_manifest, indent=2) + "\n", encoding="utf-8")
 
-    codex_manifest = {
-        "name": "option-desk",
-        "version": VERSION,
-        "description": DESCRIPTION,
-        "author": AUTHOR,
-        "homepage": REPOSITORY,
-        "repository": REPOSITORY,
-        "license": "PolyForm-Noncommercial-1.0.0",
-        "keywords": keywords,
-        "skills": "./skills/",
-        "mcpServers": "./.mcp.json",
-        "interface": {
-            "displayName": "Option Desk",
-            "shortDescription": "Research listed options with local tools.",
-            "longDescription": (
-                "Build option-chain research artifacts, inspect Greeks and "
-                "positioning, compare structures, simulate outcomes, and "
-                "backtest rules. Research software, not investment advice."
-            ),
-            "developerName": AUTHOR["name"],
-            "category": "Finance",
-            "capabilities": ["Read", "Write"],
-            "websiteURL": REPOSITORY,
-            # Codex enforces MAX_DEFAULT_PROMPT_COUNT = 3 and
-            # MAX_DEFAULT_PROMPT_LEN = 128, neither of which appears in the
-            # prose documentation. A fourth entry is rejected outright.
-            "defaultPrompt": [
-                "Show the Greek ladder for SPY's nearest expiry.",
-                "Read dealer positioning for QQQ.",
-                "Compare option structures for a neutral TLT view.",
-            ],
-        },
-    }
+    codex_manifest = _codex_manifest(include_mcp=True)
     (PLUGIN / ".codex-plugin" / "plugin.json").write_text(
         json.dumps(codex_manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -178,6 +258,11 @@ def build_plugin():
                          (AGENTS, "agents")):
         if source.exists():
             _copy_tree(source, PLUGIN / name)
+
+    asset_target = PLUGIN / "assets"
+    asset_target.mkdir(exist_ok=True)
+    for source in _branding_sources():
+        shutil.copy2(source, asset_target / source.name)
 
     # The skills point at it, and a plugin install has no repository to
     # find it in.
@@ -274,7 +359,7 @@ def main():
     plugin = build_plugin()
     marketplaces = build_marketplaces()
 
-    print("portable skill archives (the bundle is for Claude upload):")
+    print("portable skill archives and host-specific bundles:")
     for path in zips:
         print("  {:44} {:>7} bytes".format(
             str(path.relative_to(ROOT)), path.stat().st_size))

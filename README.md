@@ -3,7 +3,7 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-937%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-942%20passing%2C%200%20skipped-brightgreen)](#development)
 [![Mutation testing](https://img.shields.io/badge/mutations-78%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
@@ -120,6 +120,25 @@ Useful flags: `--dry-run` to see the plan and change nothing, `--no-engine`
 for the shell alone, `--skills-only` for no Python at all, `--no-mcp`
 to leave runtime configs untouched, `--prefix` to install elsewhere.
 
+#### Verified installation
+
+Installer 0.1.0 completed a checkout installation on macOS with Python
+3.13.13. It installed the shell and analytics engine at version 0.2.0 and
+linked both commands.
+
+It copied all six skills to both user skill directories. Claude Code and
+Codex both reported that the MCP server was connected. Gemini CLI did not
+register automatically, and the installer printed its manual registration
+command.
+
+The live test listed SPY expiries, wrote a chain artifact, computed a Greek
+ladder, and returned HTTP 200 from the dashboard. The delayed Yahoo results
+reported `degraded: false`.
+
+The reused environment contained x86_64 scientific wheels. On Apple
+silicon, use the same process architecture for installation, CLI, and MCP
+execution.
+
 ### Skills only, through the skills CLI
 
 ```
@@ -158,6 +177,11 @@ folders are documented as followed, so cloning it is enough.
 Browser ChatGPT is the one place the tools cannot follow. The MCP server is
 a local process and a web page cannot run one on your machine, so there the
 skills are knowledge and instructions. Each skill says so itself.
+
+OpenAI accepts skills-only plugins. Build the dedicated submission archive
+with `python3 scripts/package.py`, then use
+`dist/option-desk-openai-skills.zip`. It contains no MCP declaration. The
+skills-only listing does not promise fresh market figures.
 
 ### As a Claude Code plugin, which also brings the commands and agents
 
@@ -227,6 +251,7 @@ The six skills, and when each one fires:
 | `options-strategy` | twenty-three structures, built, priced and ranked side by side |
 | `options-simulation` | GARCH-t Monte Carlo, the fan, value at risk, expected shortfall |
 | `options-backtest` | real history with modelled premiums, significance, and paper forward tests |
+| `desk-setup` | installation, PATH errors, missing commands, and MCP connection faults |
 
 Every one of them reports what it cannot establish rather than filling it
 in, and none of them will recommend a trade.
@@ -510,7 +535,7 @@ every subcommand the real parser exposes appears in both copies, so a
 command added later without documentation fails the suite.
 
 The two files differ in what else they carry, and the difference is the
-point. Gemini CLI has no skill discovery, so `GEMINI.md` compiles all five
+point. Gemini CLI has no skill discovery, so `GEMINI.md` compiles all six
 skills into itself. Codex scans `.agents/skills`, which this repository
 symlinks to `shell/skills`, so it loads them progressively on its own and
 `AGENTS.md` names where they are instead of repeating them. That took it
@@ -915,7 +940,7 @@ python3 scripts/refresh.py
 
 Ten stages in a full run, and the exit code reflects all of them: runtime docs from the
 skills, `docs/INVENTORY.md` from the source, the installable forms in
-`dist/` and `plugin/`, the CodeGraph index, the three test suites, and a
+`dist/` and `plugins/option-desk/`, the CodeGraph index, the three test suites, and a
 house-rules scan that fails on an ANSI escape, an emoji, an em dash or
 anything shaped like a provider key. `--fast` skips the suites, `--no-index`
 skips the index.
@@ -923,7 +948,7 @@ skips the index.
 All three at once, from the repository root:
 
 ```
-./shell/.venv/bin/python -m pytest -q          # 569 tests
+./shell/.venv/bin/python -m pytest -q          # 942 tests
 ```
 
 That works because of `pytest.ini`, and it did not until recently: the
@@ -936,7 +961,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 432 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 437 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 159 tests
 ```
 
@@ -1127,7 +1152,7 @@ gone, replaced by the test above, which anyone can run.
 | `CLA.md`, `CONTRIBUTORS.md` | contribution terms |
 | `SECURITY.md` | what is in scope, and how to report it privately |
 | `PRIVACY.md` | what leaves your machine, which is one request to a market data provider |
-| `docs/SUBMISSION.md` | the directory submission pack, and why OpenAI's is not possible yet |
+| `docs/SUBMISSION.md` | the Anthropic and OpenAI directory submission packs and evaluation cases |
 | `CODE_OF_CONDUCT.md` | how to disagree here, and the one rule about not asking where anyone is |
 | `CONTRIBUTING.md` | measure first, test what you claim, and what gets sent back |
 

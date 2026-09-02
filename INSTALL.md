@@ -136,14 +136,31 @@ and option 2 above installs to the latter.
 The MCP server here is a local stdio process. Codex on your machine can run
 it. ChatGPT in a browser or on a phone cannot: it has no way to execute a
 binary on your computer. Reaching that would need a hosted Streamable HTTP
-MCP service with authentication and per-user credentials, which does not
-exist here and is not planned in this repository.
+MCP service with authentication and per-user credentials. That service
+does not exist in this repository.
 
 So in browser ChatGPT the six skills work as knowledge and instructions,
 the same as options 2 and 6, and they say so themselves: each one now
 carries an execution route telling the agent to prefer the MCP tool, fall
 back to the command line, and if neither is available to state plainly that
 no fresh figures can be produced rather than inventing them.
+
+### OpenAI skills-only submission archive
+
+OpenAI accepts skills-only plugins. Build the dedicated archive:
+
+```
+python3 scripts/package.py
+```
+
+Submit `dist/option-desk-openai-skills.zip`. It contains the OpenAI
+manifest, the six skills, and the required images. It excludes `.mcp.json`
+and all MCP declarations, as OpenAI requires for a skills-only upload.
+
+This archive gives browser ChatGPT research knowledge and reporting rules.
+It does not give browser ChatGPT access to live market data or local
+commands. See `docs/SUBMISSION.md` for the listing text and evaluation
+cases.
 
 ## 5. From a checkout, by hand
 
@@ -180,7 +197,7 @@ python3 scripts/package.py     # builds them
 ```
 
 Then in claude.ai, Settings, Capabilities, Skills, upload a zip. There is
-one per skill, plus `dist/option-desk-skills.zip` with all five.
+one per skill, plus `dist/option-desk-skills.zip` with all six.
 
 Two things to know before you do. Custom skills on claude.ai are per user:
 each person on a team uploads their own, and an admin cannot distribute

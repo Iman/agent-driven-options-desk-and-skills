@@ -329,9 +329,9 @@ def test_the_plugin_is_not_stale_against_its_sources():
         if not source_dir.exists():
             continue
         for source in sorted(source_dir.rglob("*")):
-            if source.is_dir() or source.name in (
-                    ".installed-by-optiondesk",) or "__pycache__" in str(
-                    source):
+            if (source.is_dir()
+                    or source.name in (".installed-by-optiondesk", ".DS_Store")
+                    or "__pycache__" in str(source)):
                 continue
             copied = plugin / name / source.relative_to(source_dir)
             if not copied.exists():

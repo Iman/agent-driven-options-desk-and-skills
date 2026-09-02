@@ -9,6 +9,7 @@ already happened once each in this project.
 
 import json
 import pathlib
+import struct
 import zipfile
 
 import pytest
@@ -17,10 +18,12 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 DIST = ROOT / "dist"
 BUNDLE = ROOT / "plugins" / "option-desk"
 SOURCE = ROOT / "shell" / "skills"
+OPENAI_ARCHIVE = "option-desk-openai-skills.zip"
 
 # Written by install.sh into an installed skill so its uninstall knows what
 # it owns. It has no business inside anything we publish.
 MARKER = ".installed-by-optiondesk"
+IGNORED = {MARKER, ".DS_Store", "__pycache__"}
 
 
 def _skill_names():
@@ -111,14 +114,99 @@ def test_the_bundled_resources_survive_packaging(dist):
     for archive in sorted((dist / "skills").glob("*.zip")):
         source = SOURCE / archive.stem
         expected = {str(p.relative_to(source)) for p in source.rglob("*")
-                    if p.is_file() and p.name != MARKER
-                    and "__pycache__" not in str(p)}
+                    if p.is_file() and not IGNORED.intersection(p.parts)
+                    and p.suffix != ".pyc"}
         with zipfile.ZipFile(archive) as zipped:
             got = {n.split("/", 1)[1] for n in zipped.namelist()
                    if "/" in n}
         missing = expected - got
         assert not missing, (
             "{} left behind {}".format(archive.name, sorted(missing)))
+
+
+def test_openai_archive_has_the_supported_skills_only_layout(dist):
+    path = dist / OPENAI_ARCHIVE
+    with zipfile.ZipFile(path) as zipped:
+        names = set(zipped.namelist())
+
+    expected = {
+        ".codex-plugin/plugin.json",
+        "DISCLAIMER.md",
+        "assets/option-desk-logo.png",
+        "assets/option-desk-icon.png",
+    }
+    for skill in SOURCE.iterdir():
+        if not (skill / "SKILL.md").is_file():
+            continue
+        expected.update(
+            str(pathlib.Path("skills") / skill.name / item.relative_to(skill))
+            for item in skill.rglob("*")
+            if item.is_file() and not IGNORED.intersection(item.parts)
+            and item.suffix != ".pyc"
+        )
+    assert names == expected
+
+
+def test_openai_archive_excludes_all_mcp_configuration(dist):
+    with zipfile.ZipFile(dist / OPENAI_ARCHIVE) as zipped:
+        names = set(zipped.namelist())
+        manifest = json.loads(
+            zipped.read(".codex-plugin/plugin.json").decode("utf-8"))
+
+    assert not any(path.endswith(".mcp.json") for path in names)
+    assert "mcpServers" not in manifest
+    assert "mcp_servers" not in manifest
+
+
+def test_openai_archive_carries_declared_branding(dist):
+    with zipfile.ZipFile(dist / OPENAI_ARCHIVE) as zipped:
+        names = set(zipped.namelist())
+        manifest = json.loads(
+            zipped.read(".codex-plugin/plugin.json").decode("utf-8"))
+        archived_assets = {
+            field: zipped.read(manifest["interface"][field][2:])
+            for field in ("logo", "composerIcon")
+        }
+
+    interface = manifest["interface"]
+    assert interface["brandColor"] == "#2F6FEB"
+    for field in ("logo", "composerIcon"):
+        target = interface[field]
+        assert target.startswith("./assets/")
+        assert target[2:] in names
+        data = archived_assets[field]
+        assert data == (ROOT / target[2:]).read_bytes()
+        assert data[:8] == b"\x89PNG\r\n\x1a\n"
+        width, height = struct.unpack(">II", data[16:24])
+        assert width == height
+        assert width >= 48
+
+
+def test_codex_manifests_meet_listing_description_limit(dist, bundle):
+    manifests = [json.loads(
+        (bundle / ".codex-plugin" / "plugin.json").read_text())]
+    with zipfile.ZipFile(dist / OPENAI_ARCHIVE) as zipped:
+        manifests.append(json.loads(
+            zipped.read(".codex-plugin/plugin.json").decode("utf-8")))
+
+    for manifest in manifests:
+        assert len(manifest["interface"]["shortDescription"]) <= 30
+        assert manifest["interface"]["brandColor"] == "#2F6FEB"
+
+
+def test_openai_manifest_promises_only_browser_safe_analysis(dist):
+    with zipfile.ZipFile(dist / OPENAI_ARCHIVE) as zipped:
+        manifest = json.loads(
+            zipped.read(".codex-plugin/plugin.json").decode("utf-8"))
+
+    interface = manifest["interface"]
+    assert "user-provided option research" in interface["longDescription"]
+    assert "without fetching live data" in interface["longDescription"]
+    assert interface["defaultPrompt"] == [
+        "Explain the main risks in this option-chain snapshot.",
+        "Compare these option structures and their trade-offs.",
+        "Review this backtest for weak evidence and overlap.",
+    ]
 
 
 def test_no_installer_marker_reaches_anything_published(dist, bundle):
@@ -150,6 +238,12 @@ def test_both_manifests_parse_and_agree_on_the_essentials(bundle):
         "the manifests and the directory disagree about the plugin name")
     assert claude["version"] == codex["version"], (
         "the two manifests declare different versions")
+
+    for field in ("logo", "composerIcon"):
+        target = codex["interface"][field]
+        relative = target[2:] if target.startswith("./") else target
+        assert (bundle / relative).is_file(), (
+            "the codex manifest points at missing branding {}".format(target))
 
     # The Codex manifest points at its parts by path. They have to exist.
     for field in ("skills", "mcpServers"):

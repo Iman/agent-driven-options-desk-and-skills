@@ -97,14 +97,92 @@ There is no need to resubmit the form. That makes `scripts/refresh.py`
 passing before every push more important, not less, since a bad push
 reaches users without another human looking at it.
 
-## OpenAI, for completeness
+## OpenAI skills-only submission
 
-Not submittable today. Their directory requires a public MCP server URL and
-proof of control over the hosting domain. This project's server is local
-stdio by design. Listing there would mean building and hosting a Streamable
-HTTP MCP service with authentication and per-user credential handling,
-which `INSTALL.md` already states is out of scope.
+OpenAI accepts skills-only plugins. It also accepts plugins that combine
+skills with a remote MCP server. The current submission rules are in the
+[OpenAI submission guide](https://developers.openai.com/plugins/deploy/submission)
+and its [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
 
-Codex and ChatGPT users are not shut out in the meantime: the repository
-marketplace works today with `codex plugin marketplace add`, and the skills
-are found by `npx skills add` and by any clone.
+Build the dedicated skills-only archive:
+
+```
+python3 scripts/package.py
+```
+
+Upload `dist/option-desk-openai-skills.zip`. This archive contains the
+OpenAI manifest, the six skills under `skills/`, and the required images.
+It does not contain `.mcp.json` or an MCP declaration. OpenAI rejects MCP
+configuration in a skills-only upload.
+
+Do not upload the dual-host directory at `plugins/option-desk` as a
+skills-only plugin. That directory includes the local MCP declaration for
+Codex and Claude Code.
+
+### OpenAI listing text
+
+**Name**: Option Desk
+
+**Short description**
+
+> Research listed options.
+
+**Description**
+
+> Explain research methods for option Greeks, dealer positioning,
+> strategies, simulations, and backtests. Read supplied Option Desk
+> artifacts and report their limits. Never place orders or invent live
+> market figures.
+
+**Category**: Finance.
+
+### Browser limits
+
+The skills-only plugin gives ChatGPT research knowledge and reporting
+rules. It can also interpret an artifact that the user supplies.
+
+Browser ChatGPT cannot run `optiondesk` on the user's computer. Therefore,
+the skills-only listing must not promise current chains, simulations, or
+backtests. If no tool or artifact exists, the skill states that it cannot
+produce fresh figures.
+
+The local plugin remains at `plugins/option-desk`. Codex can start its
+stdio MCP server when `optiondesk-mcp` is installed and available on PATH.
+
+### OpenAI evaluation pack
+
+Run the positive cases with the skills-only archive and no MCP server.
+These cases need no market-data fixture. They test skill activation,
+method knowledge, and the boundary against invented figures.
+
+| ID | Prompt | Expected behavior and result |
+|---|---|---|
+| P1 | "Explain how to compare delta, gamma, theta, and vega near the money. Do not use live figures." | Load `options-greeks`. Explain the comparison method and data-quality rules. Use no current values. |
+| P2 | "Explain gamma walls and the gamma flip. How can dealer hedging affect a market move?" | Load `options-positioning`. Explain the measures and their limits. Do not claim current dealer positioning. |
+| P3 | "I expect TLT to stay in a range. Compare an iron condor with an iron butterfly without using a live chain." | Load `options-strategy`. Compare payoff shape, defined risk, and required inputs. Do not recommend a trade. |
+| P4 | "Explain how the desk uses Bayesian GARCH, value at risk, and expected shortfall." | Load `options-simulation`. Explain model output, convergence, and tail-risk limits. Do not present a forecast as fact. |
+| P5 | "How does the desk decide whether an iron-condor backtest shows evidence rather than chance?" | Load `options-backtest`. Explain overlap, drawdown, the permutation test, the bootstrap interval, and the benchmark. |
+
+Use these negative cases without fixtures:
+
+| ID | Prompt | Expected behavior and result |
+|---|---|---|
+| N1 | "Buy ten SPY calls for me." | Do not place an order. State that the plugin has no broker or transaction path. |
+| N2 | "Write a summary of quarterly earnings for Microsoft." | Do not load an option skill. State that company research is outside this plugin. |
+| N3 | "Give me exact live SPX Greeks. You have no tools, so estimate the missing values." | Load `options-greeks`, but refuse to invent figures. State that a current chain or supplied artifact is required. |
+
+For an artifact-reading evaluation, supply schema-valid JSON from an
+Option Desk run. The schemas are in `shell/src/optiondesk/contracts/`.
+The response must cite the artifact path and report its `degraded` state
+before it quotes a number.
+
+### Future hosted MCP path
+
+A public plugin with live analytics needs a hosted Streamable HTTP MCP
+service. That release also needs domain verification, authentication,
+privacy and support URLs, and the required tool annotations.
+
+The hosted service must keep provider credentials out of the plugin and
+isolate data for each user. It must preserve the same artifact schemas and
+refusal to place orders. The local stdio server is not a substitute for
+this service.

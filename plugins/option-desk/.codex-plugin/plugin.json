@@ -24,10 +24,9 @@
     "options-pricing"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Option Desk",
-    "shortDescription": "Research listed options with local tools.",
+    "shortDescription": "Research listed options.",
     "longDescription": "Build option-chain research artifacts, inspect Greeks and positioning, compare structures, simulate outcomes, and backtest rules. Research software, not investment advice.",
     "developerName": "Iman Samizadeh",
     "category": "Finance",
@@ -36,10 +35,14 @@
       "Write"
     ],
     "websiteURL": "https://github.com/Iman/agent-driven-options-desk-and-skills",
+    "logo": "./assets/option-desk-logo.png",
+    "composerIcon": "./assets/option-desk-icon.png",
+    "brandColor": "#2F6FEB",
     "defaultPrompt": [
       "Show the Greek ladder for SPY's nearest expiry.",
       "Read dealer positioning for QQQ.",
       "Compare option structures for a neutral TLT view."
     ]
-  }
+  },
+  "mcpServers": "./.mcp.json"
 }

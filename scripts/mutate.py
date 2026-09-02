@@ -179,12 +179,10 @@ MUTATIONS = [
      "shell/tests/test_installer.py"),
     ("packaging-drops-a-resource", "scripts/package.py",
      "            for item in sorted(skill.rglob(\"*\")):\n"
-     "                if item.is_dir() or item.name == "
-     "\".installed-by-optiondesk\":\n"
+     "                if not _publishable(item):\n"
      "                    continue\n",
      "            for item in sorted(skill.glob(\"*\")):\n"
-     "                if item.is_dir() or item.name == "
-     "\".installed-by-optiondesk\":\n"
+     "                if not _publishable(item):\n"
      "                    continue\n",
      "shell/tests/test_packaging.py"),
     ("strategy-not-built-degraded", "shell/src/optiondesk/cli/strategy.py",

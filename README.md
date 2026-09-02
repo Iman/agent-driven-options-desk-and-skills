@@ -239,6 +239,7 @@ terminal:
 optiondesk expiries SPY           what is listed, and what you already hold
 optiondesk chain SPY              pull it
 optiondesk compare                every structure, ranked
+optiondesk plots SPY              write PNG charts for chat or reports
 optiondesk dashboard              serve the charts at 127.0.0.1:8787
 ```
 
@@ -265,6 +266,7 @@ optiondesk expiries SPY                  # what is listed, what you have
 optiondesk chain SPY --expiry 2026-09-18 # pull it
 optiondesk greeks --band 0.06            # sixteen Greeks per contract
 optiondesk exposure                      # walls, flip, max pain, smile
+optiondesk plots SPY                     # market and Greek charts as PNG files
 optiondesk compare                       # every structure, ranked
 optiondesk simulate SPY --horizon 14     # GARCH-t posterior and fan
 optiondesk backtest SPY iron_condor      # five years, modelled premiums
@@ -274,6 +276,9 @@ optiondesk dashboard                     # http://127.0.0.1:8787
 
 Each command prints a JSON summary and writes one artifact. The dashboard
 reads artifacts and writes nothing.
+
+If an MCP user asks for plots, `option_plots` returns PNG images in the tool
+result. The user does not need the dashboard or a localhost URL.
 
 ---
 
@@ -292,8 +297,8 @@ flowchart TB
         human["A person<br/>types commands"]
     end
 
-    mcp["MCP server<br/>stdio, standard library only<br/>10 tools"]
-    cli["CLI<br/>optiondesk chain, greeks, exposure,<br/>strategy, compare, simulate,<br/>backtest, forward"]
+    mcp["MCP server<br/>stdio, standard library only<br/>11 tools"]
+    cli["CLI<br/>optiondesk chain, greeks, exposure, plots,<br/>strategy, compare, simulate,<br/>backtest, forward"]
 
     subgraph shell["shell"]
         providers["Provider registry<br/>resolve by capability,<br/>not by vendor"]
@@ -447,9 +452,10 @@ posterior is one whose quantiles must not be quoted.
 | Command | What it does | Writes |
 |---|---|---|
 | `optiondesk expiries [SYM]` | Every expiry a provider lists, with days to expiry, and which you already hold. No symbol lists on-disk only, with no network. | nothing |
-| `optiondesk chain SYM` | Retrieve a chain, solve implied volatility per contract. `--expiry`, `--rate`, `--dividend-yield` | `chain_SYM_EXPIRY.json` |
+| `optiondesk chain SYM` | Retrieve a chain, solve implied volatility per contract, or ingest one from `--from-file` (CSV or JSON). `--expiry`, `--rate`, `--dividend-yield`, `--from-file` | `chain_SYM_EXPIRY.json` |
 | `optiondesk greeks` | Sixteen Greeks per contract from its own volatility. `--band`, `--type`, `--snapshot` | `greeks_SYM_EXPIRY.json` |
 | `optiondesk exposure` | Dealer gamma by strike, walls, flip, max pain, put-call ratios, smile geometry. | `exposure_SYM_EXPIRY.json` |
+| `optiondesk plots SYM` | Retrieve or read a chain and write opaque PNG charts. `--snapshot`, `--from-file`, `--expiry`, `--band` | `plots_SYM_EXPIRY_market.png`, `plots_SYM_EXPIRY_greeks.png` |
 | `optiondesk strategy NAME` | Build one structure. `--list`, `--recommend N`, `--vol-view`, `--size`, `--owns-underlying`, `--direction-unknown`; and for time spreads `--far-snapshot`, `--kind`, `--offset` | `strategy_SYM_NAME_EXPIRY.json` |
 | `optiondesk compare` | Every buildable structure, ranked by expected return on capital at risk. | `comparison_SYM_EXPIRY.json` |
 | `optiondesk simulate SYM` | GARCH-t posterior by MCMC, predictive fan, VaR and ES, per-structure distributions. `--horizon`, `--paths`, `--draws` | `simulation_SYM_Nd.json` |
@@ -528,8 +534,8 @@ compares the generated text against what is on disk, so a stale
 `AGENTS.md` fails the suite.
 
 Those files also carry a command reference read from the argparse parsers
-themselves rather than written by hand. Three commands, `expiries`, `keys`
-and `dashboard`, have no skill of their own, so without that section a
+themselves rather than written by hand. Four commands, `expiries`, `keys`,
+`plots` and `dashboard`, have no skill of their own, so without that section a
 Codex or Gemini user had no way to learn they were there. A test asserts
 every subcommand the real parser exposes appears in both copies, so a
 command added later without documentation fails the suite.
@@ -551,7 +557,8 @@ codex  mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
 gemini mcp add -s user optiondesk /abs/path/to/.venv/bin/optiondesk-mcp
 ```
 
-Ten tools are exposed: `option_chain_snapshot`, `option_greeks_ladder`,
+Eleven tools are exposed: `option_chain_snapshot`, `option_greeks_ladder`,
+`option_plots`,
 `option_expiries`, `option_strategy_build`, `option_strategy_compare`,
 `option_positioning`, `option_simulate`, `option_backtest`,
 `option_forward_test`, `option_desk_status`.
@@ -948,7 +955,7 @@ skips the index.
 All three at once, from the repository root:
 
 ```
-./shell/.venv/bin/python -m pytest -q          # 942 tests
+./shell/.venv/bin/python -m pytest -q          # 947 tests
 ```
 
 That works because of `pytest.ini`, and it did not until recently: the
@@ -961,8 +968,8 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 437 tests
-./shell/.venv/bin/python -m pytest agent/tests -q     # 159 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 441 tests
+./shell/.venv/bin/python -m pytest agent/tests -q     # 160 tests
 ```
 
 Those three counts are checked by `shell/tests/test_documented_counts.py`, which

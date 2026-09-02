@@ -81,7 +81,7 @@ with live browser analytics needs a hosted Streamable HTTP MCP service.
 
 ## 3. The command line
 
-Twelve commands. Each does one thing, writes one schema-validated artifact,
+Thirteen commands. Each command does one task. Each command writes an artifact
 and prints a JSON summary to standard output.
 
 | command | what it does |
@@ -92,6 +92,7 @@ and prints a JSON summary to standard output.
 | `optiondesk strategy` | build one named structure, or recommend one from a stated view |
 | `optiondesk compare` | build every buildable structure from one chain and rank them |
 | `optiondesk exposure` | dealer gamma, walls, flip levels, max pain, put-call ratios, smile |
+| `optiondesk plots SPY` | market, positioning and Greek plots as opaque PNG files |
 | `optiondesk simulate` | GARCH(1,1)-t posterior by MCMC, forward paths, tail risk |
 | `optiondesk backtest` | one structure entered repeatedly across real history |
 | `optiondesk forward` | paper ledger: open, mark, close, status |
@@ -489,11 +490,11 @@ current is the failure this exists to catch.
 
 ## 11. MCP tools
 
-Ten, over stdio, from `optiondesk-mcp`. Typed schemas, no prose, for any
+Eleven, over stdio, from `optiondesk-mcp`. Typed schemas, no prose, for any
 runtime that speaks the protocol: Claude Code, Codex, Gemini CLI and
 anything else.
 
-`option_chain_snapshot`, `option_greeks_ladder`, `option_expiries`,
+`option_chain_snapshot`, `option_greeks_ladder`, `option_plots`, `option_expiries`,
 `option_strategy_build`, `option_strategy_compare`, `option_positioning`,
 `option_simulate`, `option_backtest`, `option_forward_test`,
 `option_desk_status`.
@@ -514,7 +515,7 @@ null id. A request carrying id `0`, which is legal and easy to lose to a
 truthiness test, is still answered.
 
 Every tool description carries the reporting rule, appended in a loop
-rather than typed into ten strings so a tool added later cannot ship
+rather than typed into eleven strings so a tool added later cannot ship
 without it, and every result that produces numbers carries the disclaimer.
 This server is the surface Codex and Gemini reach, and neither of them
 loads the skills where those rules otherwise live.
@@ -526,7 +527,7 @@ loads the skills where those rules otherwise live.
 For an application you are building yourself, where this is one capability
 among several and the orchestration is yours.
 
-`desk_tools()` returns nine `StructuredTool` objects wrapping the same
+`desk_tools()` returns ten `StructuredTool` objects wrapping the same
 commands. `ArtifactStore` reads the artifact directory and exposes it three
 ways: `records()` for the raw payloads, `documents()` as LangChain
 `Document` objects for retrieval, and `context_for(underlying)` as a

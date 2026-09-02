@@ -11,6 +11,7 @@ from optiondesk.cli import chain as chain_cmd
 from optiondesk.cli import forward as forward_cmd
 from optiondesk.cli import greeks as greeks_cmd
 from optiondesk.cli import keys as keys_cmd
+from optiondesk.cli import plots as plots_cmd
 from optiondesk.cli import compare as compare_cmd
 from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.cli import expiries as expiries_cmd
@@ -53,6 +54,8 @@ def build_parser():
         "strategy", help="build a multi-leg strategy from a snapshot"))
     exposure_cmd.add_arguments(sub.add_parser(
         "exposure", help="dealer gamma, walls, max pain and smile geometry"))
+    plots_cmd.add_arguments(sub.add_parser(
+        "plots", help="write chat-ready market and Greek PNG plots"))
     expiries_cmd.add_arguments(sub.add_parser(
         "expiries", help="list available expiries and what is on disk"))
     compare_cmd.add_arguments(sub.add_parser(
@@ -88,6 +91,7 @@ HANDLERS = {
     "greeks": greeks_cmd.run,
     "strategy": strategy_cmd.run,
     "exposure": exposure_cmd.run,
+    "plots": plots_cmd.run,
     "expiries": expiries_cmd.run,
     "compare": compare_cmd.run,
     "simulate": simulate_cmd.run,

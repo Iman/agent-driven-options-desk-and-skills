@@ -189,6 +189,112 @@ def test_a_supplied_rate_is_used_and_nothing_is_fetched(
     assert "risk_free_rate" not in stub.calls
 
 
+def test_a_json_snapshot_file_is_accepted_without_network_access(tmp_path,
+                                                                args_factory):
+    """Catches a path-only chain run requiring no provider traffic."""
+    snapshot = {
+        "underlying": "SPY",
+        "spot": 600.0,
+        "spot_asof": "2026-09-02T14:00:00Z",
+        "expiry": "2026-09-18",
+        "days_to_expiry": 16,
+        "contracts": [
+            {
+                "strike": 600,
+                "type": "call",
+                "bid": 5.2,
+                "ask": 5.6,
+                "volume": 50,
+                "open_interest": 200,
+            },
+            {
+                "strike": 600,
+                "type": "put",
+                "bid": 4.8,
+                "ask": 5.0,
+                "volume": 80,
+                "open_interest": 120,
+            },
+        ],
+    }
+    path = tmp_path / "snapshot.json"
+    path.write_text(json.dumps(snapshot), encoding="utf-8")
+
+    args = args_factory(symbol="SPY", out_dir=str(tmp_path),
+                        from_file=str(path), source_path=None,
+                        rate=0.05, dividend_yield=0.0)
+    result = chain_cmd.run(args)
+
+    payload = read_json(result["artifact"])
+    assert payload["meta"]["provider_used"] == "user snapshot"
+    assert payload["risk_free_rate"] == 0.05
+    assert payload["spot_asof"] == "2026-09-02T14:00:00Z"
+    assert payload["counts"]["calls"] == 1
+    assert payload["counts"]["puts"] == 1
+
+
+def test_csv_snapshot_file_is_accepted_without_network_access(tmp_path,
+                                                             args_factory):
+    """Catches a CSV path reaching the same parser and writer path."""
+    csv_text = "\n".join([
+        "underlying,expiry,spot,strike,type,bid,ask,volume,open_interest,iv",
+        "SPY,2026-09-18,600.0,590,call,4.1,4.5,20,40,0.22",
+        "SPY,2026-09-18,600.0,590,put,3.2,3.4,10,30,0.27",
+    ])
+    path = tmp_path / "snapshot.csv"
+    path.write_text(csv_text, encoding="utf-8")
+
+    args = args_factory(symbol="SPY", out_dir=str(tmp_path),
+                        from_file=str(path), source_path=None,
+                        rate=0.03, dividend_yield=0.0)
+    result = chain_cmd.run(args)
+
+    payload = read_json(result["artifact"])
+    assert payload["meta"]["provider_used"] == "user snapshot"
+    assert payload["counts"]["calls"] == 1
+    assert payload["counts"]["puts"] == 1
+    assert len(payload["contracts"]) == 2
+    calls = [c for c in payload["contracts"] if c["type"] == "call"]
+    assert calls[0]["iv"] == 0.22
+    assert payload["counts"]["without_iv"] == 0
+
+
+def test_source_path_is_honoured_by_the_chain_runner(tmp_path, args_factory):
+    """Catches MCP/agent field naming from `source_path` from_file mismatch."""
+    snapshot = {
+        "underlying": "SPY",
+        "spot": 600.0,
+        "expiry": "2026-09-18",
+        "days_to_expiry": 16,
+        "contracts": [
+            {
+                "strike": 600,
+                "type": "call",
+                "bid": 5.2,
+                "ask": 5.6,
+                "iv": 0.21,
+            },
+            {
+                "strike": 600,
+                "type": "put",
+                "bid": 4.8,
+                "ask": 5.0,
+                "iv": 0.22,
+            },
+        ],
+    }
+    path = tmp_path / "snapshot.json"
+    path.write_text(json.dumps(snapshot), encoding="utf-8")
+
+    args = args_factory(symbol="SPY", out_dir=str(tmp_path),
+                        source_path=str(path), from_file=None,
+                        rate=0.05, dividend_yield=0.0)
+    result = chain_cmd.run(args)
+
+    payload = read_json(result["artifact"])
+    assert payload["meta"]["provider_used"] == "user snapshot"
+
+
 @needs_engine
 def test_a_degraded_rate_degrades_the_snapshot(
         stub_provider, provider_chain, args_factory, tmp_path):

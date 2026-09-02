@@ -11,7 +11,12 @@ three hundred points away is exactly what a band would hide.
 ## Execution route
 
 Prefer `option_chain_snapshot` to retrieve the whole chain and
-`option_positioning` to analyse it. If a matching MCP tool is not available,
+`option_positioning` to analyse it. When the user asks to see positioning,
+gamma, open-interest, volume, or volatility plots, call `option_plots`. The
+tool returns PNG images in the conversation. Do not answer with a localhost
+dashboard URL. If the user has attached a CSV or JSON chain, pass its path as
+`source_path`. Do not ask for the same data again. If a matching MCP tool is
+not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh positioning result can be produced; do not invent figures
 or present example or remembered values as current.
@@ -21,6 +26,7 @@ or present example or remembered values as current.
 ```
 optiondesk chain SPY --expiry 2026-09-18
 optiondesk exposure
+optiondesk plots SPY --expiry 2026-09-18
 ```
 
 `exposure` takes `--snapshot PATH` and `--multiplier` (100 for US equity

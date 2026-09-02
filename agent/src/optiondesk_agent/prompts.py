@@ -62,6 +62,8 @@ def build_router_prompt():
          "option_chain_snapshot: quotes and implied volatility for one "
          "expiry.\n"
          "option_greeks_ladder: sensitivities per contract.\n"
+         "option_plots: images for requests to see, show, chart, or plot "
+         "option data.\n"
          "option_positioning: walls, gamma flip, max pain, smile geometry.\n"
          "option_strategy_build: one structure.\n"
          "option_strategy_compare: every structure, ranked.\n"

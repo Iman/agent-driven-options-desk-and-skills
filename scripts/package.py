@@ -95,11 +95,11 @@ def _codex_manifest(include_mcp):
         description = DESCRIPTION
         long_description = (
             "Build option-chain research artifacts, inspect Greeks and "
-            "positioning, compare structures, simulate outcomes, and "
+            "positioning, show plots, compare structures, simulate outcomes, and "
             "backtest rules. Research software, not investment advice."
         )
         default_prompts = [
-            "Show the Greek ladder for SPY's nearest expiry.",
+            "Show SPY option plots for the nearest expiry.",
             "Read dealer positioning for QQQ.",
             "Compare option structures for a neutral TLT view.",
         ]

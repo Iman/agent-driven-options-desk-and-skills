@@ -248,7 +248,7 @@ codex  mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
 gemini mcp add -s user optiondesk /abs/path/to/.venv/bin/optiondesk-mcp
 ```
 
-Ten tools, typed schemas, no prose. This is the right choice when the
+Eleven tools, typed schemas, no prose. This is the right choice when the
 runtime already has its own conventions and you want capability, not
 guidance.
 

@@ -26,6 +26,7 @@ from optiondesk.cli import expiries as expiries_cmd
 from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.cli import forward as forward_cmd
 from optiondesk.cli import greeks as greeks_cmd
+from optiondesk.cli import plots as plots_cmd
 from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.cli import strategy as strategy_cmd
 
@@ -54,13 +55,16 @@ SPECS = [
         "name": "option_chain_snapshot",
         "description": (
             "Retrieve an option chain for one underlying and expiry from a "
-            "free data provider, solve implied volatility per contract, and "
+            "free data provider or uploaded snapshot, solve implied volatility "
+            "per contract, and "
             "write a schema validated snapshot. Returns the artifact path "
             "and a summary. Delayed third party data."),
         "runner": chain_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "provider": None,
-                     "rate": None, "dividend_yield": 0.0, "out_dir": None},
-        "public": ("symbol", "expiry", "dividend_yield", "rate"),
+                     "source_path": None, "from_file": None, "rate": None,
+                     "dividend_yield": 0.0, "out_dir": None},
+        "public": ("symbol", "expiry", "source_path", "dividend_yield",
+                   "rate"),
     },
     {
         "name": "option_expiries",
@@ -83,6 +87,21 @@ SPECS = [
         "defaults": {"snapshot": None, "band": 0.10, "type": "both",
                      "out_dir": None},
         "public": ("snapshot", "band", "type"),
+    },
+    {
+        "name": "option_plots",
+        "description": (
+            "Fetch or read a chain and write opaque PNG charts for direct "
+            "display: positioning, open interest, volume, implied volatility, "
+            "delta, gamma, theta and vega. Use when the user asks to see "
+            "plots; return the image paths instead of starting a dashboard."),
+        "runner": plots_cmd.run,
+        "defaults": {"symbol": None, "expiry": None, "snapshot": None,
+                     "source_path": None, "rate": None,
+                     "dividend_yield": None, "band": 0.15,
+                     "out_dir": None},
+        "public": ("symbol", "expiry", "snapshot", "source_path", "rate",
+                   "dividend_yield", "band"),
     },
     {
         "name": "option_positioning",

@@ -16,6 +16,7 @@ stray print corrupts the stream and the client reports a parse error with no
 clue where it came from.
 """
 
+import base64
 import json
 import sys
 
@@ -28,6 +29,7 @@ from optiondesk.cli import expiries as expiries_cmd
 from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.cli import forward as forward_cmd
 from optiondesk.cli import greeks as greeks_cmd
+from optiondesk.cli import plots as plots_cmd
 from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.cli import strategy as strategy_cmd
 from optiondesk.providers import describe_all
@@ -93,10 +95,10 @@ TOOLS = [
         "name": "option_chain_snapshot",
         "description": (
             "Retrieve an option chain for one underlying and expiry from a "
-            "free data provider, solve implied volatility per contract where "
-            "possible, and write a schema-validated snapshot artifact. "
-            "Returns the artifact path and a summary. Delayed third-party "
-            "data; not investment advice."),
+            "free data provider or an uploaded snapshot file. Solve implied "
+            "volatility where possible and write a schema-validated chain "
+            "artifact. Returns the artifact path and a summary. Delayed "
+            "third-party or user-provided data; not investment advice."),
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -104,6 +106,8 @@ TOOLS = [
                            "description": "Underlying ticker, e.g. SPY"},
                 "expiry": {"type": "string",
                            "description": "YYYY-MM-DD. Omit for nearest"},
+                "source_path": {"type": "string",
+                                "description": "Path to a CSV or JSON snapshot"},
                 "dividend_yield": {"type": "number",
                                    "description": "Continuous yield per 1.00"},
                 "rate": {"type": "number",
@@ -114,7 +118,8 @@ TOOLS = [
         },
         "handler": chain_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "provider": None,
-                     "rate": None, "dividend_yield": 0.0, "out_dir": None},
+                     "source_path": None, "from_file": None, "rate": None,
+                     "dividend_yield": 0.0, "out_dir": None},
     },
     {
         "name": "option_greeks_ladder",
@@ -141,6 +146,41 @@ TOOLS = [
         "handler": greeks_cmd.run,
         "defaults": {"snapshot": None, "band": 0.10, "type": "both",
                      "out_dir": None},
+    },
+    {
+        "name": "option_plots",
+        "description": (
+            "Fetch or read an option chain and return opaque PNG charts as "
+            "image content in this tool result. Use this when the user asks "
+            "to see, show, draw, chart, or plot option data. It displays the "
+            "images in the conversation; do not start the localhost dashboard "
+            "instead. The market image includes positioning when the analytics "
+            "engine is available, plus open interest, volume, and implied "
+            "volatility. A second image shows delta, gamma, theta, and vega."),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "symbol": {"type": "string",
+                           "description": "Underlying ticker, e.g. SPY"},
+                "expiry": {"type": "string",
+                           "description": "YYYY-MM-DD. Omit for nearest"},
+                "snapshot": {"type": "string",
+                             "description": "Existing chain artifact path"},
+                "source_path": {"type": "string",
+                                "description": "Uploaded CSV or JSON chain"},
+                "rate": {"type": "number"},
+                "dividend_yield": {"type": "number"},
+                "band": {"type": "number",
+                         "description": "Fraction around spot; 0 shows all"},
+            },
+            "required": ["symbol"],
+        },
+        "handler": plots_cmd.run,
+        "defaults": {"symbol": None, "expiry": None, "snapshot": None,
+                     "source_path": None, "rate": None,
+                     "dividend_yield": None, "band": 0.15,
+                     "out_dir": None},
+        "returns_images": True,
     },
     {
         "name": "option_expiries",
@@ -380,7 +420,7 @@ def _public(tool):
             "inputSchema": tool["inputSchema"]}
 
 
-def _result(payload, rejected=()):
+def _result(payload, rejected=(), image_paths=()):
     """One tools/call result frame.
 
     Two things travel with every payload rather than with one of them.
@@ -400,8 +440,16 @@ def _result(payload, rejected=()):
         payload.setdefault("disclaimer", DISCLAIMER)
         if rejected:
             payload["ignored_arguments"] = list(rejected)
-    return {"content": [{"type": "text",
-                         "text": json.dumps(payload, indent=1, default=str)}]}
+    content = [{"type": "text",
+                "text": json.dumps(payload, indent=1, default=str)}]
+    for path in image_paths:
+        with open(path, "rb") as handle:
+            content.append({
+                "type": "image",
+                "data": base64.b64encode(handle.read()).decode("ascii"),
+                "mimeType": "image/png",
+            })
+    return {"content": content}
 
 
 def _error_result(exc):
@@ -507,11 +555,14 @@ def handle(request):
         args = _Args(tool["defaults"], supplied, allowed)
         try:
             payload = tool["handler"](args)
+            image_paths = (payload.get("plots") or []) if (
+                tool.get("returns_images") and isinstance(payload, dict)) else []
+            result = _result(payload, args.rejected, image_paths)
         except Exception as exc:  # surfaced to the model, not the transport
             return {"jsonrpc": "2.0", "id": request_id,
                     "result": _error_result(exc)}
         return {"jsonrpc": "2.0", "id": request_id,
-                "result": _result(payload, args.rejected)}
+                "result": result}
 
     return {"jsonrpc": "2.0", "id": request_id,
             "error": {"code": -32601,

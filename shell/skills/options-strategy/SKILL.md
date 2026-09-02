@@ -11,7 +11,9 @@ Three commands. Build one structure, list what exists, or compare them all.
 
 Prefer `option_strategy_build` to list or build structures and
 `option_strategy_compare` to compare them. Use `option_chain_snapshot` first
-when a fresh chain is needed. If a matching MCP tool is not available, use
+when a fresh chain is needed. If the user has attached a CSV or JSON chain,
+pass its path as `source_path`. Do not ask the user to paste or upload it
+again. If a matching MCP tool is not available, use
 the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh structure analysis can be produced; do not invent figures
 or present example or remembered values as current.

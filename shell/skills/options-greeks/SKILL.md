@@ -24,7 +24,11 @@ anything that amounts to a recommendation to trade.
 
 Prefer `option_chain_snapshot` to retrieve the chain and
 `option_greeks_ladder` to grade it. Use `option_desk_status` for the
-availability check when needed. If a matching MCP tool is not available,
+availability check when needed. When the user asks to see a plot or chart,
+call `option_plots`. The tool returns PNG images in the conversation. Do not
+start the localhost dashboard as a substitute. If the user attached a CSV or
+JSON chain, pass its path as `source_path`. Do not ask the user to paste the
+same data. If a matching MCP tool is not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is
 available, say that no fresh chain or Greek ladder can be produced; do not
 invent figures or present example or remembered values as current.
@@ -34,6 +38,7 @@ invent figures or present example or remembered values as current.
 ```
 optiondesk chain SPY
 optiondesk greeks
+optiondesk plots SPY
 ```
 
 `chain` takes `--expiry YYYY-MM-DD` (default: nearest listed),

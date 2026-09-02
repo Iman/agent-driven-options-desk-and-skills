@@ -30,13 +30,15 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 Every command the CLI exposes, read from the argparse parsers in src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
-  Flags: --expiry, --provider, --rate, --dividend-yield, --out-dir
+  Flags: --from-file, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot
   Flags: --snapshot, --band, --type, --out-dir
 - `optiondesk strategy [NAME]`: build a multi-leg strategy from a snapshot
   Flags: --snapshot, --far-snapshot, --kind, --offset, --size, --underlying-entry, --list, --recommend, --vol-view, --owns-underlying, --direction-unknown, --out-dir
 - `optiondesk exposure`: dealer gamma, walls, max pain and smile geometry
   Flags: --snapshot, --multiplier, --out-dir
+- `optiondesk plots SYMBOL`: write chat-ready market and Greek PNG plots
+  Flags: --snapshot, --from-file, --expiry, --rate, --dividend-yield, --band, --out-dir
 - `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
   Flags: --provider, --out-dir
 - `optiondesk compare`: every structure side by side, ranked

@@ -27,7 +27,7 @@
   "interface": {
     "displayName": "Option Desk",
     "shortDescription": "Research listed options.",
-    "longDescription": "Build option-chain research artifacts, inspect Greeks and positioning, compare structures, simulate outcomes, and backtest rules. Research software, not investment advice.",
+    "longDescription": "Build option-chain research artifacts, inspect Greeks and positioning, show plots, compare structures, simulate outcomes, and backtest rules. Research software, not investment advice.",
     "developerName": "Iman Samizadeh",
     "category": "Finance",
     "capabilities": [
@@ -39,7 +39,7 @@
     "composerIcon": "./assets/option-desk-icon.png",
     "brandColor": "#2F6FEB",
     "defaultPrompt": [
-      "Show the Greek ladder for SPY's nearest expiry.",
+      "Show SPY option plots for the nearest expiry.",
       "Read dealer positioning for QQQ.",
       "Compare option structures for a neutral TLT view."
     ]

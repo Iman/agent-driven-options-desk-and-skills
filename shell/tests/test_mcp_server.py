@@ -2,6 +2,7 @@
 else, so a regression here breaks Claude Code, Codex and Gemini at once."""
 
 import argparse
+import base64
 import io
 import json
 
@@ -15,6 +16,7 @@ from optiondesk.cli import expiries as expiries_cmd
 from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.cli import forward as forward_cmd
 from optiondesk.cli import greeks as greeks_cmd
+from optiondesk.cli import plots as plots_cmd
 from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.cli import strategy as strategy_cmd
 from optiondesk.mcp import server
@@ -49,6 +51,7 @@ def test_tools_list_shape():
     assert {"option_chain_snapshot", "option_greeks_ladder",
             "option_expiries", "option_strategy_build",
             "option_strategy_compare", "option_positioning",
+            "option_plots",
             "option_simulate", "option_backtest", "option_forward_test",
             "option_desk_status"} <= names
     assert len(names) == len(tools), "duplicate tool name"
@@ -191,6 +194,7 @@ def test_handler_exceptions_do_not_escape_the_transport():
 CLI_BEHIND = {
     "option_chain_snapshot": chain_cmd,
     "option_greeks_ladder": greeks_cmd,
+    "option_plots": plots_cmd,
     "option_expiries": expiries_cmd,
     "option_strategy_build": strategy_cmd,
     "option_strategy_compare": compare_cmd,
@@ -233,6 +237,26 @@ def call(name, arguments=None, request_id=1):
                           "method": "tools/call",
                           "params": {"name": name,
                                      "arguments": arguments or {}}})
+
+
+def test_plot_tool_returns_opaque_png_content(
+        desk, chain_snapshot, monkeypatch):
+    """A plot request must put an image in the MCP result itself."""
+    snapshot = chain_snapshot(expiry="2026-09-18", days=16.0)
+    path = write_json(snapshot, "chain_TEST_2026-09-18.json", desk)
+    monkeypatch.setattr(plots_cmd.engine_bridge, "AVAILABLE", False)
+
+    response = call("option_plots", {
+        "symbol": "TEST", "snapshot": str(path)})
+    assert not response["result"].get("isError"), response
+    blocks = response["result"]["content"]
+    assert blocks[0]["type"] == "text"
+    images = [block for block in blocks if block["type"] == "image"]
+    assert len(images) == 1
+    assert images[0]["mimeType"] == "image/png"
+    decoded = base64.b64decode(images[0]["data"])
+    assert decoded.startswith(b"\x89PNG\r\n\x1a\n")
+    assert decoded[25] == 2, "PNG must use opaque RGB, not RGBA"
 
 
 def body_of(response):

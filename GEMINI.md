@@ -253,7 +253,11 @@ anything that amounts to a recommendation to trade.
 
 Prefer `option_chain_snapshot` to retrieve the chain and
 `option_greeks_ladder` to grade it. Use `option_desk_status` for the
-availability check when needed. If a matching MCP tool is not available,
+availability check when needed. When the user asks to see a plot or chart,
+call `option_plots`. The tool returns PNG images in the conversation. Do not
+start the localhost dashboard as a substitute. If the user attached a CSV or
+JSON chain, pass its path as `source_path`. Do not ask the user to paste the
+same data. If a matching MCP tool is not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is
 available, say that no fresh chain or Greek ladder can be produced; do not
 invent figures or present example or remembered values as current.
@@ -263,6 +267,7 @@ invent figures or present example or remembered values as current.
 ```
 optiondesk chain SPY
 optiondesk greeks
+optiondesk plots SPY
 ```
 
 `chain` takes `--expiry YYYY-MM-DD` (default: nearest listed),
@@ -391,7 +396,12 @@ three hundred points away is exactly what a band would hide.
 ## Execution route
 
 Prefer `option_chain_snapshot` to retrieve the whole chain and
-`option_positioning` to analyse it. If a matching MCP tool is not available,
+`option_positioning` to analyse it. When the user asks to see positioning,
+gamma, open-interest, volume, or volatility plots, call `option_plots`. The
+tool returns PNG images in the conversation. Do not answer with a localhost
+dashboard URL. If the user has attached a CSV or JSON chain, pass its path as
+`source_path`. Do not ask for the same data again. If a matching MCP tool is
+not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh positioning result can be produced; do not invent figures
 or present example or remembered values as current.
@@ -401,6 +411,7 @@ or present example or remembered values as current.
 ```
 optiondesk chain SPY --expiry 2026-09-18
 optiondesk exposure
+optiondesk plots SPY --expiry 2026-09-18
 ```
 
 `exposure` takes `--snapshot PATH` and `--multiplier` (100 for US equity
@@ -649,7 +660,9 @@ Three commands. Build one structure, list what exists, or compare them all.
 
 Prefer `option_strategy_build` to list or build structures and
 `option_strategy_compare` to compare them. Use `option_chain_snapshot` first
-when a fresh chain is needed. If a matching MCP tool is not available, use
+when a fresh chain is needed. If the user has attached a CSV or JSON chain,
+pass its path as `source_path`. Do not ask the user to paste or upload it
+again. If a matching MCP tool is not available, use
 the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh structure analysis can be produced; do not invent figures
 or present example or remembered values as current.
@@ -759,13 +772,15 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 Every command the CLI exposes, read from the argparse parsers in shell/src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
-  Flags: --expiry, --provider, --rate, --dividend-yield, --out-dir
+  Flags: --from-file, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot
   Flags: --snapshot, --band, --type, --out-dir
 - `optiondesk strategy [NAME]`: build a multi-leg strategy from a snapshot
   Flags: --snapshot, --far-snapshot, --kind, --offset, --size, --underlying-entry, --list, --recommend, --vol-view, --owns-underlying, --direction-unknown, --out-dir
 - `optiondesk exposure`: dealer gamma, walls, max pain and smile geometry
   Flags: --snapshot, --multiplier, --out-dir
+- `optiondesk plots SYMBOL`: write chat-ready market and Greek PNG plots
+  Flags: --snapshot, --from-file, --expiry, --rate, --dividend-yield, --band, --out-dir
 - `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
   Flags: --provider, --out-dir
 - `optiondesk compare`: every structure side by side, ranked

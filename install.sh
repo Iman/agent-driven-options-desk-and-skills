@@ -606,6 +606,7 @@ Try it:
   optiondesk chain SPY
   optiondesk greeks --band 0.05
   optiondesk exposure
+  optiondesk plots SPY
   optiondesk compare
   optiondesk dashboard
 

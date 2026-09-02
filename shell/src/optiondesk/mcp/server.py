@@ -68,6 +68,11 @@ REPORTING_RULE = (
     "it names.")
 
 
+def _snapshot_schema(_args):
+    """Describe the private user-data contract without reading data."""
+    return chain_cmd.snapshot_schema()
+
+
 class _Args:
     """argparse-free stand-in so CLI handlers can be called directly.
 
@@ -92,13 +97,27 @@ class _Args:
 
 TOOLS = [
     {
+        "name": "option_snapshot_schema",
+        "description": (
+            "Describe the accepted user-supplied CSV and JSON fields, column "
+            "aliases, deterministic repair policy, size limits, and data-rights "
+            "requirement. Call this when an attachment needs correction. Never "
+            "invent a missing market value."),
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": _snapshot_schema,
+        "defaults": {},
+    },
+    {
         "name": "option_chain_snapshot",
         "description": (
             "Retrieve an option chain for one underlying and expiry from a "
-            "free data provider or an uploaded snapshot file. Solve implied "
+            "permitted provider or user-supplied data. An attachment can be "
+            "sent as source_data, source_text, or a local source_path. Solve implied "
             "volatility where possible and write a schema-validated chain "
-            "artifact. Returns the artifact path and a summary. Delayed "
-            "third-party or user-provided data; not investment advice."),
+            "artifact for the dashboard and later tools. Set rights_confirmed "
+            "only after the user states that the data can be sent for private "
+            "analysis. Do not ask for an attachment again when it is present. "
+            "Never invent a missing market value."),
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -108,6 +127,19 @@ TOOLS = [
                            "description": "YYYY-MM-DD. Omit for nearest"},
                 "source_path": {"type": "string",
                                 "description": "Path to a CSV or JSON snapshot"},
+                "source_text": {"type": "string",
+                                "description": "Inline CSV or JSON text"},
+                "source_data": {
+                    "description": "Inline JSON object or contract-row list",
+                    "oneOf": [{"type": "object"}, {"type": "array"}]},
+                "source_format": {"type": "string", "enum": ["csv", "json"]},
+                "data_source": {
+                    "type": "string",
+                    "description": "Provider or source named by the user"},
+                "rights_confirmed": {
+                    "type": "boolean",
+                    "description": "User states that this data can be sent "
+                                   "for private analysis"},
                 "dividend_yield": {"type": "number",
                                    "description": "Continuous yield per 1.00"},
                 "rate": {"type": "number",
@@ -119,7 +151,10 @@ TOOLS = [
         "handler": chain_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "provider": None,
                      "source_path": None, "from_file": None, "rate": None,
-                     "dividend_yield": 0.0, "out_dir": None},
+                     "source_text": None, "source_data": None,
+                     "source_format": None, "data_source": None,
+                     "rights_confirmed": False,
+                     "dividend_yield": None, "out_dir": None},
     },
     {
         "name": "option_greeks_ladder",
@@ -168,6 +203,14 @@ TOOLS = [
                              "description": "Existing chain artifact path"},
                 "source_path": {"type": "string",
                                 "description": "Uploaded CSV or JSON chain"},
+                "source_text": {"type": "string",
+                                "description": "Inline CSV or JSON text"},
+                "source_data": {
+                    "description": "Inline JSON object or contract-row list",
+                    "oneOf": [{"type": "object"}, {"type": "array"}]},
+                "source_format": {"type": "string", "enum": ["csv", "json"]},
+                "data_source": {"type": "string"},
+                "rights_confirmed": {"type": "boolean"},
                 "rate": {"type": "number"},
                 "dividend_yield": {"type": "number"},
                 "band": {"type": "number",
@@ -178,6 +221,9 @@ TOOLS = [
         "handler": plots_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "snapshot": None,
                      "source_path": None, "rate": None,
+                     "source_text": None, "source_data": None,
+                     "source_format": None, "data_source": None,
+                     "rights_confirmed": False,
                      "dividend_yield": None, "band": 0.15,
                      "out_dir": None},
         "returns_images": True,
@@ -498,10 +544,13 @@ def handle(request):
                 "capabilities": {"tools": {"listChanged": False}},
                 "serverInfo": {"name": SERVER_NAME, "version": __version__},
                 "instructions": (
-                    "Option analytics over free market data. Outputs are "
-                    "research artifacts, not investment advice, and option "
-                    "premiums are modelled values rather than tradable "
-                    "quotes. Present the degraded flag whenever it is true."),
+                    "Option analytics over permitted or user-supplied data. "
+                    "When a file is attached, use it instead of asking for it "
+                    "again. Correct clear format and unit errors, report each "
+                    "repair, and never invent a missing market value. User data "
+                    "is for private analysis only. Outputs are research "
+                    "artifacts, not investment advice. Present the degraded "
+                    "flag whenever it is true."),
             },
         }
 

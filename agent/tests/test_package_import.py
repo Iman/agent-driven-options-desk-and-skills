@@ -53,7 +53,7 @@ def test_the_package_imports_with_langgraph_blocked():
     with langgraph_absent():
         package = importlib.import_module("optiondesk_agent")
 
-        assert package.__version__ == "0.2.0"
+        assert package.__version__ == "0.3.0"
 
 
 def test_the_graph_module_is_not_pulled_in_on_import():

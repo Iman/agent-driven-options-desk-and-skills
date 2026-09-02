@@ -419,3 +419,6 @@ def test_describe_reports_the_terms_without_claiming_redistribution():
     assert described["requires_key"] is False
     assert "legal.yahoo.com" in described["terms_url"]
     assert "redistribution" in described["notes"].lower()
+    assert described["public_redistribution_approved"] is False
+    assert described["public_web_display_approved"] is False
+    assert described["public_mcp_delivery_approved"] is False

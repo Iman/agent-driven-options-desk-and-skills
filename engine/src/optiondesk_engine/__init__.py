@@ -16,7 +16,7 @@ This is research software. It is not investment advice, not a
 recommendation and not a solicitation. See DISCLAIMER.md.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 LICENSE = "PolyForm-Noncommercial-1.0.0"
 
 from optiondesk_engine.pricing.black_scholes import (

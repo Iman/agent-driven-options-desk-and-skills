@@ -289,7 +289,17 @@ def _within_band(rows, spot, band):
             and abs(float(row["strike"]) - spot) <= spot * band]
 
 
-def market_png(chain, exposure=None, width=1200, height=820, band=0.15):
+def _warning_footer(canvas, text):
+    """Draw a solid warning strip without transparency."""
+    if not text:
+        return
+    height = 26
+    canvas.rect(0, canvas.height - height, canvas.width, height, AMBER)
+    canvas.text(18, canvas.height - 17, str(text)[:190], BLACK, 1)
+
+
+def market_png(chain, exposure=None, width=1200, height=820, band=0.15,
+               footer=None):
     """Render positioning, open interest, volume, and volatility smile."""
     canvas = Canvas(width, height)
     symbol = str(chain.get("underlying") or "OPTION DESK")
@@ -336,10 +346,11 @@ def market_png(chain, exposure=None, width=1200, height=820, band=0.15):
         ("CALL", CALL, [(r.get("strike"), r.get("iv")) for r in calls]),
         ("PUT", PUT, [(r.get("strike"), r.get("iv")) for r in puts]),
     ], "line", spot, percent=True)
+    _warning_footer(canvas, footer)
     return canvas.png()
 
 
-def greeks_png(ladder, width=1200, height=820):
+def greeks_png(ladder, width=1200, height=820, footer=None):
     """Render delta, gamma, theta, and vega from a Greek ladder."""
     canvas = Canvas(width, height)
     symbol = str(ladder.get("underlying") or "OPTION DESK")
@@ -358,4 +369,5 @@ def greeks_png(ladder, width=1200, height=820):
             ("CALL", CALL, [(r.get("strike"), r.get(key)) for r in calls]),
             ("PUT", PUT, [(r.get("strike"), r.get(key)) for r in puts]),
         ], "line", spot)
+    _warning_footer(canvas, footer)
     return canvas.png()

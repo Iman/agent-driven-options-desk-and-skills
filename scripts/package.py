@@ -41,7 +41,7 @@ BRANDING = {
 }
 PUBLISH_IGNORES = {".DS_Store", ".installed-by-optiondesk", "__pycache__"}
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 AUTHOR = {"name": "Iman Samizadeh"}
 REPOSITORY = "https://github.com/Iman/agent-driven-options-desk-and-skills"
 DESCRIPTION = (
@@ -108,14 +108,14 @@ def _codex_manifest(include_mcp):
         description = (
             "Interpret user-provided option-chain data and research artifacts "
             "using focused workflows for Greeks, positioning, strategy, "
-            "simulation, and backtests. Research software, not investment "
-            "advice."
+            "simulation, and backtests. Users must have the right to share "
+            "their inputs. Research software, not investment advice."
         )
         long_description = (
             "Interpret user-provided option research without fetching live "
             "data. Review Greeks and positioning, compare structures, and "
-            "assess simulations and backtests. Research software, not "
-            "investment advice."
+            "assess simulations and backtests. Use only data that you have "
+            "the right to share. Research software, not investment advice."
         )
         default_prompts = [
             "Explain the main risks in this option-chain snapshot.",
@@ -128,7 +128,7 @@ def _codex_manifest(include_mcp):
         "longDescription": long_description,
         "developerName": AUTHOR["name"],
         "category": "Finance",
-        "capabilities": ["Read", "Write"],
+        "capabilities": ["Read", "Write"] if include_mcp else ["Read"],
         "websiteURL": REPOSITORY,
         "logo": "./assets/{}".format(BRANDING["logo"]),
         "composerIcon": "./assets/{}".format(BRANDING["composerIcon"]),

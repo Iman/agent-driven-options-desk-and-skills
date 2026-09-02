@@ -4,6 +4,40 @@ Dates are the day the work landed. Figures quoted here were measured on one
 live SPY chain, 2026-10-16 expiry with 2026-12-18 also on disk, unless the
 entry says otherwise.
 
+## 0.3.0, 2026-09-02
+
+This release adds private analysis of user-supplied option-chain data.
+
+- The CLI imports CSV or JSON with an explicit source and data-rights statement.
+- MCP clients can send a JSON object, JSON text, CSV text, or a local path.
+- The importer normalizes documented aliases, numeric commas, call or put codes,
+  and clear percentage units.
+- The importer reports each deterministic repair. It rejects missing, duplicate,
+  conflicting, negative, or non-finite market fields.
+- Imported snapshots feed the existing Greeks, positioning, strategy, plot, and
+  dashboard paths.
+- User-data plots include a solid warning footer.
+- A new `option_snapshot_schema` tool tells chat clients how to correct an
+  attachment without inventing values.
+- The hosted service can process uploads privately. The public dashboard remains
+  synthetic until a licensed provider is approved.
+
+## 0.2.1, 2026-09-02
+
+This release corrects the data-use boundary. It does not change the analytics.
+
+- Yahoo now needs a separate local personal-use acknowledgement. The
+  installer's `--yes` flag does not provide it.
+- `PUBLIC_DATA_MODE=demo` blocks all external providers.
+- `PUBLIC_DATA_MODE=licensed` permits only providers approved for public web
+  display, derived outputs, storage, redistribution, and MCP delivery. No
+  included provider has that approval.
+- An invalid public data mode fails closed.
+- The public OpenAI archive remains skills-only. It accepts user-provided data
+  and tells users to share only data they have the right to share.
+- The skills use an approved tool when one is present. They do not bypass a
+  provider refusal or start a localhost dashboard in place of an in-chat plot.
+
 ## 0.2.0, 2026-08-31
 
 The headline: eleven numbers or claims changed, so figures produced by

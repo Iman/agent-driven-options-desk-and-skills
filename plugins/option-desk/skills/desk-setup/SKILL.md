@@ -34,7 +34,10 @@ copies the skills into both `~/.claude/skills` and `~/.agents/skills`, and
 registers the MCP server with every agent runtime it finds. Re-running is
 safe, and `./install.sh --uninstall` removes only what it created.
 
-Python 3.11 or newer is required. No API key is needed for anything.
+Python 3.11 or newer is required. Yahoo needs no API key, but it remains
+disabled until the user accepts its local personal-use boundary. Use
+`--accept-yahoo-terms` only after the user reads Yahoo's terms. The flag does
+not permit hosting, business use, public display, or redistribution.
 
 ## The failure almost everyone hits
 
@@ -81,9 +84,14 @@ is a skill that explains the desk; it is not a desk.
 ## What this cannot fix
 
 In ChatGPT on the web or on a phone, there is no local process to install
-and nothing here will make the tools run. The skills work there as
-knowledge only. Codex on your own machine, Claude Code, and the ChatGPT
-desktop app can all run the local server.
+and nothing here will make local tools run. Do not ask the user to install a
+local process in that session. Use an attached remote MCP server when one is
+present. Without one, the skills can analyse user-provided data only.
+
+Hosted deployments must set `PUBLIC_DATA_MODE=demo` or `licensed`. Demo mode
+blocks all external providers. Licensed mode permits only a provider that has
+an explicit approval for public display, derived outputs, storage, and MCP
+delivery. Never change this mode to work around a provider refusal.
 
 ## Reporting rules
 

@@ -73,6 +73,16 @@ Reading and honouring those terms is your responsibility, not the author's.
 Where you supply your own API keys, your agreement with that provider governs
 your use.
 
+Do not upload a market-data snapshot unless you have the right to share it
+with the service that receives it. A derived chart can still be subject to a
+provider agreement. A disclaimer does not create display, storage, commercial,
+or redistribution rights.
+
+The included Yahoo adapter is for acknowledged local personal research only.
+The included Alpha Vantage adapter has no recorded approval for public hosting.
+Hosted data modes block both adapters. A hosted provider must have an explicit
+approval for public display, derived outputs, storage, and MCP delivery.
+
 ## 6. No warranty
 
 The software is provided "as is", without warranty of any kind, express or

@@ -1,6 +1,6 @@
 ---
 name: options-greeks
-description: Retrieve an option chain from free market data and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
+description: Retrieve an approved or user-provided option chain and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
 ---
 
 # Option Greeks
@@ -27,16 +27,41 @@ Prefer `option_chain_snapshot` to retrieve the chain and
 availability check when needed. When the user asks to see a plot or chart,
 call `option_plots`. The tool returns PNG images in the conversation. Do not
 start the localhost dashboard as a substitute. If the user attached a CSV or
-JSON chain, pass its path as `source_path`. Do not ask the user to paste the
-same data. If a matching MCP tool is not available,
+JSON chain, do not ask for the same data again. For a local file, pass its
+path as `source_path`. For remote chat, pass its content as `source_data` or
+`source_text`. If a matching MCP tool is not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is
 available, say that no fresh chain or Greek ladder can be produced; do not
 invent figures or present example or remembered values as current.
+
+## User-supplied data
+
+Before you send data to the tool, ask the user to state that private analysis
+is permitted. Then set `rights_confirmed` to true and name `data_source`.
+
+If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
+known column aliases, call or put notation, numeric commas, and clear percentage
+units. Report the repairs from `normalization`. Never invent a missing spot,
+expiry, strike, option type, quote, timestamp, or source. If a required value
+is missing, ask only for that value.
+
+The imported chain becomes a normal Option Desk artifact. Use its path for the
+Greek ladder, plots, strategies, positioning, and the local dashboard.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
 ```
 optiondesk chain SPY
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
 optiondesk greeks
 optiondesk plots SPY
 ```

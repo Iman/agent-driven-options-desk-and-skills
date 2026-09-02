@@ -31,6 +31,8 @@ PROVIDER_KEY_VARS = {
     "finviz": "FINVIZ_API_KEY",
 }
 
+PUBLIC_DATA_MODES = ("local", "demo", "licensed")
+
 _DOTENV_CACHE = None
 
 
@@ -71,6 +73,18 @@ def artifact_dir(override=None):
     """Directory artifacts are written to. Created on demand by the writer."""
     value = setting("OPTIONDESK_ARTIFACTS", None, override)
     return Path(value).expanduser() if value else DEFAULT_ARTIFACT_DIR
+
+
+def public_data_mode(override=None):
+    """Return the data boundary selected for this process.
+
+    ``local`` permits providers under their local-use rules. ``demo`` does
+    not permit any external provider. ``licensed`` permits only providers
+    that carry an explicit public-redistribution approval in the code.
+    Unknown values remain unknown so the provider gate can fail closed.
+    """
+    value = setting("PUBLIC_DATA_MODE", "local", override)
+    return str(value).strip().lower()
 
 
 def provider_key(provider):

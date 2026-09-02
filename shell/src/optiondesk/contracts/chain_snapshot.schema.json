@@ -44,6 +44,71 @@
       "type": "number",
       "minimum": 0
     },
+    "data_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The source named by the user for a private uploaded snapshot. A source name does not grant data rights."
+    },
+    "data_rights": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The user's assertion for private analysis. It is not a provider licence and it does not permit public display.",
+      "properties": {
+        "asserted_by_user": {
+          "type": "boolean"
+        },
+        "use": {
+          "type": "string"
+        },
+        "public_display": {
+          "type": "boolean"
+        }
+      }
+    },
+    "normalization": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Deterministic changes and unresolved warnings from the user-data importer.",
+      "properties": {
+        "source_format": {
+          "type": "string",
+          "enum": [
+            "csv",
+            "json"
+          ]
+        },
+        "input_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_contracts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repairs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "contracts": {
       "type": "array",
       "items": {

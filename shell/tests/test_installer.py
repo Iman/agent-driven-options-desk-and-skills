@@ -31,8 +31,22 @@ def test_help_lists_the_safety_flags():
     result = _run("--help")
     assert result.returncode == 0
     for flag in ("--dry-run", "--uninstall", "--no-engine", "--no-mcp",
-                 "--prefix"):
+                 "--prefix", "--accept-yahoo-terms"):
         assert flag in result.stdout
+
+
+def test_yes_does_not_accept_yahoo_terms(tmp_path):
+    result = _run_isolated(tmp_path, "--dry-run", "--yes", "--no-mcp",
+                           "--prefix", str(tmp_path / "opt"))
+    assert "would record Yahoo" not in result.stdout
+
+
+def test_explicit_yahoo_acknowledgement_is_separate(tmp_path):
+    result = _run_isolated(
+        tmp_path, "--dry-run", "--accept-yahoo-terms", "--no-mcp",
+        "--prefix", str(tmp_path / "opt"))
+    assert "would record Yahoo local personal-use acknowledgement" in (
+        result.stdout)
 
 
 def test_dry_run_changes_nothing(tmp_path):

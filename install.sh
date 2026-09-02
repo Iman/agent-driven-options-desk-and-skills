@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-VERSION="0.1.0"
+VERSION="0.1.1"
 PREFIX="${OPTIONDESK_PREFIX:-$HOME/.optiondesk}"
 BIN_DIR="${OPTIONDESK_BIN_DIR:-$HOME/.local/bin}"
 CLAUDE_SKILLS_DIR="${OPTIONDESK_CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
@@ -59,6 +59,7 @@ SKILLS_ONLY=0
 DRY_RUN=0
 UNINSTALL=0
 ASSUME_YES=0
+ACCEPT_YAHOO_TERMS=0
 
 SERVER_NAME="optiondesk"
 
@@ -97,6 +98,9 @@ Options:
                         no commands linked and no MCP registration
   --no-mcp              do not register the MCP server with any runtime
   --no-keys             skip the optional provider key prompt
+  --accept-yahoo-terms  enable Yahoo for local personal research after you
+                        have read and accepted Yahoo's terms. This flag does
+                        not permit hosting or redistribution
   --uninstall           remove everything this installer created
   --dry-run             print what would happen, change nothing
   --yes                 do not pause on the engine licence notice
@@ -122,6 +126,7 @@ while [ $# -gt 0 ]; do
     --skills-only) SKILLS_ONLY=1; WITH_MCP=0; WITH_KEYS=0; shift ;;
     --no-mcp) WITH_MCP=0; shift ;;
     --no-keys) WITH_KEYS=0; shift ;;
+    --accept-yahoo-terms) ACCEPT_YAHOO_TERMS=1; shift ;;
     --uninstall) UNINSTALL=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     --yes|-y) ASSUME_YES=1; shift ;;
@@ -338,7 +343,7 @@ install_packages() {
   local pip="$VENV/bin/pip"
   run "$pip" install --quiet --upgrade pip
 
-  say "Installing the shell with the free Yahoo provider"
+  say "Installing the shell with the local Yahoo adapter"
   run "$pip" install --quiet -e "$SOURCE/shell[yahoo]"
 
   if [ "$WITH_ENGINE" -eq 1 ]; then
@@ -350,6 +355,53 @@ install_packages() {
   else
     say "Skipping the analytics engine, as requested"
   fi
+}
+
+acknowledge_yahoo_terms() {
+  local config_file="$HOME/.optiondesk/config.env"
+  local accepted="$ACCEPT_YAHOO_TERMS"
+
+  if [ "$accepted" -eq 0 ] && [ -t 0 ] && [ "$DRY_RUN" -eq 0 ]; then
+    cat <<'YAHOO_NOTICE'
+
+  Yahoo data access is for local personal research only.
+
+  Read Yahoo's terms before you enable it:
+  https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html
+
+  This acknowledgement does not grant public display, hosting, business
+  use, automated redistribution, or MCP delivery rights.
+
+YAHOO_NOTICE
+    printf '  Enable the Yahoo adapter for local personal research? [y/N] '
+    read -r reply || reply=""
+    case "$reply" in
+      [Yy]*) accepted=1 ;;
+    esac
+  fi
+
+  if [ "$accepted" -eq 0 ]; then
+    say "Yahoo remains disabled. Re-run with --accept-yahoo-terms after reading the terms."
+    return 0
+  fi
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    say "  would record Yahoo local personal-use acknowledgement"
+    return 0
+  fi
+
+  local temp_file="${config_file}.tmp.$$"
+  mkdir -p "$(dirname "$config_file")"
+  umask 077
+  if [ -f "$config_file" ]; then
+    awk '!/^OPTIONDESK_ACCEPT_YAHOO_TERMS=/' "$config_file" > "$temp_file"
+  else
+    : > "$temp_file"
+  fi
+  printf '%s\n' 'OPTIONDESK_ACCEPT_YAHOO_TERMS=personal-use' >> "$temp_file"
+  mv "$temp_file" "$config_file"
+  chmod 600 "$config_file"
+  say "  recorded Yahoo local personal-use acknowledgement"
 }
 
 link_commands() {
@@ -505,10 +557,8 @@ register_mcp() {
 }
 
 configure_keys() {
-  # Optional, interactive, and skippable. The desk runs on free sources
-  # with no key at all, so this must never look like a requirement: a
-  # setup step that appears mandatory is how a working install gets
-  # abandoned at the first prompt.
+  # Optional, interactive, and skippable. A key is not required for the
+  # local Yahoo adapter, but that adapter has its own terms acknowledgement.
   [ "$WITH_KEYS" -eq 1 ] || { say "Skipping the key prompt, as requested"; return 0; }
   [ "$DRY_RUN" -eq 0 ] || { say "  would offer the optional key prompt"; return 0; }
   [ -t 0 ] || return 0
@@ -520,10 +570,9 @@ configure_keys() {
 
   Optional: provider keys.
 
-  Everything works without any key. Chains, Greeks, positioning,
-  structures, simulation and backtests all run on free sources. A key only
-  adds an alternative provider, and one whose key is missing is skipped
-  rather than failing.
+  A key adds an alternative provider. A provider whose key is missing is
+  skipped rather than failing. A personal Alpha Vantage key does not grant
+  public display or redistribution rights.
 
   Keys are stored in ~/.optiondesk/config.env, outside any repository,
   readable only by you. They are never printed, logged, or written into an
@@ -588,6 +637,7 @@ main() {
   fi
 
   install_packages
+  acknowledge_yahoo_terms
   link_commands
   install_skills
   register_mcp
@@ -615,8 +665,9 @@ Provider keys are optional and can be added at any time:
   optiondesk keys list
   optiondesk keys set alphavantage
 
-No API key is needed. The default data source is Yahoo, which is free and
-delayed. Outputs are research artifacts: modelled option premiums, not
+Yahoo is available only for local personal research after the separate
+terms acknowledgement. Hosted modes block Yahoo and personal Alpha Vantage
+credentials. Outputs are research artifacts: modelled option premiums, not
 tradable quotes, and not investment advice. See DISCLAIMER.md.
 
 Remove everything with: ./install.sh --uninstall

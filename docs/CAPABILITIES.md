@@ -490,11 +490,11 @@ current is the failure this exists to catch.
 
 ## 11. MCP tools
 
-Eleven, over stdio, from `optiondesk-mcp`. Typed schemas, no prose, for any
+Twelve, over stdio, from `optiondesk-mcp`. Typed schemas, no prose, for any
 runtime that speaks the protocol: Claude Code, Codex, Gemini CLI and
 anything else.
 
-`option_chain_snapshot`, `option_greeks_ladder`, `option_plots`, `option_expiries`,
+`option_snapshot_schema`, `option_chain_snapshot`, `option_greeks_ladder`, `option_plots`, `option_expiries`,
 `option_strategy_build`, `option_strategy_compare`, `option_positioning`,
 `option_simulate`, `option_backtest`, `option_forward_test`,
 `option_desk_status`.
@@ -515,7 +515,7 @@ null id. A request carrying id `0`, which is legal and easy to lose to a
 truthiness test, is still answered.
 
 Every tool description carries the reporting rule, appended in a loop
-rather than typed into eleven strings so a tool added later cannot ship
+rather than typed into twelve strings so a tool added later cannot ship
 without it, and every result that produces numbers carries the disclaimer.
 This server is the surface Codex and Gemini reach, and neither of them
 loads the skills where those rules otherwise live.
@@ -527,7 +527,7 @@ loads the skills where those rules otherwise live.
 For an application you are building yourself, where this is one capability
 among several and the orchestration is yours.
 
-`desk_tools()` returns ten `StructuredTool` objects wrapping the same
+`desk_tools()` returns eleven `StructuredTool` objects wrapping the same
 commands. `ArtifactStore` reads the artifact directory and exposes it three
 ways: `records()` for the raw payloads, `documents()` as LangChain
 `Document` objects for retrieval, and `context_for(underlying)` as a

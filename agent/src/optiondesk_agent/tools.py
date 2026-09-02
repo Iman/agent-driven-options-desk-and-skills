@@ -50,21 +50,39 @@ class _Args:
                 self.rejected.append(key)
 
 
+def _snapshot_schema(_args):
+    return chain_cmd.snapshot_schema()
+
+
 SPECS = [
+    {
+        "name": "option_snapshot_schema",
+        "description": (
+            "Describe the accepted user-supplied CSV and JSON fields, column "
+            "aliases, deterministic repairs, limits, and data-rights rule. "
+            "Use it to correct an attachment without inventing market values."),
+        "runner": _snapshot_schema,
+        "defaults": {},
+        "public": (),
+    },
     {
         "name": "option_chain_snapshot",
         "description": (
             "Retrieve an option chain for one underlying and expiry from a "
-            "free data provider or uploaded snapshot, solve implied volatility "
-            "per contract, and "
+            "permitted provider or user-supplied snapshot, solve implied "
+            "volatility per contract, and "
             "write a schema validated snapshot. Returns the artifact path "
             "and a summary. Delayed third party data."),
         "runner": chain_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "provider": None,
                      "source_path": None, "from_file": None, "rate": None,
-                     "dividend_yield": 0.0, "out_dir": None},
-        "public": ("symbol", "expiry", "source_path", "dividend_yield",
-                   "rate"),
+                     "source_text": None, "source_data": None,
+                     "source_format": None, "data_source": None,
+                     "rights_confirmed": False,
+                     "dividend_yield": None, "out_dir": None},
+        "public": ("symbol", "expiry", "source_path", "source_text",
+                   "source_data", "source_format", "data_source",
+                   "rights_confirmed", "dividend_yield", "rate"),
     },
     {
         "name": "option_expiries",
@@ -98,9 +116,14 @@ SPECS = [
         "runner": plots_cmd.run,
         "defaults": {"symbol": None, "expiry": None, "snapshot": None,
                      "source_path": None, "rate": None,
+                     "source_text": None, "source_data": None,
+                     "source_format": None, "data_source": None,
+                     "rights_confirmed": False,
                      "dividend_yield": None, "band": 0.15,
                      "out_dir": None},
-        "public": ("symbol", "expiry", "snapshot", "source_path", "rate",
+        "public": ("symbol", "expiry", "snapshot", "source_path",
+                   "source_text", "source_data", "source_format",
+                   "data_source", "rights_confirmed", "rate",
                    "dividend_yield", "band"),
     },
     {

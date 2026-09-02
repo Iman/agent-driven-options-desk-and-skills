@@ -222,7 +222,9 @@ def test_a_json_snapshot_file_is_accepted_without_network_access(tmp_path,
 
     args = args_factory(symbol="SPY", out_dir=str(tmp_path),
                         from_file=str(path), source_path=None,
-                        rate=0.05, dividend_yield=0.0)
+                        rate=0.05, dividend_yield=0.0,
+                        data_source="licensed test fixture",
+                        rights_confirmed=True)
     result = chain_cmd.run(args)
 
     payload = read_json(result["artifact"])
@@ -246,7 +248,9 @@ def test_csv_snapshot_file_is_accepted_without_network_access(tmp_path,
 
     args = args_factory(symbol="SPY", out_dir=str(tmp_path),
                         from_file=str(path), source_path=None,
-                        rate=0.03, dividend_yield=0.0)
+                        rate=0.03, dividend_yield=0.0,
+                        data_source="licensed test fixture",
+                        rights_confirmed=True)
     result = chain_cmd.run(args)
 
     payload = read_json(result["artifact"])
@@ -288,11 +292,78 @@ def test_source_path_is_honoured_by_the_chain_runner(tmp_path, args_factory):
 
     args = args_factory(symbol="SPY", out_dir=str(tmp_path),
                         source_path=str(path), from_file=None,
-                        rate=0.05, dividend_yield=0.0)
+                        rate=0.05, dividend_yield=0.0,
+                        data_source="licensed test fixture",
+                        rights_confirmed=True)
     result = chain_cmd.run(args)
 
     payload = read_json(result["artifact"])
     assert payload["meta"]["provider_used"] == "user snapshot"
+
+
+def test_inline_json_is_normalized_and_written_for_chat(tmp_path,
+                                                        args_factory):
+    """A remote MCP client can send structured rows without a local path."""
+    source_data = {
+        "underlying": "SPY",
+        "spot": "600.00",
+        "snapshot_timestamp": "2026-09-02T14:00:00Z",
+        "expiry": "2026-09-18",
+        "contracts": [
+            {"strike_price": "600", "right": "C", "bid": "5.2",
+             "ask": "5.6", "implied_volatility": "22",
+             "openinterest": "1,200"},
+            {"strike_price": "600", "right": "P", "bid": "4.8",
+             "ask": "5.0", "implied_volatility": "24",
+             "openinterest": "980"},
+        ],
+    }
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data=source_data, source_text=None,
+        source_format=None, data_source="user broker export",
+        rights_confirmed=True, rate=0.05, dividend_yield=0.0)
+
+    result = chain_cmd.run(args)
+    payload = read_json(result["artifact"])
+
+    assert payload["data_source"] == "user broker export"
+    assert payload["data_rights"]["asserted_by_user"] is True
+    assert payload["data_rights"]["public_display"] is False
+    assert payload["contracts"][0]["iv"] == pytest.approx(0.22)
+    assert payload["contracts"][0]["open_interest"] == 1200
+    assert result["normalization"]["repair_count"] >= 4
+    assert any("converted implied volatility" in repair
+               for repair in result["normalization"]["repairs"])
+
+
+def test_user_snapshot_requires_rights_confirmation(tmp_path, args_factory):
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data={"contracts": []}, source_text=None,
+        source_format=None, data_source="unknown", rights_confirmed=False,
+        rate=0.05, dividend_yield=0.0)
+
+    with pytest.raises(ValueError, match="rights confirmation"):
+        chain_cmd.run(args)
+
+
+def test_user_snapshot_reports_all_repairable_rows(tmp_path, args_factory):
+    source_data = {
+        "underlying": "SPY", "spot": 600, "expiry": "2026-09-18",
+        "contracts": [
+            {"strike": 600, "type": "unknown"},
+            {"strike": -1, "type": "put"},
+        ],
+    }
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data=source_data, source_text=None,
+        source_format=None, data_source="user export", rights_confirmed=True,
+        rate=0.05, dividend_yield=0.0)
+
+    with pytest.raises(ValueError, match="row 1.*row 2"):
+        chain_cmd.run(args)
 
 
 @needs_engine

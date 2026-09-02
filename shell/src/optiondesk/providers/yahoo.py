@@ -1,8 +1,7 @@
-"""Yahoo Finance provider, through yfinance. Free, no key, delayed.
+"""Yahoo Finance provider, through yfinance. Local personal research only.
 
-This is the default so that a fresh clone works with no signup. It is also
-the weakest link in the chain, and the class is written to say so rather
-than to paper over it.
+This adapter is disabled until the user accepts the local-use boundary. It
+is never approved for a public dashboard or a hosted MCP service.
 
 Two failure modes are handled explicitly because both have produced silent
 wrong answers in production before:
@@ -55,7 +54,7 @@ def _num(value, default=None):
 
 class YahooProvider(Provider):
 
-    """The free default, with no key and no signup.
+    """A local provider, with no key and an explicit acknowledgement.
 
     Covers option chains, underlying history, quotes and a risk free rate
     proxy. Data is delayed and third party, which is stated in every artifact
@@ -70,11 +69,15 @@ class YahooProvider(Provider):
     terms_url = "https://legal.yahoo.com/us/en/yahoo/terms/otos/index.html"
     notes = ("Delayed and indicative. Personal use under Yahoo's terms; "
              "this project grants no data redistribution rights.")
+    terms_reviewed_on = "2026-09-02"
+    local_acknowledgement_env = "OPTIONDESK_ACCEPT_YAHOO_TERMS"
+    local_acknowledgement_value = "personal-use"
 
     def __init__(self):
         self._yf = None
 
     def _client(self):
+        self.require_access()
         if self._yf is None:
             try:
                 import yfinance
@@ -82,7 +85,7 @@ class YahooProvider(Provider):
                 raise ProviderUnavailable(
                     "yfinance is not installed. Install it with "
                     "'pip install yfinance' or 'pip install \"optiondesk"
-                    "[yahoo]\"' to use the free Yahoo provider."
+                    "[yahoo]\"' to use the local Yahoo provider."
                 ) from exc
             self._yf = yfinance
         return self._yf

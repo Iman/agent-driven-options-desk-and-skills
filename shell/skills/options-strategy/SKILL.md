@@ -12,16 +12,41 @@ Three commands. Build one structure, list what exists, or compare them all.
 Prefer `option_strategy_build` to list or build structures and
 `option_strategy_compare` to compare them. Use `option_chain_snapshot` first
 when a fresh chain is needed. If the user has attached a CSV or JSON chain,
-pass its path as `source_path`. Do not ask the user to paste or upload it
-again. If a matching MCP tool is not available, use
+pass its path as `source_path` for a local file. For remote chat, pass its
+content as `source_data` or `source_text`. Do not ask the user for it again.
+If a matching MCP tool is not available, use
 the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh structure analysis can be produced; do not invent figures
 or present example or remembered values as current.
+
+## User-supplied data
+
+Before you send data to the tool, ask the user to state that private analysis
+is permitted. Then set `rights_confirmed` to true and name `data_source`.
+
+If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
+known column aliases, call or put notation, numeric commas, and clear percentage
+units. Report the repairs from `normalization`. Never invent a missing spot,
+expiry, strike, option type, quote, timestamp, or source. If a required value
+is missing, ask only for that value.
+
+The imported chain becomes a normal Option Desk artifact. Use its path for the
+strategy, comparison, plots, positioning, Greeks, and the local dashboard.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
 ```
 optiondesk strategy --list                    # the playbook, as data
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
 optiondesk strategy iron_condor               # build one from the latest chain
 optiondesk strategy --recommend 1 --vol-view crush
 optiondesk compare                            # every structure, ranked

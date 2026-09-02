@@ -11,6 +11,10 @@ cannot answer raises ProviderUnavailable with a message a user can act on.
 It never returns an empty result that looks like a real one.
 """
 
+import os
+
+from optiondesk.config import PUBLIC_DATA_MODES, public_data_mode
+
 CAP_OPTION_CHAIN = "option_chain"
 CAP_UNDERLYING_QUOTE = "underlying_quote"
 CAP_RISK_FREE_RATE = "risk_free_rate"
@@ -48,12 +52,82 @@ class Provider:
     capabilities = ()
     terms_url = None
     notes = ""
+    public_redistribution_approved = False
+    public_web_display_approved = False
+    public_mcp_delivery_approved = False
+    public_derived_outputs_approved = False
+    public_storage_approved = False
+    terms_reviewed_on = None
+    local_acknowledgement_env = None
+    local_acknowledgement_value = None
+
+    def access_status(self):
+        """Report whether this process may use the provider.
+
+        Provider availability and data permission are separate facts. A key
+        or dependency can make a provider technically available without
+        granting rights to publish its data.
+        """
+        mode = public_data_mode()
+        if mode not in PUBLIC_DATA_MODES:
+            return {
+                "mode": mode,
+                "allowed": False,
+                "reason": (
+                    "PUBLIC_DATA_MODE is invalid. Use local, demo, or "
+                    "licensed. Access is denied until it is corrected."
+                ),
+            }
+        if mode == "demo":
+            return {
+                "mode": mode,
+                "allowed": False,
+                "reason": "demo mode blocks every external data provider",
+            }
+        if mode == "licensed":
+            approved = bool(
+                self.public_redistribution_approved
+                and self.public_web_display_approved
+                and self.public_mcp_delivery_approved
+                and self.public_derived_outputs_approved
+                and self.public_storage_approved
+            )
+            return {
+                "mode": mode,
+                "allowed": approved,
+                "reason": (
+                    "provider has an explicit public-use approval"
+                    if approved else
+                    "provider is not approved for public web and MCP use"
+                ),
+            }
+        if self.local_acknowledgement_env:
+            accepted = os.environ.get(self.local_acknowledgement_env)
+            expected = self.local_acknowledgement_value
+            if accepted != expected:
+                return {
+                    "mode": mode,
+                    "allowed": False,
+                    "reason": (
+                        "local terms acknowledgement is missing; set {}={} "
+                        "only after reading the provider terms"
+                    ).format(self.local_acknowledgement_env, expected),
+                }
+        return {"mode": mode, "allowed": True, "reason": "local use"}
+
+    def require_access(self):
+        status = self.access_status()
+        if not status["allowed"]:
+            raise ProviderUnavailable(
+                "{} data access denied: {}".format(
+                    self.name, status["reason"]))
 
     def available(self):
         """True when this provider could answer a request right now."""
         raise NotImplementedError
 
     def describe(self):
+        access = self.access_status()
         return {
             "name": self.name,
             "tier": self.tier,
@@ -62,6 +136,19 @@ class Provider:
             "available": bool(self.available()),
             "terms_url": self.terms_url,
             "notes": self.notes,
+            "data_mode": access["mode"],
+            "access_allowed": access["allowed"],
+            "access_reason": access["reason"],
+            "public_redistribution_approved": bool(
+                self.public_redistribution_approved),
+            "public_web_display_approved": bool(
+                self.public_web_display_approved),
+            "public_mcp_delivery_approved": bool(
+                self.public_mcp_delivery_approved),
+            "public_derived_outputs_approved": bool(
+                self.public_derived_outputs_approved),
+            "public_storage_approved": bool(self.public_storage_approved),
+            "terms_reviewed_on": self.terms_reviewed_on,
         }
 
     def option_chain(self, symbol, expiry=None, **kwargs):

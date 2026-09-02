@@ -20,6 +20,12 @@ def add_arguments(parser):
                         help="existing chain snapshot path")
     parser.add_argument("--from-file", dest="source_path", default=None,
                         help="CSV or JSON chain snapshot to import")
+    parser.add_argument("--data-source", default=None,
+                        help="name of the user-supplied data source")
+    parser.add_argument("--accept-data-rights", action="store_true",
+                        dest="rights_confirmed",
+                        help="confirm that you can send this data for private "
+                             "analysis")
     parser.add_argument("--expiry", default=None,
                         help="expiry as YYYY-MM-DD. Default: nearest listed")
     parser.add_argument("--rate", type=float, default=None)
@@ -51,6 +57,11 @@ def _chain_args(args):
         provider=None,
         source_path=getattr(args, "source_path", None),
         from_file=getattr(args, "source_path", None),
+        source_text=getattr(args, "source_text", None),
+        source_data=getattr(args, "source_data", None),
+        source_format=getattr(args, "source_format", None),
+        data_source=getattr(args, "data_source", None),
+        rights_confirmed=getattr(args, "rights_confirmed", False),
         rate=args.rate,
         dividend_yield=args.dividend_yield,
         out_dir=args.out_dir,
@@ -120,13 +131,21 @@ def run(args):
                 "{} plots are unavailable. {}".format(
                     " and ".join(missing), engine_bridge.MISSING_MESSAGE))
 
+    user_supplied = bool((chain.get("meta") or {}).get("inputs", {}).get(
+        "user_supplied"))
+    footer = None
+    if user_supplied:
+        footer = (
+            "USER-SUPPLIED DATA / PRIVATE RESEARCH / NOT INVESTMENT ADVICE "
+            "/ DO NOT USE FOR ORDERS")
+
     market_path = _write_png(
-        market_png(chain, exposure, band=args.band),
+        market_png(chain, exposure, band=args.band, footer=footer),
         "plots_{}_{}_market.png".format(symbol, expiry), target)
     paths = [str(market_path)]
     if ladder and ladder.get("rows"):
         greek_path = _write_png(
-            greeks_png(ladder),
+            greeks_png(ladder, footer=footer),
             "plots_{}_{}_greeks.png".format(symbol, expiry), target)
         paths.append(str(greek_path))
 
@@ -142,6 +161,8 @@ def run(args):
         "spot": chain.get("spot"),
         "spot_asof": chain.get("spot_asof"),
         "provider_used": meta.get("provider_used"),
+        "data_source": chain.get("data_source"),
+        "user_supplied": user_supplied,
         "degraded": bool(meta.get("degraded")) or bool(analytics_errors),
         "degraded_reason": "; ".join(reasons) or None,
         "analytics_included": {

@@ -110,3 +110,36 @@ def test_describe_all_never_leaks_a_key():
     blob = repr(described).lower()
     assert "api_key" not in blob and "secret" not in blob
     assert described["yahoo"]["requires_key"] is False
+
+
+def test_demo_mode_blocks_every_external_provider(registry, monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_MODE", "demo")
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    assert "no substitute was permitted" in str(excinfo.value)
+    assert registry.describe_all()["yahoo"]["access_allowed"] is False
+
+
+def test_licensed_mode_fails_closed_without_provider_approval(
+        registry, monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_MODE", "licensed")
+    with pytest.raises(ProviderUnavailable):
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    described = registry.describe_all()["yahoo"]
+    assert described["public_redistribution_approved"] is False
+    assert described["public_mcp_delivery_approved"] is False
+
+
+def test_invalid_public_mode_denies_access(registry, monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_MODE", "licenced")
+    with pytest.raises(ProviderUnavailable):
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    assert "invalid" in registry.describe_all()["yahoo"][
+        "access_reason"].lower()
+
+
+def test_yahoo_requires_explicit_local_acknowledgement(monkeypatch):
+    monkeypatch.delenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", raising=False)
+    described = providers.get("yahoo").describe()
+    assert described["access_allowed"] is False
+    assert "acknowledgement" in described["access_reason"]

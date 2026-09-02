@@ -3,13 +3,13 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-942%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-959%20passing%2C%200%20skipped-brightgreen)](#development)
 [![Mutation testing](https://img.shields.io/badge/mutations-78%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills)
 
-Pull a chain from free market data, compute the full Greek ladder, measure
+Import a permitted chain, compute the full Greek ladder, measure
 where dealer hedging concentrates, build and rank multi-leg structures,
 simulate the underlying forward from its own behaviour, test a rule against
 history, and track what you actually took. Every step writes a
@@ -17,7 +17,8 @@ schema-validated artifact. A local dashboard renders them.
 
 ```
 curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-skills/main/install.sh | bash
-optiondesk chain SPY && optiondesk greeks && optiondesk dashboard
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
+optiondesk greeks && optiondesk dashboard
 ```
 
 Then ask your agent "where are the gamma walls on SPY?" and it will use the
@@ -174,14 +175,19 @@ your user and `/etc/codex/skills` for the machine. This repository
 symlinks the repository-root one to `shell/skills`, and symlinked skill
 folders are documented as followed, so cloning it is enough.
 
-Browser ChatGPT is the one place the tools cannot follow. The MCP server is
-a local process and a web page cannot run one on your machine, so there the
-skills are knowledge and instructions. Each skill says so itself.
+Browser ChatGPT cannot run the local MCP process. It can use the hosted MCP
+service after the plugin owner registers that service. The hosted service can
+process a user attachment privately. It does not fetch Yahoo or personal Alpha
+Vantage data.
 
 OpenAI accepts skills-only plugins. Build the dedicated submission archive
 with `python3 scripts/package.py`, then use
 `dist/option-desk-openai-skills.zip`. It contains no MCP declaration. The
 skills-only listing does not promise fresh market figures.
+
+The hosted MCP endpoint is `https://optiondesk.avidquant.com/mcp`. The current
+public plugin is not connected to that endpoint. Create and test a new plugin
+release before you promise in-chat calculations or plots.
 
 ### As a Claude Code plugin, which also brings the commands and agents
 
@@ -209,8 +215,8 @@ Add `-e agent` for the LangChain bindings and the graph.
 `INSTALL.md` covers two more paths, zip upload for claude.ai in the browser
 and the MCP server on its own, along with the flags in full.
 
-No API key is needed for any of them. Python 3.11 or newer, and the skills
-paths need no Python at all.
+Python 3.11 or newer is required for the tools. User-data imports need no API
+key or provider request. The skill-only paths need no Python.
 
 ---
 
@@ -242,6 +248,36 @@ optiondesk compare                every structure, ranked
 optiondesk plots SPY              write PNG charts for chat or reports
 optiondesk dashboard              serve the charts at 127.0.0.1:8787
 ```
+
+### Use your own option-chain data
+
+Only upload data that you can send for private analysis. A user statement does
+not change the provider licence.
+
+```
+optiondesk chain SPY \
+  --from-file chain.csv \
+  --data-source "broker export" \
+  --accept-data-rights
+optiondesk greeks
+optiondesk exposure
+optiondesk strategy iron_condor
+optiondesk plots SPY --snapshot ~/TradingDesk/option-desk/chain_SPY_2026-09-18.json
+optiondesk dashboard
+```
+
+The importer accepts CSV and JSON. It normalizes documented column aliases,
+`C` or `P` codes, numeric commas, and clear percentage units. The artifact
+lists each repair in `normalization`.
+
+The importer does not invent market values. It rejects missing spot, expiry,
+strike, option type, source, duplicate contracts, and invalid numeric values.
+If chat receives an unclear attachment, it calls `option_snapshot_schema`.
+Then it corrects safe format errors and asks only for missing required values.
+
+The imported chain uses the existing artifact path. Greeks, positioning,
+strategies, plots, comparisons, and the local dashboard use that same artifact.
+User-data plot images include a solid private-research warning.
 
 The six skills, and when each one fires:
 
@@ -297,7 +333,7 @@ flowchart TB
         human["A person<br/>types commands"]
     end
 
-    mcp["MCP server<br/>stdio, standard library only<br/>11 tools"]
+    mcp["MCP server<br/>stdio, standard library only<br/>12 tools"]
     cli["CLI<br/>optiondesk chain, greeks, exposure, plots,<br/>strategy, compare, simulate,<br/>backtest, forward"]
 
     subgraph shell["shell"]
@@ -452,10 +488,10 @@ posterior is one whose quantiles must not be quoted.
 | Command | What it does | Writes |
 |---|---|---|
 | `optiondesk expiries [SYM]` | Every expiry a provider lists, with days to expiry, and which you already hold. No symbol lists on-disk only, with no network. | nothing |
-| `optiondesk chain SYM` | Retrieve a chain, solve implied volatility per contract, or ingest one from `--from-file` (CSV or JSON). `--expiry`, `--rate`, `--dividend-yield`, `--from-file` | `chain_SYM_EXPIRY.json` |
+| `optiondesk chain SYM` | Retrieve a permitted chain or import private user data. `--expiry`, `--rate`, `--dividend-yield`, `--from-file`, `--data-source`, `--accept-data-rights` | `chain_SYM_EXPIRY.json` |
 | `optiondesk greeks` | Sixteen Greeks per contract from its own volatility. `--band`, `--type`, `--snapshot` | `greeks_SYM_EXPIRY.json` |
 | `optiondesk exposure` | Dealer gamma by strike, walls, flip, max pain, put-call ratios, smile geometry. | `exposure_SYM_EXPIRY.json` |
-| `optiondesk plots SYM` | Retrieve or read a chain and write opaque PNG charts. `--snapshot`, `--from-file`, `--expiry`, `--band` | `plots_SYM_EXPIRY_market.png`, `plots_SYM_EXPIRY_greeks.png` |
+| `optiondesk plots SYM` | Retrieve or read a chain and write opaque PNG charts. `--snapshot`, `--from-file`, `--data-source`, `--accept-data-rights`, `--expiry`, `--band` | `plots_SYM_EXPIRY_market.png`, `plots_SYM_EXPIRY_greeks.png` |
 | `optiondesk strategy NAME` | Build one structure. `--list`, `--recommend N`, `--vol-view`, `--size`, `--owns-underlying`, `--direction-unknown`; and for time spreads `--far-snapshot`, `--kind`, `--offset` | `strategy_SYM_NAME_EXPIRY.json` |
 | `optiondesk compare` | Every buildable structure, ranked by expected return on capital at risk. | `comparison_SYM_EXPIRY.json` |
 | `optiondesk simulate SYM` | GARCH-t posterior by MCMC, predictive fan, VaR and ES, per-structure distributions. `--horizon`, `--paths`, `--draws` | `simulation_SYM_Nd.json` |
@@ -557,7 +593,7 @@ codex  mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
 gemini mcp add -s user optiondesk /abs/path/to/.venv/bin/optiondesk-mcp
 ```
 
-Eleven tools are exposed: `option_chain_snapshot`, `option_greeks_ladder`,
+Twelve tools are exposed: `option_snapshot_schema`, `option_chain_snapshot`, `option_greeks_ladder`,
 `option_plots`,
 `option_expiries`, `option_strategy_build`, `option_strategy_compare`,
 `option_positioning`, `option_simulate`, `option_backtest`,
@@ -695,19 +731,17 @@ registry answers.
 flowchart LR
     need["A command needs<br/>option_chain"] --> reg{"Registry<br/>priority order"}
     reg -->|"key present"| paid["Alpha Vantage<br/>key required, history and quotes"]
-    reg -->|"always available"| yahoo["Yahoo<br/>free, delayed"]
+    reg -->|"local acknowledgement"| yahoo["Yahoo<br/>local personal research<br/>delayed"]
     reg -->|"nothing can answer"| err["ProviderUnavailable<br/>naming every candidate<br/>and why each was skipped"]
     paid --> art["artifact records<br/>provider_used"]
     yahoo --> art
 ```
 
 Capabilities: `option_chain`, `underlying_quote`, `risk_free_rate`,
-`underlying_history`, `dividend_yield`. Yahoo supplies all four with no key. Alpha Vantage
-ships as well and covers underlying history and quotes, sitting below
-Yahoo in the priority for both because its free tier allows roughly
-twenty-five requests a day. A provider whose key is absent is skipped
-rather than failing, so adding another is a class plus one line of
-priority.
+`underlying_history`, `dividend_yield`. Yahoo supplies all four after a local
+personal-use acknowledgement. Alpha Vantage covers history and quotes when a
+key is present. Its ordinary access is not approved for the hosted service.
+A provider without technical access or data permission is skipped.
 
 Naming a provider with `--provider` is strict: if it cannot answer, the
 command fails rather than quietly serving a different source. Pass
@@ -968,8 +1002,8 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 441 tests
-./shell/.venv/bin/python -m pytest agent/tests -q     # 160 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 452 tests
+./shell/.venv/bin/python -m pytest agent/tests -q     # 161 tests
 ```
 
 Those three counts are checked by `shell/tests/test_documented_counts.py`, which

@@ -51,7 +51,7 @@ def test_tools_list_shape():
     assert {"option_chain_snapshot", "option_greeks_ladder",
             "option_expiries", "option_strategy_build",
             "option_strategy_compare", "option_positioning",
-            "option_plots",
+            "option_plots", "option_snapshot_schema",
             "option_simulate", "option_backtest", "option_forward_test",
             "option_desk_status"} <= names
     assert len(names) == len(tools), "duplicate tool name"
@@ -71,6 +71,40 @@ def test_status_tool_call_returns_json_content():
     payload = json.loads(content["text"])
     assert "engine" in payload and "providers" in payload
     assert "disclaimer" in payload
+
+
+def test_snapshot_schema_tells_chat_what_it_can_repair():
+    payload = body_of(call("option_snapshot_schema"))
+    assert "source_data" in " ".join(payload["accepted_inputs"])
+    assert payload["limits"]["rows"] == chain_cmd.MAX_USER_ROWS
+    assert "Never invent" in payload["repair_policy"]
+
+
+def test_inline_user_snapshot_reaches_the_local_artifact_desk(desk):
+    response = call("option_chain_snapshot", {
+        "symbol": "SPY",
+        "source_data": {
+            "underlying": "SPY",
+            "spot": 600,
+            "snapshot_timestamp": "2026-09-02T14:00:00Z",
+            "expiry": "2026-09-18",
+            "contracts": [
+                {"strike": 600, "type": "call", "bid": 5.2,
+                 "ask": 5.6, "iv": 0.22},
+                {"strike": 600, "type": "put", "bid": 4.8,
+                 "ask": 5.0, "iv": 0.24},
+            ],
+        },
+        "data_source": "user broker export",
+        "rights_confirmed": True,
+        "rate": 0.05,
+        "dividend_yield": 0.0,
+    })
+    assert not response["result"].get("isError"), response
+    payload = body_of(response)
+    assert payload["data_source"] == "user broker export"
+    assert payload["normalization"]["output_contracts"] == 2
+    assert (desk / "chain_SPY_2026-09-18.json").is_file()
 
 
 def test_unknown_tool_is_a_protocol_error():

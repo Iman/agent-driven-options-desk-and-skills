@@ -11,6 +11,13 @@ from optiondesk.artifacts import envelope
 from optiondesk.contracts import CHAIN_SNAPSHOT
 
 
+@pytest.fixture(autouse=True)
+def acknowledge_local_yahoo_terms(monkeypatch):
+    """Tests use fakes, but they still cross the production access gate."""
+    monkeypatch.setenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", "personal-use")
+    monkeypatch.delenv("PUBLIC_DATA_MODE", raising=False)
+
+
 @pytest.fixture
 def snapshot():
     contracts = []

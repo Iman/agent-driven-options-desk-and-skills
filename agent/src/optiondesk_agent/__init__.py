@@ -28,7 +28,7 @@ def __getattr__(name):
         return getattr(graph, name)
     raise AttributeError(name)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = ["ArtifactStore", "desk_tools", "tool_specs",
            "build_answer_prompt", "build_router_prompt", "REPORTING_RULES",

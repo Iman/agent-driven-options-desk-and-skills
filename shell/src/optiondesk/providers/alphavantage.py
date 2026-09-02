@@ -61,12 +61,16 @@ class AlphaVantageProvider(Provider):
     notes = ("Documented API behind a user key. Free tier is rate limited "
              "to roughly 25 requests a day, so it sits below Yahoo in "
              "priority. Daily history only: option chains are a paid tier "
-             "and are not claimed here.")
+             "and are not claimed here. No public redistribution approval "
+             "is recorded for this adapter.")
+    terms_reviewed_on = "2026-09-02"
 
     def available(self):
-        return bool(provider_key("alphavantage"))
+        return bool(provider_key("alphavantage")) and bool(
+            self.access_status()["allowed"])
 
     def _request(self, params):
+        self.require_access()
         key = provider_key("alphavantage")
         if not key:
             raise ProviderUnavailable(

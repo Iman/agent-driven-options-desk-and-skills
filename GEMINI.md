@@ -41,7 +41,10 @@ copies the skills into both `~/.claude/skills` and `~/.agents/skills`, and
 registers the MCP server with every agent runtime it finds. Re-running is
 safe, and `./install.sh --uninstall` removes only what it created.
 
-Python 3.11 or newer is required. No API key is needed for anything.
+Python 3.11 or newer is required. Yahoo needs no API key, but it remains
+disabled until the user accepts its local personal-use boundary. Use
+`--accept-yahoo-terms` only after the user reads Yahoo's terms. The flag does
+not permit hosting, business use, public display, or redistribution.
 
 ## The failure almost everyone hits
 
@@ -88,9 +91,14 @@ is a skill that explains the desk; it is not a desk.
 ## What this cannot fix
 
 In ChatGPT on the web or on a phone, there is no local process to install
-and nothing here will make the tools run. The skills work there as
-knowledge only. Codex on your own machine, Claude Code, and the ChatGPT
-desktop app can all run the local server.
+and nothing here will make local tools run. Do not ask the user to install a
+local process in that session. Use an attached remote MCP server when one is
+present. Without one, the skills can analyse user-provided data only.
+
+Hosted deployments must set `PUBLIC_DATA_MODE=demo` or `licensed`. Demo mode
+blocks all external providers. Licensed mode permits only a provider that has
+an explicit approval for public display, derived outputs, storage, and MCP
+delivery. Never change this mode to work around a provider refusal.
 
 ## Reporting rules
 
@@ -120,6 +128,15 @@ Prefer the `option_backtest` MCP tool for a backtest and the
 not available, use the `optiondesk` commands below. If neither MCP nor the
 CLI is available, say that no fresh result can be produced; do not invent
 figures or present an example or remembered result as a new analysis.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Backtest
 
@@ -230,7 +247,7 @@ you to say them.
 
 ## Skill: options-greeks
 
-Retrieve an option chain from free market data and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
+Retrieve an approved or user-provided option chain and compute the full first to third order Greek ladder (delta, gamma, vega, theta, rho, lambda, vanna, vomma, charm, veta, speed, zomma, color, ultima, dual delta, dual gamma) for any US listed underlying. Use when the user asks about option Greeks for individual contracts, an option chain, a Greek by strike or expiry, theta decay, vega risk, or how one strike compares with another. For dealer gamma exposure, the walls, the gamma flip or the skew across a whole chain, use options-positioning instead. Not for order placement and not for recommendations.
 
 # Option Greeks
 
@@ -256,16 +273,41 @@ Prefer `option_chain_snapshot` to retrieve the chain and
 availability check when needed. When the user asks to see a plot or chart,
 call `option_plots`. The tool returns PNG images in the conversation. Do not
 start the localhost dashboard as a substitute. If the user attached a CSV or
-JSON chain, pass its path as `source_path`. Do not ask the user to paste the
-same data. If a matching MCP tool is not available,
+JSON chain, do not ask for the same data again. For a local file, pass its
+path as `source_path`. For remote chat, pass its content as `source_data` or
+`source_text`. If a matching MCP tool is not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is
 available, say that no fresh chain or Greek ladder can be produced; do not
 invent figures or present example or remembered values as current.
+
+## User-supplied data
+
+Before you send data to the tool, ask the user to state that private analysis
+is permitted. Then set `rights_confirmed` to true and name `data_source`.
+
+If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
+known column aliases, call or put notation, numeric commas, and clear percentage
+units. Report the repairs from `normalization`. Never invent a missing spot,
+expiry, strike, option type, quote, timestamp, or source. If a required value
+is missing, ask only for that value.
+
+The imported chain becomes a normal Option Desk artifact. Use its path for the
+Greek ladder, plots, strategies, positioning, and the local dashboard.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
 ```
 optiondesk chain SPY
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
 optiondesk greeks
 optiondesk plots SPY
 ```
@@ -400,16 +442,41 @@ Prefer `option_chain_snapshot` to retrieve the whole chain and
 gamma, open-interest, volume, or volatility plots, call `option_plots`. The
 tool returns PNG images in the conversation. Do not answer with a localhost
 dashboard URL. If the user has attached a CSV or JSON chain, pass its path as
-`source_path`. Do not ask for the same data again. If a matching MCP tool is
-not available,
+`source_path` for a local file. For remote chat, pass its content as
+`source_data` or `source_text`. Do not ask for the same data again. If a
+matching MCP tool is not available,
 use the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh positioning result can be produced; do not invent figures
 or present example or remembered values as current.
+
+## User-supplied data
+
+Before you send data to the tool, ask the user to state that private analysis
+is permitted. Then set `rights_confirmed` to true and name `data_source`.
+
+If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
+known column aliases, call or put notation, numeric commas, and clear percentage
+units. Report the repairs from `normalization`. Never invent a missing spot,
+expiry, strike, option type, quote, timestamp, or source. If a required value
+is missing, ask only for that value.
+
+The imported chain becomes a normal Option Desk artifact. Use its path for
+positioning, plots, strategies, Greeks, and the local dashboard.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
 ```
 optiondesk chain SPY --expiry 2026-09-18
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
 optiondesk exposure
 optiondesk plots SPY --expiry 2026-09-18
 ```
@@ -518,6 +585,15 @@ Prefer the `option_simulate` MCP tool. If it is not available, use the
 `optiondesk` command below. If neither MCP nor the CLI is available, say
 that no fresh simulation can be produced; do not invent figures or present
 an example or remembered result as a new analysis.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
@@ -661,16 +737,41 @@ Three commands. Build one structure, list what exists, or compare them all.
 Prefer `option_strategy_build` to list or build structures and
 `option_strategy_compare` to compare them. Use `option_chain_snapshot` first
 when a fresh chain is needed. If the user has attached a CSV or JSON chain,
-pass its path as `source_path`. Do not ask the user to paste or upload it
-again. If a matching MCP tool is not available, use
+pass its path as `source_path` for a local file. For remote chat, pass its
+content as `source_data` or `source_text`. Do not ask the user for it again.
+If a matching MCP tool is not available, use
 the `optiondesk` commands below. If neither MCP nor the CLI is available,
 say that no fresh structure analysis can be produced; do not invent figures
 or present example or remembered values as current.
+
+## User-supplied data
+
+Before you send data to the tool, ask the user to state that private analysis
+is permitted. Then set `rights_confirmed` to true and name `data_source`.
+
+If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
+known column aliases, call or put notation, numeric commas, and clear percentage
+units. Report the repairs from `normalization`. Never invent a missing spot,
+expiry, strike, option type, quote, timestamp, or source. If a required value
+is missing, ask only for that value.
+
+The imported chain becomes a normal Option Desk artifact. Use its path for the
+strategy, comparison, plots, positioning, Greeks, and the local dashboard.
+
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
 
 ## Run it
 
 ```
 optiondesk strategy --list                    # the playbook, as data
+optiondesk chain SPY --from-file chain.csv --data-source "broker export" --accept-data-rights
 optiondesk strategy iron_condor               # build one from the latest chain
 optiondesk strategy --recommend 1 --vol-view crush
 optiondesk compare                            # every structure, ranked
@@ -772,7 +873,7 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 Every command the CLI exposes, read from the argparse parsers in shell/src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
-  Flags: --from-file, --expiry, --provider, --rate, --dividend-yield, --out-dir
+  Flags: --from-file, --data-source, --accept-data-rights, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot
   Flags: --snapshot, --band, --type, --out-dir
 - `optiondesk strategy [NAME]`: build a multi-leg strategy from a snapshot
@@ -780,7 +881,7 @@ Every command the CLI exposes, read from the argparse parsers in shell/src/optio
 - `optiondesk exposure`: dealer gamma, walls, max pain and smile geometry
   Flags: --snapshot, --multiplier, --out-dir
 - `optiondesk plots SYMBOL`: write chat-ready market and Greek PNG plots
-  Flags: --snapshot, --from-file, --expiry, --rate, --dividend-yield, --band, --out-dir
+  Flags: --snapshot, --from-file, --data-source, --accept-data-rights, --expiry, --rate, --dividend-yield, --band, --out-dir
 - `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
   Flags: --provider, --out-dir
 - `optiondesk compare`: every structure side by side, ranked

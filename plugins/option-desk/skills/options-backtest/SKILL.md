@@ -17,6 +17,15 @@ not available, use the `optiondesk` commands below. If neither MCP nor the
 CLI is available, say that no fresh result can be produced; do not invent
 figures or present an example or remembered result as a new analysis.
 
+## Data boundary
+
+Use fresh provider data only when the tool reports that access is allowed.
+A local Yahoo adapter also requires the personal-use acknowledgement. A
+hosted tool must use a provider that is approved for public display, derived
+outputs, storage, and MCP delivery. Never bypass a provider refusal. When no
+approved tool is available, analyse a snapshot that the user supplied and
+had the right to share. Otherwise, state that current figures are unavailable.
+
 ## Backtest
 
 ```

@@ -15,7 +15,7 @@ They are not copied into this file. You discover skills in `.agents/skills`, sca
 - `options-simulation`
 - `options-strategy`
 
-Compiling their bodies into this file as well would add about 35 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
+Compiling their bodies into this file as well would add about 41 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
 
 ## What else is here
 
@@ -30,7 +30,7 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 Every command the CLI exposes, read from the argparse parsers in shell/src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
-  Flags: --from-file, --expiry, --provider, --rate, --dividend-yield, --out-dir
+  Flags: --from-file, --data-source, --accept-data-rights, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot
   Flags: --snapshot, --band, --type, --out-dir
 - `optiondesk strategy [NAME]`: build a multi-leg strategy from a snapshot
@@ -38,7 +38,7 @@ Every command the CLI exposes, read from the argparse parsers in shell/src/optio
 - `optiondesk exposure`: dealer gamma, walls, max pain and smile geometry
   Flags: --snapshot, --multiplier, --out-dir
 - `optiondesk plots SYMBOL`: write chat-ready market and Greek PNG plots
-  Flags: --snapshot, --from-file, --expiry, --rate, --dividend-yield, --band, --out-dir
+  Flags: --snapshot, --from-file, --data-source, --accept-data-rights, --expiry, --rate, --dividend-yield, --band, --out-dir
 - `optiondesk expiries [SYMBOL]`: list available expiries and what is on disk
   Flags: --provider, --out-dir
 - `optiondesk compare`: every structure side by side, ranked

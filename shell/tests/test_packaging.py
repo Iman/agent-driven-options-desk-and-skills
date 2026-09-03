@@ -19,6 +19,7 @@ DIST = ROOT / "dist"
 BUNDLE = ROOT / "plugins" / "option-desk"
 SOURCE = ROOT / "shell" / "skills"
 OPENAI_ARCHIVE = "option-desk-openai-skills.zip"
+SKILLS_ARCHIVE = "option-desk-skills.zip"
 
 # Written by install.sh into an installed skill so its uninstall knows what
 # it owns. It has no business inside anything we publish.
@@ -87,6 +88,17 @@ def test_every_archive_holds_the_skill_under_its_own_directory(dist):
                 archive.name, sorted(tops), archive.stem))
         assert "{}/SKILL.md".format(archive.stem) in names, (
             "{} has no SKILL.md at its root".format(archive.name))
+
+
+def test_combined_skills_archive_contains_only_skill_roots(dist):
+    with zipfile.ZipFile(dist / SKILLS_ARCHIVE) as zipped:
+        names = zipped.namelist()
+
+    tops = {name.split("/", 1)[0] for name in names}
+    assert tops == set(_skill_names())
+    assert all("/" in name for name in names)
+    for skill in _skill_names():
+        assert "{}/SKILL.md".format(skill) in names
 
 
 def test_the_frontmatter_in_every_archive_is_valid_yaml(dist):

@@ -180,10 +180,14 @@ service after the plugin owner registers that service. The hosted service can
 process a user attachment privately. It does not fetch Yahoo or personal Alpha
 Vantage data.
 
-OpenAI accepts skills-only plugins. Build the dedicated submission archive
-with `python3 scripts/package.py`, then use
-`dist/option-desk-openai-skills.zip`. It contains no MCP declaration. The
-skills-only listing does not promise fresh market figures.
+For the Skills page of a plugin with its own MCP server, build the archives
+with `python3 scripts/package.py`. Upload `dist/option-desk-skills.zip`. Its
+top level contains only the six skill directories. The hosted MCP remains a
+separate portal setting.
+
+`dist/option-desk-openai-skills.zip` is the legacy skills-only plugin bundle.
+It includes a plugin manifest and images, so do not upload it on the new
+plugin's Skills page.
 
 The hosted MCP endpoint is `https://optiondesk.avidquant.com/mcp`. The current
 public plugin is not connected to that endpoint. Create and test a new plugin

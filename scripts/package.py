@@ -6,9 +6,9 @@ places people install from. Rather than maintaining copies by hand, this
 builds them:
 
   dist/skills/<name>.zip      one portable archive per agent skill
-  dist/option-desk-skills.zip all six together for Claude skill upload
+  dist/option-desk-skills.zip all six as one directory of skill roots
   dist/option-desk-openai-skills.zip
-                              one skills-only OpenAI plugin archive
+                              one legacy skills-only OpenAI plugin archive
   plugins/option-desk/        one dual-host plugin: OpenAI/Codex plus Claude
   .claude-plugin/marketplace.json
                               the Claude Code marketplace entry

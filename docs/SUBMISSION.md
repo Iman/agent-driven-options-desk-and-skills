@@ -97,27 +97,29 @@ There is no need to resubmit the form. That makes `scripts/refresh.py`
 passing before every push more important, not less, since a bad push
 reaches users without another human looking at it.
 
-## OpenAI skills-only submission
+## OpenAI Skills page
 
 OpenAI accepts skills-only plugins. It also accepts plugins that combine
 skills with a remote MCP server. The current submission rules are in the
 [OpenAI submission guide](https://developers.openai.com/plugins/deploy/submission)
 and its [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
 
-Build the dedicated skills-only archive:
+Build the skill archives:
 
 ```
 python3 scripts/package.py
 ```
 
-Upload `dist/option-desk-openai-skills.zip`. This archive contains the
-OpenAI manifest, the six skills under `skills/`, and the required images.
-It does not contain `.mcp.json` or an MCP declaration. OpenAI rejects MCP
-configuration in a skills-only upload.
+For a plugin with its own MCP server, upload `dist/option-desk-skills.zip` on
+the Skills page. Its top level contains only the six skill directories. Each
+directory has a `SKILL.md` file.
 
-Do not upload the dual-host directory at `plugins/option-desk` as a
-skills-only plugin. That directory includes the local MCP declaration for
-Codex and Claude Code.
+Do not upload `dist/option-desk-openai-skills.zip` on that page. It is the
+legacy skills-only plugin bundle. It also contains the OpenAI manifest and
+images, which the Skills uploader rejects.
+
+Do not upload the dual-host directory at `plugins/option-desk`. That
+directory includes the local MCP declaration for Codex and Claude Code.
 
 ### OpenAI listing text
 
@@ -192,7 +194,7 @@ https://optiondesk.avidquant.com/mcp
 ```
 
 Create an OpenAI Universal plugin and use this URL for every user. Upload
-`dist/option-desk-openai-skills.zip` on the Skills page. The hosted repository
+`dist/option-desk-skills.zip` on the Skills page. The hosted repository
 contains `chatgpt-app-submission.json` for the Plugin Info page.
 
 The hosted service uses SYNTH for public demonstrations. It can privately

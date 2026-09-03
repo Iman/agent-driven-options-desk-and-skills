@@ -75,11 +75,13 @@ says so: its execution route tells the agent to prefer the MCP tool, fall
 back to the command line, and if neither is available to say that no fresh
 figures can be produced rather than inventing them.
 
-`scripts/package.py` builds `dist/option-desk-openai-skills.zip` for an
-OpenAI skills-only submission. The archive contains the six skills and the
-OpenAI manifest. It excludes the local MCP configuration. A new Universal
-plugin can combine that archive with the hosted MCP URL. The current public
-skills-only plugin remains unchanged until OpenAI accepts the new submission.
+`scripts/package.py` builds `dist/option-desk-skills.zip` for the Skills page
+of a plugin with its own MCP server. The archive contains only six skill
+roots. The MCP URL is configured separately in the portal.
+
+The script also builds `dist/option-desk-openai-skills.zip` for the legacy
+skills-only plugin format. That bundle includes a manifest and images. Do not
+upload it on the new Skills page.
 
 ---
 

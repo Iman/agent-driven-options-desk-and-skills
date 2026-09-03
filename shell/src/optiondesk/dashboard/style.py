@@ -134,4 +134,24 @@ footer { color: var(--muted); font-size: 11.5px; margin-top: 34px;
 code { background: var(--bg); border: 1px solid var(--line);
        border-radius: 4px; padding: 1px 5px; font-size: 11.5px; }
 .empty { color: var(--muted); }
+details.maths { margin: 2px 0 14px; }
+details.maths summary { cursor: pointer; color: var(--muted);
+                        font-size: 10.5px; text-transform: uppercase;
+                        letter-spacing: .07em; font-weight: 650;
+                        padding: 4px 0; }
+details.maths summary:hover { color: var(--ink); }
+pre.maths { margin: 6px 0 0; font-size: 11px; line-height: 1.65; }
+.flow svg { width: 100%; height: auto; display: block; margin: 8px 0 6px; }
+.flow .box { fill: var(--bg); stroke: var(--line); }
+.flow .t { fill: var(--ink); font: 600 12.5px ui-sans-serif, system-ui,
+           sans-serif; }
+.flow .f { fill: var(--accent); font: 10.5px ui-monospace, SFMono-Regular,
+           Menlo, monospace; }
+.flow .m { fill: var(--muted); font: 10.5px ui-sans-serif, system-ui,
+           sans-serif; }
+.flow .arrow { stroke: var(--muted); fill: none; stroke-width: 1.2; }
+.flow .arrow.soft { stroke-dasharray: 4 3; }
+.flow .head { fill: var(--muted); }
+.flow .lbl { fill: var(--muted); font: 10px ui-sans-serif, system-ui,
+             sans-serif; }
 """

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "optiondesk-hosted": {
+      "type": "http",
+      "url": "https://optiondesk.avidquant.com/mcp"
+    }
+  }
+}

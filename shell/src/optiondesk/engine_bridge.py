@@ -31,6 +31,7 @@ try:  # pragma: no cover - trivially environment dependent
     from optiondesk_engine import backtest as _backtest
     from optiondesk_engine import simulation as _simulation
     from optiondesk_engine import strategies as _strategies
+    from optiondesk_engine.pricing import black_scholes as _pricing
     AVAILABLE = True
 except ImportError:  # pragma: no cover
     GREEK_KEYS = ()
@@ -42,6 +43,7 @@ except ImportError:  # pragma: no cover
     _backtest = None
     _simulation = None
     _strategies = None
+    _pricing = None
     AVAILABLE = False
 
 
@@ -104,6 +106,18 @@ def backtest():
     if not AVAILABLE:
         raise EngineUnavailable()
     return _backtest
+
+
+def pricing():
+    """The engine's pricing surface: the Black-Scholes model and the
+    constants its solver works to.
+
+    Exposed so the dashboard can print the numbers it quotes from the
+    engine rather than restating them by hand, where they would drift.
+    """
+    if not AVAILABLE:
+        raise EngineUnavailable()
+    return _pricing
 
 
 def status():

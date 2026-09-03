@@ -1,10 +1,17 @@
 # Disclaimer and terms of use
 
+Last updated 2026-09-03.
+
 This document applies to the entire repository, to the shell and to the
-analytics engine, to every artifact either of them writes,
-and to every response produced by an AI agent that invokes them. Using,
-copying or running this software means you accept what follows. If you do not
-accept it, do not use the software.
+analytics engine, to every artifact either of them writes, and to every
+response produced by an AI agent that invokes them. Using, copying or
+running this software means you accept what follows. If you do not accept
+it, do not use the software.
+
+The separate hosted service at `optiondesk.avidquant.com` has its own
+terms, at `https://optiondesk.avidquant.com/legal/terms`. Where you use
+that service, those terms apply to it; this document applies to the
+software here.
 
 ## 1. This is software, not advice
 
@@ -18,17 +25,37 @@ No output is tailored to any person's financial situation, objectives,
 knowledge, experience, tax position or risk tolerance, and no output should be
 read as if it were. The software cannot know those things and does not ask.
 
-## 2. No regulated status
+The software is general in nature. Its output is not suitable or
+appropriate for you, in the regulatory sense of those words, because no
+assessment of suitability or appropriateness has been performed or is
+possible.
 
-The author is not authorised or regulated by the Financial Conduct Authority.
-The author is not registered with the United States Securities and Exchange
-Commission, is not an investment adviser, is not a broker or dealer, is not a
-commodity trading advisor, and is not registered in any equivalent capacity in
-any other jurisdiction.
+## 2. No regulated status, and no regulated activity is carried on
 
-No fiduciary, advisory, agency or client relationship is created by your use
-of this software, by your reading of its documentation, or by any
-correspondence about it.
+The author and copyright holder is not authorised or regulated by the
+Financial Conduct Authority. He is not registered with the United States
+Securities and Exchange Commission, is not an investment adviser, is not a
+broker or dealer, is not a commodity trading advisor, is not registered in
+any equivalent capacity in any other jurisdiction, and does not hold himself
+out as being so.
+
+Nothing offered here constitutes, and nothing here is intended to
+constitute:
+
+- investment advice or a personal recommendation, within the meaning of the
+  FCA Handbook or Article 53 of the Financial Services and Markets Act 2000
+  (Regulated Activities) Order 2001, or advice within the meaning of the
+  US Investment Advisers Act of 1940
+- an offer, inducement or invitation to engage in investment activity, or a
+  financial promotion within the meaning of section 21 of the Financial
+  Services and Markets Act 2000
+- dealing, arranging, managing, safeguarding or administering investments
+  for any person
+- an offer to sell or a solicitation of an offer to buy any security
+
+No fiduciary, advisory, agency or client relationship of any kind is created
+by your use of this software, by your reading of its documentation, by any
+correspondence about it, or by any commercial licence granted for it.
 
 ## 3. Your responsibility
 
@@ -112,68 +139,15 @@ for any other liability that cannot lawfully be excluded or limited.
 
 ## 8. Indemnity
 
-You agree to indemnify and hold the author harmless from any claim, demand,
-loss, liability, cost or expense, including reasonable legal fees, arising
-from your use of the software, your breach of these terms, your breach of any
-data provider's terms, or your breach of any law or regulation.
+To the extent permitted by law, you agree to indemnify and hold the author
+harmless from any claim, demand, loss, liability, cost or expense, including
+reasonable legal fees, arising from your use of the software, from any
+output you distribute or act on, from any decision you or a third party
+takes in connection with it, from your breach of these terms or of the
+licence, from your breach of any data provider's terms, or from your breach
+of any law or regulation.
 
-## 9. Automated and agent use
-
-This software is designed to be invoked by AI agents. An agent's summary of an
-output is not a substitute for the output, and neither is advice. Any agent
-integration must preserve the substance of this disclaimer where results are
-presented to a person, and must not present modelled figures as executable
-prices or as recommendations.
-
-Automated execution against a live account is outside the scope of this
-project. If you build it, you own the consequences entirely.
-
-## 10. Governing law
-
-These terms are governed by the laws of England and Wales, and the courts of
-England and Wales have exclusive jurisdiction, without prejudice to any
-mandatory consumer protection rights available to you locally.
-
-If any provision is held unenforceable, the remainder stays in force.
-
-## 11. Not a substitute for professional advice
-
-Nothing here is legal, tax, accounting or financial advice. Consult a
-qualified professional in your jurisdiction before acting on anything this
-software produces.
-
-## 12. No regulated activity is carried on
-
-The copyright holder is not authorised or regulated by the Financial
-Conduct Authority, the Securities and Exchange Commission, or any other
-financial regulator, and does not hold himself out as being so.
-
-Nothing offered here constitutes, and nothing here is intended to
-constitute:
-
-- investment advice or a personal recommendation, within the meaning of the
-  FCA Handbook or Article 53 of the Financial Services and Markets Act 2000
-  (Regulated Activities) Order 2001, or advice within the meaning of the
-  US Investment Advisers Act of 1940
-- an offer, inducement or invitation to engage in investment activity, or a
-  financial promotion within the meaning of section 21 of the Financial
-  Services and Markets Act 2000
-- dealing, arranging, managing, safeguarding or administering investments
-  for any person
-- an offer to sell or a solicitation of an offer to buy any security
-
-No client relationship, advisory relationship, agency or fiduciary duty of
-any kind arises between you and the copyright holder through your use of
-this software, through correspondence about it, or through any commercial
-licence granted for it.
-
-The software is general in nature. It knows nothing of your circumstances,
-objectives, tax position, risk tolerance or regulatory status, and it does
-not consider them. Its output is not suitable or appropriate for you, in
-the regulatory sense of those words, because no assessment of suitability
-or appropriateness has been performed or is possible.
-
-## 13. No reliance
+## 9. No reliance
 
 You must not rely on anything this software produces. Any decision you take
 is yours alone, taken on your own judgement and on your own information,
@@ -184,15 +158,20 @@ results, and the honesty statement carried in every backtest artifact
 explains precisely why. Historical or simulated performance does not
 indicate future performance.
 
-## 14. Indemnity
+## 10. Automated and agent use
 
-To the extent permitted by law, you agree to indemnify the copyright holder
-against any claim, loss, liability, cost or expense, including reasonable
-legal fees, arising from your use of this software, from any output you
-distribute or act on, from any decision you or a third party takes in
-connection with it, and from any breach of these terms or of the licence.
+This software is designed to be invoked by AI agents. An agent's summary of an
+output is not a substitute for the output, and neither is advice. Any agent
+integration must preserve the substance of this disclaimer where results are
+presented to a person, and must not present modelled figures as executable
+prices or as recommendations.
 
-## 15. Where you may not use it
+Automated execution against a live account is outside the scope of this
+project. If you build it, you own the consequences entirely. Nothing in this
+repository places, routes or executes an order, and nothing here is a path
+to a broker.
+
+## 11. Where you may not use it
 
 You are responsible for determining whether use of this software is lawful
 where you are, and for complying with all applicable law, including
@@ -207,3 +186,17 @@ Commercial use of any kind requires a separate written agreement under
 LICENSES.md. Obtaining such an agreement does not make the copyright holder
 your adviser, does not transfer any regulatory permission to you, and does
 not make him responsible for how you use the software.
+
+## 12. Not a substitute for professional advice
+
+Nothing here is legal, tax, accounting or financial advice. Consult a
+qualified professional in your jurisdiction before acting on anything this
+software produces.
+
+## 13. Governing law
+
+These terms are governed by the laws of England and Wales, and the courts of
+England and Wales have exclusive jurisdiction, without prejudice to any
+mandatory consumer protection rights available to you locally.
+
+If any provision is held unenforceable, the remainder stays in force.

@@ -36,7 +36,19 @@ COMMANDS = ROOT / ".claude" / "commands"
 AGENTS = ROOT / ".claude" / "agents"
 DIST = ROOT / "dist"
 PLUGIN = ROOT / "plugins" / "option-desk"
+HOSTED_PLUGIN = ROOT / "plugins" / "option-desk-hosted"
 ASSETS = ROOT / "assets"
+
+# The hosted Streamable HTTP endpoint. It serves the SYNTH sample and
+# privately processes permitted user snapshots; it fetches no market data.
+HOSTED_MCP_URL = "https://optiondesk.avidquant.com/mcp"
+HOSTED_DESCRIPTION = (
+    "Option analytics over the hosted MCP at optiondesk.avidquant.com: "
+    "validate a permitted option-chain snapshot, then Greeks, dealer "
+    "positioning and structure payoffs as charts in the conversation, or "
+    "the SYNTH sample with no upload. No market data is fetched, no local "
+    "install is needed. Research software, not investment advice."
+)
 
 BRANDING = {
     "logo": "openai-directory-icon.png",
@@ -327,6 +339,114 @@ def build_plugin():
     return PLUGIN
 
 
+def build_hosted_plugin():
+    """A second plugin over the hosted HTTP MCP, kept apart from the local one.
+
+    Separate rather than a second server inside the local plugin, because
+    the two servers expose tools with the same names. One plugin carrying
+    both would hand an agent duplicate tools to choose between, and a
+    machine without optiondesk-mcp a failed server beside a working one.
+    This one carries the four hosted-safe skills, no commands and no
+    agents: there is nothing to install and nothing local to drive.
+    """
+    if HOSTED_PLUGIN.exists():
+        shutil.rmtree(HOSTED_PLUGIN)
+    HOSTED_PLUGIN.mkdir(parents=True)
+    (HOSTED_PLUGIN / ".claude-plugin").mkdir()
+    (HOSTED_PLUGIN / ".codex-plugin").mkdir()
+
+    keywords = ["options", "greeks", "volatility", "risk",
+                "quantitative-finance", "mcp", "remote-mcp", "skills",
+                "claude-skills", "agent-skills", "options-pricing"]
+    (HOSTED_PLUGIN / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({
+            "name": "option-desk-hosted",
+            "version": VERSION,
+            "description": HOSTED_DESCRIPTION,
+            "author": AUTHOR,
+            "keywords": keywords,
+            "license": "PolyForm-Noncommercial-1.0.0",
+        }, indent=2) + "\n", encoding="utf-8")
+
+    codex_manifest = {
+        "name": "option-desk-hosted",
+        "version": VERSION,
+        "description": HOSTED_DESCRIPTION,
+        "author": AUTHOR,
+        "homepage": REPOSITORY,
+        "repository": REPOSITORY,
+        "license": "PolyForm-Noncommercial-1.0.0",
+        "keywords": keywords,
+        "skills": "./skills/",
+        "interface": {
+            "displayName": "Option Desk (hosted)",
+            "shortDescription": "Analyze option-chain data.",
+            "longDescription": (
+                "Validate a permitted option-chain snapshot and return "
+                "Greek, positioning and strategy charts in the "
+                "conversation through the hosted Option Desk MCP, or "
+                "explore the SYNTH sample with no upload. Fetches no "
+                "market data. Research software, not investment advice."),
+            "developerName": AUTHOR["name"],
+            "category": "Finance",
+            "capabilities": ["Read", "Write"],
+            "websiteURL": "https://optiondesk.avidquant.com",
+            "logo": "./assets/{}".format(BRANDING["logo"]),
+            "composerIcon": "./assets/{}".format(BRANDING["composerIcon"]),
+            "brandColor": "#2F6FEB",
+            "defaultPrompt": [
+                "Show the SYNTH dealer gamma exposure plot.",
+                "Validate my attached option-chain snapshot.",
+                "Build an iron-condor payoff plot from my attached chain.",
+            ],
+        },
+        "mcpServers": "./.mcp.json",
+    }
+    (HOSTED_PLUGIN / ".codex-plugin" / "plugin.json").write_text(
+        json.dumps(codex_manifest, indent=2) + "\n", encoding="utf-8")
+
+    _copy_tree(HOSTED_SKILLS, HOSTED_PLUGIN / "skills")
+
+    asset_target = HOSTED_PLUGIN / "assets"
+    asset_target.mkdir(exist_ok=True)
+    for source in _branding_sources():
+        shutil.copy2(source, asset_target / source.name)
+    for name in CARRIED:
+        source = ROOT / name
+        if source.exists():
+            shutil.copy2(source, HOSTED_PLUGIN / name)
+
+    # "type": "http" plus "url" is the shape both Claude Code and Codex
+    # document for a remote Streamable HTTP server, and the one every
+    # published Codex plugin with a remote server uses.
+    (HOSTED_PLUGIN / ".mcp.json").write_text(json.dumps({
+        "mcpServers": {
+            "optiondesk-hosted": {
+                "type": "http",
+                "url": HOSTED_MCP_URL,
+            }
+        }
+    }, indent=2) + "\n", encoding="utf-8")
+
+    (HOSTED_PLUGIN / "README.md").write_text(
+        "# option-desk-hosted plugin\n\n"
+        "Built by `scripts/package.py` from `openai-skills`. Do not edit "
+        "here: edit the sources and rebuild.\n\n"
+        "It declares one remote MCP server, `{}`, and carries the four "
+        "skills that match it. The service serves the SYNTH sample and "
+        "privately processes option-chain snapshots the user is permitted "
+        "to send; it fetches no market data and places no orders. Its "
+        "privacy policy and terms are at "
+        "https://optiondesk.avidquant.com/legal/privacy and "
+        "https://optiondesk.avidquant.com/legal/terms.\n\n"
+        "For the local desk, with its own data pulls, simulation, "
+        "backtests, commands and agents, install `option-desk` "
+        "instead. Do not install both: they expose tools with the same "
+        "names.\n".format(HOSTED_MCP_URL),
+        encoding="utf-8")
+    return HOSTED_PLUGIN
+
+
 def build_marketplaces():
     """Write the Claude and OpenAI/Codex repository marketplaces."""
     (ROOT / ".claude-plugin").mkdir(exist_ok=True)
@@ -341,7 +461,13 @@ def build_marketplaces():
                 "description": DESCRIPTION,
                 "source": "./plugins/option-desk",
                 "category": "finance",
-            }
+            },
+            {
+                "name": "option-desk-hosted",
+                "description": HOSTED_DESCRIPTION,
+                "source": "./plugins/option-desk-hosted",
+                "category": "finance",
+            },
         ],
     }
     claude_path = ROOT / ".claude-plugin" / "marketplace.json"
@@ -363,7 +489,19 @@ def build_marketplaces():
                     "authentication": "ON_INSTALL",
                 },
                 "category": "Finance",
-            }
+            },
+            {
+                "name": "option-desk-hosted",
+                "source": {
+                    "source": "local",
+                    "path": "./plugins/option-desk-hosted",
+                },
+                "policy": {
+                    "installation": "AVAILABLE",
+                    "authentication": "ON_INSTALL",
+                },
+                "category": "Finance",
+            },
         ],
     }
     codex_path = ROOT / ".agents" / "plugins" / "marketplace.json"
@@ -376,6 +514,7 @@ def build_marketplaces():
 def main():
     zips = build_zips()
     plugin = build_plugin()
+    hosted = build_hosted_plugin()
     marketplaces = build_marketplaces()
 
     print("portable skill archives and host-specific bundles:")
@@ -390,6 +529,8 @@ def main():
     print("plugin: {} with {} skills, {} commands, {} agents, "
           "1 mcp server".format(plugin.relative_to(ROOT), skills, commands,
                                 agents))
+    print("plugin: {} with {} skills and the hosted MCP at {}".format(
+        hosted.relative_to(ROOT), len(_hosted_skill_dirs()), HOSTED_MCP_URL))
     print("marketplaces: {}".format(
         ", ".join(str(path.relative_to(ROOT)) for path in marketplaces)))
     return 0

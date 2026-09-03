@@ -170,7 +170,7 @@ MUTATIONS = [
     # "Thirty-nine" while the document said "Forty", so this mutation was
     # reported SKIPPED, which is a mutation that proves nothing at all.
     ("dashboard-counts-unguarded", "docs/CAPABILITIES.md",
-     "Forty-one panels and, at most, thirty-two chart canvases",
+     "Forty-two panels and, at most, thirty-two chart canvases",
      "Thirty-five panels and, at most, twenty-eight chart canvases",
      "shell/tests/test_documented_counts.py"),
     ("installer-bare-repo-accepted", "install.sh",

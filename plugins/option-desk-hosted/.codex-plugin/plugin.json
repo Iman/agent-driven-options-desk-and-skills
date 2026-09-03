@@ -1,0 +1,46 @@
+{
+  "name": "option-desk-hosted",
+  "version": "0.3.0",
+  "description": "Option analytics over the hosted MCP at optiondesk.avidquant.com: validate a permitted option-chain snapshot, then Greeks, dealer positioning and structure payoffs as charts in the conversation, or the SYNTH sample with no upload. No market data is fetched, no local install is needed. Research software, not investment advice.",
+  "author": {
+    "name": "Iman Samizadeh"
+  },
+  "homepage": "https://github.com/Iman/agent-driven-options-desk-and-skills",
+  "repository": "https://github.com/Iman/agent-driven-options-desk-and-skills",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "keywords": [
+    "options",
+    "greeks",
+    "volatility",
+    "risk",
+    "quantitative-finance",
+    "mcp",
+    "remote-mcp",
+    "skills",
+    "claude-skills",
+    "agent-skills",
+    "options-pricing"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Option Desk (hosted)",
+    "shortDescription": "Analyze option-chain data.",
+    "longDescription": "Validate a permitted option-chain snapshot and return Greek, positioning and strategy charts in the conversation through the hosted Option Desk MCP, or explore the SYNTH sample with no upload. Fetches no market data. Research software, not investment advice.",
+    "developerName": "Iman Samizadeh",
+    "category": "Finance",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://optiondesk.avidquant.com",
+    "logo": "./assets/openai-directory-icon.png",
+    "composerIcon": "./assets/openai-composer-icon.png",
+    "brandColor": "#2F6FEB",
+    "defaultPrompt": [
+      "Show the SYNTH dealer gamma exposure plot.",
+      "Validate my attached option-chain snapshot.",
+      "Build an iron-condor payoff plot from my attached chain."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

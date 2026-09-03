@@ -322,3 +322,81 @@ def test_the_mcp_descriptor_names_a_command_the_installer_creates(bundle):
         assert command in installer, (
             "{} is declared in .mcp.json and install.sh never creates "
             "it".format(command))
+
+
+# --------------------------------------------------------- the hosted plugin
+
+
+@pytest.fixture(scope="module")
+def hosted(built, tmp_path_factory):
+    """The hosted plugin, built by the same packager into our own tree."""
+    built.HOSTED_PLUGIN = built.PLUGIN.parent / "option-desk-hosted"
+    return built.build_hosted_plugin()
+
+
+def test_the_hosted_plugin_declares_one_remote_http_server_and_no_command(
+        hosted, built):
+    """A remote server is a URL and a type; a command would be a stdio
+    server nothing on a browser can run."""
+    descriptor = json.loads((hosted / ".mcp.json").read_text())
+    servers = descriptor["mcpServers"]
+
+    assert list(servers) == ["optiondesk-hosted"]
+    server = servers["optiondesk-hosted"]
+    assert server == {"type": "http", "url": built.HOSTED_MCP_URL}
+    assert server["url"].startswith("https://")
+
+
+def test_the_hosted_plugin_carries_the_hosted_skills_and_nothing_local(
+        hosted):
+    """The four hosted-safe skills, and none of the six local workflows:
+    a skill that says optiondesk chain would send a browser user to a
+    command it cannot run."""
+    packaged = sorted(p.parent.name
+                      for p in (hosted / "skills").glob("*/SKILL.md"))
+    assert packaged == _hosted_skill_names()
+    assert not (hosted / "commands").exists()
+    assert not (hosted / "agents").exists()
+    text = "\n".join(p.read_text(encoding="utf-8")
+                     for p in (hosted / "skills").glob("*/SKILL.md")).lower()
+    assert "optiondesk chain" not in text
+    assert "optiondesk-mcp" not in text
+
+
+def test_the_hosted_manifests_agree_and_name_a_different_plugin(hosted,
+                                                                bundle):
+    claude = json.loads(
+        (hosted / ".claude-plugin" / "plugin.json").read_text())
+    codex = json.loads((hosted / ".codex-plugin" / "plugin.json").read_text())
+    local = json.loads(
+        (bundle / ".claude-plugin" / "plugin.json").read_text())
+
+    assert claude["name"] == codex["name"] == hosted.name
+    assert claude["name"] != local["name"]
+    assert claude["version"] == codex["version"] == local["version"]
+    assert "not investment advice" in claude["description"]
+    assert "No market data is fetched" in claude["description"]
+    assert codex["mcpServers"] == "./.mcp.json"
+    assert len(codex["interface"]["shortDescription"]) <= 30
+    assert len(codex["interface"]["defaultPrompt"]) <= 3
+    for field in ("logo", "composerIcon"):
+        assert (hosted / codex["interface"][field][2:]).is_file()
+    assert (hosted / "DISCLAIMER.md").is_file()
+
+
+def test_both_marketplaces_list_both_plugins(built, tmp_path):
+    """Two plugins, listed in the same order by both hosts."""
+    built.ROOT = tmp_path
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".agents" / "plugins").mkdir(parents=True)
+    claude_path, codex_path = built.build_marketplaces()
+
+    claude = json.loads(claude_path.read_text())
+    codex = json.loads(codex_path.read_text())
+    assert [p["name"] for p in claude["plugins"]] == [
+        "option-desk", "option-desk-hosted"]
+    assert [p["name"] for p in codex["plugins"]] == [
+        "option-desk", "option-desk-hosted"]
+    assert claude["plugins"][1]["source"] == "./plugins/option-desk-hosted"
+    assert codex["plugins"][1]["source"]["path"] == \
+        "./plugins/option-desk-hosted"

@@ -3,7 +3,7 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-962%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-980%20passing%2C%200%20skipped-brightgreen)](#development)
 [![Mutation testing](https://img.shields.io/badge/mutations-81%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
@@ -37,16 +37,21 @@ into a container that is about to be deleted.
 
 ![All twenty-three structures on one SPY expiry, ranked by model expected profit per unit of capital at risk, with the degradation banner the run itself produced](docs/screenshots/dashboard-comparison.png)
 
-Every screenshot on this page is one live run against free data: SPY at the
-2026-10-16 expiry with 2026-12-18 also on disk, 394 and 303 contracts, all
-twenty-three structures built and seventeen of them backtested over five
-years.
-None of it has been cleaned up. Two of the 394 contracts fall back to the
-provider's published volatility and fourteen carry none at all, and the
+Every screenshot on this page is one live run against free data, taken on
+2026-09-03: SPY at the 2026-10-16 expiry with 2026-09-30 and 2026-11-30
+also on disk, 394, 576 and 386 contracts, all twenty-three structures built
+and fifteen of them backtested over five years, one of which, the ratio
+spread, refused to divide by an unbounded loss and says so.
+None of it has been cleaned up. Ten of the 394 contracts fall back to the
+provider's published volatility and fifteen carry none at all, and the
 page says both for itself rather than presenting a chain that solved
-perfectly. An earlier version of this run showed 48 fallbacks and an amber
-degradation banner; an audit found the solver was refusing contracts it
-could identify, and fixing that took the fallbacks from 48 to 2.
+perfectly; the month-end 2026-09-30 chain, with wider wings, carries a
+degradation banner because 127 of its 576 contracts fell back. An earlier
+version of this run showed 48 fallbacks on the monthly expiry and an amber
+banner; an audit found the solver was refusing contracts it could
+identify, and fixing that took the fallbacks from 48 to 2 on the August
+chain and to 10 on this one. The images are captured by
+`scripts/screenshots.py`, which anyone can rerun.
 
 To reproduce all of it in one command:
 
@@ -209,6 +214,22 @@ release before you promise in-chat calculations or plots.
 That adds the six skills, six commands, two agents and the MCP server
 declaration in one step. The commands and agents come only through this
 path; the skills CLI installs skills.
+
+### The hosted plugin, for a browser with nothing installed
+
+```
+/plugin marketplace add Iman/agent-driven-options-desk-and-skills
+/plugin install option-desk-hosted@option-desk
+```
+
+The same marketplace carries a second plugin, `option-desk-hosted`, which
+declares the remote Streamable HTTP MCP at
+`https://optiondesk.avidquant.com/mcp` and brings the four skills that
+match it. Codex reads the same manifest. The service serves a synthetic
+sample and privately processes an option-chain snapshot you are permitted
+to send; it fetches no market data and places no orders, and its own
+privacy policy and terms are linked from `PRIVACY.md`. Install one plugin
+or the other, not both: the two servers expose tools with the same names.
 
 ### From a checkout, by hand
 
@@ -898,7 +919,8 @@ request from the viewer's browser. It reads artifacts and never writes
 them, so it cannot corrupt a run in progress.
 
 Sections: a selector for underlying and expiry built from what is on disk,
-structure comparison, composite support (one score per structure under a
+the pipeline (every command, the artifact it writes and which artifact
+feeds which, drawn inline), structure comparison, composite support (one score per structure under a
 printed formula, with the model, the simulation and five years of history
 side by side and their disagreements marked), time spreads (the two-expiry
 family with the delta ratio, the giveback, the carry each was priced at and
@@ -910,12 +932,28 @@ distribution, parameter table with diagnostics, realised against implied),
 and backtest (statistics table, equity curves, drawdown and the per-trade
 outcome distribution).
 
+Under every section sits a printed block of the arithmetic behind it, in
+the same plain monospace form the composite panel uses for its formula:
+the pricing model and the solver's acceptance rule, dealer gamma exposure
+and max pain, the smile figures and the expected move, the payoff engine
+and the lognormal law behind P(profit), time-spread marking, GARCH-t by
+MCMC with its diagnostics and tail figures, and the backtest's block-aware
+tests. Every constant in those blocks is read from the engine, and a test
+fails if the text and the code part company.
+
 Every view is addressable: `?u=SPY&e=2026-09-18`.
 
 ### What it looks like
 
-Nine views below. Every panel and every chart, seventy-nine images in all,
-is in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md).
+Ten views below. Every section, panel and chart, ninety images in all, is
+in [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md), captured from one live run
+by `scripts/screenshots.py`.
+
+The pipeline. One box per command, the artifact each writes, and which
+artifact feeds which; the page reads all of them and writes nothing. The
+maths of each stage is printed in the section that shows it.
+
+![The pipeline: provider or file to chain, greeks and exposure; chain to strategy, comparison and forward ledger; daily closes to simulation and backtest](docs/screenshots/dashboard-pipeline.png)
 
 Positioning. Dealer gamma by strike with the walls marked, the cumulative
 profile and where it crosses zero, open interest before any assumption
@@ -923,7 +961,7 @@ about who holds it, and the max pain curve. The sign convention is stated
 on the panel rather than buried, because it is the assumption most likely
 to be wrong for a single name.
 
-![Dealer gamma exposure by strike, cumulative exposure and the flip, open interest, and the max pain profile](docs/screenshots/dashboard-positioning.png)
+![Dealer gamma exposure by strike, cumulative exposure and the flip, open interest, the max pain profile, and the printed arithmetic behind them](docs/screenshots/dashboard-positioning.png)
 
 Volatility. The surface by strike and expiry from two expiries on file, the
 smile with its 25-delta wings, and the first and second order Greek curves
@@ -972,14 +1010,16 @@ Backtest. Entered on a fixed schedule and held to expiry, against a
 buy-and-hold benchmark over the same windows, with the drawdown and the
 per-trade outcome distribution beside it. The panel states what it is not
 before it states what it found: 233 iron condors on SPY over five years,
-63.9 percent of them winners, and a total of minus 30 units of risk.
+62.2 percent of them winners, and a total of minus 34 units of risk.
 
 Those 233 windows overlap. A thirty day hold entered every five trading
 days shares twenty-five of its thirty days with its neighbour, so the
 significance test flips signs a block at a time and the interval resamples
-blocks. The artifacts carry the block. It matters: correcting for the
-overlap moved four structures from below the conventional 0.05 to above
-it, and one from 0.0005 to 0.148.
+blocks. The artifacts carry the block, six here. It matters: when the
+correction landed, on the August chain, it moved four structures from
+below the conventional 0.05 to above it, and one from 0.0005 to 0.148. On
+this run the iron condor's block p-value is 0.016, and the maths block
+under the panel prints the test.
 
 ![The backtest statistics table, equity curve, drawdown from peak, and the per-trade outcome distribution](docs/screenshots/dashboard-backtest.png)
 
@@ -1056,7 +1096,7 @@ skips the index.
 All three at once, from the repository root:
 
 ```
-./shell/.venv/bin/python -m pytest -q          # 965 tests
+./shell/.venv/bin/python -m pytest -q          # 980 tests
 ```
 
 That works because of `pytest.ini`, and it did not until recently: the
@@ -1069,7 +1109,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 458 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 473 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 161 tests
 ```
 

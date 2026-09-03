@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 import re
 
+from optiondesk.dashboard import flow, maths
 from optiondesk.dashboard.charts import SCRIPT
 from optiondesk.dashboard.style import STYLE
 
@@ -783,7 +784,8 @@ def _simulation_section(simulation):
             "<th>expected shortfall</th></tr></thead><tbody>"
             + "".join(structure_rows) + "</tbody></table></div>")
 
-    return "<h2 class='section'>Simulation</h2>" + body
+    return ("<h2 class='section'>Simulation</h2>" + body
+            + maths.block(maths.simulation(maths.constants(), simulation)))
 
 
 def _backtest_section(backtests):
@@ -844,7 +846,8 @@ def _backtest_section(backtests):
                 "<tbody>" + "".join(rows) + "</tbody></table></div>"
                 + "<div id='equity' class='chart short'></div>"
                 + "<p class='caveat'><strong>What this is not.</strong> {}"
-                "</p>".format(html.escape(honesty))))
+                "</p>".format(html.escape(honesty)))
+            + maths.block(maths.backtest(maths.constants(), backtests)))
 
 
 def _term_section(term_structure):
@@ -1033,12 +1036,15 @@ def _time_spread_section(plans):
     work; the delta ratio is a bound on the split, not the reason.
     """
     spreads = []
+    first_analysis = None
     for plan in plans or []:
         days = {leg.get("days_to_expiry") for leg in plan.get("legs") or []
                 if leg.get("days_to_expiry") is not None}
         if len(days) < 2:
             continue
         analysis = plan.get("analysis") or {}
+        if first_analysis is None:
+            first_analysis = analysis
         legs = plan.get("legs") or []
         near = min(days)
         far = max(days)
@@ -1102,7 +1108,8 @@ def _time_spread_section(plans):
               "carry each plan was selected and priced at, read from the "
               "chain rather than assumed: at four percent and no dividend "
               "three of the four legs of the ratio structures land on "
-              "different strikes.</p>"))
+              "different strikes.</p>")
+        + maths.block(maths.time_spreads(maths.constants(), first_analysis)))
 
 
 def _gamma_scalp_section(simulation, ladder, plans, expiry):
@@ -1307,6 +1314,11 @@ def render(payload):
     sections.append(_selector(payload.get("groups") or [],
                               payload.get("selected")))
 
+    # The pipeline first, so a reader meets the artifacts before the
+    # numbers made from them, and knows where each number came from.
+    sections.append("<h2 class='section'>The pipeline</h2>" + flow.panel())
+    constants = maths.constants()
+
     comparison = payload.get("comparison")
     if comparison:
         sections.append("<h2 class='section'>Structure comparison</h2>"
@@ -1349,11 +1361,13 @@ def render(payload):
                      "price. The minimum is the conventional max pain level. "
                      "It describes where open interest sits, not where price "
                      "is going.",
-                     "<div id='pain' class='chart short'></div>"))
+                     "<div id='pain' class='chart short'></div>")
+            + maths.block(maths.positioning(constants)))
 
     if exposure and exposure.get("smile"):
         sections.append("<h2 class='section'>Volatility</h2>"
-                        + _volatility_tiles(exposure))
+                        + _volatility_tiles(exposure)
+                        + maths.block(maths.volatility(constants, days)))
 
     sections.append(_term_section(payload.get("term_structure")))
     sections.append(_surface_section(payload.get("surface")))
@@ -1402,7 +1416,8 @@ def render(payload):
                 "<p class='hint' id='plan-when'></p>"
                 "<p class='hint' id='plan-friction'></p>"
                 "<div id='payoff' class='chart tall'></div>"
-                "{}".format(picker, legs_table)))
+                "{}".format(picker, legs_table))
+            + maths.block(maths.structures(constants)))
 
     if ladder and ladder.get("rows"):
         columns = ["strike", "type", "iv", "price", "delta", "gamma", "vega",
@@ -1416,7 +1431,10 @@ def render(payload):
                 "per 1.00 of volatility, so divide by 100 for the per-point "
                 "figure. Contracts with no usable implied volatility are not "
                 "here: they were skipped, not estimated.",
-                _table(ladder["rows"], columns)))
+                _table(ladder["rows"], columns))
+            + maths.block(maths.pricing(constants,
+                                        ladder.get("risk_free_rate"),
+                                        ladder.get("dividend_yield"))))
 
     sections.append(_overlay_section(plans, comparison))
     sections.append(_condor_section(payload.get("condors")))

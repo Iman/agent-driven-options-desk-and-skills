@@ -61,7 +61,11 @@ ChatGPT scan `.agents/skills` and read `.agents/plugins/marketplace.json`.
 This repository symlinks `.agents/skills` to `shell/skills`, and the plugin
 bundle at `plugins/option-desk` carries both manifests over one copy of the
 skills, so neither host gets a stale or partial set. A test asserts the two
-discovery paths see the same six.
+discovery paths see the same six. A second bundle, `plugins/option-desk-hosted`,
+declares the remote Streamable HTTP MCP instead of the local process and
+carries the four hosted-safe skills; both marketplaces list both, and a
+user installs one or the other because the two servers expose tools with
+the same names.
 
 The MCP server is a local stdio process, which Codex on your own machine
 can run and browser ChatGPT cannot, because it has no way to execute a
@@ -371,10 +375,12 @@ flag, and it was verified by removing one and watching it go red.
 ECharts from a vendored copy so a viewer's browser makes no third-party
 request.
 
-Forty-one panels and, at most, thirty-two chart canvases: twenty with
+Forty-two panels and, at most, thirty-two chart canvases: twenty with
 fixed identities, six Greek profiles and up to six per-structure outcome
-distributions. Each renders only when the artifact behind it exists, rather
-than being drawn empty:
+distributions. The first panel is the pipeline, drawn as inline SVG, and
+under every section sits a printed block of the arithmetic behind it, with
+each constant read from the engine. Each chart renders only when the
+artifact behind it exists, rather than being drawn empty:
 
 - payoff at expiry, with breakevens and the expected-move band
 - dealer gamma by strike, cumulative exposure and the flip

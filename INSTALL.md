@@ -205,6 +205,16 @@ them centrally. And the runtime there has no access to your machine, so the
 skills work as knowledge and instructions rather than as tools, the same
 as options 2 and 6.
 
+For tools in the browser, use the hosted service instead. Add
+`https://optiondesk.avidquant.com/mcp` as a custom MCP connector, or
+install the `option-desk-hosted` plugin from this repository's
+marketplace, which declares that connector and carries the four skills
+that match it. The service serves a synthetic sample and privately
+processes an option-chain snapshot you are permitted to send; it fetches
+no market data, and its own privacy policy and terms are linked from
+`PRIVACY.md`. Do not install it beside the local `option-desk` plugin: the
+two servers expose tools with the same names.
+
 ## 8. Docker, for the CLI and the dashboard
 
 ```

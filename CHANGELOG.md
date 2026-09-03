@@ -13,6 +13,34 @@ entry says otherwise.
 - The dashboard header names the artifact file, not the directory that
   holds it, so one machine's layout no longer appears on the page.
 
+## Unreleased, 2026-09-03
+
+The dashboard now shows its own arithmetic, and the screenshots come from a
+script rather than a hand.
+
+- A pipeline figure at the top of the dashboard: every command, the
+  artifact it writes, and which artifact feeds which, drawn as inline SVG in
+  the page's palette so it renders offline and follows the theme.
+- A printed maths block under each section: the Black-Scholes-Merton model
+  and the solver's acceptance rule, dealer gamma exposure with its sign
+  convention and max pain, the smile figures and the expected move, the
+  payoff engine and the lognormal law behind P(profit), time-spread marking
+  and the two ratio columns, GARCH-t by MCMC with the diagnostics and the
+  two tail figures, and the backtest's block-aware tests. Every constant is
+  read from the engine and a test holds the two together.
+- `scripts/screenshots.py` captures every section, panel and chart from a
+  live dashboard, clipped to the element's own box, and rewrites
+  `docs/SCREENSHOTS.md`. The README's images and figures were refreshed
+  from a 2026-09-03 run: SPY at 2026-10-16, 394 contracts, 10 fallbacks.
+- A second plugin, `option-desk-hosted`, in both marketplaces: the four
+  hosted-safe skills and the remote Streamable HTTP MCP at
+  optiondesk.avidquant.com, for claude.ai, ChatGPT and Codex users with no
+  local install. Kept apart from the local plugin because the two servers
+  expose tools with the same names.
+- PRIVACY.md now describes the hosted service and points at its own
+  policy; it had said the project has no servers. DISCLAIMER.md no longer
+  states its regulated-status and indemnity sections twice.
+
 ## 0.3.0, 2026-09-02
 
 This release adds private analysis of user-supplied option-chain data.

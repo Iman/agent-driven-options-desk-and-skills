@@ -1,23 +1,8 @@
 # Screenshot gallery
 
-Every panel and every chart the dashboard renders, captured from one
-live run after three independent verifications corrected eleven defects
-in the numbers: SPY at the 2026-10-16 expiry with 2026-12-18 also on
-disk, 394 and 303 contracts, all twenty-three structures built and
-seventeen backtested over five years.
+Every panel and every chart the dashboard renders, captured from one live run by `scripts/screenshots.py`. SPY at the 2026-10-16 expiry on 2026-09-03, with 2026-09-30 and 2026-11-30 also on disk.
 
-What is visible here that was not before: the chain solves 380 of 394
-contracts rather than 338 and is no longer degraded, the backtest
-p-values are block p-values that respect the overlap between windows,
-the two-expiry rows say where their maximum sits and how wide the scan
-is in standard deviations, and every time spread names the rate and
-dividend yield it was priced at.
-
-Each image is clipped to the element's own bounding box read from the
-live DOM, so a panel image is exactly that panel.
-
-The nine images used in [README.md](../README.md) are in the directory
-above this one. This page is the complete set.
+Each image is clipped to the element's own bounding box read from the live DOM, so a panel image is exactly that panel. The images used in [README.md](../README.md) are in the directory above this one; this page is the complete set.
 
 ## The whole page
 
@@ -57,27 +42,39 @@ above this one. This page is the complete set.
 
 ![structures](screenshots/gallery/sections/structures.png)
 
+### Term structure
+
+![term structure](screenshots/gallery/sections/term-structure.png)
+
 ### The ladder
 
 ![the ladder](screenshots/gallery/sections/the-ladder.png)
+
+### The pipeline
+
+![the pipeline](screenshots/gallery/sections/the-pipeline.png)
 
 ### Time spreads
 
 ![time spreads](screenshots/gallery/sections/time-spreads.png)
 
-### Volatility surface
+### Variance risk premium
 
-![volatility surface](screenshots/gallery/sections/volatility-surface.png)
+![variance risk premium](screenshots/gallery/sections/variance-risk-premium.png)
 
 ### Volatility
 
 ![volatility](screenshots/gallery/sections/volatility.png)
 
+### Volatility surface
+
+![volatility surface](screenshots/gallery/sections/volatility-surface.png)
+
 ## Panels
 
-### 197 graded contracts
+### 189 graded contracts
 
-![197 graded contracts](screenshots/gallery/panels/197-graded-contracts.png)
+![189 graded contracts](screenshots/gallery/panels/189-graded-contracts.png)
 
 ### Analysing something else
 
@@ -86,10 +83,6 @@ above this one. This page is the complete set.
 ### Charm
 
 ![charm](screenshots/gallery/panels/charm.png)
-
-### Composite support table
-
-![composite support table](screenshots/gallery/panels/composite-support-table.png)
 
 ### Cumulative exposure and the flip
 
@@ -111,6 +104,10 @@ above this one. This page is the complete set.
 
 ![every condor on file by the distance between its shorts](screenshots/gallery/panels/every-condor-on-file-by-the-distance-between-its-shorts.png)
 
+### Every expiry on file
+
+![every expiry on file](screenshots/gallery/panels/every-expiry-on-file.png)
+
 ### Every structure on one axis
 
 ![every structure on one axis](screenshots/gallery/panels/every-structure-on-one-axis.png)
@@ -122,6 +119,10 @@ above this one. This page is the complete set.
 ### Gamma
 
 ![gamma](screenshots/gallery/panels/gamma.png)
+
+### How this page was built
+
+![how this page was built](screenshots/gallery/panels/how-this-page-was-built.png)
 
 ### Implied volatility by strike and expiry
 
@@ -183,6 +184,10 @@ above this one. This page is the complete set.
 
 ![realised volatility against implied](screenshots/gallery/panels/realised-volatility-against-implied.png)
 
+### Skew across expiries
+
+![skew across expiries](screenshots/gallery/panels/skew-across-expiries.png)
+
 ### Structures across real history with modelled premiums
 
 ![structures across real history with modelled premiums](screenshots/gallery/panels/structures-across-real-history-with-modelled-premiums.png)
@@ -211,9 +216,17 @@ above this one. This page is the complete set.
 
 ![vega](screenshots/gallery/panels/vega.png)
 
+### Volatility and expected move by expiry
+
+![volatility and expected move by expiry](screenshots/gallery/panels/volatility-and-expected-move-by-expiry.png)
+
 ### Volume by strike
 
 ![volume by strike](screenshots/gallery/panels/volume-by-strike.png)
+
+### What the options are priced at against what the underlying has done
+
+![what the options are priced at against what the underlying has done](screenshots/gallery/panels/what-the-options-are-priced-at-against-what-the-underlying-has-done.png)
 
 ### Where a delta hedge would be working
 
@@ -222,6 +235,10 @@ above this one. This page is the complete set.
 ### Where each structure lands
 
 ![where each structure lands](screenshots/gallery/panels/where-each-structure-lands.png)
+
+### Which structure has the most support under one printed formula
+
+![which structure has the most support under one printed formula](screenshots/gallery/panels/which-structure-has-the-most-support-under-one-printed-formula.png)
 
 ## Charts
 
@@ -333,9 +350,21 @@ above this one. This page is the complete set.
 
 ![profit distribution 6](screenshots/gallery/charts/profit-distribution-6.png)
 
+### Skew across expiries
+
+![skew across expiries](screenshots/gallery/charts/skew-across-expiries.png)
+
 ### Terminal distribution
 
 ![terminal distribution](screenshots/gallery/charts/terminal-distribution.png)
+
+### Variance risk premium
+
+![variance risk premium](screenshots/gallery/charts/variance-risk-premium.png)
+
+### Volatility and expected move by expiry
+
+![volatility and expected move by expiry](screenshots/gallery/charts/volatility-and-expected-move-by-expiry.png)
 
 ### Volume by strike
 

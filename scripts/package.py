@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Build every installable form of this project from one source.
 
-There is one source of truth for the skills, `shell/skills`, and several
-places people install from. Rather than maintaining copies by hand, this
-builds them:
+Local skills live in `shell/skills`. Hosted ChatGPT skills live in
+`openai-skills`. The two sets have different tools and data rights. This
+script builds each installable form from the correct source:
 
   dist/skills/<name>.zip      one portable archive per agent skill
-  dist/option-desk-skills.zip all six as one directory of skill roots
+  dist/option-desk-local-skills.zip
+                              all six local skills
+  dist/option-desk-skills.zip hosted-safe skills for the OpenAI portal
   dist/option-desk-openai-skills.zip
                               one legacy skills-only OpenAI plugin archive
   plugins/option-desk/        one dual-host plugin: OpenAI/Codex plus Claude
@@ -29,6 +31,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS = ROOT / "shell" / "skills"
+HOSTED_SKILLS = ROOT / "openai-skills"
 COMMANDS = ROOT / ".claude" / "commands"
 AGENTS = ROOT / ".claude" / "agents"
 DIST = ROOT / "dist"
@@ -54,6 +57,12 @@ DESCRIPTION = (
 
 def _skill_dirs():
     return sorted(p for p in SKILLS.iterdir()
+                  if p.is_dir() and (p / "SKILL.md").exists())
+
+
+def _hosted_skill_dirs():
+    """Return skills that match the public Streamable HTTP MCP service."""
+    return sorted(p for p in HOSTED_SKILLS.iterdir()
                   if p.is_dir() and (p / "SKILL.md").exists())
 
 
@@ -185,8 +194,8 @@ def build_zips():
             _carry_into(archive, skill.name)
         written.append(path)
 
-    bundle = DIST / "option-desk-skills.zip"
-    with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as archive:
+    local_bundle = DIST / "option-desk-local-skills.zip"
+    with zipfile.ZipFile(local_bundle, "w", zipfile.ZIP_DEFLATED) as archive:
         for skill in _skill_dirs():
             for item in sorted(skill.rglob("*")):
                 if not _publishable(item):
@@ -194,6 +203,16 @@ def build_zips():
                 archive.write(item,
                               Path(skill.name) / item.relative_to(skill))
             _carry_into(archive, skill.name)
+    written.append(local_bundle)
+
+    bundle = DIST / "option-desk-skills.zip"
+    with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as archive:
+        for skill in _hosted_skill_dirs():
+            for item in sorted(skill.rglob("*")):
+                if not _publishable(item):
+                    continue
+                archive.write(item,
+                              Path(skill.name) / item.relative_to(skill))
     written.append(bundle)
 
     # Public OpenAI skills-only submissions need the plugin manifest and

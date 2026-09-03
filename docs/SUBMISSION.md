@@ -111,8 +111,12 @@ python3 scripts/package.py
 ```
 
 For a plugin with its own MCP server, upload `dist/option-desk-skills.zip` on
-the Skills page. Its top level contains only the six skill directories. Each
-directory has a `SKILL.md` file.
+the Skills page. Its top level contains only the hosted-safe skill directories.
+Each directory has a `SKILL.md` file. These skills use the remote MCP and never
+claim access to the local provider or CLI.
+
+`dist/option-desk-local-skills.zip` contains all six local skills. Keep it for
+local Codex and Claude installations. Do not upload it to the hosted plugin.
 
 Do not upload `dist/option-desk-openai-skills.zip` on that page. It is the
 legacy skills-only plugin bundle. It also contains the OpenAI manifest and
@@ -197,7 +201,7 @@ Create an OpenAI Universal plugin and use this URL for every user. Upload
 `dist/option-desk-skills.zip` on the Skills page. The hosted repository
 contains `chatgpt-app-submission.json` for the Plugin Info page.
 
-The hosted service uses SYNTH for public demonstrations. It can privately
+The hosted service uses SYNTH as a public synthetic sample. It can privately
 process a permitted user snapshot and return charts in the conversation. It
 does not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
 

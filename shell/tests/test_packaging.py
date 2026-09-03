@@ -18,8 +18,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 DIST = ROOT / "dist"
 BUNDLE = ROOT / "plugins" / "option-desk"
 SOURCE = ROOT / "shell" / "skills"
+HOSTED_SOURCE = ROOT / "openai-skills"
 OPENAI_ARCHIVE = "option-desk-openai-skills.zip"
 SKILLS_ARCHIVE = "option-desk-skills.zip"
+LOCAL_SKILLS_ARCHIVE = "option-desk-local-skills.zip"
 
 # Written by install.sh into an installed skill so its uninstall knows what
 # it owns. It has no business inside anything we publish.
@@ -29,6 +31,10 @@ IGNORED = {MARKER, ".DS_Store", "__pycache__"}
 
 def _skill_names():
     return sorted(p.parent.name for p in SOURCE.glob("*/SKILL.md"))
+
+
+def _hosted_skill_names():
+    return sorted(p.parent.name for p in HOSTED_SOURCE.glob("*/SKILL.md"))
 
 
 @pytest.fixture(scope="module")
@@ -95,10 +101,36 @@ def test_combined_skills_archive_contains_only_skill_roots(dist):
         names = zipped.namelist()
 
     tops = {name.split("/", 1)[0] for name in names}
-    assert tops == set(_skill_names())
+    assert tops == set(_hosted_skill_names())
     assert all("/" in name for name in names)
+    for skill in _hosted_skill_names():
+        assert "{}/SKILL.md".format(skill) in names
+
+
+def test_local_skills_archive_keeps_the_six_local_workflows(dist):
+    with zipfile.ZipFile(dist / LOCAL_SKILLS_ARCHIVE) as zipped:
+        names = zipped.namelist()
+
+    tops = {name.split("/", 1)[0] for name in names}
+    assert tops == set(_skill_names())
     for skill in _skill_names():
         assert "{}/SKILL.md".format(skill) in names
+
+
+def test_hosted_skills_do_not_claim_local_or_live_provider_access(dist):
+    with zipfile.ZipFile(dist / SKILLS_ARCHIVE) as zipped:
+        text = "\n".join(
+            zipped.read(name).decode("utf-8")
+            for name in zipped.namelist()
+            if name.endswith("/SKILL.md")
+        ).lower()
+
+    assert "optiondesk chain" not in text
+    assert "optiondesk-mcp" not in text
+    assert "fetch from yahoo" not in text
+    assert "ask for an api key" not in text
+    assert "set an api key" not in text
+    assert "option_plots_from_snapshot" in text
 
 
 def test_the_frontmatter_in_every_archive_is_valid_yaml(dist):

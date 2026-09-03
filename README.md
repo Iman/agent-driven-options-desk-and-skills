@@ -3,7 +3,7 @@
 **Option analytics that an AI agent can drive, and that a person can read.**
 
 [![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-959%20passing%2C%200%20skipped-brightgreen)](#development)
+[![Tests](https://img.shields.io/badge/tests-962%20passing%2C%200%20skipped-brightgreen)](#development)
 [![Mutation testing](https://img.shields.io/badge/mutations-78%20run%2C%200%20survived-brightgreen)](#development)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 [![Runtimes](https://img.shields.io/badge/runs%20in-Claude%20Code%20%7C%20Codex%20%7C%20ChatGPT-informational)](INSTALL.md)
@@ -182,8 +182,13 @@ Vantage data.
 
 For the Skills page of a plugin with its own MCP server, build the archives
 with `python3 scripts/package.py`. Upload `dist/option-desk-skills.zip`. Its
-top level contains only the six skill directories. The hosted MCP remains a
-separate portal setting.
+top level contains only the hosted-safe skill directories. These skills match
+the remote service. They do not contain local provider, installation,
+simulation, or backtest instructions. The hosted MCP remains a separate
+portal setting.
+
+`dist/option-desk-local-skills.zip` contains all six local skills. Do not
+upload it to a plugin that uses the hosted MCP.
 
 `dist/option-desk-openai-skills.zip` is the legacy skills-only plugin bundle.
 It includes a plugin manifest and images, so do not upload it on the new
@@ -1006,7 +1011,7 @@ Or one suite at a time:
 
 ```
 ./shell/.venv/bin/python -m pytest engine/tests -q    # 346 tests
-./shell/.venv/bin/python -m pytest shell/tests -q     # 452 tests
+./shell/.venv/bin/python -m pytest shell/tests -q     # 455 tests
 ./shell/.venv/bin/python -m pytest agent/tests -q     # 161 tests
 ```
 

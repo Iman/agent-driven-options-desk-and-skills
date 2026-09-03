@@ -8,6 +8,10 @@ entry says otherwise.
 
 This release adds private analysis of user-supplied option-chain data.
 
+- The OpenAI Skills-page archive now contains hosted-safe MCP workflows only.
+  Local provider, setup, simulation, and backtest instructions remain in a
+  separate local-skills archive.
+
 - The CLI imports CSV or JSON with an explicit source and data-rights statement.
 - MCP clients can send a JSON object, JSON text, CSV text, or a local path.
 - The importer normalizes documented aliases, numeric commas, call or put codes,

@@ -263,10 +263,9 @@ definition, or carries a note saying why it cannot.
 
 ## Not planned
 
-**A hosted MCP server.** The MCP server here is a local stdio process by
-design. Reaching browser ChatGPT would need a hosted Streamable HTTP
-service with authentication and per-user credentials. That is a different
-project with a different threat model.
+**A hosted MCP server in this repository.** The MCP server here is a local
+stdio process by design. The separate hosted project provides browser access
+with a different data policy, deployment, and threat model.
 
 **More structures.** Twenty-three is past the point where another one
 teaches anything. The verification work suggests the returns are higher on

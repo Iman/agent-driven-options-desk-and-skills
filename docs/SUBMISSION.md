@@ -176,13 +176,24 @@ Option Desk run. The schemas are in `shell/src/optiondesk/contracts/`.
 The response must cite the artifact path and report its `degraded` state
 before it quotes a number.
 
-### Future hosted MCP path
+### Hosted MCP submission
 
-A public plugin with live analytics needs a hosted Streamable HTTP MCP
-service. That release also needs domain verification, authentication,
-privacy and support URLs, and the required tool annotations.
+The separate hosted service is available at:
 
-The hosted service must keep provider credentials out of the plugin and
-isolate data for each user. It must preserve the same artifact schemas and
-refusal to place orders. The local stdio server is not a substitute for
-this service.
+```text
+https://optiondesk.avidquant.com/mcp
+```
+
+Create an OpenAI Universal plugin and use this URL for every user. Upload
+`dist/option-desk-openai-skills.zip` on the Skills page. The hosted repository
+contains `chatgpt-app-submission.json` for the Plugin Info page.
+
+The hosted service uses SYNTH for public demonstrations. It can privately
+process a permitted user snapshot and return charts in the conversation. It
+does not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
+
+The submission also needs domain verification, public privacy and support
+URLs, accurate tool annotations, and a Developer Mode recording. Do not claim
+that the MCP provides current market data.
+
+The local stdio server remains separate. It is not the browser service.

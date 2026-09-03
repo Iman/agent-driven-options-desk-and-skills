@@ -65,8 +65,11 @@ discovery paths see the same six.
 
 The MCP server is a local stdio process, which Codex on your own machine
 can run and browser ChatGPT cannot, because it has no way to execute a
-binary on your computer. Reaching that would need a hosted Streamable HTTP
-service with authentication and per-user credentials, and none exists here.
+binary on your computer. The separate hosted service now provides a
+Streamable HTTP endpoint at `https://optiondesk.avidquant.com/mcp`.
+It serves SYNTH and privately processes permitted user snapshots. It does
+not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
+
 In browser ChatGPT the skills are knowledge and instructions, and each one
 says so: its execution route tells the agent to prefer the MCP tool, fall
 back to the command line, and if neither is available to say that no fresh
@@ -74,8 +77,9 @@ figures can be produced rather than inventing them.
 
 `scripts/package.py` builds `dist/option-desk-openai-skills.zip` for an
 OpenAI skills-only submission. The archive contains the six skills and the
-OpenAI manifest. It excludes the local MCP configuration. A future release
-with live browser analytics needs a hosted Streamable HTTP MCP service.
+OpenAI manifest. It excludes the local MCP configuration. A new Universal
+plugin can combine that archive with the hosted MCP URL. The current public
+skills-only plugin remains unchanged until OpenAI accepts the new submission.
 
 ---
 

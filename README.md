@@ -78,6 +78,7 @@ agreement: see [LICENSES.md](LICENSES.md).
 
 - [Install](#install)
 - [Usage](#usage)
+- [Use the skills](#use-the-skills)
 - [Five minutes to a full desk](#five-minutes-to-a-full-desk)
 - [Architecture](#architecture)
 - [How data flows](#how-data-flows)
@@ -288,19 +289,76 @@ The imported chain uses the existing artifact path. Greeks, positioning,
 strategies, plots, comparisons, and the local dashboard use that same artifact.
 User-data plot images include a solid private-research warning.
 
-The six skills, and when each one fires:
+## Use the skills
 
-| Skill | Covers |
+Ask a normal question. You do not have to type a skill name. Codex, Claude,
+or ChatGPT selects the matching skill from the request. You can name a skill
+when you want to force a specific workflow.
+
+Every skill reports missing facts. It does not fill them in. No skill places
+an order, selects a trade for you, or gives investment advice.
+
+### All six local skills
+
+Install the full desk before you use these skills. The installer adds the
+skills and connects the local MCP server.
+
+| Skill | Ask this | Result |
+|---|---|---|
+| `desk-setup` | "Install Option Desk and check why its MCP tools are missing." | Runs the setup and health checks. It does not analyze options. |
+| `options-greeks` | "Show the Greek ladder and Greek plots for SPY's nearest expiry." | Imports or retrieves a chain, calculates sixteen Greeks, and returns charts. |
+| `options-positioning` | "Show SPY dealer gamma exposure, walls, max pain, and volatility smile." | Calculates chain-wide geometry and states the assumed dealer-sign convention. |
+| `options-strategy` | "Build and plot a 30-day SPY iron condor, with both breakevens and maximum loss." | Builds a structure from the chain and reports legs, payoff, Greeks, and quoted-spread friction. |
+| `options-simulation` | "Simulate SPY for 30 days and show value at risk and expected shortfall." | Fits the GARCH-t model to price history and returns the predictive distribution. |
+| `options-backtest` | "Backtest a 30-day SPY iron condor and compare it with buy and hold." | Reports modelled results, uncertainty tests, drawdown, and the benchmark. |
+
+Local provider access is subject to the provider's terms. Yahoo access is for
+acknowledged personal research only. Do not use a personal provider key in a
+hosted or public service.
+
+### All four hosted OpenAI skills
+
+The public plugin has a smaller skill set because its MCP server does not
+fetch market data. It supports the `SYNTH` sample and permitted user-supplied
+CSV or JSON data.
+
+| Skill | Ask this | Result |
+|---|---|---|
+| `option-data-import` | "Validate my attached option chain. Its source is [source], and I confirm that I may send it for private analysis." | Checks the schema, makes only safe format repairs, and explains all remaining errors. |
+| `options-greeks` | "Plot the Greeks from my attached chain." | Returns a Greek PNG in the conversation. |
+| `options-positioning` | "Show gamma exposure and the volatility smile from my attached chain." | Returns positioning figures or plots with the source and capture time. |
+| `options-strategy` | "Build an iron-condor payoff plot from my attached chain." | Returns a payoff PNG, legs, breakevens, limits, and model assumptions. |
+
+Use this sequence in ChatGPT:
+
+1. Mention the Option Desk plugin.
+2. Attach one permitted CSV or JSON option-chain snapshot.
+3. Name the source. Confirm that you may send it for private analysis.
+4. Ask Option Desk to validate the file before it calculates results.
+5. Ask for a Greek, positioning, or strategy plot.
+6. Ask Option Desk to delete a private dashboard when you finish with it.
+
+Do not attach account numbers, credentials, API keys, names, or portfolio
+positions. A rights confirmation does not override the source provider's
+licence. The hosted service does not describe an attachment as live or
+verified.
+
+To try the hosted tools without an upload, ask: "Show the SYNTH dealer gamma
+plot." The answer must identify the result as synthetic sample data.
+
+### Which ZIP to upload
+
+Run `python3 scripts/package.py`. Then select one archive:
+
+| Archive | Use it for |
 |---|---|
-| `options-greeks` | chains, implied volatility by strike, the sixteen Greeks per contract |
-| `options-positioning` | dealer gamma, the walls, the flip, max pain, put-call ratios, skew |
-| `options-strategy` | twenty-three structures, built, priced and ranked side by side |
-| `options-simulation` | GARCH-t Monte Carlo, the fan, value at risk, expected shortfall |
-| `options-backtest` | real history with modelled premiums, significance, and paper forward tests |
-| `desk-setup` | installation, PATH errors, missing commands, and MCP connection faults |
+| `dist/option-desk-skills.zip` | The OpenAI plugin Skills page. It contains the four hosted skill roots. |
+| `dist/option-desk-local-skills.zip` | Local skill import. It contains all six local skills. |
+| `dist/option-desk-openai-skills.zip` | The legacy skills-only plugin package. Do not upload it to the new Skills page. |
 
-Every one of them reports what it cannot establish rather than filling it
-in, and none of them will recommend a trade.
+The hosted MCP URL is a separate plugin setting:
+`https://optiondesk.avidquant.com/mcp`. Uploading a skills ZIP does not connect
+the MCP server by itself.
 
 ---
 
@@ -608,9 +666,9 @@ Twelve tools are exposed: `option_snapshot_schema`, `option_chain_snapshot`, `op
 `option_positioning`, `option_simulate`, `option_backtest`,
 `option_forward_test`, `option_desk_status`.
 
-Six skills ship: `options-greeks`, `options-strategy`,
-`options-positioning`, `options-simulation`, `options-backtest`. Each
-carries the reporting rules an agent must follow, not just the commands.
+Six local skills ship: `desk-setup`, `options-greeks`, `options-strategy`,
+`options-positioning`, `options-simulation`, and `options-backtest`. Each
+carries the reporting rules an agent must follow, not only the commands.
 
 ---
 

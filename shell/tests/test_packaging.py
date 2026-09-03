@@ -132,8 +132,8 @@ def test_openai_archive_has_the_supported_skills_only_layout(dist):
     expected = {
         ".codex-plugin/plugin.json",
         "DISCLAIMER.md",
-        "assets/option-desk-logo.png",
-        "assets/option-desk-icon.png",
+        "assets/openai-directory-icon.png",
+        "assets/openai-composer-icon.png",
     }
     for skill in SOURCE.iterdir():
         if not (skill / "SKILL.md").is_file():

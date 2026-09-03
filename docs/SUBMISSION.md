@@ -136,6 +136,13 @@ Codex and Claude Code.
 
 **Category**: Finance.
 
+Use these portal-specific PNG files:
+
+- Directory icon: `assets/openai-directory-icon.png` (1024 by 1024 pixels).
+- Composer icon: `assets/openai-composer-icon.png` (512 by 512 pixels).
+
+Both files are 8-bit sRGB PNGs without transparency or embedded profiles.
+
 ### Browser limits
 
 The skills-only plugin gives ChatGPT research knowledge and reporting

@@ -35,8 +35,8 @@
       "Write"
     ],
     "websiteURL": "https://github.com/Iman/agent-driven-options-desk-and-skills",
-    "logo": "./assets/option-desk-logo.png",
-    "composerIcon": "./assets/option-desk-icon.png",
+    "logo": "./assets/openai-directory-icon.png",
+    "composerIcon": "./assets/openai-composer-icon.png",
     "brandColor": "#2F6FEB",
     "defaultPrompt": [
       "Show SPY option plots for the nearest expiry.",

@@ -36,8 +36,8 @@ PLUGIN = ROOT / "plugins" / "option-desk"
 ASSETS = ROOT / "assets"
 
 BRANDING = {
-    "logo": "option-desk-logo.png",
-    "composerIcon": "option-desk-icon.png",
+    "logo": "openai-directory-icon.png",
+    "composerIcon": "openai-composer-icon.png",
 }
 PUBLISH_IGNORES = {".DS_Store", ".installed-by-optiondesk", "__pycache__"}
 

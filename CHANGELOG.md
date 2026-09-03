@@ -4,6 +4,15 @@ Dates are the day the work landed. Figures quoted here were measured on one
 live SPY chain, 2026-10-16 expiry with 2026-12-18 also on disk, unless the
 entry says otherwise.
 
+## Unreleased
+
+- The dashboard folds per-row import repairs into one line per repair, with
+  the row ranges, so a chain with hundreds of bid-and-ask rows no longer
+  prints hundreds of identical notes above the first chart. Artifacts and
+  MCP repair lists are unchanged.
+- The dashboard header names the artifact file, not the directory that
+  holds it, so one machine's layout no longer appears on the page.
+
 ## 0.3.0, 2026-09-02
 
 This release adds private analysis of user-supplied option-chain data.

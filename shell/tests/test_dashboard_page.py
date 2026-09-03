@@ -82,6 +82,54 @@ def test_notes_are_shown_without_claiming_the_page_is_degraded():
     assert ">clean" in html
 
 
+def test_per_row_import_repairs_are_folded_into_one_line_each():
+    """Catches the importer's per-row record being shown as-is.
+
+    One note per repaired row is the right record and the wrong display: a
+    chain with three hundred bid-and-ask rows put three hundred identical
+    lines above the first chart. Rows are folded into ranges, not hidden,
+    and notes that are not about a row keep their place and wording.
+    """
+    notes = ["row {}: calculated mid from bid and ask".format(n)
+             for n in range(1, 23)]
+    notes += ["row 3: normalized option type 'C' to call",
+              "row 9: calculated mid from bid and ask",
+              "8 contracts outside the 0.15 band around spot"]
+    html = page_module.render(payload(ladder=ladder(notes=notes)))
+
+    shown = re.search(r"<ul class='notes'>(.*?)</ul>", html).group(1)
+    assert shown.count("<li>") == 3
+    assert ("<li>calculated mid from bid and ask (22 rows: 1 to 22)</li>"
+            in shown)
+    assert ("<li>row 3: normalized option type &#x27;C&#x27; to call</li>"
+            in shown)
+    assert "<li>8 contracts outside the 0.15 band around spot</li>" in shown
+    assert "row 1: calculated" not in html
+
+
+def test_folded_rows_keep_their_gaps():
+    """Catches a fold that reports a range the rows do not cover."""
+    lines = page_module._grouped_notes([
+        "row 1: x", "row 2: x", "row 3: x", "row 7: x", "row 10: x",
+        "row 11: x"])
+
+    assert lines == ["x (6 rows: 1 to 3, 7, 10 to 11)"]
+
+
+def test_the_header_names_the_artifact_and_not_its_directory():
+    """Catches one machine's filesystem layout leaking into the page.
+
+    The file name identifies the artifact. The directory only says where
+    this machine keeps it, and on a hosted page that is a server detail.
+    """
+    html = page_module.render(payload(
+        ladder=ladder(),
+        ladder_path="/srv/private/artifacts/greeks_TEST_2026-09-18.json"))
+
+    assert "greeks_TEST_2026-09-18.json" in html
+    assert "/srv/private/artifacts" not in html
+
+
 def test_values_taken_from_artifacts_are_escaped():
     """Catches markup in an artifact being written into the page verbatim.
 

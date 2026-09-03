@@ -11,9 +11,62 @@ check the numbers themselves.
 
 import html
 import json
+from pathlib import Path
+import re
 
 from optiondesk.dashboard.charts import SCRIPT
 from optiondesk.dashboard.style import STYLE
+
+
+
+_ROW_NOTE = re.compile(r"^row (\d+): (.+)$")
+
+
+def _row_ranges(numbers):
+    """Compact sorted row numbers into runs: 1 to 5, 9, 12 to 14."""
+    runs = []
+    for number in numbers:
+        if runs and number == runs[-1][1] + 1:
+            runs[-1][1] = number
+        else:
+            runs.append([number, number])
+    return ", ".join("{}".format(a) if a == b else "{} to {}".format(a, b)
+                     for a, b in runs)
+
+
+def _grouped_notes(notes):
+    """Fold per-row import repairs into one line per repair.
+
+    The importer records one note per row it repaired. That is the right
+    record and the wrong display: a chain with three hundred bid-and-ask
+    rows put three hundred identical lines above the first chart. Rows are
+    kept as ranges, so the fold hides nothing. Notes that are not about a
+    row pass through unchanged, in their original position.
+    """
+    order = []
+    rows_by_message = {}
+    for note in notes:
+        match = _ROW_NOTE.match(str(note))
+        if not match:
+            order.append(("plain", str(note)))
+            continue
+        number, message = int(match.group(1)), match.group(2)
+        if message not in rows_by_message:
+            rows_by_message[message] = []
+            order.append(("rows", message))
+        rows_by_message[message].append(number)
+    lines = []
+    for kind, text in order:
+        if kind == "plain":
+            lines.append(text)
+            continue
+        numbers = sorted(set(rows_by_message[text]))
+        if len(numbers) == 1:
+            lines.append("row {}: {}".format(numbers[0], text))
+        else:
+            lines.append("{} ({} rows: {})".format(
+                text, len(numbers), _row_ranges(numbers)))
+    return lines
 
 
 def _tile(key, value, tone="", sub=""):
@@ -1234,15 +1287,18 @@ def render(payload):
         stale=" stale" if degraded else "",
         status="degraded" if degraded else "clean",
         generated=html.escape(str(meta.get("generated_utc") or "n/a")),
-        path=html.escape(str(payload.get("ladder_path")
-                             or payload["artifact_dir"])))
+        # The file name says which artifact this is. The directory says
+        # where one machine keeps it, which is noise on the desk and a
+        # server detail on a hosted page.
+        path=html.escape(Path(str(payload.get("ladder_path")
+                                  or payload["artifact_dir"])).name))
 
     warn = ""
     if degraded:
         warn = ("<div class='warn'><strong>Degraded.</strong> {}</div>"
                 .format(html.escape(str(meta.get("degraded_reason") or ""))))
 
-    notes = (meta.get("notes") or [])
+    notes = _grouped_notes(meta.get("notes") or [])
     notes_html = ("<ul class='notes'>" + "".join(
         "<li>{}</li>".format(html.escape(str(n))) for n in notes) + "</ul>"
         if notes else "")

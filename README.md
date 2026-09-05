@@ -84,6 +84,7 @@ agreement: see [LICENSES.md](LICENSES.md).
 - [Install](#install)
 - [Usage](#usage)
 - [Use the skills](#use-the-skills)
+- [Hosted example prompts](#hosted-example-prompts)
 - [Five minutes to a full desk](#five-minutes-to-a-full-desk)
 - [Architecture](#architecture)
 - [How data flows](#how-data-flows)
@@ -186,23 +187,18 @@ service after the plugin owner registers that service. The hosted service can
 process a user attachment privately. It does not fetch Yahoo or personal Alpha
 Vantage data.
 
-For the Skills page of a plugin with its own MCP server, build the archives
-with `python3 scripts/package.py`. Upload `dist/option-desk-skills.zip`. Its
-top level contains only the hosted-safe skill directories. These skills match
-the remote service. They do not contain local provider, installation,
-simulation, or backtest instructions. The hosted MCP remains a separate
-portal setting.
+The public submission is one **Option Desk** plugin with hosted MCP and four
+supporting skills. Build it with `python3 scripts/package.py`.
+`dist/option-desk-hosted.zip` contains the complete plugin.
+`dist/option-desk-skills.zip` contains the four skills for the MCP submission's
+Skills page. Configure `https://optiondesk.avidquant.com/mcp` separately in
+the portal. See [the submission pack](docs/SUBMISSION.md) for listing text,
+starter prompts, and evaluation cases.
 
-`dist/option-desk-local-skills.zip` contains all six local skills. Do not
-upload it to a plugin that uses the hosted MCP.
-
-`dist/option-desk-openai-skills.zip` is the legacy skills-only plugin bundle.
-It includes a plugin manifest and images, so do not upload it on the new
-plugin's Skills page.
-
-The hosted MCP endpoint is `https://optiondesk.avidquant.com/mcp`. The current
-public plugin is not connected to that endpoint. Create and test a new plugin
-release before you promise in-chat calculations or plots.
+The build retires the standalone skills-only plugin archive. Local skill
+archives remain available for advanced use. The public listing covers snapshot
+validation, Greeks, positioning, and strategy plots. Simulation and backtesting
+remain local capabilities. Test the hosted workflows before publishing.
 
 ### As a Claude Code plugin, which also brings the commands and agents
 
@@ -369,19 +365,91 @@ plot." The answer must identify the result as synthetic sample data.
 
 ### Which ZIP to upload
 
-Run `python3 scripts/package.py`. Then select one archive:
+Run `python3 scripts/package.py`. Use each artifact for its stated purpose:
 
 | Archive | Use it for |
 |---|---|
 | `dist/option-desk-skills.zip` | The OpenAI plugin Skills page. It contains the four hosted skill roots. |
 | `dist/option-desk-local-skills.zip` | Local skill import. It contains all six local skills. |
-| `dist/option-desk-openai-skills.zip` | The legacy skills-only plugin package. Do not upload it to the new Skills page. |
+| `dist/option-desk-hosted.zip` | Complete public plugin with hosted MCP, four skills, manifests, and images. |
 
 The hosted MCP URL is a separate plugin setting:
 `https://optiondesk.avidquant.com/mcp`. Uploading a skills ZIP does not connect
 the MCP server by itself.
 
 ---
+
+## Hosted example prompts
+
+Use these prompts with the Option Desk hosted MCP connection. SYNTH is synthetic sample data.
+
+### 1. Greek ladder
+
+```text
+Show the SYNTH Greek ladder plot.
+```
+
+### 2. Market chart
+
+```text
+Show the SYNTH market plot, including dealer gamma exposure, open interest, volume, and volatility smile.
+```
+
+### 3. Strategy comparison
+
+```text
+Show the SYNTH option strategy comparison plot.
+```
+
+### 4. Payoff chart
+
+```text
+Show the payoff plot for a SYNTH iron condor. Explain its breakevens and maximum gain and loss.
+```
+
+### 5. All diagnostic charts
+
+```text
+Use option_plots with plot="all" to show the SYNTH market chart, Greek ladder, and strategy comparison in one widget.
+```
+
+### 6. Data transparency
+
+```text
+Is SYNTH live market data? State its source, expiry, and spot price.
+```
+
+### 7. Unsupported live data
+
+```text
+Show today’s live AAPL Greek ladder.
+```
+
+Expected: Requests a user-supplied chain and explains that this service does not fetch live data.
+
+### 8. Unsupported historical analysis
+
+```text
+Backtest the SYNTH iron condor over the last year.
+```
+
+Expected: Explains that SYNTH has no price history and does not invent backtest results.
+
+### Complex report prompt
+
+```text
+Run a complete options research demonstration using only the SYNTH sample.
+
+1. Check the service status. State the data source, expiry, spot price, and available capabilities.
+2. Use option_report_plots once to return the market chart, Greek ladder, strategy comparison, and payoff charts for an iron condor, bull put spread, and straddle. Return all six charts in one widget. Do not make separate or parallel plot calls.
+3. Explain how gamma, theta, and vega vary across strikes. Distinguish per-contract Greeks from assumed dealer positioning.
+4. Compare the three strategies using the same expiry. Show their legs, premiums, breakevens, maximum gain and loss, net delta, gamma, theta, and vega in one table. Include quoted-spread cost estimates only if available.
+5. Compare expiration outcomes at underlying prices of 90, 100, and 110. Use returned calculations or explicitly label calculations derived from the returned legs. State contract multipliers and units.
+6. Explain how each structure responds to a rise in implied volatility before expiry. Keep this separate from expiration payoff.
+7. Identify missing inputs and modeling assumptions. If a tool fails or a metric is unavailable, report that limitation. Do not invent values or substitute another strategy silently.
+
+Use actual plot tools for every chart. Do not treat a successful tool call as proof that I can see the images. Keep synthetic-data labels visible. Do not fetch live prices, claim historical performance, place orders, or recommend a trade.
+```
 
 ## Five minutes to a full desk
 

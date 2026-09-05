@@ -74,18 +74,16 @@ Streamable HTTP endpoint at `https://optiondesk.avidquant.com/mcp`.
 It serves SYNTH and privately processes permitted user snapshots. It does
 not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
 
-In browser ChatGPT the skills are knowledge and instructions, and each one
-says so: its execution route tells the agent to prefer the MCP tool, fall
-back to the command line, and if neither is available to say that no fresh
-figures can be produced rather than inventing them.
+The public submission is one plugin with hosted MCP and four supporting
+skills. Browser ChatGPT uses that service for calculations and charts.
+The six local skills require local tools for fresh results.
 
-`scripts/package.py` builds `dist/option-desk-skills.zip` for the Skills page
-of a plugin with its own MCP server. The archive contains only six skill
-roots. The MCP URL is configured separately in the portal.
+`scripts/package.py` builds `dist/option-desk-hosted.zip` with the complete
+public plugin. It also builds `dist/option-desk-skills.zip` with four skill
+roots for the MCP submission's Skills page. Configure the MCP URL separately
+in the portal. The build removes the former standalone skills-only archive.
 
-The script also builds `dist/option-desk-openai-skills.zip` for the legacy
-skills-only plugin format. That bundle includes a manifest and images. Do not
-upload it on the new Skills page.
+See [the submission pack](SUBMISSION.md) for the public scope and evaluations.
 
 ---
 

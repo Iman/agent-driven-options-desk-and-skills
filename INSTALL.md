@@ -131,36 +131,29 @@ Codex also finds the skills with no plugin at all, because it scans
 repository symlinks the former to `shell/skills`, so cloning it is enough,
 and option 2 above installs to the latter.
 
-### What ChatGPT on the web cannot do
+### Public plugin with hosted MCP
 
-The MCP server here is a local stdio process. Codex on your machine can run
-it. ChatGPT in a browser or on a phone cannot: it has no way to execute a
-binary on your computer. Reaching that would need a hosted Streamable HTTP
-MCP service with authentication and per-user credentials. That service
-does not exist in this repository.
+The public Option Desk submission uses the hosted Streamable HTTP service at
+`https://optiondesk.avidquant.com/mcp`. It includes four supporting skills.
+Browser ChatGPT connects to that service without a local Python installation.
 
-So in browser ChatGPT the six skills work as knowledge and instructions,
-the same as options 2 and 6, and they say so themselves: each one now
-carries an execution route telling the agent to prefer the MCP tool, fall
-back to the command line, and if neither is available to state plainly that
-no fresh figures can be produced rather than inventing them.
+Build the package:
 
-### OpenAI skills-only submission archive
-
-OpenAI accepts skills-only plugins. Build the dedicated archive:
-
-```
+```sh
 python3 scripts/package.py
 ```
 
-Submit `dist/option-desk-openai-skills.zip`. It contains the OpenAI
-manifest, the six skills, and the required images. It excludes `.mcp.json`
-and all MCP declarations, as OpenAI requires for a skills-only upload.
+`dist/option-desk-hosted.zip` contains the complete public plugin.
+For the portal, select **With MCP** and enter the hosted URL.
+Upload `dist/option-desk-skills.zip` on the Skills page of that submission.
 
-This archive gives browser ChatGPT research knowledge and reporting rules.
-It does not give browser ChatGPT access to live market data or local
-commands. See `docs/SUBMISSION.md` for the listing text and evaluation
-cases.
+The hosted plugin validates permitted snapshots and calculates Greeks,
+positioning, and strategy plots. SYNTH provides examples without uploads.
+It fetches no market data. Simulation and backtesting remain local capabilities.
+
+There is no separate skills-only submission. The build removes the retired
+standalone archive. See [the submission pack](docs/SUBMISSION.md) for listing
+text, starter prompts, and evaluation cases.
 
 ## 5. From a checkout, by hand
 
@@ -197,7 +190,7 @@ python3 scripts/package.py     # builds them
 ```
 
 Then in claude.ai, Settings, Capabilities, Skills, upload a zip. There is
-one per skill, plus `dist/option-desk-skills.zip` with all six.
+one per skill, plus `dist/option-desk-local-skills.zip` with all six.
 
 Two things to know before you do. Custom skills on claude.ai are per user:
 each person on a team uploads their own, and an admin cannot distribute

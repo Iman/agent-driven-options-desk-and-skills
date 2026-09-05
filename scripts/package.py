@@ -9,8 +9,7 @@ script builds each installable form from the correct source:
   dist/option-desk-local-skills.zip
                               all six local skills
   dist/option-desk-skills.zip hosted-safe skills for the OpenAI portal
-  dist/option-desk-openai-skills.zip
-                              one legacy skills-only OpenAI plugin archive
+  dist/option-desk-hosted.zip the public plugin with hosted MCP and four skills
   plugins/option-desk/        one dual-host plugin: OpenAI/Codex plus Claude
   .claude-plugin/marketplace.json
                               the Claude Code marketplace entry
@@ -106,50 +105,30 @@ def _carry_into(archive, prefix):
             archive.write(source, Path(prefix) / name)
 
 
-def _codex_manifest(include_mcp):
-    """Return the shared Codex manifest, with optional local MCP wiring."""
+def _codex_manifest():
+    """Return the local development plugin manifest."""
     keywords = ["options", "greeks", "volatility", "risk", "trading",
                 "quantitative-finance", "backtesting", "mcp", "skills",
                 "claude-skills", "agent-skills", "langgraph",
                 "options-pricing"]
-    if include_mcp:
-        description = DESCRIPTION
-        long_description = (
-            "Build option-chain research artifacts, inspect Greeks and "
-            "positioning, show plots, compare structures, simulate outcomes, and "
-            "backtest rules. Research software, not investment advice."
-        )
-        default_prompts = [
-            "Show SPY option plots for the nearest expiry.",
-            "Read dealer positioning for QQQ.",
-            "Compare option structures for a neutral TLT view.",
-        ]
-    else:
-        keywords.remove("mcp")
-        description = (
-            "Interpret user-provided option-chain data and research artifacts "
-            "using focused workflows for Greeks, positioning, strategy, "
-            "simulation, and backtests. Users must have the right to share "
-            "their inputs. Research software, not investment advice."
-        )
-        long_description = (
-            "Interpret user-provided option research without fetching live "
-            "data. Review Greeks and positioning, compare structures, and "
-            "assess simulations and backtests. Use only data that you have "
-            "the right to share. Research software, not investment advice."
-        )
-        default_prompts = [
-            "Explain the main risks in this option-chain snapshot.",
-            "Compare these option structures and their trade-offs.",
-            "Review this backtest for weak evidence and overlap.",
-        ]
+    description = DESCRIPTION
+    long_description = (
+        "Build option-chain research artifacts, inspect Greeks and "
+        "positioning, show plots, compare structures, simulate outcomes, and "
+        "backtest rules. Research software, not investment advice."
+    )
+    default_prompts = [
+        "Show SPY option plots for the nearest expiry.",
+        "Read dealer positioning for QQQ.",
+        "Compare option structures for a neutral TLT view.",
+    ]
     interface = {
         "displayName": "Option Desk",
         "shortDescription": "Research listed options.",
         "longDescription": long_description,
         "developerName": AUTHOR["name"],
         "category": "Finance",
-        "capabilities": ["Read", "Write"] if include_mcp else ["Read"],
+        "capabilities": ["Read", "Write"],
         "websiteURL": REPOSITORY,
         "logo": "./assets/{}".format(BRANDING["logo"]),
         "composerIcon": "./assets/{}".format(BRANDING["composerIcon"]),
@@ -171,8 +150,7 @@ def _codex_manifest(include_mcp):
         "skills": "./skills/",
         "interface": interface,
     }
-    if include_mcp:
-        manifest["mcpServers"] = "./.mcp.json"
+    manifest["mcpServers"] = "./.mcp.json"
     return manifest
 
 
@@ -227,22 +205,10 @@ def build_zips():
                               Path(skill.name) / item.relative_to(skill))
     written.append(bundle)
 
-    # Public OpenAI skills-only submissions need the plugin manifest and
-    # skills/ layout, but must not carry an MCP descriptor or declaration.
-    openai = DIST / "option-desk-openai-skills.zip"
-    with zipfile.ZipFile(openai, "w", zipfile.ZIP_DEFLATED) as archive:
-        manifest = json.dumps(_codex_manifest(include_mcp=False), indent=2)
-        archive.writestr(".codex-plugin/plugin.json", manifest + "\n")
-        for skill in _skill_dirs():
-            prefix = Path("skills") / skill.name
-            for item in sorted(skill.rglob("*")):
-                if not _publishable(item):
-                    continue
-                archive.write(item, prefix / item.relative_to(skill))
-        _carry_into(archive, "")
-        for source in _branding_sources():
-            archive.write(source, Path("assets") / source.name)
-    written.append(openai)
+    # Retire the former standalone submission so stale builds cannot ship it.
+    legacy = DIST / "option-desk-openai-skills.zip"
+    if legacy.exists():
+        legacy.unlink()
 
     # A zip that cannot be opened is worse than no zip, so each is read back.
     for path in written:
@@ -281,7 +247,7 @@ def build_plugin():
     (PLUGIN / ".claude-plugin" / "plugin.json").write_text(
         json.dumps(claude_manifest, indent=2) + "\n", encoding="utf-8")
 
-    codex_manifest = _codex_manifest(include_mcp=True)
+    codex_manifest = _codex_manifest()
     (PLUGIN / ".codex-plugin" / "plugin.json").write_text(
         json.dumps(codex_manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -447,6 +413,21 @@ def build_hosted_plugin():
     return HOSTED_PLUGIN
 
 
+def build_hosted_archive():
+    """Archive the built public plugin, including its remote MCP declaration."""
+    DIST.mkdir(parents=True, exist_ok=True)
+    path = DIST / "option-desk-hosted.zip"
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for item in sorted(HOSTED_PLUGIN.rglob("*")):
+            if _publishable(item):
+                archive.write(item, item.relative_to(HOSTED_PLUGIN))
+    with zipfile.ZipFile(path) as archive:
+        broken = archive.testzip()
+        if broken is not None:
+            raise SystemExit("corrupt entry in {}: {}".format(path, broken))
+    return path
+
+
 def build_marketplaces():
     """Write the Claude and OpenAI/Codex repository marketplaces."""
     (ROOT / ".claude-plugin").mkdir(exist_ok=True)
@@ -515,6 +496,7 @@ def main():
     zips = build_zips()
     plugin = build_plugin()
     hosted = build_hosted_plugin()
+    zips.append(build_hosted_archive())
     marketplaces = build_marketplaces()
 
     print("portable skill archives and host-specific bundles:")

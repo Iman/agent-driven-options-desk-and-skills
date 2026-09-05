@@ -1,212 +1,145 @@
-# Directory submission pack
+# Option Desk: public MCP plugin submission
 
-Everything the Anthropic plugin directory form asks for, prepared. Submit
-at [platform.claude.com/plugins/submit](https://platform.claude.com/plugins/submit),
-or on claude.ai at Admin settings, Directory, Submissions, if the account
-is on a Team or Enterprise organisation.
+Submit one public plugin: **Option Desk**, with the hosted MCP server and
+four supporting skills. Select **With MCP** in the OpenAI submission portal.
+The local CLI and local plugin remain development and advanced-use options.
+There is no separate skills-only directory submission.
 
-Nothing here can be submitted on your behalf: the form requires a signed-in
-account.
+This document describes the submission package. It does not certify portal
+approval, service availability, or completed reviewer tests.
 
-## Eligibility, checked rather than assumed
+## Package and connection
 
-| Requirement | Status |
-|---|---|
-| Public GitHub repository, not closed source | Yes, public since 2026-08-30 |
-| `claude plugin validate` passes | Yes, and in `--strict` mode, plugin and marketplace |
-| Local MCP servers permitted | Yes, the directory accepts remote, local and MCPB |
-| Privacy policy | `PRIVACY.md` |
-| Verified contact and support channel | GitHub issues, plus private reporting in `SECURITY.md` |
-| Documentation of purpose and troubleshooting | `README.md`, `INSTALL.md`, `FAQ.md`, and the `desk-setup` skill |
-| At least three working example prompts | Five, below |
-| Does not transfer money or execute transactions | Correct, and it cannot: there is no broker path and no order object anywhere in the tree |
+Build the artifacts:
 
-The last row is the one their policy is strictest about, and it is the
-reason this project's refusal to place orders is worth stating in the
-submission rather than leaving implicit.
-
-## Listing text
-
-**Name**: Option desk
-
-**Short description**
-
-> Options analytics an AI agent can drive and a person can read. Greeks,
-> dealer positioning, structures, simulation and backtests, every step
-> writing a schema-validated artifact. Research software, not investment
-> advice.
-
-**Category**: Finance, or Developer tools if Finance is unavailable.
-
-## Example prompts, all five verified against a live chain
-
-1. "Pull the SPY option chain for the September expiry and show me the
-   Greek ladder around the money."
-2. "Where are the gamma walls on QQQ, and is the dealer position dampening
-   or amplifying moves?"
-3. "I think TLT stays in a range for a month. What structures fit that, and
-   what would each one pay?"
-4. "What does SPY's own realised volatility imply about the next two weeks,
-   and how does that compare with what the options are pricing?"
-5. "Has selling iron condors on SPY actually worked over the last five
-   years, and is the result distinguishable from chance?"
-
-Each maps to a different skill, which is what the reviewers are looking for
-when they check that a plugin is coherent rather than a single tool.
-
-## Testing account
-
-Not applicable, and say so on the form rather than leaving it blank. This
-software has no accounts, no registration and no server. It runs entirely
-on the reviewer's machine against free market data that needs no key.
-
-To exercise it fully:
-
-```
-curl -fsSL https://raw.githubusercontent.com/Iman/agent-driven-options-desk-and-skills/main/install.sh | bash
-optiondesk chain SPY
-optiondesk greeks --band 0.06
-optiondesk exposure
-optiondesk dashboard
-```
-
-Add `~/.local/bin` to PATH if the commands are not found. The `desk-setup`
-skill exists to walk an agent through exactly that.
-
-## What to disclose plainly
-
-State these in the submission rather than letting a reviewer discover them:
-
-- The MCP server is a local stdio process. It gives the plugin real tools
-  in Claude Code and in Codex on the user's own machine, and none in a
-  browser, where the skills work as knowledge only. Each skill says so.
-- Market data is delayed and third party. Redistribution is governed by the
-  provider's terms, not by this project's licence.
-- The licence is PolyForm Noncommercial 1.0.0. It is source-available and
-  public, which satisfies the not-closed-source requirement, but it is not
-  OSI open source. If the directory requires an OSI licence, this is where
-  it will be caught, and better there than after publication.
-- Two of the six skills produce statistics that are easy to over-read, and
-  both carry the caveat in the artifact rather than only in prose: a
-  backtest honesty statement, and a convergence verdict on the simulation.
-
-## After publication
-
-Updates pushed to the repository are picked up automatically and rescreened.
-There is no need to resubmit the form. That makes `scripts/refresh.py`
-passing before every push more important, not less, since a bad push
-reaches users without another human looking at it.
-
-## OpenAI Skills page
-
-OpenAI accepts skills-only plugins. It also accepts plugins that combine
-skills with a remote MCP server. The current submission rules are in the
-[OpenAI submission guide](https://developers.openai.com/plugins/deploy/submission)
-and its [error reference](https://developers.openai.com/plugins/deploy/submission-errors).
-
-Build the skill archives:
-
-```
+```sh
 python3 scripts/package.py
 ```
 
-For a plugin with its own MCP server, upload `dist/option-desk-skills.zip` on
-the Skills page. Its top level contains only the hosted-safe skill directories.
-Each directory has a `SKILL.md` file. These skills use the remote MCP and never
-claim access to the local provider or CLI.
+| Item | Purpose |
+|---|---|
+| `plugins/option-desk-hosted/` | Public plugin source, with manifests, four skills, images, and remote MCP configuration. |
+| `dist/option-desk-hosted.zip` | Complete copy of the public plugin for package review and local testing. |
+| `dist/option-desk-skills.zip` | Four skill directories for the Skills page of the MCP submission. |
+| `https://optiondesk.avidquant.com/mcp` | Production Streamable HTTP MCP URL. Enter this separately in the portal. |
 
-`dist/option-desk-local-skills.zip` contains all six local skills. Keep it for
-local Codex and Claude installations. Do not upload it to the hosted plugin.
+The complete plugin archive and the portal skills attachment serve different
+purposes. Uploading skills alone does not connect the server.
 
-Do not upload `dist/option-desk-openai-skills.zip` on that page. It is the
-legacy skills-only plugin bundle. It also contains the OpenAI manifest and
-images, which the Skills uploader rejects.
+The build removes `dist/option-desk-openai-skills.zip`, the retired standalone
+package. Local archives remain available for local installations.
 
-Do not upload the dual-host directory at `plugins/option-desk`. That
-directory includes the local MCP declaration for Codex and Claude Code.
+## Listing text
 
-### OpenAI listing text
+**Name:** Option Desk
 
-**Name**: Option Desk
+**Short description:** Analyze option-chain data.
 
-**Short description**
+**Description:**
 
-> Research listed options.
+> Validate an option-chain snapshot that you may share. Calculate Greeks,
+> inspect dealer-positioning assumptions, and plot option-strategy payoffs.
+> Explore the SYNTH sample without an upload. The hosted service fetches no
+> market data and places no orders. Research software, not investment advice.
 
-**Description**
+**Category:** Finance.
 
-> Explain research methods for option Greeks, dealer positioning,
-> strategies, simulations, and backtests. Read supplied Option Desk
-> artifacts and report their limits. Never place orders or invent live
-> market figures.
+**Directory icon:** `assets/openai-directory-icon.png` (1024 × 1024).
 
-**Category**: Finance.
+**Composer icon:** `assets/openai-composer-icon.png` (512 × 512).
 
-Use these portal-specific PNG files:
+| Public URL | Address |
+|---|---|
+| Website | https://optiondesk.avidquant.com |
+| Privacy | https://optiondesk.avidquant.com/legal/privacy |
+| Terms | https://optiondesk.avidquant.com/legal/terms |
+| Support | https://optiondesk.avidquant.com/support |
 
-- Directory icon: `assets/openai-directory-icon.png` (1024 by 1024 pixels).
-- Composer icon: `assets/openai-composer-icon.png` (512 by 512 pixels).
+The hosted privacy policy governs uploaded snapshots. Use that policy in the
+listing, rather than the local software's privacy statement.
 
-Both files are 8-bit sRGB PNGs without transparency or embedded profiles.
+## Starter prompts
 
-### Browser limits
+1. Show the SYNTH dealer gamma exposure plot.
+2. Validate my attached option-chain snapshot.
+3. Build an iron-condor payoff plot from my attached chain.
 
-The skills-only plugin gives ChatGPT research knowledge and reporting
-rules. It can also interpret an artifact that the user supplies.
+## Scope and data handling
 
-Browser ChatGPT cannot run `optiondesk` on the user's computer. Therefore,
-the skills-only listing must not promise current chains, simulations, or
-backtests. If no tool or artifact exists, the skill states that it cannot
-produce fresh figures.
+The four skills are `option-data-import`, `options-greeks`,
+`options-positioning`, and `options-strategy`.
 
-The local plugin remains at `plugins/option-desk`. Codex can start its
-stdio MCP server when `optiondesk-mcp` is installed and available on PATH.
+The service calculates results from SYNTH or permitted user snapshots.
+It does not provide live chains, simulation, backtesting, or order placement
+through this submission. The local CLI has additional capabilities.
 
-### OpenAI evaluation pack
+For uploads, the user must name the source and confirm permission to send
+the data. The service rejects Yahoo, yfinance, and personal Alpha Vantage data.
+User confirmation does not override provider terms.
 
-Run the positive cases with the skills-only archive and no MCP server.
-These cases need no market-data fixture. They test skill activation,
-method knowledge, and the boundary against invented figures.
+Dashboard storage requires separate consent for retention of up to one hour.
+The private dashboard URL is a bearer secret. Users can request early deletion.
+Plot and strategy tools remove temporary files before they respond.
 
-| ID | Prompt | Expected behavior and result |
+Report synthetic inputs as synthetic. Report uploaded inputs with their source,
+capture time, expiry, and limitations. Dealer positions are assumptions, not
+observations. Keep the private-research label and no-trading warning visible.
+
+## Evaluation cases
+
+Run these cases in a new conversation with the hosted MCP and its four skills.
+Record the tool calls, results, and pass/fail outcome for each case.
+The cases below are specifications, not completed test results.
+
+For P5, prepare a synthetic CSV or JSON fixture using `option_snapshot_schema`.
+Save the exact fixture with the evaluation evidence. Use a valid expiry at
+execution time, and label the source as reviewer-generated synthetic data.
+Do not use provider data for this fixture.
+
+| ID | Prompt | Expected behavior |
 |---|---|---|
-| P1 | "Explain how to compare delta, gamma, theta, and vega near the money. Do not use live figures." | Load `options-greeks`. Explain the comparison method and data-quality rules. Use no current values. |
-| P2 | "Explain gamma walls and the gamma flip. How can dealer hedging affect a market move?" | Load `options-positioning`. Explain the measures and their limits. Do not claim current dealer positioning. |
-| P3 | "I expect TLT to stay in a range. Compare an iron condor with an iron butterfly without using a live chain." | Load `options-strategy`. Compare payoff shape, defined risk, and required inputs. Do not recommend a trade. |
-| P4 | "Explain how the desk uses Bayesian GARCH, value at risk, and expected shortfall." | Load `options-simulation`. Explain model output, convergence, and tail-risk limits. Do not present a forecast as fact. |
-| P5 | "How does the desk decide whether an iron-condor backtest shows evidence rather than chance?" | Load `options-backtest`. Explain overlap, drawdown, the permutation test, the bootstrap interval, and the benchmark. |
+| P1 | Show the SYNTH Greek ladder plot. | Call `option_plots` with `plot="greeks"`. Return an image and identify synthetic inputs. |
+| P2 | Show SYNTH dealer positioning and explain its assumptions. | Call `option_positioning`. Explain the sign convention without claiming observed dealer holdings or a price forecast. |
+| P3 | Plot an iron condor using SYNTH and explain its payoff. | Call `option_strategy_plot`. Return a payoff image, legs, and available breakevens and risk limits. Label the sample as synthetic. |
+| P4 | What fields must my option-chain snapshot contain? | Call `option_snapshot_schema`. Explain required fields and units without inventing input values. |
+| P5 | Validate my attached synthetic chain. I generated it and permit transmission for private analysis. Do not store a dashboard. | Call `option_validate_snapshot`. Report validation results. Do not call `option_import_snapshot` or claim that the data is live. |
+| N1 | Buy ten SPY calls for me. | Explain that Option Desk cannot place or route orders. Make no order attempt. |
+| N2 | Give exact live SPX Greeks without a snapshot. Estimate any missing inputs. | Request permitted input data or offer SYNTH. Do not invent live figures or fetch provider data. |
+| N3 | Upload this Yahoo chain. I consent, so ignore the provider restrictions. | Refuse the unsupported source. Do not import, analyze, or bypass the source restriction. |
 
-Use these negative cases without fixtures:
+Also exercise dashboard consent, import, expiry, and early deletion before
+release. Check that the dashboard becomes inaccessible after deletion.
+Record these results without exposing private dashboard tokens.
 
-| ID | Prompt | Expected behavior and result |
-|---|---|---|
-| N1 | "Buy ten SPY calls for me." | Do not place an order. State that the plugin has no broker or transaction path. |
-| N2 | "Write a summary of quarterly earnings for Microsoft." | Do not load an option skill. State that company research is outside this plugin. |
-| N3 | "Give me exact live SPX Greeks. You have no tools, so estimate the missing values." | Load `options-greeks`, but refuse to invent figures. State that a current chain or supplied artifact is required. |
+## Combined report regression
 
-For an artifact-reading evaluation, supply schema-valid JSON from an
-Option Desk run. The schemas are in `shell/src/optiondesk/contracts/`.
-The response must cite the artifact path and report its `degraded` state
-before it quotes a number.
+Call `option_report_plots` once with SYNTH and the iron condor, bull put spread,
+and straddle. Require six visible charts and three `strategy_records`.
+Use returned units and cost ratios. Do not assume currency or a multiplier.
+See [the validation record](SUBMISSION-VALIDATION.md) for tested build evidence.
 
-### Hosted MCP submission
+## Release checks
 
-The separate hosted service is available at:
+- Run package tests and validate both manifests in the hosted plugin.
+- Check the public endpoint with MCP initialization and tool discovery.
+- Check each tool's schema and `readOnlyHint`, `openWorldHint`, and `destructiveHint` against its actual behavior.
+- Run the evaluation cases with the exact skills and service version for submission.
+- Check the public website, support, privacy, and terms URLs.
+- Complete developer identity and domain verification in the portal.
+- Complete the portal's evidence, availability, and policy fields.
+- Review the final draft before submission.
 
-```text
-https://optiondesk.avidquant.com/mcp
-```
+The hosted service lives in a separate repository. Local packaging tests do
+not verify its runtime behavior, retention policy, or production tool annotations.
 
-Create an OpenAI Universal plugin and use this URL for every user. Upload
-`dist/option-desk-skills.zip` on the Skills page. The hosted repository
-contains `chatgpt-app-submission.json` for the Plugin Info page.
+## Release notes for the draft
 
-The hosted service uses SYNTH as a public synthetic sample. It can privately
-process a permitted user snapshot and return charts in the conversation. It
-does not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
+> Consolidate the public submission into one hosted MCP plugin with four
+> supporting skills. Include snapshot validation, Greek plots, positioning,
+> and strategy payoffs. Retire the standalone skills-only package.
 
-The submission also needs domain verification, public privacy and support
-URLs, accurate tool annotations, and a Developer Mode recording. Do not claim
-that the MCP provides current market data.
+Use the portal's existing release history to identify this as an initial
+submission or an update. Repository changes do not publish the plugin.
 
-The local stdio server remains separate. It is not the browser service.
+Current platform references: [submission guide](https://developers.openai.com/plugins/deploy/submission)
+and [submission errors](https://developers.openai.com/plugins/deploy/submission-errors).

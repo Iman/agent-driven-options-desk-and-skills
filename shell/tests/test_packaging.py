@@ -19,7 +19,7 @@ DIST = ROOT / "dist"
 BUNDLE = ROOT / "plugins" / "option-desk"
 SOURCE = ROOT / "shell" / "skills"
 HOSTED_SOURCE = ROOT / "openai-skills"
-OPENAI_ARCHIVE = "option-desk-openai-skills.zip"
+OPENAI_ARCHIVE = "option-desk-hosted.zip"
 SKILLS_ARCHIVE = "option-desk-skills.zip"
 LOCAL_SKILLS_ARCHIVE = "option-desk-local-skills.zip"
 
@@ -56,8 +56,13 @@ def built(tmp_path_factory):
     out = tmp_path_factory.mktemp("packaged")
     module.DIST = out / "dist"
     module.PLUGIN = out / "plugins" / "option-desk"
+    module.HOSTED_PLUGIN = out / "plugins" / "option-desk-hosted"
+    module.DIST.mkdir(parents=True)
+    (module.DIST / "option-desk-openai-skills.zip").write_bytes(b"stale")
     module.build_zips()
     module.build_plugin()
+    module.build_hosted_plugin()
+    module.build_hosted_archive()
     return module
 
 
@@ -168,18 +173,22 @@ def test_the_bundled_resources_survive_packaging(dist):
             "{} left behind {}".format(archive.name, sorted(missing)))
 
 
-def test_openai_archive_has_the_supported_skills_only_layout(dist):
+def test_public_archive_contains_hosted_plugin_and_retires_standalone(dist):
+    assert not (dist / "option-desk-openai-skills.zip").exists()
     path = dist / OPENAI_ARCHIVE
     with zipfile.ZipFile(path) as zipped:
         names = set(zipped.namelist())
 
     expected = {
         ".codex-plugin/plugin.json",
+        ".claude-plugin/plugin.json",
+        ".mcp.json",
+        "README.md",
         "DISCLAIMER.md",
         "assets/openai-directory-icon.png",
         "assets/openai-composer-icon.png",
     }
-    for skill in SOURCE.iterdir():
+    for skill in HOSTED_SOURCE.iterdir():
         if not (skill / "SKILL.md").is_file():
             continue
         expected.update(
@@ -191,15 +200,17 @@ def test_openai_archive_has_the_supported_skills_only_layout(dist):
     assert names == expected
 
 
-def test_openai_archive_excludes_all_mcp_configuration(dist):
+def test_public_archive_connects_only_the_hosted_mcp(dist):
     with zipfile.ZipFile(dist / OPENAI_ARCHIVE) as zipped:
         names = set(zipped.namelist())
         manifest = json.loads(
             zipped.read(".codex-plugin/plugin.json").decode("utf-8"))
 
-    assert not any(path.endswith(".mcp.json") for path in names)
-    assert "mcpServers" not in manifest
-    assert "mcp_servers" not in manifest
+        descriptor = json.loads(zipped.read(".mcp.json"))
+    assert ".mcp.json" in names
+    assert manifest["mcpServers"] == "./.mcp.json"
+    assert descriptor == {"mcpServers": {"optiondesk-hosted": {
+        "type": "http", "url": "https://optiondesk.avidquant.com/mcp"}}}
 
 
 def test_openai_archive_carries_declared_branding(dist):
@@ -244,12 +255,12 @@ def test_openai_manifest_promises_only_browser_safe_analysis(dist):
             zipped.read(".codex-plugin/plugin.json").decode("utf-8"))
 
     interface = manifest["interface"]
-    assert "user-provided option research" in interface["longDescription"]
-    assert "without fetching live data" in interface["longDescription"]
+    assert "permitted option-chain snapshot" in interface["longDescription"]
+    assert "Fetches no market data" in interface["longDescription"]
     assert interface["defaultPrompt"] == [
-        "Explain the main risks in this option-chain snapshot.",
-        "Compare these option structures and their trade-offs.",
-        "Review this backtest for weak evidence and overlap.",
+        "Show the SYNTH dealer gamma exposure plot.",
+        "Validate my attached option-chain snapshot.",
+        "Build an iron-condor payoff plot from my attached chain.",
     ]
 
 

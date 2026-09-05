@@ -13,4 +13,8 @@ For a ticker such as SPY, require an attached CSV or JSON option chain. The user
 
 Report the selected legs, assumptions, breakevens, maximum gain and loss when available, and quoted-spread limitations. Keep the source, capture time, expiry, private-research label, and no-trading warning visible.
 
+For a report with diagnostics and several payoffs, call `option_report_plots` once with up to three distinct strategies. Do not split the report into parallel plot calls. If that tool is unavailable, report that the connection needs a tool refresh.
+
+Use `strategy_records` for tables and expiration scenarios. These are the engine records used for the charts. Do not reconstruct legs from images. Use the returned units: no currency or contract multiplier is implied. Report `vega_per_vol_point` for a one-percentage-point IV change. Keep the patient-fill friction model separate from `natural_entry_cost`, which estimates full bid/ask crossing. Never claim that a successful tool call proves the images rendered.
+
 Do not select a trade for the user. Do not recommend entry, exit, order, or position size. Option Desk cannot place or route orders.

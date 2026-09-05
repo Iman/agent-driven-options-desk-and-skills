@@ -1,0 +1,34 @@
+{
+  "endpoint": "https://optiondesk.avidquant.com/mcp",
+  "tool": "option_report_plots",
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+  },
+  "resource_uri": "ui://optiondesk/plot-v3.html",
+  "resource_metadata": {
+    "ui": {
+      "prefersBorder": true,
+      "domain": "https://optiondesk.avidquant.com",
+      "csp": {
+        "connectDomains": [],
+        "resourceDomains": []
+      }
+    },
+    "openai/widgetDomain": "https://optiondesk.avidquant.com",
+    "openai/widgetCSP": {
+      "connect_domains": [],
+      "resource_domains": []
+    },
+    "openai/widgetDescription": "Option Desk charts with synthetic or user-data labels and explicit units.",
+    "openai/widgetPrefersBorder": true
+  },
+  "review_explanations": {
+    "readOnlyHint": "Generates charts and calculations from SYNTH or a user-supplied snapshot. Does not modify user records, place orders, or change external systems.",
+    "openWorldHint": "Processes data within the hosted service. Does not fetch live market data, contact external services, or publish user data.",
+    "destructiveHint": "Does not delete or overwrite user records, change account settings, or execute financial transactions. Temporary analysis files are cleaned up after processing."
+  },
+  "note": "Annotations and resource metadata were read from the MCP endpoint. Review explanations are prepared submission text, not fields returned by the endpoint."
+}

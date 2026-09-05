@@ -503,7 +503,7 @@ _METADATA = {
     # expiries asks the provider for its list when a symbol is given and
     # writes nothing either way: it reads the artifact directory to mark
     # what is already pulled and returns rows.
-    "option_expiries": ("Expiries", _FETCHES_AND_WRITES),
+    "option_expiries": ("Expiries", _hints(True, False, True, True)),
     # These four read a chain snapshot from the artifact directory and
     # write a ladder, a plan, a comparison or an exposure beside it.
     "option_greeks_ladder": ("Greek ladder", _WRITES_FROM_DISK),

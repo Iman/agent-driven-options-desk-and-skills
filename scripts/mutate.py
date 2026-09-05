@@ -61,9 +61,16 @@ MUTATIONS = [
     ("iv-guard-removed", ENGINE + "/pricing/black_scholes.py",
      "if abs(v) < MIN_VEGA:", "if abs(v) < -1.0:",
      "engine/tests/test_audit_regressions.py"),
+    # Both identification tests go at once. Removing only the vega test
+    # survived after the band test was added, because the band test refuses
+    # the same seed: the vega test is defence in depth, and a mutation that
+    # the other guard masks proves nothing about either.
     ("iv-seed-returned", ENGINE + "/pricing/black_scholes.py",
-     "if abs(vega_raw(spot, strike, t, sigma, r, q)) < MIN_VEGA:",
-     "if abs(vega_raw(spot, strike, t, sigma, r, q)) < -1.0:",
+     "        if abs(vega_raw(spot, strike, t, sigma, r, q)) < MIN_VEGA:\n"
+     "            return None\n"
+     "        if not _pinned(sigma, price, spot, strike, t, kind, r, q, tol):\n"
+     "            return None\n",
+     "        pass\n",
      "engine/tests/test_audit_regressions.py"),
     ("rhat-stuck-chain", ENGINE + "/simulation/garch.py",
      "        # Every draw identical: the chain is stuck, not converged.\n"

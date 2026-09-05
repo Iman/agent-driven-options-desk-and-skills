@@ -204,9 +204,52 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         r=plan.get("risk_free_rate", DEFAULT_CURVE_RATE),
         q=plan.get("dividend_yield", DEFAULT_CURVE_YIELD))
 
+    # The three figures every single-expiry plan carries, which this path
+    # wrote as null while the schema, the capabilities document and the
+    # skill all said every plan has them. Nothing about a time spread
+    # prevents any of the three: the engine prices each leg at its own
+    # expiry, friction is the same arithmetic on the same quotes, and the
+    # probability is the lognormal mass of the profitable part of the
+    # marking curve at the near expiry, integrated numerically because
+    # that curve has no closed form. The near chain's at-the-money
+    # volatility sets the law, as it does for every other plan.
+    rate = plan.get("risk_free_rate", DEFAULT_CURVE_RATE)
+    dividend_yield = plan.get("dividend_yield", DEFAULT_CURVE_YIELD)
+    iv = engine_strategies.chain_iv(near, plan["spot"])
+    front = engine_strategies.timespread.probability_at_front(
+        plan["legs"], plan["spot"], iv, analysis["at_days"], r=rate,
+        q=dividend_yield)
+    probability = None
+    if front is not None:
+        probability = {
+            "profit": front["profit"],
+            "loss": front["loss"],
+            "expected_pnl": front["expected_pnl"],
+            "expected_loss": front["expected_loss"],
+            "model": ("lognormal underlying at the near expiry, at the "
+                      "near chain's at-the-money implied volatility of "
+                      "{:.4f}, no drift; the far leg is marked at the "
+                      "volatility it carries today and the marking curve "
+                      "is integrated numerically over the scan "
+                      "grid".format(iv)),
+        }
+    friction = engine_strategies.plan_friction(
+        plan["legs"], net_cash=analysis["net_cash"])
+    net_greeks = _net_greeks(engine, plan["legs"], plan["spot"],
+                             plan["near_days"], rate, dividend_yield)
+
     source_meta = snapshot.get("meta", {})
     notes = list(source_meta.get("notes") or [])
     notes.append(plan["assumption"])
+    if front is not None:
+        notes.append(front["method"])
+    if net_greeks and net_greeks["legs_skipped_without_iv"]:
+        notes.append("{} leg(s) had no implied volatility, so the net Greeks "
+                     "exclude them".format(
+                         net_greeks["legs_skipped_without_iv"]))
+    if friction["verdict"] in ("thin", "untradeable"):
+        notes.append("friction verdict {}: {}".format(friction["verdict"],
+                                                      friction["reason"]))
 
     payload = {
         "meta": envelope(
@@ -249,9 +292,9 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         "long_delta": plan.get("long_delta"),
         "short_delta": plan.get("short_delta"),
         "giveback": plan.get("giveback"),
-        "probability": None,
-        "net_greeks": None,
-        "friction": None,
+        "probability": probability,
+        "net_greeks": net_greeks,
+        "friction": friction,
         "payoff_curve": {"prices": prices, "pnl": pnls},
     }
     validate(payload, SCHEMA_FILES[STRATEGY_PLAN])
@@ -278,6 +321,15 @@ def _time_spread(args, engine, engine_strategies, snapshot, path):
         "max_gain_at": analysis["max_gain_at"],
         "max_loss": analysis["max_loss"],
         "reward_risk": analysis["reward_risk"],
+        "probability_of_profit": probability["profit"] if probability else None,
+        "expected_pnl": probability["expected_pnl"] if probability else None,
+        "friction_verdict": friction["verdict"],
+        "friction_reason": friction["reason"],
+        "net_delta": net_greeks["delta"] if net_greeks else None,
+        "net_theta": net_greeks["theta"] if net_greeks else None,
+        "net_vega": net_greeks["vega"] if net_greeks else None,
+        "net_greeks_complete": (net_greeks["complete"] if net_greeks
+                                else None),
         "legs": payload["legs"],
         "assumption": plan["assumption"],
         "notes": notes,
@@ -314,10 +366,19 @@ def _net_greeks(engine, legs, spot, days, rate, dividend_yield):
     Legs whose contract carries no implied volatility are skipped and
     counted, on the same principle as the ladder: a defaulted volatility
     would produce a complete and fictional risk profile.
+
+    days is the plan's expiry and prices every leg of a single-expiry
+    structure. A time leg carries its own expiry and its own volatility
+    and is priced at both, because marking the far leg of a calendar at
+    the near expiry erases the position: the legs share a strike, so at
+    one expiry and one volatility their Greeks cancel and a structure
+    that is long vega and collects decay reads as flat. Measured on the
+    fixture pair, whose two chains carry the same volatility at the shared
+    strike: net vega 4.402 at each leg's own expiry, exactly zero at the
+    near one.
     """
     if not days or days <= 0:
         return None
-    t = days / 365.0
     keys = ("delta", "gamma", "vega", "theta", "rho", "vanna", "vomma",
             "charm")
     net = {key: 0.0 for key in keys}
@@ -328,10 +389,12 @@ def _net_greeks(engine, legs, spot, days, rate, dividend_yield):
             # carries no other Greek.
             net["delta"] += leg.side * leg.qty
             continue
-        iv = (leg.ref or {}).get("iv")
+        own_days = getattr(leg, "days", None)
+        iv = getattr(leg, "iv", None) or (leg.ref or {}).get("iv")
         if not iv or iv <= 0:
             skipped += 1
             continue
+        t = (own_days if own_days else days) / 365.0
         greeks = engine["all_greeks"](spot, leg.strike, t, float(iv),
                                       leg.kind, rate, dividend_yield)
         for key in keys:

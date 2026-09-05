@@ -1,13 +1,16 @@
 """Provider registry: selection, strictness, and failure containment."""
 
+import sys
+
 import pytest
 
-from optiondesk import providers
+from optiondesk import config, providers
 from optiondesk.providers.base import (
     CAP_OPTION_CHAIN,
     Provider,
     ProviderUnavailable,
 )
+from optiondesk.providers.yahoo import YahooProvider
 
 
 class Dummy(Provider):
@@ -143,3 +146,88 @@ def test_yahoo_requires_explicit_local_acknowledgement(monkeypatch):
     described = providers.get("yahoo").describe()
     assert described["access_allowed"] is False
     assert "acknowledgement" in described["access_reason"]
+
+
+# ------------------------------------------------- the reason for a refusal
+#
+# resolve() used to write "not available (missing dependency or key)" for
+# every provider whose available() was false. That was a guess, and wrong
+# for the commonest case: demo mode refuses every external provider with
+# the key and the library both present, and the message sent the user
+# looking for an install problem that did not exist.
+
+def test_the_refusal_names_demo_mode_when_that_is_the_cause(registry,
+                                                            monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_MODE", "demo")
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    message = str(excinfo.value)
+    assert "demo mode blocks every external data provider" in message
+    assert "missing dependency or key" not in message
+
+
+def test_the_refusal_names_the_missing_acknowledgement(registry,
+                                                       monkeypatch):
+    monkeypatch.delenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", raising=False)
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    assert "acknowledgement is missing" in str(excinfo.value)
+
+
+def test_the_refusal_names_the_missing_key(registry, monkeypatch):
+    class Keyed(Dummy):
+        name = "keyed"
+        requires_key = True
+
+    monkeypatch.setitem(config.PROVIDER_KEY_VARS, "keyed",
+                        "KEYED_TEST_PROVIDER_TOKEN")
+    monkeypatch.delenv("KEYED_TEST_PROVIDER_TOKEN", raising=False)
+    registry.register(Keyed(ok=False))
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "keyed")
+    message = str(excinfo.value)
+    assert "no API key configured" in message
+    assert "optiondesk keys set keyed" in message
+
+
+def test_the_refusal_names_the_missing_dependency(registry, monkeypatch):
+    # A fresh adapter, because the registered one may have imported the
+    # library already and cached it.
+    monkeypatch.setitem(sys.modules, "yfinance", None)
+    registry.register(YahooProvider())
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "yahoo")
+    assert "yfinance is not installed" in str(excinfo.value)
+
+
+def test_a_provider_that_gives_no_reason_is_still_reported_as_unavailable(
+        registry):
+    registry.register(Dummy(ok=False))
+    with pytest.raises(ProviderUnavailable) as excinfo:
+        registry.resolve(CAP_OPTION_CHAIN, "dummy")
+    message = str(excinfo.value)
+    assert "dummy: not available" in message
+    assert "without a reason" in message
+
+
+def test_a_reason_check_that_raises_does_not_take_the_registry_down(
+        registry, monkeypatch):
+    dummy = Dummy(ok=False)
+    monkeypatch.setattr(dummy, "unavailable_reason",
+                        lambda: 1 / 0)
+    registry.register(dummy)
+    provider, choice = registry.resolve(CAP_OPTION_CHAIN, "dummy",
+                                        strict=False)
+    assert provider.name != "dummy"
+    assert any("ZeroDivisionError" in reason for reason in choice["skipped"])
+
+
+def test_describe_carries_the_reason_a_provider_is_unavailable(registry,
+                                                               monkeypatch):
+    monkeypatch.setenv("PUBLIC_DATA_MODE", "demo")
+    described = registry.describe_all()["yahoo"]
+    assert described["available"] is False
+    assert "demo mode" in described["unavailable_reason"]
+    # And nothing in it names a key variable, which the leak test above
+    # would otherwise read as a secret.
+    assert "api_key" not in repr(described).lower()

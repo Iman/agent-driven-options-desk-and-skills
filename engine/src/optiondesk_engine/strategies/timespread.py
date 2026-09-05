@@ -33,6 +33,12 @@ from optiondesk_engine.pricing.black_scholes import (
     DEFAULT_R,
     bs_price,
 )
+# The settlement law the single-expiry probabilities use, imported rather
+# than restated so that "the same law" is literally true.
+from optiondesk_engine.strategies.payoff import (
+    _lognormal_cdf_factory,
+    _usable,
+)
 
 INF = float("inf")
 CURVE_POINTS = 320
@@ -253,6 +259,97 @@ def analyze_at_front(legs, spot, at_days=None, r=DEFAULT_R, q=DEFAULT_Q,
                     "structure's best case."
                     if gain_on_boundary or loss_on_boundary else "")
                  + " " + ASSUMPTION),
+    }
+
+
+def probability_at_front(legs, spot, iv, at_days=None, r=DEFAULT_R,
+                         q=DEFAULT_Q, reach=6.0, points=4 * CURVE_POINTS):
+    """Model probability of profit at the near expiry, or None.
+
+    The single-expiry engine has this in closed form: breakevens split a
+    piecewise-linear payoff into regions, and the lognormal mass of each
+    region is an integral with a known answer. The profit here is a curve,
+    because the far leg is still alive, so the regions are found
+    numerically. The marking curve is scanned on a grid that reaches
+    `reach` standard deviations of the underlying either side of spot over
+    the time to the mark, every sign change is located by linear
+    interpolation and inserted as a grid point, and each cell is weighted
+    by the lognormal mass it holds. Probability of profit is the mass of
+    the cells where the curve is above zero, expected profit is the
+    mass-weighted mean of the curve, and expected loss is that mean over
+    the losing cells. The mass beyond the grid, below 1e-9 at six standard
+    deviations, is valued at the edge rather than dropped.
+
+    The law is the one the single-expiry plans use, lognormal settlement
+    at the at-the-money implied volatility with no drift and time in
+    calendar days over 365, applied at the near expiry. The far leg is
+    marked at the volatility it carries today, which is the assumption
+    every time-spread figure rests on and the reason this is a shape and
+    not a forecast.
+    """
+    if not legs:
+        return None
+    if at_days is None:
+        at_days = min(leg.days for leg in legs)
+    if not _usable(spot, iv, at_days):
+        return None
+    try:
+        cdf, m, sd, survival = _lognormal_cdf_factory(spot, float(iv),
+                                                      at_days, 0.0)
+        lo = max(math.exp(m - reach * sd), 0.01)
+        hi = math.exp(m + reach * sd)
+    except (OverflowError, ValueError):
+        return None
+    if hi <= lo:
+        return None
+    prices, profits = payoff_curve(legs, lo, hi, at_days, points, r, q)
+
+    # Split every cell at a sign change, so each cell is wholly profitable
+    # or wholly losing and the crossing itself is a grid point.
+    xs, ys = [], []
+    for (x0, y0), (x1, y1) in zip(zip(prices, profits),
+                                  zip(prices[1:], profits[1:])):
+        xs.append(x0)
+        ys.append(y0)
+        if (y0 < 0 < y1) or (y1 < 0 < y0):
+            xs.append(x0 - y0 * (x1 - x0) / (y1 - y0))
+            ys.append(0.0)
+    xs.append(prices[-1])
+    ys.append(profits[-1])
+
+    cells = [(cdf(xs[0]), ys[0])]
+    for (x0, y0), (x1, y1) in zip(zip(xs, ys), zip(xs[1:], ys[1:])):
+        cells.append((cdf(x1) - cdf(x0), 0.5 * (y0 + y1)))
+    cells.append((survival(xs[-1]), ys[-1]))
+
+    profit = loss = expected = losing = 0.0
+    for mass, value in cells:
+        if mass <= 0:
+            continue
+        expected += mass * value
+        if value > 0:
+            profit += mass
+        elif value < 0:
+            loss += mass
+            losing += mass * value
+    if not all(math.isfinite(v) for v in (profit, loss, expected, losing)):
+        return None
+    return {
+        "profit": min(max(profit, 0.0), 1.0),
+        "loss": min(max(loss, 0.0), 1.0),
+        "expected_pnl": expected,
+        "expected_loss": (losing / loss) if loss > 1e-9 else 0.0,
+        "breakevens": sorted({round(x, 4) for x, y in zip(xs, ys)
+                              if y == 0.0}),
+        "at_days": at_days,
+        "scan_range": [lo, hi],
+        "method": ("Probability and expectation at the near expiry are "
+                   "numerical: the marking curve is integrated cell by "
+                   "cell over a grid reaching {:g} standard deviations "
+                   "either side of spot under a lognormal law at the "
+                   "near chain's at-the-money implied volatility with no "
+                   "drift, with the far leg marked at the volatility it "
+                   "carries today.".format(reach)),
     }
 
 

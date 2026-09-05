@@ -240,6 +240,11 @@ def run(args):
         "simulation": {
             "horizon_days": simulation["horizon_days"],
             "paths": simulation["paths"],
+            # Requested as well as kept. The engine returns both and this
+            # block carried only the kept count, so the dashboard's maths
+            # panel, which prints "requested (kept)", fell back to the
+            # engine default and described a 5,000-path run as 20,000.
+            "requested_paths": simulation["requested_paths"],
             "antithetic": simulation["antithetic"],
             "fan": simulation["fan"],
             "terminal_histogram": _histogram(simulation["terminal"]),

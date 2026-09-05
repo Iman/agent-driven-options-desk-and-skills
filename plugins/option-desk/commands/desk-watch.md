@@ -35,10 +35,15 @@ From the newest exposure artifact for the expiry you are watching, record:
 ## 2. Refresh
 
 ```
-optiondesk chain $symbol --expiry $expiry
+optiondesk chain $symbol
 optiondesk greeks --band 0.06
 optiondesk exposure
 ```
+
+When an expiry was given, append `--expiry $expiry` to the chain line;
+without one the nearest listed expiry is pulled. The flag is not written
+into the block above because an omitted argument expands to nothing, and a
+bare `--expiry` is rejected before anything is refreshed.
 
 ## 3. Report only these, each with its previous value beside it
 

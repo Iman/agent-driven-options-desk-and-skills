@@ -64,59 +64,64 @@ def simulate_paths(posterior, spot, horizon_days, paths=DEFAULT_PATHS,
     """Posterior predictive price paths.
 
     Returns the terminal prices, the per-day quantile fan, and the settings
-    used. Paths are generated in antithetic pairs, so the requested count is
-    rounded down to an even number.
+    used. Every path is an independent draw, with its own posterior
+    parameter set and its own shocks and nothing shared or mirrored between
+    neighbours, so the requested count is generated exactly, less any path
+    discarded as non-finite. The terminal list is sorted, for the readers
+    that take quantiles and histograms from it; terminal_by_path keeps
+    generation order, so the independence of consecutive paths can be
+    measured rather than read off a flag.
     """
     if spot <= 0:
         raise ValueError("spot must be positive")
     if horizon_days < 1:
         raise ValueError("horizon must be at least one day")
+    if paths < 1:
+        raise ValueError("paths must be at least one")
 
     rng = random.Random(seed)
     draws = posterior.draws
-    pairs = max(1, paths // 2)
 
     per_day = [[] for _ in range(horizon_days)]
     terminal = []
     discarded = 0
-    for _ in range(pairs):
-        # A fresh parameter draw for each side of the pair. Sharing one
-        # draw halved the number of independent parameter samples, and
-        # parameter uncertainty is what dominates the tail quantiles that
-        # value at risk depends on.
-        # Two paths per outer step, keeping the requested count exact.
-        # This was a sign loop mirroring the shocks, and the mirroring was
-        # inert: see the module docstring.
-        for _side in (0, 1):
-            params = draws[rng.randrange(len(draws))]
-            mu, omega, alpha, beta, nu = params
-            if not all(math.isfinite(v) for v in params):
-                discarded += 1
-                continue
-            base_variance = posterior.last_variance(params)
-            if not math.isfinite(base_variance) or base_variance <= 0:
-                discarded += 1
-                continue
-            variance = base_variance
-            log_price = math.log(spot)
-            path = []
-            broken = False
-            for day in range(horizon_days):
-                sigma = math.sqrt(variance)
-                residual = sigma * _standard_t(rng, nu)
-                log_price += mu + residual
-                if not math.isfinite(log_price) or log_price > 700:
-                    broken = True
-                    break
-                variance = (omega + alpha * residual * residual
-                            + beta * variance)
-                path.append(math.exp(log_price))
-            if broken or len(path) != horizon_days:
-                discarded += 1
-                continue
-            for day, price in enumerate(path):
-                per_day[day].append(price)
-            terminal.append(path[-1])
+    # Independent draws. Each path takes its own parameter set, which is
+    # what carries parameter uncertainty into the fan, and its own shocks,
+    # drawn up front as one list so it is visible that nothing else feeds
+    # the path. The pairing loop that stood here mirrored nothing, see the
+    # module docstring: consecutive paths in generation order correlate at
+    # -0.0032, and the test measures that rather than reading the
+    # antithetic flag.
+    for _ in range(paths):
+        params = draws[rng.randrange(len(draws))]
+        mu, omega, alpha, beta, nu = params
+        if not all(math.isfinite(v) for v in params):
+            discarded += 1
+            continue
+        base_variance = posterior.last_variance(params)
+        if not math.isfinite(base_variance) or base_variance <= 0:
+            discarded += 1
+            continue
+        shocks = [_standard_t(rng, nu) for _ in range(horizon_days)]
+        variance = base_variance
+        log_price = math.log(spot)
+        path = []
+        broken = False
+        for day in range(horizon_days):
+            residual = math.sqrt(variance) * shocks[day]
+            log_price += mu + residual
+            if not math.isfinite(log_price) or log_price > 700:
+                broken = True
+                break
+            variance = (omega + alpha * residual * residual
+                        + beta * variance)
+            path.append(math.exp(log_price))
+        if broken or len(path) != horizon_days:
+            discarded += 1
+            continue
+        for day, price in enumerate(path):
+            per_day[day].append(price)
+        terminal.append(path[-1])
 
     if not terminal:
         raise ValueError(
@@ -133,9 +138,11 @@ def simulate_paths(posterior, spot, horizon_days, paths=DEFAULT_PATHS,
             row["p{}".format(int(q * 100))] = _quantile(values, q)
         fan.append(row)
 
+    by_path = list(terminal)
     terminal.sort()
     return {
         "terminal": terminal,
+        "terminal_by_path": by_path,
         "fan": fan,
         "paths": len(terminal),
         "requested_paths": paths,

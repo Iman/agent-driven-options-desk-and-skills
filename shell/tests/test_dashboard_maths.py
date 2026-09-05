@@ -6,8 +6,12 @@ page following it fails here rather than shipping as a stale formula.
 """
 
 import html as html_module
+import inspect
 
 from optiondesk import engine_bridge
+from optiondesk.artifacts import envelope
+from optiondesk.cli import exposure as exposure_cmd
+from optiondesk.contracts import SCHEMA_FILES, SIMULATION, validate
 from optiondesk.dashboard import flow, maths
 from optiondesk.dashboard import page as page_module
 
@@ -140,19 +144,113 @@ def test_the_backtest_block_quotes_the_artifacts_own_schedule():
     assert "every E trading days, hold H trading days" in bare
 
 
-def test_the_simulation_block_quotes_the_artifacts_own_history():
-    artifact = {
-        "history": {"observations": 1254, "first": "2021-09-03",
-                    "last": "2026-09-03"},
-        "simulation": {"horizon_days": 30, "paths": 19998,
-                       "requested_paths": 20000},
-        "posterior": {},
-    }
-    text = maths.simulation(maths.constants(), artifact)
+def simulation_artifact(**overrides):
+    """A simulation artifact as the command writes it, schema-validated.
 
-    assert "over 1,254 daily closes (2021-09-03 to 2026-09-03)" in text
-    assert "20,000 paths (19,998 kept)" in text
+    The run deliberately uses none of the engine defaults: 4 chains rather
+    than 2, 6,000 draws rather than 3,000, 2,000 burn-in rather than 1,000,
+    5,000 paths rather than 20,000. A block that prints a default in place
+    of one of these is printing a number the run did not use, and a
+    fixture built on the defaults could not tell the two apart.
+
+    The settings sit where cli/simulate.py puts them: chains, draws and
+    burn-in in posterior.diagnostics under the engine's own key names, and
+    the requested path count beside the kept one in the simulation block.
+    An earlier fixture invented posterior.settings and simulation.paths
+    alone, so the test passed against keys no artifact carried.
+    """
+    garch = engine_bridge.simulation().garch
+    diagnostics = {
+        "chains": 4, "draws_per_chain": 6000, "burn_in": 2000,
+        "acceptance_rate": 0.3, "acceptance_rate_including_burn_in": 0.3,
+        "rhat": {"mu": 1.01}, "ess": {"mu": 400.0}, "converged": True,
+        "rhat_limit": garch.RHAT_LIMIT, "min_ess": garch.MIN_ESS,
+        "note": "",
+    }
+    artifact = {
+        "meta": envelope(schema=SIMULATION, tool="optiondesk simulate",
+                         provider_used="stub"),
+        "underlying": "TEST",
+        "spot": 100.0,
+        "history": {"observations": 1254, "first": "2021-09-03",
+                    "last": "2026-09-03", "period": "5y",
+                    "annualised_volatility": 0.2},
+        "posterior": {"converged": True, "parameters": {},
+                      "diagnostics": diagnostics},
+        "simulation": {"horizon_days": 30, "paths": 4998,
+                       "requested_paths": 5000, "antithetic": False,
+                       "fan": [], "terminal_histogram": []},
+        "risk": None,
+        "structures": [],
+    }
+    artifact.update(overrides)
+    validate(artifact, SCHEMA_FILES[SIMULATION])
+    return artifact
+
+
+def test_the_simulation_block_quotes_the_artifacts_own_history():
+    text = maths.simulation(maths.constants(), simulation_artifact())
+
+    assert "over 1,254 daily returns (2021-09-03 to 2026-09-03)" in text
+    assert "daily closes" not in text
+    assert "5,000 paths (4,998 kept)" in text
     assert "30 business days out" in text
+
+
+def test_the_simulation_block_quotes_the_runs_own_sampler_settings():
+    """Catches the block printing the engine defaults for every run.
+
+    Measured at ac72957: a 4-chain, 6,000-draw, 2,000-burn-in artifact
+    printed "2 chains of 3,000 draws after 1,000 burn-in", and a
+    5,000-path run printed "20,000 paths (4,998 kept)", because the block
+    read keys the command never writes and fell back to the defaults.
+    """
+    garch = engine_bridge.simulation().garch
+    paths = engine_bridge.simulation().paths
+    text = maths.simulation(maths.constants(), simulation_artifact())
+
+    assert "4 chains of 6,000 draws after 2,000 burn-in" in text
+    assert "5,000 paths (4,998 kept)" in text
+    defaults = "{} chains of {:,} draws after {:,} burn-in".format(
+        garch.DEFAULT_CHAINS, garch.DEFAULT_DRAWS, garch.DEFAULT_BURN)
+    assert defaults not in text
+    assert "{:,} paths".format(paths.DEFAULT_PATHS) not in text
+
+
+def test_an_artifact_without_a_requested_count_states_only_what_it_kept():
+    """Artifacts written before requested_paths existed carry the kept
+    count alone. Beside the engine default that read "20,000 paths (200
+    kept)" for a 200-path run; alone it is simply true.
+    """
+    paths = engine_bridge.simulation().paths
+    old = simulation_artifact()
+    del old["simulation"]["requested_paths"]
+    old["simulation"]["paths"] = 200
+    text = maths.simulation(maths.constants(), old)
+
+    assert "200 paths;" in text
+    assert "{:,}".format(paths.DEFAULT_PATHS) not in text
+
+    complete = simulation_artifact()
+    complete["simulation"]["paths"] = 5000
+    assert "5,000 paths, all kept" in maths.simulation(maths.constants(),
+                                                      complete)
+
+
+def test_the_history_annualisation_the_block_quotes_is_the_one_used():
+    """The realised figure is computed in cli/simulate.py with the shell's
+    own trading-day constant; the block prints the engine's. They are the
+    same number today, and this holds them together.
+    """
+    from optiondesk.cli import simulate as simulate_cmd
+
+    stats = engine_bridge.backtest().stats
+    assert simulate_cmd.TRADING_DAYS == stats.TRADING_DAYS
+    text = maths.volatility(maths.constants())
+    assert "sum over t of r_t^2 x {:g} )".format(stats.TRADING_DAYS) in text
+    assert "uncentred and divided by n" in text
+    assert "sample variance" not in text.split("realised")[1].split(
+        "premium gap")[0].replace("centred sample variance", "")
 
 
 def test_the_pricing_block_states_the_chains_own_carry():
@@ -201,3 +299,33 @@ def test_the_pipeline_edges_join_real_nodes_and_no_two_nodes_share_a_cell():
         assert source in flow.NODES
         assert target in flow.NODES
         assert shape in ("right", "down", "under")
+
+
+def test_the_exposure_box_is_fed_by_the_chain_and_not_the_ladder():
+    """Catches the figure drawing layout as data flow.
+
+    The exposure command opens chain_*.json and prices gamma for every
+    contract itself; it never reads a ladder. The figure drew
+    greeks -> exposure because the two boxes sit side by side. The source
+    of the command is read here so the edge cannot be put back without
+    the command changing first.
+    """
+    source = inspect.getsource(exposure_cmd.run)
+    assert 'latest("chain_*.json"' in source
+    assert "greeks_" not in source
+
+    joins = {(edge[0], edge[1]) for edge in flow.EDGES}
+    assert ("chain", "exposure") in joins
+    assert ("greeks", "exposure") not in joins
+
+
+def test_the_caption_calls_the_two_inputs_inputs():
+    """The source and the closes are fetched or supplied, not commands
+    that write artifacts, and the caption used to say every box was
+    both. The ledger claim is kept: the page now renders the ledger.
+    """
+    caption = flow.CAPTION
+    assert "inputs, not commands" in caption
+    assert "reads all of them and writes nothing" in caption
+    assert "Every box is one command" not in caption
+    assert "exposure command reads the chain snapshot" in caption

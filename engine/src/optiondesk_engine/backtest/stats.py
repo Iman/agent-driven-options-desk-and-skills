@@ -39,6 +39,8 @@ def performance_stats(returns, holding_days=None):
     at risk. Annualisation is deliberately optional and only applied when
     the holding period is known, because annualising a handful of trades of
     unknown length produces an impressive number that means nothing.
+    holding_days is in trading days, as it is in the runner, so a year
+    holds TRADING_DAYS / holding_days of them.
     """
     if not returns:
         return None

@@ -8,6 +8,9 @@ expiry, the profit is a curve rather than line segments, and the whole
 thing rests on a volatility assumption that has to be visible.
 """
 
+import math
+import random
+
 import pytest
 
 from optiondesk_engine.pricing.black_scholes import bs_price
@@ -21,6 +24,7 @@ from optiondesk_engine.strategies.timespread import (
     net_option_cash,
     payoff_curve,
     pnl_at,
+    probability_at_front,
 )
 
 
@@ -464,3 +468,113 @@ def test_an_interior_maximum_is_not_flagged(chains):
     # At a narrower window the same worst case IS the window, and says so.
     narrow = analyze_at_front(plan["legs"], plan["spot"], span=0.10)
     assert narrow["max_loss_on_boundary"] is True
+
+
+# ------------------------------------------- probability at the near expiry
+
+# Two-expiry plans were written with probability, net Greeks and friction
+# all null while the schema, the capabilities document and the skill said
+# every plan carries them. The engine can price the surviving leg at any
+# underlying price, so the lognormal mass of the profitable part of that
+# curve is computable; it is numerical because the curve has no closed
+# form, and these tests check the numbers against independent arithmetic.
+
+def _lognormal(spot, iv, at_days):
+    t = at_days / 365.0
+    sd = iv * math.sqrt(t)
+    m = math.log(spot) - 0.5 * iv * iv * t
+
+    def cdf(price):
+        return 0.5 * (1.0 + math.erf((math.log(price) - m)
+                                     / (sd * math.sqrt(2.0))))
+    return cdf, m, sd
+
+
+def _root(legs, at_days, lo, hi):
+    """A breakeven by bisection on the marking curve itself."""
+    for _ in range(80):
+        mid = 0.5 * (lo + hi)
+        if pnl_at(legs, lo, at_days) * pnl_at(legs, mid, at_days) <= 0:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+
+def test_the_front_probability_is_the_lognormal_mass_between_the_breakevens(
+        chains):
+    """A calendar profits between two breakevens, so its probability of
+    profit is one cdf difference, computed here from the erf and from
+    breakevens found by bisection, with nothing shared with the engine
+    but the pricing function.
+    """
+    near, far = chains
+    plan = calendar_spread(near, far)
+    legs, spot = plan["legs"], plan["spot"]
+    at_days = plan["analysis"]["at_days"]
+    iv = 0.22    # the near chain's at-the-money volatility
+
+    result = probability_at_front(legs, spot, iv, at_days)
+    assert result is not None
+    below = _root(legs, at_days, 70.0, 100.0)
+    above = _root(legs, at_days, 100.0, 130.0)
+    cdf, _, _ = _lognormal(spot, iv, at_days)
+    expected = cdf(above) - cdf(below)
+    assert 0.0 < expected < 1.0
+    assert result["profit"] == pytest.approx(expected, abs=1e-4)
+    assert result["loss"] == pytest.approx(1.0 - expected, abs=1e-4)
+    assert result["breakevens"] == pytest.approx([below, above], abs=0.01)
+    assert result["at_days"] == at_days
+    assert "integrated cell by cell" in result["method"]
+
+
+def test_the_front_expectation_agrees_with_a_simulation(chains):
+    """The Riemann sum against a seeded Monte Carlo under the same law.
+
+    Twenty thousand draws put the standard error of the mean profit near
+    0.006 and of the probability near 0.0035; the tolerances are four of
+    those, and a sum that dropped the tails or weighted cells by width
+    rather than by mass would miss by far more.
+    """
+    near, far = chains
+    plan = calendar_spread(near, far)
+    legs, spot = plan["legs"], plan["spot"]
+    at_days = plan["analysis"]["at_days"]
+    iv = 0.22
+
+    result = probability_at_front(legs, spot, iv, at_days)
+    _, m, sd = _lognormal(spot, iv, at_days)
+    rng = random.Random(7)
+    outcomes = [pnl_at(legs, math.exp(m + sd * rng.gauss(0.0, 1.0)), at_days)
+                for _ in range(20000)]
+    n = len(outcomes)
+    mean = sum(outcomes) / n
+    spread = math.sqrt(sum((o - mean) ** 2 for o in outcomes) / (n - 1))
+    assert abs(result["expected_pnl"] - mean) < 4.0 * spread / math.sqrt(n)
+    assert abs(result["profit"] - sum(1 for o in outcomes if o > 0) / n) \
+        < 0.015
+    losses = [o for o in outcomes if o < 0]
+    assert result["expected_loss"] < 0
+    assert abs(result["expected_loss"] - sum(losses) / len(losses)) < 0.02
+
+
+def test_a_free_position_is_profitable_everywhere_it_has_value():
+    """A far call bought for nothing cannot lose, and the far tails, valued
+    at the edge of the grid rather than dropped, must not invent a loss."""
+    legs = [TimeLeg("call", +1, 0.0, 100.0, 1.0, 0.24, 56.0)]
+    result = probability_at_front(legs, 100.0, 0.22, 21.0)
+    assert result["loss"] == 0.0
+    assert result["expected_loss"] == 0.0
+    assert result["profit"] > 0.999
+    assert result["expected_pnl"] > 0
+
+
+def test_the_front_probability_refuses_what_it_cannot_price(chains):
+    near, far = chains
+    legs = calendar_spread(near, far)["legs"]
+    assert probability_at_front(legs, 100.0, None, 21.0) is None
+    assert probability_at_front(legs, 100.0, 0.0, 21.0) is None
+    assert probability_at_front(legs, 100.0, float("nan"), 21.0) is None
+    assert probability_at_front([], 100.0, 0.22, 21.0) is None
+    # The mark date defaults to the near expiry, as the risk graph does.
+    assert probability_at_front(legs, 100.0, 0.22)["at_days"] == 21.0

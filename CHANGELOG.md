@@ -6,12 +6,80 @@ entry says otherwise.
 
 ## Unreleased
 
+- The maths printed beside each dashboard panel now matches the code that
+  made the numbers. A line-by-line review found thirteen sentences that did
+  not: the simulation block printed the engine's default chains, draws and
+  burn-in for every run because it read a key the artifact never carried,
+  and printed a default path count the same way; the realised-volatility
+  formula described the backtest's centred estimator, not the simulation's
+  uncentred one; the pipeline figure joined greeks to exposure when
+  exposure reads the chain; the caption said the page reads every artifact
+  while the forward ledger was never read; and the mid, band, unlimited,
+  region, open-interest ratio and observation-count sentences each
+  overstated the code. The artifact now records the paths requested, the
+  page shows each backtest's own buy-and-hold figure beside its row, and a
+  ledger panel renders forward_ledger.json when it exists.
+- The local MCP server lists a title and the four annotation hints for
+  every tool, and an output schema for the two whose shape is fixed. A
+  refusal names its true cause: demo mode, a missing dependency, a missing
+  key, or unaccepted provider terms, in place of one string for all four.
+  Error results carry the disclaimer that success results carry.
+- The desk-watch, desk-risk and desk-test commands no longer print a bare
+  flag when the optional second argument is omitted; the default is in the
+  command line and the flag is added only when a value was given.
+- The greeks, positioning and strategy skills say that the local desk does
+  not gate the data_source name of user-supplied data, and that the
+  provider's terms are the user's responsibility. The hosted service blocks
+  Yahoo, yfinance and Alpha Vantage names; the local desk does not.
 - The dashboard folds per-row import repairs into one line per repair, with
   the row ranges, so a chain with hundreds of bid-and-ask rows no longer
   prints hundreds of identical notes above the first chart. Artifacts and
   MCP repair lists are unchanged.
 - The dashboard header names the artifact file, not the directory that
   holds it, so one machine's layout no longer appears on the page.
+- The implied volatility solver refuses the top edge of a flat band. Deep
+  in or out of the money, a quote within 1e-6 of intrinsic reprices at
+  every volatility from IV_MIN up to the point where vega has just cleared
+  MIN_VEGA, and the solver returned that point: on a grid of 1440
+  contracts, 43 came back 0.001 to 0.07 above the truth, the worst a put at
+  S=50 K=90 T=1 returning 0.1175 for a true 0.05 with vega 2.6e-27 there.
+  A root is now accepted only when a step of SIGMA_RESOLUTION either way
+  takes the model price out of the tolerance band, so a returned volatility
+  is within 0.005 of every volatility that reprices the quote. Checking
+  one side was measured and is not enough: at the worst case the step up
+  moved the price by 2.8e-6 and the step down by 3e-7. After the change
+  the same grid returns nothing more than 0.0016 from the truth.
+- The backtest prices its model chain over the trading days it holds.
+  holding_days indexes trading-day closes and the statistics annualise by
+  252 / holding_days, but the chain was priced at holding_days / 365.
+  Measured: an at the money straddle at 18 percent volatility was 4.1186
+  against 4.9573 at 30 / 252, so entry premiums were about 17 percent low
+  on every trade of every backtest. The chain is now priced at
+  holding_days / 252 and states its life in calendar days so the
+  expected-move band lands on the same t. Backtest artifacts written
+  before this carry the old premiums, and the FAQ's 47 percent per trade
+  figure was measured on one of them.
+- Two-expiry plans carry net Greeks, friction and a probability of profit,
+  as the schema, docs/CAPABILITIES.md and the strategy skill said all
+  along; every calendar, diagonal and ratio diagonal plan wrote all three
+  as null. Each leg is now priced at its own expiry and its own volatility
+  (on the fixture pair: net vega 4.402 that way, exactly zero at the near
+  expiry), friction is the same arithmetic on the same quotes, and the
+  probability is the lognormal mass of the profitable part of the marking
+  curve at the near expiry under the near chain's at-the-money volatility,
+  integrated numerically because that curve has no closed form. The method
+  is stated in the plan's notes and its model field, and the comparison
+  can now rank these structures.
+- The simulation's function docstring and loop comment still said paths
+  came in antithetic pairs while the module docstring and the code said
+  independent draws; the words now match the code, and an odd path count
+  is no longer rounded down. The guard test correlated the even and odd
+  entries of the SORTED terminal list, which reads +0.9966 on honest paths
+  and +0.9983 on mirrored ones, so it could not see the thing it guarded.
+  The engine keeps generation order in terminal_by_path and the test
+  asserts consecutive paths correlate near zero, which mirrored pairs fail
+  at -0.99.
+- One mutation for each of the four, so the harness has eighty-five.
 
 ## Unreleased, 2026-09-03
 

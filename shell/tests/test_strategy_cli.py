@@ -363,3 +363,112 @@ def test_the_published_curve_agrees_with_its_own_analysis(
         "the curve peaks at {} while the analysis says {}".format(
             peak, plan["analysis"]["max_gain"]))
     assert plan["risk_free_rate"] is not None
+
+
+def _two_expiries(chain_snapshot, tmp_path, **far_overrides):
+    """A near chain and a far chain priced at its own 58 days.
+
+    The tests above copy the near chain and relabel it, which is enough
+    to prove a calendar builds. It is not enough here: a far leg quoted at
+    the near leg's price makes the calendar free, so it cannot lose, its
+    probability of profit is exactly one and its friction has no premium
+    to compare against.
+    """
+    near = put_snapshot(chain_snapshot, tmp_path)
+    far = put_snapshot(chain_snapshot, tmp_path, expiry="2026-10-16",
+                       days=near["days_to_expiry"] + 28, **far_overrides)
+    return near, far
+
+
+@pytest.mark.parametrize("name,theta_sign", [
+    # Short the front against one back-month contract: collects decay.
+    ("calendar_spread", 1),
+    ("diagonal_spread", 1),
+    # Two back-month longs against one front short: pays decay, and the
+    # ratio is the point of the structure rather than a mistake.
+    ("ratio_call_diagonal", -1),
+])
+def test_a_time_spread_plan_carries_greeks_probability_and_friction(
+        chain_snapshot, args_factory, tmp_path, name, theta_sign):
+    """Two-expiry plans were written with all three null while the schema,
+    docs/CAPABILITIES.md and the strategy skill said every plan carries
+    them. The Greeks are checked against an independent sum over the legs
+    at each leg's own expiry, which is the part that has to be right: at
+    one expiry and one volatility a calendar's legs cancel exactly.
+    """
+    from optiondesk import engine_bridge
+
+    _two_expiries(chain_snapshot, tmp_path)
+    result = strategy_cmd.run(strategy_args(args_factory, tmp_path,
+                                            name=name))
+    assert result["built"] is True
+    plan = read_json(result["artifact"])
+    assert validate(plan, SCHEMA_FILES[STRATEGY_PLAN]) is plan
+
+    all_greeks = engine_bridge.require()["all_greeks"]
+    expected = {key: 0.0 for key in ("delta", "gamma", "vega", "theta",
+                                     "rho")}
+    for leg in plan["legs"]:
+        greeks = all_greeks(plan["spot"], leg["strike"],
+                            leg["days_to_expiry"] / 365.0, leg["iv"],
+                            leg["kind"], plan["risk_free_rate"],
+                            plan["dividend_yield"])
+        side = 1 if leg["side"] == "long" else -1
+        for key in expected:
+            expected[key] += side * leg["qty"] * greeks[key]
+    net = plan["net_greeks"]
+    for key, value in expected.items():
+        assert net[key] == pytest.approx(value, abs=1e-9), key
+    assert net["complete"] is True
+    assert net["legs_priced"] == 2
+    # Long the back month against the front is long vega whatever the
+    # ratio; on this fixture both chains carry the same volatility at a
+    # strike, so at one expiry the calendar's vega would be exactly zero.
+    assert net["vega"] > 1.0
+    assert net["theta"] * theta_sign > 0
+
+    probability = plan["probability"]
+    assert 0.0 < probability["profit"] < 1.0
+    assert probability["profit"] + probability["loss"] == pytest.approx(
+        1.0, abs=1e-6)
+    assert probability["expected_loss"] < 0
+    assert "near expiry" in probability["model"]
+
+    friction = plan["friction"]
+    assert friction["verdict"] in ("ok", "thin", "untradeable")
+    assert friction["round_trip"] > 0
+    assert friction["legs_without_quotes"] == 0
+
+    assert result["probability_of_profit"] == probability["profit"]
+    assert result["expected_pnl"] == probability["expected_pnl"]
+    assert result["net_vega"] == net["vega"]
+    assert result["net_theta"] == net["theta"]
+    assert result["friction_verdict"] == friction["verdict"]
+    assert any("integrated cell by cell" in note
+               for note in plan["meta"]["notes"])
+
+
+def test_a_time_spread_without_an_atm_volatility_still_carries_greeks(
+        chain_snapshot, args_factory, tmp_path):
+    """The probability needs the near chain's at-the-money volatility and
+    is withheld without it. The Greeks and the friction need only the legs
+    and must not vanish with it."""
+    from conftest import STRIKES
+
+    # Every call on both chains without a volatility: chain_iv reads the
+    # call nearest spot, so the put calendar has legs to mark and no law
+    # to integrate against.
+    no_iv = {(strike, "call") for strike in STRIKES}
+    near = put_snapshot(chain_snapshot, tmp_path, no_iv=no_iv)
+    put_snapshot(chain_snapshot, tmp_path, expiry="2026-10-16",
+                 days=near["days_to_expiry"] + 28, no_iv=no_iv)
+
+    result = strategy_cmd.run(strategy_args(args_factory, tmp_path,
+                                            name="calendar_put_spread"))
+    assert result["built"] is True
+    plan = read_json(result["artifact"])
+    assert plan["probability"] is None
+    assert plan["net_greeks"]["legs_priced"] == 2
+    assert plan["friction"]["verdict"] in ("ok", "thin", "untradeable")
+    assert result["probability_of_profit"] is None
+    assert result["net_vega"] > 0

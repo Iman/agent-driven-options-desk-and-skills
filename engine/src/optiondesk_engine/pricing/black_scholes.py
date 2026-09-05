@@ -46,6 +46,21 @@ IV_MAX = 5.0
 # The number is derived, not chosen: to distinguish volatilities half a
 # point apart at a price tolerance of tol, the price must move by more than
 # tol over that half point, so vega must exceed tol / 0.005.
+#
+# Vega is that requirement linearised at one point, and one point is not
+# enough. The model price is convex in volatility deep in and out of the
+# money, so a root can sit where vega has just climbed above the threshold
+# while the price is flat, within tol, all the way down to IV_MIN. The
+# solver then returns the top edge of that band. Measured on a grid of
+# 1440 contracts: 43 priced within 1e-6 of the intrinsic floor came back
+# 0.001 to 0.07 above the truth with vega at the answer 2.0e-4 to 7.8e-4,
+# and the worst, a put at S=50 K=90 T=1 true volatility 0.05, came back as
+# 0.117513 with vega 2.6e-27 at the truth. So _accept also applies the
+# requirement exactly, in both directions: a step of SIGMA_RESOLUTION
+# either way from the answer has to take the model price out of the
+# tolerance band. One direction is not enough either: at that worst case
+# the step up moves the price by 2.8e-6, more than tol, and the step down
+# by 3e-7.
 SIGMA_RESOLUTION = 0.005
 MIN_VEGA = 1e-6 / SIGMA_RESOLUTION
 
@@ -145,11 +160,17 @@ def implied_vol(price, spot, strike, t, kind, r=DEFAULT_R, q=DEFAULT_Q,
 
     A candidate is accepted only when the price both reprices within tol AND
     is actually sensitive to volatility there, meaning vega exceeds
-    MIN_VEGA. Without that second test the seed itself satisfies the first
-    for any contract whose value is dominated by intrinsic, and the function
-    returns 0.30 for a contract whose true volatility is 0.05, 0.10, 0.20 or
-    anything else. That is the exact failure this module tells its callers
-    to avoid, committed by the solver rather than by them.
+    MIN_VEGA and, exactly rather than linearised, that moving the candidate
+    by SIGMA_RESOLUTION in either direction takes the model price outside
+    the tolerance band. Without the second test the seed itself satisfies
+    the first for any contract whose value is dominated by intrinsic, and
+    the function returns 0.30 for a contract whose true volatility is 0.05,
+    0.10, 0.20 or anything else. Without the third it returns the top edge
+    of a band of volatilities that all reprice the quote, which is the
+    same failure with a different number. That is the exact failure this
+    module tells its callers to avoid, committed by the solver rather than
+    by them. A returned volatility is therefore within SIGMA_RESOLUTION of
+    every volatility that reprices the quote, the truth included.
 
     Returns None rather than a number whenever the input cannot imply a
     volatility: a non-positive price, an expired contract, a quote below
@@ -175,7 +196,7 @@ def implied_vol(price, spot, strike, t, kind, r=DEFAULT_R, q=DEFAULT_Q,
             break
         diff = est - price
         if abs(diff) < tol:
-            return _accept(sigma, spot, strike, t, kind, r, q)
+            return _accept(sigma, price, spot, strike, t, kind, r, q, tol)
         if abs(v) < MIN_VEGA:
             # Newton has nowhere to go from HERE. That is a statement about
             # this iterate, not about the contract, and treating it as a
@@ -204,16 +225,45 @@ def implied_vol(price, spot, strike, t, kind, r=DEFAULT_R, q=DEFAULT_Q,
     return _bisect_iv(price, spot, strike, t, kind, r, q, tol, max_iter)
 
 
-def _accept(sigma, spot, strike, t, kind, r, q):
-    """Return sigma only if it is inside the range and identified."""
+def _accept(sigma, price, spot, strike, t, kind, r, q, tol):
+    """Return sigma only if it is inside the range and identified.
+
+    Identified means vega above MIN_VEGA at the answer, which is the
+    linearised test, and the exact test behind it: the quote pins the
+    volatility to within SIGMA_RESOLUTION on both sides. See the note at
+    MIN_VEGA for the measurement that made the second one necessary.
+    """
     if not (IV_MIN < sigma <= IV_MAX):
         return None
     try:
         if abs(vega_raw(spot, strike, t, sigma, r, q)) < MIN_VEGA:
             return None
+        if not _pinned(sigma, price, spot, strike, t, kind, r, q, tol):
+            return None
     except (ValueError, ZeroDivisionError, OverflowError):
         return None
     return round(sigma, 6)
+
+
+def _pinned(sigma, price, spot, strike, t, kind, r, q, tol):
+    """True when every volatility that reprices the quote within tol lies
+    within SIGMA_RESOLUTION of sigma.
+
+    The model price rises with volatility, so one step either side is
+    enough to look: if the price a resolution step away is already outside
+    the tolerance band, nothing further out can be inside it. A step that
+    would leave [IV_MIN, IV_MAX] is not taken, because the edge of the
+    range bounds the band by itself and is within a step of sigma.
+    """
+    above = sigma + SIGMA_RESOLUTION
+    if above < IV_MAX:
+        if bs_price(spot, strike, t, above, kind, r, q) <= price + tol:
+            return False
+    below = sigma - SIGMA_RESOLUTION
+    if below > IV_MIN:
+        if bs_price(spot, strike, t, below, kind, r, q) >= price - tol:
+            return False
+    return True
 
 
 def _bisect_iv(price, spot, strike, t, kind, r, q, tol, max_iter):
@@ -233,9 +283,9 @@ def _bisect_iv(price, spot, strike, t, kind, r, q, tol, max_iter):
         except (ValueError, ZeroDivisionError, OverflowError):
             return None
         if abs(p_mid - price) < tol:
-            return _accept(mid, spot, strike, t, kind, r, q)
+            return _accept(mid, price, spot, strike, t, kind, r, q, tol)
         if p_mid < price:
             lo = mid
         else:
             hi = mid
-    return _accept(0.5 * (lo + hi), spot, strike, t, kind, r, q)
+    return _accept(0.5 * (lo + hi), price, spot, strike, t, kind, r, q, tol)

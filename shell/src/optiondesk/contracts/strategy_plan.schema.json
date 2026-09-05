@@ -129,7 +129,7 @@
         "object",
         "null"
       ],
-      "description": "Position Greeks, netted across option legs with sign and quantity. Units match the Greek ladder artifact."
+      "description": "Position Greeks, netted across option legs with sign and quantity. Units match the Greek ladder artifact. For a two-expiry structure each leg is priced at its own expiry and its own implied volatility, which is what lets a calendar read as long vega and collecting decay rather than as flat."
     },
     "friction": {
       "$ref": "#/$defs/friction"
@@ -324,7 +324,7 @@
         "object",
         "null"
       ],
-      "description": "Model estimates under a lognormal settlement distribution built from current implied volatility, with no directional drift. Not a forecast and not an observed win rate.",
+      "description": "Model estimates under a lognormal settlement distribution built from current implied volatility, with no directional drift. Not a forecast and not an observed win rate. For a two-expiry structure the settlement is the near expiry, the far leg is marked at the volatility it carries today, and the figures are numerical integrals of the marking curve rather than closed form; the model field says which.",
       "properties": {
         "profit": {
           "type": [

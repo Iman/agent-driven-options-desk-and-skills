@@ -13,7 +13,7 @@ It never returns an empty result that looks like a real one.
 
 import os
 
-from optiondesk.config import PUBLIC_DATA_MODES, public_data_mode
+from optiondesk.config import PUBLIC_DATA_MODES, has_key, public_data_mode
 
 CAP_OPTION_CHAIN = "option_chain"
 CAP_UNDERLYING_QUOTE = "underlying_quote"
@@ -126,14 +126,43 @@ class Provider:
         """True when this provider could answer a request right now."""
         raise NotImplementedError
 
+    def unavailable_reason(self):
+        """Why available() is false right now, or None when it is true.
+
+        Read by the registry when it skips a provider, so the refusal
+        names the gate that actually closed rather than guessing. The
+        gates, in the order available() meets them: the data boundary
+        (demo mode, an invalid mode, a licence approval that is not
+        recorded, a terms acknowledgement that is missing), a key that is
+        not configured, and a dependency the subclass knows it needs. The
+        registry used to print "missing dependency or key" for all of
+        them, which was wrong for the commonest: in demo mode every
+        external provider is refused with its key and its library both
+        present.
+        """
+        access = self.access_status()
+        if not access["allowed"]:
+            return access["reason"]
+        if self.requires_key and not has_key(self.name):
+            return ("no API key configured; run 'optiondesk keys set {}' "
+                    "or set its environment variable".format(self.name))
+        return self.missing_dependency()
+
+    def missing_dependency(self):
+        """Name a library this provider needs and cannot import, or None."""
+        return None
+
     def describe(self):
         access = self.access_status()
+        available = bool(self.available())
         return {
             "name": self.name,
             "tier": self.tier,
             "requires_key": self.requires_key,
             "capabilities": list(self.capabilities),
-            "available": bool(self.available()),
+            "available": available,
+            "unavailable_reason": (None if available
+                                   else self.unavailable_reason()),
             "terms_url": self.terms_url,
             "notes": self.notes,
             "data_mode": access["mode"],

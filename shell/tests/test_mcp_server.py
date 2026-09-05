@@ -58,8 +58,12 @@ def test_tools_list_shape():
     for tool in tools:
         assert tool["description"]
         assert tool["inputSchema"]["type"] == "object"
-        # No internal keys may leak into the wire format.
-        assert set(tool) == {"name", "description", "inputSchema"}
+        # No internal keys may leak into the wire format: the handler,
+        # the defaults and the image flag stay on the server side.
+        assert {"name", "title", "description", "inputSchema",
+                "annotations"} <= set(tool)
+        assert set(tool) <= {"name", "title", "description", "inputSchema",
+                             "annotations", "outputSchema"}
 
 
 def test_status_tool_call_returns_json_content():
@@ -686,16 +690,137 @@ def test_a_handler_that_supplies_its_own_disclaimer_keeps_it(desk):
     assert body["disclaimer"] == DISCLAIMER
 
 
-def test_an_error_result_is_not_dressed_up_with_a_disclaimer(desk):
-    """A failure reports the failure. Attaching the standard footer to it
-    would put the language of a finished analysis on something that
-    produced no numbers at all.
+def test_an_error_result_carries_the_disclaimer_too(desk):
+    """A refusal names the provider, the file or the terms that stopped
+    the run, and a model quotes that text as readily as a number. For
+    Codex and Gemini the result frame is the only place the boundary can
+    be stated, so an isError result carries the line a success carries.
+
+    The earlier contract left it off on the grounds that an error reports
+    no numbers. A provider refusal reported in prose travels just as far.
     """
     response = call("option_greeks_ladder",
                     {"snapshot": "/nonexistent/path.json"})
     body = body_of(response)
     assert response["result"]["isError"] is True
-    assert "disclaimer" not in body
+    assert body["error"] and body["message"]
+    assert body["disclaimer"] == DISCLAIMER
+
+
+# ------------------------------------------------- 8. tools/list metadata
+
+def listed():
+    return server.handle({"jsonrpc": "2.0", "id": 1,
+                          "method": "tools/list"})["result"]["tools"]
+
+
+# (readOnly, destructive, idempotent, openWorld), read from each runner
+# rather than from its description: whether it writes under the artifact
+# directory, whether anything it writes replaces something without an
+# archive copy, whether a repeat leaves the directory as it was, and
+# whether it can resolve a provider.
+EXPECTED_HINTS = {
+    "option_snapshot_schema": (True, False, True, False),
+    "option_chain_snapshot": (False, False, False, True),
+    "option_greeks_ladder": (False, False, False, False),
+    "option_plots": (False, False, False, True),
+    # Lists the provider's expiries and marks what is on disk; writes
+    # nothing (cli/expiries.py imports read_json and never write_json).
+    "option_expiries": (True, False, True, True),
+    "option_strategy_build": (False, False, False, False),
+    "option_strategy_compare": (False, False, False, False),
+    "option_positioning": (False, False, False, False),
+    "option_simulate": (False, False, False, True),
+    "option_backtest": (False, False, False, True),
+    # close settles an open position and nothing reopens it.
+    "option_forward_test": (False, True, False, False),
+    "option_desk_status": (True, False, True, False),
+}
+
+
+def test_every_tool_advertises_a_title_and_all_four_hints():
+    """WHAT WOULD BREAK. tools/list carried name, description and
+    inputSchema alone, so a client applying the protocol defaults saw
+    every tool as a destructive, non-idempotent writer that might reach
+    the network, the status and schema tools included.
+    """
+    tools = listed()
+    assert {tool["name"] for tool in tools} == set(EXPECTED_HINTS)
+    names = ("readOnlyHint", "destructiveHint", "idempotentHint",
+             "openWorldHint")
+    for tool in tools:
+        assert tool["title"] and tool["title"] != tool["name"]
+        hints = tool["annotations"]
+        assert hints["title"] == tool["title"]
+        for key, value in zip(names, EXPECTED_HINTS[tool["name"]]):
+            assert hints[key] is value, (tool["name"], key)
+
+
+@needs_engine
+def test_a_tool_advertised_read_only_leaves_the_desk_untouched(
+        desk, chain_snapshot):
+    """The hint is a claim about the file system, so the file system is
+    what checks it: every tool that says read-only runs against a desk
+    with chains on it, and the listing afterwards is the listing before.
+    """
+    two_expiry_chains(chain_snapshot, desk)
+    before = sorted(str(p) for p in desk.rglob("*"))
+    for name, arguments in (("option_snapshot_schema", {}),
+                            ("option_desk_status", {}),
+                            ("option_expiries", {})):
+        tool = next(t for t in listed() if t["name"] == name)
+        assert tool["annotations"]["readOnlyHint"] is True
+        response = call(name, arguments)
+        assert not response["result"].get("isError"), (name, response)
+    assert sorted(str(p) for p in desk.rglob("*")) == before
+
+
+@needs_engine
+def test_a_tool_advertised_as_a_writer_writes_and_deletes_nothing(
+        desk, chain_snapshot):
+    """readOnly false and destructive false together: the run leaves a
+    new artifact on the desk and every file that was there before."""
+    two_expiry_chains(chain_snapshot, desk)
+    before = sorted(str(p) for p in desk.rglob("*"))
+    tool = next(t for t in listed() if t["name"] == "option_positioning")
+    assert tool["annotations"]["readOnlyHint"] is False
+    assert tool["annotations"]["destructiveHint"] is False
+
+    response = call("option_positioning", {})
+    assert not response["result"].get("isError"), response
+    after = sorted(str(p) for p in desk.rglob("*"))
+    assert list(desk.glob("exposure_*.json"))
+    assert set(before) <= set(after)
+
+
+def test_the_two_fixed_shape_tools_return_structured_content_that_validates(
+        desk):
+    """A declared outputSchema obliges the server to return
+    structuredContent conforming to it, beside the text every client can
+    read. The in-tree validator is the same one the artifacts pass.
+    """
+    # The package exports validate() the function, which hides the module
+    # of the same name, so the checker is imported from the module itself.
+    from optiondesk.contracts.validate import _check
+
+    for name in ("option_desk_status", "option_snapshot_schema"):
+        tool = next(t for t in listed() if t["name"] == name)
+        schema = tool["outputSchema"]
+        result = call(name, {})["result"]
+        structured = result["structuredContent"]
+        assert structured == json.loads(result["content"][0]["text"])
+        _check(structured, schema, schema, "$")
+        assert set(schema["required"]) <= set(structured)
+
+
+def test_tools_without_an_output_schema_send_no_structured_content(desk):
+    """The other tools return a shape that depends on the branch taken,
+    so they promise none, and a result must not carry structured content
+    a client would have no schema to check it against.
+    """
+    without = {t["name"] for t in listed() if "outputSchema" not in t}
+    assert "option_expiries" in without
+    assert "structuredContent" not in call("option_expiries", {})["result"]
 
 
 def test_non_object_arguments_blame_the_caller_not_the_server():

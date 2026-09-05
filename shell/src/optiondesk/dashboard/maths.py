@@ -109,7 +109,11 @@ def pricing(c, rate=None, dividend=None):
         "defaults are r = {}, q = {}".format(
             carry, _value(c, "default_r"), _value(c, "default_q")),
         "implied    sigma solves  model(S, K, T, sigma) = mid,  with "
-        "mid = (bid + ask) / 2",
+        "mid = (bid + ask) / 2 where both sides are quoted",
+        "           and the last trade standing in for mid where a side is "
+        "missing, counted apart as a last-trade mark;",
+        "           a user-supplied chain that carries its own volatility "
+        "column keeps it as given and is never re-solved",
         "           Newton-Raphson from a fixed seed, bisection on [{}, {}] "
         "when Newton leaves the bracket".format(
             _value(c, "iv_min"), _value(c, "iv_max")),
@@ -167,10 +171,15 @@ def positioning(c):
         "max(P - K, 0) + OI_put(K) max(K - P, 0) ] x {}".format(m),
         "              evaluated at each listed strike: a description of "
         "where open interest sits, not a forecast",
-        "ratios        put/call OI = sum of put OI / sum of call OI;  "
-        "put/call volume the same, on today's volume",
+        "ratios        put/call OI = sum of put OI / sum of call OI over "
+        "the contracts in the profile, which are those",
+        "              carrying gamma, open interest and strike;  put/call "
+        "volume = sum of put volume / sum of call volume",
+        "              over every option in the chain, a missing volume "
+        "counted as zero",
         "skipped       a contract missing gamma, open interest or strike is "
-        "counted apart by cause, never treated as zero",
+        "counted apart by cause, never treated as zero,",
+        "              and is out of the profile and the OI ratio above",
     ])
 
 
@@ -194,7 +203,9 @@ def volatility(c, days=None):
         "butterfly      BF = ( sigma(put {w}d) + sigma(call {w}d) ) / 2 - "
         "sigma(atm)".format(w=wing),
         "skew slope     least-squares slope of sigma against (K / S - 1) x "
-        "100, calls only, across the graded band",
+        "100, calls only, over every call in the chain",
+        "               that carries a volatility: the whole chain, not the "
+        "ladder's band",
         "expected move  EM = S x sigma(atm) x sqrt({} / {})      one "
         "standard deviation over the life of the expiry".format(
             horizon, _value(c, "days_per_year")),
@@ -202,9 +213,12 @@ def volatility(c, days=None):
         "percent of outcomes under a lognormal",
         "term           the same figures per expiry on file, so the slope "
         "across tenors is visible",
-        "realised       sigma(real) = sqrt( sample variance of daily "
-        "ln(S_t / S_t-1) x {} ) over the simulation's history "
-        "window".format(_value(c, "trading_days")),
+        "realised       sigma(real) = sqrt( (1 / n) sum over t of r_t^2 "
+        "x {} ),  r_t = ln(S_t / S_t-1), over the simulation's".format(
+            _value(c, "trading_days")),
+        "               history window of n returns: the simulation's own "
+        "estimator, uncentred and divided by n, not the",
+        "               backtest's centred sample variance with n - 1",
         "premium gap    gap = sigma(atm) - sigma(real) per expiry: a "
         "disagreement between forecast and past, not an edge",
     ])
@@ -222,7 +236,9 @@ def structures(c):
         "breakevens     every settlement price where P(S_T) = 0, one per "
         "sign change of the piecewise-linear payoff",
         "extremes       max gain and max loss over all S_T; \"unlimited\" "
-        "where the outer slope does not vanish",
+        "only on the upside, where the slope beyond the",
+        "               last strike does not vanish; the downside is "
+        "bounded by S_T = 0 and is evaluated there",
         "capital        capital at risk = |max loss| for a defined-risk "
         "structure; undefined where the loss is unbounded,",
         "               and such a structure is listed but not ranked",
@@ -235,9 +251,10 @@ def structures(c):
         "               with sigma = one at-the-money implied volatility "
         "for every strike: a model estimate, not a win rate",
         "expected P/L   E[ P(S_T) ] under the same law, in closed form "
-        "region by region, because P is linear in S_T",
-        "               between breakevens and the partial expectation of "
-        "a lognormal is analytic",
+        "region by region, the regions cut at every strike",
+        "               and every breakeven, because P is linear in S_T "
+        "between strikes and the partial expectation of a",
+        "               lognormal is analytic",
         "shortfall      expected loss = E[ P(S_T) | P(S_T) < 0 ], the same "
         "way",
         "ranking        expected return on risk = E[P] / capital at risk; "
@@ -293,7 +310,14 @@ def simulation(c, artifact=None):
     history = sim.get("history") or {}
     settings = sim.get("simulation") or {}
     posterior = sim.get("posterior") or {}
-    fit = posterior.get("settings") or {}
+    # The run's own chain count, draws and burn-in live in the sampler's
+    # diagnostics block: that is the only place the simulate command
+    # writes them, under the engine's names. An earlier version read
+    # posterior.settings, which nothing writes, so every artifact printed
+    # the engine defaults and a 4-chain, 6,000-draw run read "2 chains of
+    # 3,000 draws". The defaults are the fallback only when the artifact
+    # carries no diagnostics at all.
+    fit = posterior.get("diagnostics") or {}
 
     def either(key, artifact_value):
         return (format(artifact_value, ",") if artifact_value is not None
@@ -303,15 +327,30 @@ def simulation(c, artifact=None):
     window = ""
     if history.get("first") and history.get("last"):
         window = " ({} to {})".format(history["first"], history["last"])
-    kept = ""
-    if settings.get("paths") is not None:
-        kept = " ({:,} kept)".format(int(settings["paths"]))
+    # Requested and kept are two numbers. Older artifacts carry only the
+    # kept count, and for those the kept count is the only figure stated:
+    # printing the engine default beside it described a 200-path run as
+    # "20,000 paths (200 kept)".
+    requested = settings.get("requested_paths")
+    kept = settings.get("paths")
+    if requested is not None and kept is not None:
+        paths_text = "{:,} paths".format(int(requested))
+        if int(kept) != int(requested):
+            paths_text += " ({:,} kept)".format(int(kept))
+        else:
+            paths_text += ", all kept"
+    elif kept is not None:
+        paths_text = "{:,} paths".format(int(kept))
+    else:
+        paths_text = "{} paths".format(either("paths", requested))
     horizon = ""
     if settings.get("horizon_days") is not None:
         horizon = ", {} business days out".format(settings["horizon_days"])
     return "\n".join([
+        # observations counts the returns, which is one fewer than the
+        # closes that produced them.
         "returns        r_t = ln( S_t / S_t-1 ) over {} daily "
-        "closes{}".format(
+        "returns{}, one fewer than the closes".format(
             "{:,}".format(int(observations)) if observations else "the",
             window),
         "model          r_t = mu + e_t,   e_t = sigma_t z_t,   z_t ~ "
@@ -323,14 +362,13 @@ def simulation(c, artifact=None):
         "posterior      Markov chain Monte Carlo over (mu, omega, alpha, "
         "beta, nu): {} chains of {} draws after {} burn-in;".format(
             either("chains", fit.get("chains")),
-            either("draws", fit.get("draws")),
-            either("burn", fit.get("burn"))),
+            either("draws", fit.get("draws_per_chain")),
+            either("burn", fit.get("burn_in"))),
         "               converged only when split R-hat < {} and effective "
         "sample size >= {} for every parameter".format(
             _value(c, "rhat_limit"), _value(c, "min_ess")),
-        "paths          {} paths{}; each draws its own parameter set from "
-        "the posterior, steps sigma_t^2 forward one day".format(
-            either("paths", settings.get("requested_paths")), kept),
+        "paths          {}; each draws its own parameter set from "
+        "the posterior, steps sigma_t^2 forward one day".format(paths_text),
         "               at a time and exponentiates the summed returns: "
         "independent draws, so parameter uncertainty is in the fan",
         "fan            per-day 5th, 25th, 50th, 75th and 95th percentiles "
@@ -405,6 +443,6 @@ def backtest(c, backtests=None):
         "interval       moving-block bootstrap: blocks of b resampled with "
         "replacement, {} interval on the mean;".format(level_text),
         "               it excludes zero when both ends share a sign",
-        "benchmark      buy and hold the underlying over the same windows, "
-        "reported beside every row",
+        "benchmark      buy and hold the underlying over that row's own "
+        "windows, in the buy and hold column beside every row",
     ])

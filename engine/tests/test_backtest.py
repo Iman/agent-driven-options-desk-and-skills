@@ -19,6 +19,7 @@ from optiondesk_engine.backtest.runner import (
     synthetic_chain,
 )
 from optiondesk_engine.backtest.stats import (
+    TRADING_DAYS,
     bootstrap_mean_interval,
     performance_stats,
     permutation_p_value,
@@ -56,6 +57,34 @@ def test_synthetic_chain_is_priced_and_two_sided():
     # Every contract must be priced by the model, and say so, so a reader
     # cannot mistake this for quoted data.
     assert all(c["iv_source"] == "model" for c in chain["contracts"])
+
+
+def test_the_model_chain_is_priced_over_the_trading_days_it_is_held():
+    """holding_days counts trading-day closes: the runner settles against
+    prices[index + holding_days] and the statistics annualise by
+    252 / holding_days. The chain was priced at holding_days / 365, a
+    calendar-day convention applied to a trading-day count, so every
+    premium was for a life about a third shorter than the trade had.
+    Measured before the fix: an at the money straddle at 18 percent
+    volatility on a 30 day chain was 4.1186, against 4.9573 at 30 / 252,
+    so every entry premium was about 17 percent low.
+    """
+    spot, hold, vol = 100.0, 30, 0.18
+    chain = synthetic_chain(bs_price, spot, hold, vol)
+    t = hold / TRADING_DAYS
+    for contract in chain["contracts"]:
+        expected = bs_price(spot, contract["strike"], t, vol,
+                            contract["type"], chain["risk_free_rate"],
+                            chain["dividend_yield"])
+        assert contract["mid"] == pytest.approx(expected, abs=1e-12), (
+            contract)
+    atm = [c for c in chain["contracts"] if c["strike"] == spot]
+    assert sum(c["mid"] for c in atm) == pytest.approx(4.9573, abs=5e-4)
+    # Everything downstream reads days_to_expiry through the engine's
+    # ACT/365 convention, so the chain states its life in calendar days
+    # that land on the same t, and still says how many closes it spans.
+    assert chain["days_to_expiry"] / 365.0 == pytest.approx(t)
+    assert chain["holding_days"] == hold
 
 
 def test_a_backtest_produces_trades_and_carries_the_honesty_statement():

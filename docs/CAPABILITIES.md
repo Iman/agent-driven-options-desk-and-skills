@@ -375,7 +375,7 @@ flag, and it was verified by removing one and watching it go red.
 ECharts from a vendored copy so a viewer's browser makes no third-party
 request.
 
-Forty-two panels and, at most, thirty-two chart canvases: twenty with
+Forty-three panels and, at most, thirty-two chart canvases: twenty with
 fixed identities, six Greek profiles and up to six per-structure outcome
 distributions. The first panel is the pipeline, drawn as inline SVG, and
 under every section sits a printed block of the arithmetic behind it, with
@@ -698,7 +698,7 @@ that passes rather than a test suite that works.
 The harness is `scripts/mutate.py`, in the tree and runnable, because
 "mutation tested" was written in this documentation before anything in the
 repository could check it, which is the kind of claim this project refuses
-everywhere else. It applies eighty-one breakages to a copy of
+everywhere else. It applies ninety-eight breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
 suite, or survived. The last full run recorded here, on 2026-08-31 and

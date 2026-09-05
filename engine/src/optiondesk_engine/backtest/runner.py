@@ -5,9 +5,15 @@ Commercial use requires a separate written agreement.
 
 THE LOOP. Every entry_every trading days, build the structure from a
 synthetic chain priced at the volatility estimated from the trailing window,
-hold it to expiry, and settle it against the underlying's actual close on
-that date. Real path, modelled premium. Read the honesty rule in the package
-docstring before using any number this produces.
+hold it for holding_days trading days, and settle it against the
+underlying's actual close on that date. Real path, modelled premium. Read
+the honesty rule in the package docstring before using any number this
+produces.
+
+Both counts are in TRADING days, because the history is a list of closes
+and there is nothing else to index it by. The chain has to be priced over
+the same span: see synthetic_chain for the conversion and for what it cost
+when it was missing.
 
 WHY A SYNTHETIC CHAIN. No history of quotes exists, so strikes are generated
 around the spot of the day and priced with the engine's own model. The
@@ -26,7 +32,11 @@ every short-premium structure look profitable.
 
 import math
 
-TRADING_DAYS = 252
+# One definition of the trading year, shared with the statistics so the
+# chain is priced over the same span the annualisation divides by.
+from optiondesk_engine.backtest.stats import TRADING_DAYS
+from optiondesk_engine.pricing.black_scholes import DAYS_PER_YEAR
+
 DEFAULT_LOOKBACK = 60
 
 
@@ -39,15 +49,31 @@ def realised_volatility(returns):
     return math.sqrt(variance * TRADING_DAYS)
 
 
-def synthetic_chain(bs_price, spot, days, volatility, rate=0.04,
+def synthetic_chain(bs_price, spot, holding_days, volatility, rate=0.04,
                     dividend_yield=0.0, width=0.25, step=0.01):
     """A chain of strikes around spot, priced by the model.
 
     Strikes run to width either side of spot in steps of step, as fractions
     of spot, which is close enough to how listed strikes are spaced for the
     structures here to find what they need.
+
+    holding_days is in TRADING days, because that is what the runner holds
+    for: it settles against the close holding_days rows later, and the
+    statistics annualise by TRADING_DAYS / holding_days. The chain used to
+    be priced at holding_days / 365, a calendar-day convention applied to
+    a trading-day count, so every premium was for a life about a third
+    shorter than the trade actually had. Measured: an at the money
+    straddle at 18 percent volatility priced 4.1186 at 30 / 365 against
+    4.9573 at 30 / 252, so entry premiums were about 17 percent low on
+    every trade of every backtest. The engine prices in years, and the
+    conversion is made once, here. The chain also carries the calendar-day
+    equivalent of its life, because everything downstream reads
+    days_to_expiry through the engine's ACT/365 convention, the
+    expected-move band that positions the wings included, and has to land
+    on the same t.
     """
-    t = days / 365.0
+    t = holding_days / TRADING_DAYS
+    calendar_days = t * DAYS_PER_YEAR
     contracts = []
     count = int(width / step)
     for index in range(-count, count + 1):
@@ -70,7 +96,8 @@ def synthetic_chain(bs_price, spot, days, volatility, rate=0.04,
                 "open_interest": 1000, "volume": 100,
             })
     return {"underlying": "SYNTHETIC", "spot": spot, "expiry": None,
-            "days_to_expiry": days, "contracts": contracts,
+            "days_to_expiry": calendar_days, "holding_days": holding_days,
+            "contracts": contracts,
             "risk_free_rate": rate, "dividend_yield": dividend_yield}
 
 
@@ -78,6 +105,10 @@ def run_backtest(strategies, bs_price, prices, dates, strategy_name,
                  holding_days=30, entry_every=5, lookback=DEFAULT_LOOKBACK,
                  rate=0.04, dividend_yield=0.0, size=1.0):
     """Enter a structure repeatedly and settle each one at expiry.
+
+    holding_days, entry_every and lookback are all in trading days, since
+    they index a list of closes. The model chain is priced over
+    holding_days / TRADING_DAYS years to match.
 
     Returns every trade, the per-trade returns on capital at risk, and the
     reasons any entry was skipped. A skipped entry is recorded rather than
@@ -88,9 +119,10 @@ def run_backtest(strategies, bs_price, prices, dates, strategy_name,
         raise ValueError("prices and dates must be the same length")
     if len(prices) < lookback + holding_days + 5:
         raise ValueError(
-            "need at least {} closes for a {} day hold with a {} day "
-            "lookback, got {}".format(lookback + holding_days + 5,
-                                      holding_days, lookback, len(prices)))
+            "need at least {} closes for a {} trading day hold with a {} "
+            "day lookback, got {}".format(lookback + holding_days + 5,
+                                          holding_days, lookback,
+                                          len(prices)))
 
     log_returns = []
     for previous, current in zip(prices, prices[1:]):

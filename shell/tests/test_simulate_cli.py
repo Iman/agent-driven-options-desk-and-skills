@@ -43,6 +43,7 @@ def test_simulation_artifact_validates_and_records_its_settings(
     assert validate(payload, SCHEMA_FILES[SIMULATION]) is payload
     assert payload["meta"]["inputs"]["draws"] == 40
     assert payload["meta"]["inputs"]["paths"] == 200
+    assert payload["simulation"]["requested_paths"] == 200
     assert payload["simulation"]["horizon_days"] == 3
     assert len(payload["simulation"]["fan"]) == 3
     assert payload["underlying"] == "TEST"

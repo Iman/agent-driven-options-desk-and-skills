@@ -262,6 +262,79 @@ def test_implied_vol_refuses_prices_that_do_not_identify_a_volatility(
     assert implied_vol(price, spot, strike, t, kind, 0.04, 0.0) is None
 
 
+@pytest.mark.parametrize("spot,strike,t,sigma,r,q,kind,old_answer", [
+    # The worst case on a grid of 1440 contracts: a put forty points in
+    # the money with a year to run, priced within 1e-6 of intrinsic. The
+    # solver returned 0.117513 for a true volatility of 0.05, with vega
+    # 2.6e-27 at the truth and 2.6e-4 at the answer, just above MIN_VEGA.
+    (50.0, 90.0, 1.0, 0.05, 0.04, 0.02, "put", 0.117513),
+    # Deep out of the money with two years to run, priced at 9.7e-12. The
+    # solver returned 0.067788, and returned the same number for a price
+    # of 1.4e-8, which is a different volatility.
+    (50.0, 80.0, 2.0, 0.05, 0.0, 0.0, "call", 0.067788),
+])
+def test_implied_vol_refuses_the_top_edge_of_a_flat_band(
+        spot, strike, t, sigma, r, q, kind, old_answer):
+    """A vega test at one point is not an identification test.
+
+    Deep in or out of the money the model price is flat, within tol, from
+    IV_MIN up to some volatility where vega has just climbed above
+    MIN_VEGA. Newton and bisection both stop at the first candidate that
+    reprices, which is the top edge of that band, and the vega test at
+    that one point passes. The price does not identify a volatility, so
+    the only correct answer is None, and the module's own contract says
+    so.
+    """
+    from optiondesk_engine.pricing.black_scholes import IV_MIN
+
+    price = bs_price(spot, strike, t, sigma, kind, r, q)
+    # The old answer does reprice within tolerance, which is why it was
+    # accepted. So does the bottom of the range: every volatility between
+    # them reprices this quote, and the quote identifies none of them.
+    assert abs(bs_price(spot, strike, t, old_answer, kind, r, q)
+               - price) < 1e-6
+    assert abs(bs_price(spot, strike, t, IV_MIN * 1.01, kind, r, q)
+               - price) < 1e-6
+    assert implied_vol(price, spot, strike, t, kind, r, q) is None
+
+
+def test_a_returned_volatility_is_pinned_within_the_resolution():
+    """The invariant the fix above establishes, on the answers that ARE
+    returned: a step of SIGMA_RESOLUTION either way from the answer takes
+    the model price out of the tolerance band, so every volatility that
+    reprices the quote, the truth included, is within one step of it.
+    Checked in both directions, because at the worst case above the step
+    up moved the price by 2.8e-6 and the step down by 3e-7.
+    """
+    from optiondesk_engine.pricing.black_scholes import (IV_MAX, IV_MIN,
+                                                         SIGMA_RESOLUTION)
+
+    checked = 0
+    for strike in (30.0, 40.0, 50.0, 60.0, 80.0, 90.0):
+        for t in (7 / 365, 30 / 365, 1.0, 2.0):
+            for sigma in (0.05, 0.10, 0.20, 0.40, 0.80):
+                for kind in ("call", "put"):
+                    price = bs_price(50.0, strike, t, sigma, kind, 0.04,
+                                     0.02)
+                    got = implied_vol(price, 50.0, strike, t, kind, 0.04,
+                                      0.02)
+                    if got is None:
+                        continue
+                    checked += 1
+                    assert abs(got - sigma) < SIGMA_RESOLUTION, (
+                        "K={} t={:.5f} {}: true {} returned {}".format(
+                            strike, t, kind, sigma, got))
+                    up = got + SIGMA_RESOLUTION
+                    if up < IV_MAX:
+                        assert bs_price(50.0, strike, t, up, kind, 0.04,
+                                        0.02) > price + 1e-6
+                    down = got - SIGMA_RESOLUTION
+                    if down > IV_MIN:
+                        assert bs_price(50.0, strike, t, down, kind, 0.04,
+                                        0.02) < price - 1e-6
+    assert checked > 100, "the grid solved too little to test anything"
+
+
 def test_implied_vol_never_returns_the_seed_by_accident():
     # The seed is 0.30. If a solve returns exactly 0.30, it must be because
     # the true volatility is 0.30, which this asserts by repricing.

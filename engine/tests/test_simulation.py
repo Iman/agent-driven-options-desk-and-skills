@@ -140,41 +140,45 @@ def test_the_fan_widens_with_horizon(posterior):
     assert abs(fan[-1]["p50"] / 100.0 - 1.0) < 0.05
 
 
-def test_paths_are_counted_and_the_antithetic_claim_is_measured(posterior):
-    """The old version of this test asserted the artifact's antithetic flag
-    was true, and the writer set that flag as an unconditional literal, so
-    it asserted the claim rather than the property. An audit measured the
-    property: of ten thousand pairs, zero shared a shock sequence and the
-    correlation between pair members was -0.016 where a mirror gives -1.
+def test_consecutive_paths_are_independent_draws(posterior):
+    """The first version of this test asserted the artifact's antithetic
+    flag was true, and the writer set that flag as an unconditional
+    literal, so it asserted the claim rather than the property. The second
+    correlated the even and odd entries of the SORTED terminal list, which
+    measures how smooth a sorted list is and nothing about pairing: it read
+    +0.9966 on the honest code and +0.9983 on paths mirrored in pairs, both
+    comfortably inside its own pass region of above -0.5.
 
-    The mirroring is gone. What is asserted here is the property, on the
-    paths themselves, so neither the presence nor the absence of mirroring
-    can ever again be taken on the writer's word.
+    Pairing shows up in generation order and nowhere else, so the engine
+    keeps that order, and the correlation of consecutive paths is asserted
+    near zero. Mirrored shocks put it near -1, measured at -0.9918, and a
+    shared shock sequence would put it near +1.
     """
-    simulation = simulate_paths(posterior, 100.0, 5, paths=1000, seed=3)
-    assert simulation["antithetic"] is False
-    assert simulation["paths"] == 1000
-    assert len(simulation["terminal"]) == 1000
-    assert simulation["terminal"] == sorted(simulation["terminal"])
-
-    # If the paths were mirrored, consecutive members of each pair would be
-    # opposite in log return and this correlation would sit near -1.
-    import math
     import statistics
 
-    logs = [math.log(value / 100.0) for value in simulation["terminal"]]
-    # terminal is sorted, so pair structure is gone from it; measure on the
-    # unsorted per-day series instead, using the last day.
-    last_day = simulation["fan"][-1] if simulation.get("fan") else None
-    assert last_day is not None
-    left = logs[0::2]
-    right = logs[1::2]
-    n = min(len(left), len(right))
-    if n > 2 and statistics.pstdev(left[:n]) > 0:
-        correlation = statistics.correlation(left[:n], right[:n])
-        assert correlation > -0.5, (
-            "pairs look mirrored at {}, which the artifact says they are "
-            "not".format(correlation))
+    simulation = simulate_paths(posterior, 100.0, 5, paths=4000, seed=3)
+    assert simulation["antithetic"] is False
+    assert simulation["paths"] == 4000
+    assert len(simulation["terminal"]) == 4000
+    assert simulation["terminal"] == sorted(simulation["terminal"])
+
+    ordered = simulation["terminal_by_path"]
+    assert sorted(ordered) == simulation["terminal"]
+    assert ordered != simulation["terminal"], (
+        "generation order and sorted order coincide, so this would be "
+        "measuring the sort again")
+    logs = [math.log(value / 100.0) for value in ordered]
+    correlation = statistics.correlation(logs[0::2], logs[1::2])
+    assert abs(correlation) < 0.1, (
+        "consecutive paths correlate at {:+.4f}; independent draws sit "
+        "near zero, mirrored pairs near -1".format(correlation))
+
+
+def test_an_odd_path_count_is_generated_exactly(posterior):
+    """There are no pairs, so nothing rounds the count down."""
+    simulation = simulate_paths(posterior, 100.0, 3, paths=301, seed=3)
+    assert simulation["paths"] == 301
+    assert len(simulation["terminal_by_path"]) == 301
 
 
 def test_risk_numbers_are_ordered_as_their_definitions_require(posterior):
@@ -222,3 +226,5 @@ def test_simulation_rejects_impossible_requests(posterior):
         simulate_paths(posterior, 0.0, 5)
     with pytest.raises(ValueError):
         simulate_paths(posterior, 100.0, 0)
+    with pytest.raises(ValueError):
+        simulate_paths(posterior, 100.0, 5, paths=0)

@@ -93,6 +93,11 @@
           "type": "integer",
           "minimum": 2
         },
+        "requested_paths": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Paths asked for. paths is how many survived as finite; the difference is discarded_paths in the command's notes."
+        },
         "antithetic": {
           "type": "boolean"
         },

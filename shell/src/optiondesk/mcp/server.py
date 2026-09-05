@@ -458,15 +458,162 @@ for _tool in TOOLS:
     _tool["description"] += REPORTING_RULE
 del _tool
 
+
+def _hints(read_only, destructive, idempotent, open_world):
+    """The four MCP tool annotations, every one stated.
+
+    A client treats a missing hint as its default (readOnly false,
+    destructive true, idempotent false, openWorld true), so leaving one out
+    is a claim too, and for most of these tools the wrong one.
+    """
+    return {"readOnlyHint": read_only, "destructiveHint": destructive,
+            "idempotentHint": idempotent, "openWorldHint": open_world}
+
+
+# What each kind of tool does to the machine it runs on, read from the
+# runners rather than from their descriptions.
+#
+# Writers are not destructive: write_json moves the artifact it replaces
+# into archive/<date>/ under a timestamp, so nothing is lost (unless the
+# operator has set OPTIONDESK_ARCHIVE=0). They are not idempotent either:
+# every run stamps a new generated_utc, so a repeat writes a new artifact
+# and archives the previous one rather than leaving the directory as it
+# was.
+#
+# openWorld is whether the runner can reach a data provider. It is true for
+# a tool that fetches when no local input is given, even though the same
+# tool reads a user file without touching the network.
+_FETCHES_AND_WRITES = _hints(False, False, False, True)
+_WRITES_FROM_DISK = _hints(False, False, False, False)
+_READS_ONLY = _hints(True, False, True, False)
+
+# name: (title, annotations). Every tool must appear here: the loop below
+# raises at import for one that does not, so a tool cannot ship without
+# its hints.
+_METADATA = {
+    "option_snapshot_schema": ("Snapshot schema", _READS_ONLY),
+    # chain, plots, simulate and backtest resolve a provider unless given
+    # a snapshot or a user file, and all four write artifacts. plots also
+    # writes the PNGs it returns, and runs greeks and exposure when their
+    # artifacts are missing or older than the chain.
+    "option_chain_snapshot": ("Chain snapshot", _FETCHES_AND_WRITES),
+    "option_plots": ("Option plots", _FETCHES_AND_WRITES),
+    "option_simulate": ("Simulation", _FETCHES_AND_WRITES),
+    "option_backtest": ("Backtest", _FETCHES_AND_WRITES),
+    # expiries asks the provider for its list when a symbol is given and
+    # writes nothing either way: it reads the artifact directory to mark
+    # what is already pulled and returns rows.
+    "option_expiries": ("Expiries", _FETCHES_AND_WRITES),
+    # These four read a chain snapshot from the artifact directory and
+    # write a ladder, a plan, a comparison or an exposure beside it.
+    "option_greeks_ladder": ("Greek ladder", _WRITES_FROM_DISK),
+    "option_strategy_build": ("Strategy build", _WRITES_FROM_DISK),
+    "option_strategy_compare": ("Strategy compare", _WRITES_FROM_DISK),
+    "option_positioning": ("Positioning", _WRITES_FROM_DISK),
+    # One tool, four verbs, one set of hints for the whole. status only
+    # reads, but open appends a position, mark appends marks, and close
+    # settles an open position with no verb to reopen it, so the tool as a
+    # whole is a non-idempotent, destructive writer. Marks come from chain
+    # snapshots already on disk, so no provider is reached.
+    "option_forward_test": ("Forward test",
+                            _hints(False, True, False, False)),
+    # Reads the engine's import status and each provider's availability,
+    # which is an import and a key check rather than a request.
+    "option_desk_status": ("Desk status", _READS_ONLY),
+}
+
+# Output schemas only where the runner's return dict has one shape. The
+# other tools return dicts whose keys depend on the branch taken (a plan
+# build against list_only, four forward verbs, a fetched chain against a
+# user file), and a schema saying "object" and nothing more would be a
+# promise without content. A declared schema obliges the server to return
+# structuredContent conforming to it, which _result does for these two.
+_STRINGS = {"type": "array", "items": {"type": "string"}}
+_STATUS_OUTPUT = {
+    "type": "object",
+    "properties": {
+        "shell_version": {"type": "string"},
+        "artifact_dir": {"type": "string"},
+        "engine": {
+            "type": "object",
+            "properties": {
+                "available": {"type": "boolean"},
+                "package": {"type": "string"},
+                "version": {"type": ["string", "null"]},
+                "license": {"type": ["string", "null"]},
+                "message": {"type": ["string", "null"]},
+            },
+            "required": ["available", "package", "version", "license",
+                         "message"],
+        },
+        "providers": {"type": "object"},
+        "disclaimer": {"type": "string"},
+        "ignored_arguments": _STRINGS,
+    },
+    "required": ["shell_version", "artifact_dir", "engine", "providers",
+                 "disclaimer"],
+}
+_SNAPSHOT_SCHEMA_OUTPUT = {
+    "type": "object",
+    "properties": {
+        "purpose": {"type": "string"},
+        "accepted_inputs": _STRINGS,
+        "required_metadata": _STRINGS,
+        "recommended_metadata": _STRINGS,
+        "required_contract_fields": _STRINGS,
+        "recommended_contract_fields": _STRINGS,
+        "aliases": {"type": "object"},
+        "repair_policy": {"type": "string"},
+        "rights": {"type": "string"},
+        "limits": {
+            "type": "object",
+            "properties": {"bytes": {"type": "integer"},
+                           "rows": {"type": "integer"}},
+            "required": ["bytes", "rows"],
+        },
+        "disclaimer": {"type": "string"},
+        "ignored_arguments": _STRINGS,
+    },
+    "required": ["purpose", "accepted_inputs", "required_metadata",
+                 "recommended_metadata", "required_contract_fields",
+                 "recommended_contract_fields", "aliases", "repair_policy",
+                 "rights", "limits", "disclaimer"],
+}
+_OUTPUT_SCHEMAS = {
+    "option_desk_status": _STATUS_OUTPUT,
+    "option_snapshot_schema": _SNAPSHOT_SCHEMA_OUTPUT,
+}
+
+for _tool in TOOLS:
+    _tool["title"], _tool["annotations"] = _METADATA[_tool["name"]]
+    if _tool["name"] in _OUTPUT_SCHEMAS:
+        _tool["outputSchema"] = _OUTPUT_SCHEMAS[_tool["name"]]
+del _tool
+
 _BY_NAME = {tool["name"]: tool for tool in TOOLS}
 
 
 def _public(tool):
-    return {"name": tool["name"], "description": tool["description"],
-            "inputSchema": tool["inputSchema"]}
+    """The wire form of one tool: what tools/list shows and nothing internal.
+
+    The title and the four hints travel with every tool, the output schema
+    with the two whose result has one shape. The handler, the defaults and
+    the image flag stay here. Before this, tools/list carried name,
+    description and inputSchema alone, so a client saw every tool as an
+    unhinted writer that might reach the network.
+    """
+    public = {"name": tool["name"], "title": tool["title"],
+              "description": tool["description"],
+              "inputSchema": tool["inputSchema"],
+              # Inside annotations as well: clients written to the earlier
+              # revision of the protocol look for the title there.
+              "annotations": dict(tool["annotations"], title=tool["title"])}
+    if tool.get("outputSchema"):
+        public["outputSchema"] = tool["outputSchema"]
+    return public
 
 
-def _result(payload, rejected=(), image_paths=()):
+def _result(payload, rejected=(), image_paths=(), structured=False):
     """One tools/call result frame.
 
     Two things travel with every payload rather than with one of them.
@@ -480,6 +627,10 @@ def _result(payload, rejected=(), image_paths=()):
     bindings use (agent/src/optiondesk_agent/tools.py). Silence let a caller
     believe an unadvertised argument had been honoured: a model passing
     out_dir got a normal-looking result written somewhere else entirely.
+
+    structured is true for a tool that advertises an outputSchema: the
+    protocol then requires the same object as structuredContent, beside the
+    text every client can read.
     """
     if isinstance(payload, dict):
         payload = dict(payload)
@@ -495,14 +646,26 @@ def _result(payload, rejected=(), image_paths=()):
                 "data": base64.b64encode(handle.read()).decode("ascii"),
                 "mimeType": "image/png",
             })
-    return {"content": content}
+    result = {"content": content}
+    if structured and isinstance(payload, dict):
+        result["structuredContent"] = payload
+    return result
 
 
 def _error_result(exc):
+    """A failure, as an isError result the model reads rather than a
+    transport error.
+
+    It carries the disclaimer a success carries. A refusal names the
+    provider, the file or the terms that stopped the run, and a model
+    quotes that text as readily as a number; for Codex and Gemini this
+    frame is the only place the boundary can be stated.
+    """
     return {"content": [{"type": "text",
                          "text": json.dumps(
                              {"error": type(exc).__name__,
-                              "message": str(exc)}, indent=1)}],
+                              "message": str(exc),
+                              "disclaimer": DISCLAIMER}, indent=1)}],
             "isError": True}
 
 
@@ -606,7 +769,8 @@ def handle(request):
             payload = tool["handler"](args)
             image_paths = (payload.get("plots") or []) if (
                 tool.get("returns_images") and isinstance(payload, dict)) else []
-            result = _result(payload, args.rejected, image_paths)
+            result = _result(payload, args.rejected, image_paths,
+                             structured=bool(tool.get("outputSchema")))
         except Exception as exc:  # surfaced to the model, not the transport
             return {"jsonrpc": "2.0", "id": request_id,
                     "result": _error_result(exc)}

@@ -58,6 +58,25 @@ def get(name):
     return _REGISTRY[name]
 
 
+def _reason(provider):
+    """Why a provider reports itself unavailable, in the provider's words.
+
+    The registry used to write "missing dependency or key" for every
+    skipped provider. That was a guess, and wrong for the commonest case:
+    PUBLIC_DATA_MODE=demo refuses every external provider with the key and
+    the library both present, and the message sent the user looking for
+    an install problem that did not exist. The provider knows which gate
+    closed and says so; one that raises while explaining itself is
+    reported as such rather than allowed to take the registry down.
+    """
+    try:
+        reason = provider.unavailable_reason()
+    except Exception as exc:
+        return "its reason check raised {}: {}".format(
+            type(exc).__name__, exc)
+    return reason or "the provider reports itself unavailable without a reason"
+
+
 def resolve(capability, preferred=None, strict=True):
     """Return the provider that will answer, and why it was chosen.
 
@@ -102,8 +121,8 @@ def resolve(capability, preferred=None, strict=True):
                 name, type(exc).__name__, exc))
             continue
         if not usable:
-            skipped.append("{}: not available (missing dependency or key)"
-                           .format(name))
+            skipped.append("{}: not available ({})".format(
+                name, _reason(provider)))
             continue
         return provider, {"chosen": name,
                           "degraded": bool(skipped),

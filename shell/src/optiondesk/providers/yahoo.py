@@ -97,6 +97,19 @@ class YahooProvider(Provider):
             return False
         return True
 
+    def missing_dependency(self):
+        """The one library this adapter needs, named when it is absent.
+
+        available() is false for exactly two reasons: the access gate,
+        which the base class reports, and this import.
+        """
+        try:
+            import yfinance  # noqa: F401
+        except ImportError:
+            return ("yfinance is not installed; pip install yfinance or "
+                    "pip install \"optiondesk[yahoo]\"")
+        return None
+
     def underlying_quote(self, symbol, period="5d"):
         """Last settled close, and the session it belongs to."""
         yf = self._client()

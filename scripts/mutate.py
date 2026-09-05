@@ -170,7 +170,7 @@ MUTATIONS = [
     # "Thirty-nine" while the document said "Forty", so this mutation was
     # reported SKIPPED, which is a mutation that proves nothing at all.
     ("dashboard-counts-unguarded", "docs/CAPABILITIES.md",
-     "Forty-two panels and, at most, thirty-two chart canvases",
+     "Forty-three panels and, at most, thirty-two chart canvases",
      "Thirty-five panels and, at most, twenty-eight chart canvases",
      "shell/tests/test_documented_counts.py"),
     ("installer-bare-repo-accepted", "install.sh",
@@ -335,6 +335,49 @@ MUTATIONS = [
      "            # volatility information is still refused there.\n"
      "            return None",
      "engine/tests/test_audit_regressions.py"),
+    # The defects found and fixed on 2026-09-03. Each of the four is a
+    # figure that read correctly and was not: a volatility for a quote
+    # that identifies none, a premium for a shorter life than the trade
+    # had, a time-spread plan with no Greeks, and a test that could not
+    # see the mirroring it was written to detect.
+    ("iv-band-check-removed", ENGINE + "/pricing/black_scholes.py",
+     "        if not _pinned(sigma, price, spot, strike, t, kind, r, q, "
+     "tol):\n            return None",
+     "        if False:\n            return None",
+     "engine/tests/test_greeks_full.py"),
+    ("backtest-chain-priced-in-calendar-days", ENGINE + "/backtest/runner.py",
+     "    t = holding_days / TRADING_DAYS",
+     "    t = holding_days / 365.0",
+     "engine/tests/test_backtest.py"),
+    ("timespread-greeks-at-one-expiry", "shell/src/optiondesk/cli/strategy.py",
+     "        t = (own_days if own_days else days) / 365.0",
+     "        t = days / 365.0",
+     "shell/tests/test_strategy_cli.py"),
+    ("paths-mirrored-in-pairs", ENGINE + "/simulation/paths.py",
+     "    for _ in range(paths):\n"
+     "        params = draws[rng.randrange(len(draws))]\n"
+     "        mu, omega, alpha, beta, nu = params\n"
+     "        if not all(math.isfinite(v) for v in params):\n"
+     "            discarded += 1\n"
+     "            continue\n"
+     "        base_variance = posterior.last_variance(params)\n"
+     "        if not math.isfinite(base_variance) or base_variance <= 0:\n"
+     "            discarded += 1\n"
+     "            continue\n"
+     "        shocks = [_standard_t(rng, nu) for _ in range(horizon_days)]",
+     "    for index in range(paths):\n"
+     "        params = draws[rng.randrange(len(draws))]\n"
+     "        mu, omega, alpha, beta, nu = params\n"
+     "        if not all(math.isfinite(v) for v in params):\n"
+     "            discarded += 1\n"
+     "            continue\n"
+     "        base_variance = posterior.last_variance(params)\n"
+     "        if not math.isfinite(base_variance) or base_variance <= 0:\n"
+     "            discarded += 1\n"
+     "            continue\n"
+     "        shocks = ([-z for z in shocks] if index % 2 else\n"
+     "                  [_standard_t(rng, nu) for _ in range(horizon_days)])",
+     "engine/tests/test_simulation.py"),
     ("zero-rate-silently-replaced", "shell/src/optiondesk/cli/greeks.py",
      "    rate = 0.04 if rate_missing else float(snapshot[\"risk_free_rate\"])",
      "    rate = float(snapshot.get(\"risk_free_rate\") or 0.04)",
@@ -434,6 +477,60 @@ MUTATIONS = [
      "    if env:\n"
      "        return env",
      "shell/tests/test_keys_cli.py"),
+    # The printed maths, the ledger panel, the MCP metadata and the
+    # provider refusal reasons, added with the fixes they guard.
+    ('maths-reads-settings-not-diagnostics', 'shell/src/optiondesk/dashboard/maths.py',
+     'fit = posterior.get("diagnostics") or {}',
+     'fit = posterior.get("settings") or {}',
+     'shell/tests/test_dashboard_maths.py'),
+    ('maths-draws-key-wrong', 'shell/src/optiondesk/dashboard/maths.py',
+     'either("draws", fit.get("draws_per_chain"))',
+     'either("draws", fit.get("draws"))',
+     'shell/tests/test_dashboard_maths.py'),
+    ('maths-requested-paths-dropped', 'shell/src/optiondesk/dashboard/maths.py',
+     'requested = settings.get("requested_paths")',
+     'requested = None',
+     'shell/tests/test_dashboard_maths.py'),
+    ('simulate-requested-paths-not-written', 'shell/src/optiondesk/cli/simulate.py',
+     '            "requested_paths": simulation["requested_paths"],\n',
+     '',
+     'shell/tests/test_simulate_cli.py'),
+    ('flow-edge-greeks-to-exposure', 'shell/src/optiondesk/dashboard/flow.py',
+     '("chain", "exposure", "", "under"),',
+     '("greeks", "exposure", "", "right"),',
+     'shell/tests/test_dashboard_maths.py'),
+    ('benchmark-from-first-backtest', PAGE,
+     'benchmark = (test.get("benchmark") or {}).get("statistics") or {}',
+     'benchmark = (backtests[0].get("benchmark") or {}).get("statistics") or {}',
+     'shell/tests/test_dashboard_page.py'),
+    ('ledger-panel-dropped', PAGE,
+     '    sections.append(_ledger_section(payload.get("forward_ledger")))\n',
+     '',
+     'shell/tests/test_dashboard_page.py'),
+    ('ledger-not-collected', 'shell/src/optiondesk/dashboard/data.py',
+     '        "forward_ledger": forward_ledger(directory),\n        "simulation": simulation,',
+     '        "forward_ledger": None,\n        "simulation": simulation,',
+     'shell/tests/test_dashboard_page.py'),
+    ('error-result-without-disclaimer', 'shell/src/optiondesk/mcp/server.py',
+     '"message": str(exc),\n                              "disclaimer": DISCLAIMER}',
+     '"message": str(exc)}',
+     'shell/tests/test_mcp_server.py'),
+    ('expiries-annotated-as-writer', 'shell/src/optiondesk/mcp/server.py',
+     '"option_expiries": ("Expiries", _hints(True, False, True, True)),',
+     '"option_expiries": ("Expiries", _FETCHES_AND_WRITES),',
+     'shell/tests/test_mcp_server.py'),
+    ('structured-content-never-returned', 'shell/src/optiondesk/mcp/server.py',
+     '    if structured and isinstance(payload, dict):',
+     '    if False:',
+     'shell/tests/test_mcp_server.py'),
+    ('refusal-reason-generic', 'shell/src/optiondesk/providers/__init__.py',
+     '                name, _reason(provider)))',
+     '                name, "missing dependency or key"))',
+     'shell/tests/test_providers.py'),
+    ('access-gate-reason-dropped', 'shell/src/optiondesk/providers/base.py',
+     '        if not access["allowed"]:\n            return access["reason"]\n',
+     '',
+     'shell/tests/test_providers.py'),
 ]
 
 

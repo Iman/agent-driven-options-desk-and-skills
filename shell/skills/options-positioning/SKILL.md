@@ -26,6 +26,10 @@ or present example or remembered values as current.
 
 Before you send data to the tool, ask the user to state that private analysis
 is permitted. Then set `rights_confirmed` to true and name `data_source`.
+The local desk does not gate on that name: any `data_source` is accepted,
+so whether that provider's terms allow the analysis is the user's
+responsibility (only the hosted service refuses Yahoo, yfinance and
+personal Alpha Vantage data).
 
 If the attachment fields are unclear, call `option_snapshot_schema`. Normalize
 known column aliases, call or put notation, numeric commas, and clear percentage

@@ -6,7 +6,10 @@ arguments: [symbol, structure, period]
 
 Test $structure on $symbol over $period, defaulting to five years.
 
-1. `optiondesk backtest $symbol $structure --period $period`
+1. `optiondesk backtest $symbol $structure --period 5y`. When a period was
+   given, use `--period $period` in place of 5y. An omitted argument
+   expands to nothing, and a bare `--period` is rejected before any
+   history is fetched.
 2. Read the output in this order, which is the order that stops a backtest
    selling itself: trade count, then the buy and hold benchmark, then the
    p-value, then the bootstrap interval, and only then the headline return.

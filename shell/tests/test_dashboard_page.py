@@ -449,7 +449,10 @@ def test_the_premium_is_labelled_a_disagreement_and_not_an_edge():
     assert "disagreement between the market" in html
     assert "and the recent past" in html
     # And the window the realised figure came from, not just the figure.
-    assert "500 closes from 2024-08-29 to 2026-08-28" in html
+    # observations counts returns: 500 of them come from 501 closes, and
+    # the page used to call them closes.
+    assert "500 daily returns from 2024-08-29 to 2026-08-28" in html
+    assert "500 closes" not in html
     # And that the axis is tenor, not calendar time.
     assert "days to expiry, not calendar time" in html
 
@@ -832,6 +835,113 @@ def test_tooltips_round_their_numbers():
     # formatter stops being applied while the word survives.
     assert "valueFormatter: function" in SCRIPT
     assert "axisPointer" in SCRIPT
+
+
+def test_each_backtest_row_carries_its_own_benchmark():
+    """Catches the page describing every row by the first row's benchmark.
+
+    At ac72957 one line above the table quoted backtests[0]'s buy and hold
+    figure for all rows. Each artifact carries its own benchmark, computed
+    over its own schedule, and two runs holding for different periods
+    have different ones.
+    """
+    from optiondesk.dashboard.page import _backtest_section
+
+    def run(strategy, hold, mean, bench):
+        return {"strategy": strategy,
+                "settings": {"holding_days": hold, "entry_every": 5},
+                "statistics": {"trades": 200, "win_rate": 0.6,
+                               "mean_return": mean},
+                "significance": {"p_value": 0.1}, "interval": {},
+                "benchmark": {"statistics": {"mean_return": bench,
+                                             "trades": 200}},
+                "honesty": "modelled"}
+
+    html_out = _backtest_section([run("iron_condor", 30, 0.02, 0.0156),
+                                  run("long_call", 60, 0.05, 0.0311)])
+    rows = re.findall(r"<tr>(.*?)</tr>", html_out)
+    condor = next(r for r in rows if "iron condor" in r)
+    call = next(r for r in rows if "long call" in r)
+    assert "1.56%" in condor and "3.11%" not in condor
+    assert "3.11%" in call and "1.56%" not in call
+    assert "<th>buy and hold</th>" in html_out
+    assert "across 200 windows" not in html_out
+
+    # A run with no benchmark says so in its own cell and nowhere else.
+    bare = run("strangle", 30, 0.01, None)
+    del bare["benchmark"]
+    alone = _backtest_section([bare])
+    assert "n/a" in next(r for r in re.findall(r"<tr>(.*?)</tr>", alone)
+                         if "strangle" in r)
+    assert "Buy and hold is the underlying" not in alone
+
+
+LEDGER = {
+    "positions": [
+        {"id": "abc", "strategy": "iron_condor", "underlying": "TEST",
+         "expiry": "2026-09-18", "opened_utc": "2026-08-30T16:26:46+00:00",
+         "status": "open", "entry_spot": 100.0, "entry_value": -2.07,
+         "legs": [], "marks": [{"markable": True, "profit": 0.35}],
+         "settlement": None, "thesis": "range bound into expiry"},
+        {"id": "def", "strategy": "long_call", "underlying": "TEST",
+         "expiry": "2026-09-18", "opened_utc": "2026-08-01T10:00:00+00:00",
+         "status": "closed", "entry_spot": 98.0, "entry_value": 3.59,
+         "legs": [], "marks": [],
+         "settlement": {"profit": -3.59, "settlement_price": 95.0},
+         "thesis": None},
+    ],
+    "summary": {"open": 1, "closed": 1, "settled_profit": -3.59,
+                "wins": 0, "losses": 1},
+}
+
+
+def test_the_ledger_panel_appears_only_when_a_ledger_exists():
+    """The pipeline figure counted the ledger among what this page reads,
+    and until the panel existed the page never opened it. A desk that has
+    never opened a position has no ledger and gets no panel.
+    """
+    without = page_module.render(payload(ladder=ladder()))
+    assert "Forward ledger" not in without
+
+    html_out = page_module.render(payload(ladder=ladder(),
+                                          forward_ledger=LEDGER))
+    assert "<h2 class='section'>Forward ledger</h2>" in html_out
+    assert "1 open, 1 closed, settled profit -3.59" in html_out
+    assert "range bound into expiry" in html_out
+    assert "not a track record" in html_out
+    condor = re.search(r"<tr><td>iron condor</td>.*?</tr>", html_out).group(0)
+    assert "0.35" in condor and "<td>open</td>" in condor
+    call = re.search(r"<tr><td>long call</td>.*?</tr>", html_out).group(0)
+    assert "-3.59" in call and "not marked" in call
+
+
+def test_the_ledger_shows_an_unmarked_position_as_unmarked_not_flat():
+    ledger = json.loads(json.dumps(LEDGER))
+    ledger["positions"][0]["marks"] = [
+        {"markable": False, "problems": ["no later quote"]}]
+    html_out = page_module.render(payload(ladder=ladder(),
+                                          forward_ledger=ledger))
+    row = re.search(r"<tr><td>iron condor</td>.*?</tr>", html_out).group(0)
+    assert "not marked" in row
+    assert ">0.00<" not in row
+
+
+def test_the_collector_reads_the_ledger_when_the_file_exists(tmp_path):
+    from optiondesk.dashboard import data as data_module
+
+    assert data_module.collect(tmp_path)["forward_ledger"] is None
+    write_json(LEDGER, "forward_ledger.json", tmp_path)
+    # The ledger carries no underlying key and is not a group of its own:
+    # alone on the desk it selects nothing, and is still read.
+    alone = data_module.collect(tmp_path)
+    assert alone["selected"] is None and alone["groups"] == []
+    assert alone["forward_ledger"]["summary"]["open"] == 1
+
+    # And beside a selectable group, through the ordinary branch.
+    write_json(ladder(), "greeks_TEST_2026-09-18.json", tmp_path)
+    collected = data_module.collect(tmp_path)
+    assert collected["selected"]["underlying"] == "TEST"
+    assert collected["forward_ledger"]["summary"]["open"] == 1
 
 
 def test_the_backtest_table_never_reports_zero_trades_for_a_real_run():

@@ -16,6 +16,11 @@ from optiondesk.artifacts import read_json
 KINDS = ("chain", "greeks", "exposure", "comparison", "strategy",
          "simulation", "backtest")
 
+# One file for the whole desk rather than one per underlying and expiry,
+# and it carries no underlying key, so it is read whole rather than indexed
+# into a group. Not in KINDS for that reason.
+LEDGER = "forward_ledger.json"
+
 
 def _load(path):
     """Read one artifact, or None.
@@ -109,6 +114,18 @@ def select(groups, underlying=None, expiry=None):
     return candidates[0]
 
 
+def forward_ledger(directory):
+    """The forward ledger, or None when no position has ever been opened.
+
+    The pipeline figure lists the ledger among the artifacts the page
+    reads, and until this was added the page never opened it.
+    """
+    path = Path(directory) / LEDGER
+    if not path.exists():
+        return None
+    return _load(path)
+
+
 def collect(directory, underlying=None, expiry=None):
     """Everything the page needs, for one selected group."""
     groups = index(directory)
@@ -119,7 +136,8 @@ def collect(directory, underlying=None, expiry=None):
                 "comparison": None, "plans": [], "groups": [],
                 "selected": None, "simulation": None, "backtests": [],
                 "term_structure": [], "surface": None,
-                "variance_premium": None, "condors": []}
+                "variance_premium": None, "condors": [],
+                "forward_ledger": forward_ledger(directory)}
 
     # A simulation or a backtest belongs to the underlying, not to one
     # expiry, so it is looked up across every group for that symbol rather
@@ -164,6 +182,10 @@ def collect(directory, underlying=None, expiry=None):
         "surface": volatility_surface(groups, symbol),
         "variance_premium": variance_premium(term_structure, simulation),
         "condors": condor_candidates(groups, symbol),
+        # Desk-wide, like the file: every position, whatever its
+        # underlying, so the panel matches what `optiondesk forward
+        # status` prints.
+        "forward_ledger": forward_ledger(directory),
         "simulation": simulation,
         "backtests": backtests,
         "ladder": chosen["artifacts"].get("greeks"),

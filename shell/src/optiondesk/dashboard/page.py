@@ -800,9 +800,15 @@ def _backtest_section(backtests):
         interval = test.get("interval") or {}
         honesty = test.get("honesty", honesty)
         p_value = significance.get("p_value")
+        # Each artifact carries its own benchmark, computed over its own
+        # schedule, so it belongs on its own row. One line above the table
+        # taken from backtests[0] described every row by the first one,
+        # which is wrong the moment two runs hold for different periods.
+        benchmark = (test.get("benchmark") or {}).get("statistics") or {}
         rows.append(
             "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
-            "<td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+            "<td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>"
+            .format(
                 html.escape(str(test.get("strategy", "")).replace("_", " ")),
                 # Not stats.get("trades", 0). A structure with an unbounded
                 # loss writes statistics as an empty object, and that
@@ -815,22 +821,22 @@ def _backtest_section(backtests):
                 else _num(test.get("trades_entered"), 0),
                 _percent(stats.get("win_rate"), 1),
                 _percent(stats.get("mean_return"), 2),
+                _percent(benchmark.get("mean_return"), 2),
                 _num(stats.get("total_return_on_risk")),
                 _num(stats.get("max_drawdown_in_risk_units")),
                 _num(stats.get("sharpe_per_trade"), 3),
                 ("{:.4f}".format(p_value) if p_value is not None else "n/a"),
                 "yes" if interval.get("excludes_zero") else "no"))
 
-    benchmark = (backtests[0].get("benchmark") or {}).get("statistics") or {}
     benchmark_line = ""
-    if benchmark:
+    if any((test.get("benchmark") or {}).get("statistics")
+           for test in backtests):
         benchmark_line = (
-            "<p class='hint'>Buy and hold the underlying over the same "
-            "windows: {} per window across {} windows. A structure that "
-            "merely tracks the market should be read against this, not "
-            "against zero.</p>".format(
-                _percent(benchmark.get("mean_return"), 2),
-                benchmark.get("trades", 0)))
+            "<p class='hint'>Buy and hold is the underlying held over the "
+            "same windows as the structure on that row, as a mean return "
+            "per window. A structure that merely tracks the market should "
+            "be read against its own buy and hold figure, not against "
+            "zero.</p>")
 
     return ("<h2 class='section'>Backtest</h2>"
             + _panel(
@@ -841,6 +847,7 @@ def _backtest_section(backtests):
                 benchmark_line
                 + "<div class='scroll'><table><thead><tr><th>structure</th>"
                 "<th>trades</th><th>win rate</th><th>mean on risk</th>"
+                "<th>buy and hold</th>"
                 "<th>total</th><th>max drawdown</th><th>sharpe per trade</th>"
                 "<th>p-value</th><th>interval excludes zero</th></tr></thead>"
                 "<tbody>" + "".join(rows) + "</tbody></table></div>"
@@ -939,7 +946,8 @@ def _premium_section(premium):
                 _percent(row.get("realised"), 2),
                 ("{:+.2f} pts".format(gap * 100)
                  if gap is not None else "n/a")))
-    window = "{} closes from {} to {}".format(
+    # observations counts returns, one fewer than the closes behind them.
+    window = "{} daily returns from {} to {}".format(
         history.get("observations"), history.get("first"),
         history.get("last"))
     return (
@@ -1215,6 +1223,75 @@ def _backtest_detail_section(backtests):
             + "</div>")
 
 
+def _ledger_section(ledger):
+    """The forward ledger: paper positions written down before the fact.
+
+    Desk-wide, like the file, so every position is listed with its
+    underlying. The pipeline figure counted the ledger among the artifacts
+    this page reads, and until this panel existed the page never opened
+    it. Rendered only when the file exists: a desk that has never opened a
+    position has no ledger, and an empty table would suggest it had.
+    """
+    if not ledger:
+        return ""
+    positions = ledger.get("positions") or []
+    summary = ledger.get("summary") or {}
+    settled = [p["settlement"]["profit"] for p in positions
+               if p.get("status") == "closed" and p.get("settlement")]
+    open_count = summary.get("open", sum(
+        1 for p in positions if p.get("status") == "open"))
+    closed_count = summary.get("closed", sum(
+        1 for p in positions if p.get("status") == "closed"))
+    settled_profit = summary.get("settled_profit", sum(settled))
+    rows = []
+    for position in positions:
+        marks = [m for m in (position.get("marks") or [])
+                 if m.get("markable")]
+        last_mark = marks[-1].get("profit") if marks else None
+        settlement = position.get("settlement") or {}
+        rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+            "<td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>"
+            .format(
+                html.escape(str(position.get("strategy") or "")
+                            .replace("_", " ")),
+                html.escape(str(position.get("underlying") or "")),
+                html.escape(str(position.get("expiry") or "n/a")),
+                html.escape(str(position.get("status") or "")),
+                html.escape(str(position.get("opened_utc") or "")[:10]),
+                _num(position.get("entry_spot")),
+                _num(position.get("entry_value")),
+                # A position no later chain could mark says so, rather
+                # than showing a flat zero.
+                _num(last_mark) if last_mark is not None else "not marked",
+                _num(settlement.get("profit")) if settlement else "open",
+                html.escape(str(position.get("thesis") or ""))))
+    return (
+        "<h2 class='section'>Forward ledger</h2>"
+        + _panel(
+            "Paper positions recorded before the fact",
+            "{} open, {} closed, settled profit {} over {} wins and {} "
+            "losses. Entry values and marks are snapshot mids, not fills, "
+            "so this is paper and not a track record.".format(
+                open_count, closed_count, _num(settled_profit),
+                summary.get("wins", sum(1 for v in settled if v > 0)),
+                summary.get("losses", sum(1 for v in settled if v < 0))),
+            "<div class='scroll'><table><thead><tr><th>structure</th>"
+            "<th>underlying</th><th>expiry</th><th>status</th>"
+            "<th>opened</th><th>entry spot</th><th>entry value</th>"
+            "<th>last mark P/L</th><th>settled P/L</th><th>thesis</th>"
+            "</tr></thead><tbody>" + "".join(rows)
+            + "</tbody></table></div>"
+            + "<p class='assume'>{}</p>".format(html.escape(
+                "Marked at the newest chain snapshot for the position's "
+                "underlying and expiry. A leg the later chain no longer "
+                "carries makes the whole position unmarkable rather than "
+                "worth zero, and a settled position is priced at the "
+                "underlying at close with no mark quality question left; "
+                "it still assumes the entry was achieved at the recorded "
+                "mid."))))
+
+
 def _panel(title, hint, body):
     return ("<div class='panel'><h3>{}</h3><p class='hint'>{}</p>{}</div>"
             ).format(html.escape(title), html.escape(hint), body)
@@ -1444,6 +1521,7 @@ def render(payload):
                                          plans, expiry))
     sections.append(_backtest_section(payload.get("backtests")))
     sections.append(_backtest_detail_section(payload.get("backtests")))
+    sections.append(_ledger_section(payload.get("forward_ledger")))
     sections.append("<h2 class='section'>Adding data</h2>"
                     + _add_more(payload.get("selected")))
 

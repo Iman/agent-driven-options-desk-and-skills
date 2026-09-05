@@ -5,11 +5,12 @@ image file, so it renders offline, follows the theme, stays crisp at any
 width and can be searched. Every coordinate comes from one grid, so a box
 added later lands in line with the others.
 
-The figure shows the artifacts and the commands that write them. The page
-itself is not a box: it is the reader of every box, and the caption says
-so. Two edges are curves because the graph is not a line: the backtest
-reads the same closes as the simulation, and the forward ledger reads a
-saved plan rather than the comparison beside it.
+The figure shows the two inputs, the artifacts, and the commands that write
+them. The page itself is not a box: it is the reader of every artifact, and
+the caption says so. Three edges are curves because the graph is not a
+line: the exposure command reads the chain snapshot and not the ladder
+beside it, the backtest reads the same closes as the simulation, and the
+forward ledger reads a saved plan rather than the comparison beside it.
 """
 
 import html
@@ -47,12 +48,17 @@ NODES = {
 }
 
 # (from, to, label, shape). Straight edges join neighbouring boxes; the
-# two curves route under a box that sits between their ends. Horizontal
-# edges carry no label: the gap between boxes is narrower than a word.
+# curves route under a box that sits between their ends. Horizontal edges
+# carry no label: the gap between boxes is narrower than a word.
+#
+# exposure is fed by the chain, not by the ladder. cli/exposure.py opens
+# chain_*.json and prices gamma and delta for every contract itself; it
+# never reads greeks_*.json. The figure drew greeks -> exposure because the
+# boxes sit side by side, which is layout, not data flow.
 EDGES = [
     ("source", "chain", "", "right"),
     ("chain", "greeks", "", "right"),
-    ("greeks", "exposure", "", "right"),
+    ("chain", "exposure", "", "under"),
     ("chain", "strategy", "", "down"),
     ("strategy", "compare", "", "right"),
     ("strategy", "forward", "a saved plan", "under"),
@@ -137,17 +143,23 @@ def diagram():
 
 
 CAPTION = (
-    "Every box is one command and one schema-validated artifact under the "
-    "artifact directory; every arrow is a file read from that directory. "
-    "This page reads all of them and writes nothing. The simulation and "
-    "the backtest read the underlying's own closes rather than the chain, "
-    "so they file under the symbol rather than an expiry; the forward "
-    "ledger marks a saved plan against later chains. Replaced artifacts "
-    "move to archive/<date>/ with a timestamp rather than being "
-    "overwritten, and each one carries the same meta block: schema, "
-    "timestamp, tool and engine versions, the provider used, a degraded "
-    "flag with its reason, and notes. Each section below prints the "
-    "arithmetic behind its own panel. Nothing here places an order."
+    "The two boxes on the left are inputs, not commands: a provider's "
+    "quotes or the user's own file, and the underlying's daily closes, "
+    "which the commands fetch or are given rather than read from disk. "
+    "Every other box is one command and the schema-validated artifact it "
+    "writes under the artifact directory, and every arrow into one of "
+    "those is what that command reads: an input, or an artifact already "
+    "in the directory. This page reads all of them and writes nothing. "
+    "The simulation and the backtest read the underlying's own closes "
+    "rather than the chain, so they file under the symbol rather than an "
+    "expiry; the exposure command reads the chain snapshot and prices its "
+    "own gamma rather than reading the ladder; the forward ledger marks a "
+    "saved plan against later chains. Replaced artifacts move to "
+    "archive/<date>/ with a timestamp rather than being overwritten, and "
+    "each one carries the same meta block: schema, timestamp, tool and "
+    "engine versions, the provider used, a degraded flag with its reason, "
+    "and notes. Each section below prints the arithmetic behind its own "
+    "panel. Nothing here places an order."
 )
 
 
@@ -155,8 +167,9 @@ def panel():
     """The pipeline panel: figure, hint and caption."""
     return (
         "<div class='panel flow'><h3>How this page was built</h3>"
-        "<p class='hint'>One command per box, one artifact per box, and the "
-        "arithmetic of each printed in the section that shows it.</p>"
+        "<p class='hint'>Two inputs, then one command per box and one "
+        "artifact per command, with the arithmetic of each printed in the "
+        "section that shows it.</p>"
         + diagram()
         + "<p class='assume'>{}</p></div>".format(html.escape(CAPTION))
     )

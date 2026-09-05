@@ -7,7 +7,10 @@ arguments: [symbol, horizon]
 Project $symbol forward over $horizon business days, or fourteen when no horizon is
 given.
 
-1. `optiondesk simulate $symbol --horizon $horizon --draws 4000`
+1. `optiondesk simulate $symbol --horizon 14 --draws 4000`. When a horizon
+   was given, use `--horizon $horizon` in place of 14. An omitted argument
+   expands to nothing, and a bare `--horizon` is rejected before the
+   sampler starts.
 2. Read `converged` first. If it is false, say so, do not quote a single
    quantile, and offer a higher `--draws` instead of proceeding.
 3. Report the fan as a range with its horizon attached, the value at risk

@@ -29,7 +29,8 @@ def add_arguments(parser):
                                          "iron_condor")
     parser.add_argument("--holding-days", type=int, default=30,
                         dest="holding_days",
-                        help="days from entry to expiry")
+                        help="trading days from entry to expiry; the model "
+                             "chain is priced over the same span")
     parser.add_argument("--entry-every", type=int, default=5,
                         dest="entry_every",
                         help="trading days between entries")

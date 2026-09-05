@@ -1,6 +1,6 @@
 # Submission validation: hosted service 0.3.1
 
-Validated on 5 September 2026. Technical status: HOLD — ChatGPT template loading remains unresolved.
+Validated on 5 September 2026. Technical status: HOLD: ChatGPT template loading remains unresolved.
 This is an engineering assessment, not approval from the directory reviewer.
 
 ## Deployed build
@@ -17,7 +17,7 @@ This is an engineering assessment, not approval from the directory reviewer.
 - 8 widget tests passed, including initialization, missing-data timeout, late delivery and message-source checks.
 - 20 package tests passed with no skips. Both hosted archives were rebuilt.
 - Three concurrent production reports using human-readable strategy names each returned six valid PNGs and correct strategy records.
-- Production health requests completed in 70–176 ms during that check.
+- Production health requests completed in 70-176 ms during that check.
 - Four invalid report requests were rejected: a live ticker without input data, an unknown strategy, too many strategies, and duplicate aliases.
 - Current and both legacy widget resource URLs respond. The current URI is ui://optiondesk/plot-v3.html.
 - All widget resources declare a unique origin and empty network/resource CSP allowlists.

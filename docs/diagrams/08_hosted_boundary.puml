@@ -1,0 +1,27 @@
+@startuml
+!include theme.iuml
+title Option Desk - Local tools and the hosted connection
+
+actor "Codex / Claude Code\nor another local MCP client" as local
+actor "Browser client\nChatGPT / Claude chat" as browser
+component "Local skill edition\n6 skills" as ls
+component "Hosted skill edition\n4 skills" as hs
+component "Local stdio MCP\n12 tools" as lm
+cloud "Hosted remote MCP\nseparate deployment" as hm
+component "Local providers or imports\nlocal artifact directory\nsimulation / backtest history" as runtime
+component "Documented hosted workflow\nSYNTH sample or permitted upload\nvalidation, Greeks, positioning, plots" as subset
+local --> ls
+local --> lm
+lm --> runtime
+browser --> hs
+browser --> hm
+hm --> subset
+note bottom of hm
+A skill upload supplies instructions.
+A connector supplies tool access.
+Product/account support must be checked separately.
+Hosted server source is outside this repository.
+end note
+
+caption Connection scope: docs/wiki/Skill-Installation.md and plugins/option-desk-hosted/README.md. No account eligibility is implied.
+@enduml

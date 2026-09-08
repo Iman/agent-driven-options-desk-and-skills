@@ -1,0 +1,29 @@
+@startuml
+!include theme.iuml
+title Option Desk - Prompt construction and the optional model boundary
+
+actor "Caller" as caller
+participant "Prompt builder" as prompts
+participant "ArtifactStore" as store
+participant "Optional summary model" as model
+caller -> store : context_for(underlying)
+store --> caller : saved artifact context
+caller -> prompts : build_answer_prompt(extra_rules)
+prompts -> prompts : system = REPORTING_RULES\n+ optional deployment rules
+prompts --> caller : template with context and question
+caller -> model : formatted system + human messages
+model --> caller : summary text
+note over prompts,model
+Rules require artifact-grounded answers, degradation first,
+correct units, visible missing values and model limitations.
+These are prompt instructions, not a proof that every model obeys.
+end note
+note over caller,prompts
+build_router_prompt() is a separate helper:
+question -> proposed tool name and arguments.
+The bounded graph does not call that router or let a model
+choose its calculation stages. Its optional model summarizes.
+end note
+
+caption Sources: agent/src/optiondesk_agent/prompts.py and graph.py. A prompt helper does not execute a tool.
+@enduml

@@ -1,5 +1,5 @@
 ' Option desk PlantUML house theme, matched to the 2025 MCP article diagram:
-' white ground, black thin borders, teal annotation notes with white text,
+' white ground, black thin borders, pale teal annotation notes with dark text,
 ' one green highlighted element per diagram for the load-bearing part.
 skinparam backgroundColor #FFFFFF
 skinparam shadowing false
@@ -41,9 +41,9 @@ skinparam actor {
   BorderColor #000000
 }
 skinparam note {
-  BackgroundColor #17A2B8
+  BackgroundColor #E6F4F5
   BorderColor #117A8B
-  FontColor #FFFFFF
+  FontColor #17343D
   FontSize 10
 }
 skinparam legend {

@@ -1,35 +1,22 @@
 @startuml
 !include theme.iuml
-title Option desk - Licensing (PolyForm Noncommercial 1.0.0, one licence over the whole repository)
+title Option Desk - Repository and third-party terms
 
-component "Noncommercial use\npersonal study, research, hobby,\ncharities, schools, public research,\nhealth, environment, government,\nwhatever their funding" as free #C6E9C6
-component "Option desk\nengine, shell, agent, skills,\ncommands, dashboard" as work
-component "Commercial use\nfunds and trading businesses,\nselling it or access to it, paid\nconsulting or signals, courses,\nfundraising on the back of it" as paid
-
-free --> work : no permission needed
-paid ..> work : written agreement first
-
-note bottom of free
-Modify it, build on it, pass it on,
-as long as these terms travel with it.
+component "Option Desk source\nengine, shell, agent, skills\nPolyForm Noncommercial 1.0.0" as work #C6E9C6
+component "Permitted noncommercial uses\nsubject to the full licence terms" as nc
+component "Commercial use\nseparate written agreement" as commercial
+component "Third-party components\nretain their own licences" as third
+component "Market data\nprovider terms and user rights" as data
+nc --> work
+commercial --> work
+third ..> work : see THIRD-PARTY.md
+data ..> work : separate data permissions
+note bottom of work
+LICENSE is the controlling text.
+LICENSES.md explains the repository policy.
+DISCLAIMER.md describes the research limitations.
+Historical versions retain their recorded licence terms.
 end note
 
-note bottom of paid
-Ask: terms are negotiable and
-a share is one of the shapes
-they take.
-end note
-
-note right of work
-Deliberately not OSI open source,
-and the trade is named: fewer users,
-fewer contributors, some directories
-treat noncommercial as unfree.
-The previous MIT + AGPL pair allowed
-the exact thing it was meant to stop.
-Copies taken before 2026-08-31 keep
-the terms they were given.
-end note
-
-caption Full detail in LICENSES.md; provenance of every borrowed line in THIRD-PARTY.md; contribution terms in CLA.md.
+caption This diagram summarizes repository documents. It does not replace LICENSE, LICENSES.md or third-party terms.
 @enduml

@@ -14,6 +14,8 @@ Use [Agent workflows](wiki/Agent-Workflows.md) to connect the tools to your agen
 | Interpret quality and uncertainty | [Reading results](wiki/Reading-Results.md) |
 | Resolve a problem | [Troubleshooting](wiki/Troubleshooting.md) |
 | Inspect all chart images | [Screenshot gallery](SCREENSHOTS.md) |
+| Inspect architecture and workflow diagrams | [Diagram gallery](diagrams/README.md) |
+| Read the complete research algorithm | [Master pseudocode](wiki/Algorithm.md) |
 | Find a reference document | [Documentation map](wiki/Documentation-Map.md) |
 
 The editable wiki source lives in `docs/wiki/`.

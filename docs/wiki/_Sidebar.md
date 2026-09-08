@@ -11,6 +11,7 @@
 - [Reading results](Reading-Results.md)
 - [Troubleshooting](Troubleshooting.md)
 - [Architecture and diagrams](Architecture.md)
+- [Master algorithm](Algorithm.md)
 - [Preserved project reference](Reference-README.md)
 - [Earlier FAQ](Reference-FAQ.md)
 - [Earlier installation guide](Reference-INSTALL.md)

@@ -1,48 +1,22 @@
 @startuml
 !include theme.iuml
-title Option desk - Twenty-one structures, tagged by the directional view each needs
+title Option Desk - 23 structures and their registered outlooks
 
-rectangle "-2\nstrong bearish" as sb
-rectangle "-1\nmild bearish" as mb
-rectangle "0\nneutral" as n #C6E9C6
-rectangle "+1\nmild bullish" as mu
-rectangle "+2\nstrong bullish" as su
-
-sb -right- mb
-mb -right- n
-n -right- mu
-mu -right- su
-
-rectangle "long_put\nprotective_put" as lp
-rectangle "bear_put_spread\nbear_call_spread (credit)" as bps
-rectangle "iron_condor, iron_butterfly\nlong_call_butterfly\ncash_secured_put, covered_call*" as ic
-rectangle "bull_call_spread\nbull_put_spread (credit)\ncovered_call" as bcs
-rectangle "long_call\nstraddle, strangle**" as lc
-
-sb .down.> lp
-mb .down.> bps
-n .down.> ic
-mu .down.> bcs
-su .down.> lc
-
-rectangle "Asymmetric by design:\nratio_spread (uncapped short side)\nbroken_wing_butterfly (one-sided risk,\noften a credit)\njade_lizard (no upside risk only when\ncredit > call-spread width, and it reports\nwhether that actually holds)" as asym
-rectangle "Two expiries, from a pair of snapshots:\ncalendar_spread, diagonal_spread,\nratio_call_diagonal, ratio_put_diagonal\n(delta-targeted legs: short delta mass\nstrictly below long, or no plan at all)" as timesp
-
-note bottom of n
-Three of the five outlooks sit inside the
-one-standard-deviation expected move and
-two are extreme: a spread reaches maximum
-profit on a normal move, a naked long option
-needs an extreme one. --recommend ranks
-against these tags.
+left to right direction
+rectangle "Strong bearish (-2)\n\nlong_put\nprotective_put\nstraddle\nstrangle\nratio_put_diagonal" as outlook0
+rectangle "Mild bearish (-1)\n\nbear_call_spread\nbear_put_spread\niron_condor\nbroken_wing_butterfly\njade_lizard\ndiagonal_put_spread\nratio_put_diagonal\ndiagonal_spread" as outlook1
+rectangle "Neutral (0)\n\nbull_put_spread\nbear_call_spread\ncash_secured_put\ncovered_call\niron_condor\niron_butterfly\nlong_call_butterfly\nratio_spread\nbroken_wing_butterfly\njade_lizard\ncalendar_spread\ncalendar_put_spread" as outlook2
+rectangle "Mild bullish (1)\n\nbull_call_spread\nbull_put_spread\ncash_secured_put\ncovered_call\niron_condor\nratio_spread\njade_lizard\nratio_call_diagonal\ndiagonal_spread" as outlook3
+rectangle "Strong bullish (2)\n\nlong_call\nprotective_put\nstraddle\nstrangle\nratio_call_diagonal" as outlook4
+outlook0 -[hidden]down-> outlook1
+outlook1 -[hidden]down-> outlook2
+outlook2 -[hidden]down-> outlook3
+outlook3 -[hidden]down-> outlook4
+note bottom of outlook4
+These are the registry tags, not trade recommendations.
+A structure can appear under more than one outlook.
+Volatility view and underlying ownership are separate filters.
 end note
 
-note right of lc
-** straddle and strangle are direction-agnostic
-volatility trades listed under the extreme
-buckets because they need a large move.
-* covered_call spans neutral to mild bullish.
-end note
-
-caption Builders return legs; the payoff engine, comparison, backtest and forward test pick every new structure up automatically. Credit verticals refuse a plan that pays a debit.
+caption Source: engine/src/optiondesk_engine/strategies/playbook.py, PLAYBOOK. All memberships are included.
 @enduml

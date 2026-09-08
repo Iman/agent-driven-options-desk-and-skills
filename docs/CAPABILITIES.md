@@ -19,8 +19,8 @@ Three packages, one licence, one adapter between them.
 | package | licence | what it is | depends on |
 |---|---|---|---|
 | `engine` | PolyForm NC 1.0.0 | every number the desk reports | the standard library, nothing else |
-| `shell` | MIT | data, contracts, CLI, dashboard, MCP server | the engine, optionally |
-| `agent` | MIT | LangChain tools, LangGraph routine | the shell, and langchain-core |
+| `shell` | PolyForm NC 1.0.0 | data, contracts, CLI, dashboard, MCP server | the engine, optionally |
+| `agent` | PolyForm NC 1.0.0 | LangChain tools, LangGraph routine | the shell, and langchain-core |
 
 The engine has no network access of any kind and no third-party
 dependency. The shell reaches the internet, validates what comes back

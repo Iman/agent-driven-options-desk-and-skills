@@ -1,6 +1,6 @@
 # Architecture and artifacts
 
-[Guide home](Home.md) | [API inventory](../INVENTORY.md) | [Development](Development.md)
+[Guide home](Home.md) | [API inventory](../INVENTORY.md) | [Development](Development.md) | [Master algorithm](Algorithm.md)
 
 ## Detailed reference and preserved content
 
@@ -106,87 +106,52 @@ Hosted skills live in `openai-skills/`.
 Use the [capabilities catalogue](../CAPABILITIES.md) for interfaces and the [generated inventory](../INVENTORY.md) for source symbols.
 Use [Loops](../../LOOPS.md) for the bounded graph and recurring workflows.
 
-## Restored design diagrams
+## Current design diagrams
 
-The seven diagrams below come from that preserved README edition.
-The package diagram uses lighter backgrounds for readable labels. The archive retains its original styling.
-They are reference diagrams, not fresh test or market measurements.
-The request sequence uses the recorded August 30, 2026 sample counts.
-The provider drawing is schematic: Alpha Vantage supplies history and quotes, not option chains.
+These diagrams describe the source reviewed at revision `79e8d7f`.
+The [PlantUML gallery](../diagrams/README.md) provides editable sources, SVGs, and PNGs.
+The [preserved project reference](Reference-README.md) retains the earlier Mermaid diagrams and recorded measurements.
+Original PlantUML editions remain accessible through the gallery's revision link.
 
 ### Packages and runtime boundaries
 
 ```mermaid
 flowchart TB
-    subgraph clients["Ways in"]
-        claude["Claude Code<br/>reads SKILL.md"]
-        codex["Codex<br/>reads .agents/skills"]
-        gemini["Gemini CLI<br/>reads GEMINI.md"]
-        human["A person<br/>types commands"]
-    end
-
-    mcp["MCP server<br/>stdio, standard library only<br/>12 tools"]
-    cli["CLI<br/>optiondesk chain, greeks, exposure, plots,<br/>strategy, compare, simulate,<br/>backtest, forward"]
-
-    subgraph shell["shell"]
-        providers["Provider registry<br/>resolve by capability,<br/>not by vendor"]
-        contracts["JSON contracts<br/>8 schemas + validator"]
-        artifacts["Artifact writer<br/>atomic, provenance,<br/>degraded and notes"]
-        bridge["engine_bridge<br/>THE ONLY IMPORT<br/>OF THE ENGINE"]
-    end
-
-    subgraph engine["engine &nbsp;(the numbers)"]
-        pricing["pricing<br/>Black-Scholes-Merton,<br/>16 Greeks, implied vol"]
-        strategies["strategies<br/>payoff, playbook,<br/>outlook, friction"]
-        analytics["analytics<br/>gamma exposure, walls,<br/>max pain, smile, ranking"]
-        simulation["simulation<br/>GARCH-t by MCMC,<br/>paths, VaR and ES"]
-        backtest["backtest<br/>runner, statistics,<br/>forward marking"]
-    end
-
-    yahoo[("Yahoo<br/>free, delayed")]
-    disk[("Artifact directory<br/>~/TradingDesk/option-desk")]
-    dash["Dashboard<br/>FastAPI or stdlib,<br/>ECharts vendored"]
-
-    claude --> mcp
-    codex --> mcp
-    gemini --> mcp
-    human --> cli
+    clients["Local agents and terminal users"] --> mcp["Local stdio MCP: 12 tools"]
+    clients --> cli["CLI command handlers"]
+    optional["Optional LangChain / LangGraph package"] --> cli
     mcp --> cli
-    cli --> providers
-    cli --> bridge
-    providers --> yahoo
-    bridge --> pricing
-    bridge --> strategies
-    bridge --> analytics
-    bridge --> simulation
-    bridge --> backtest
-    cli --> contracts
-    contracts --> artifacts
-    artifacts --> disk
-    disk --> dash
-
-    style engine fill:#f4edff,stroke:#7c3aed,color:#1f2328
-    style shell fill:#eaf2ff,stroke:#2f6feb,color:#1f2328
-    style bridge fill:#fff4e5,stroke:#b45309,color:#1f2328
+    cli --> inputs["Permitted imports / enabled providers"]
+    cli --> bridge["engine_bridge: sole shell-to-engine import"]
+    bridge --> engine["Engine: pricing, 16 Greeks, 23 structures,<br/>exposure, simulation, backtests"]
+    cli --> validation["8 artifact schemas"]
+    cli --> writer["Archive and atomic artifact writer"]
+    writer --> disk["Local JSON artifacts"]
+    disk --> dashboard["Local dashboard and readers"]
+    browser["Browser clients"] --> hosted["Remote MCP: separate deployment"]
+    hosted --> subset["Documented hosted subset:<br/>SYNTH sample or permitted uploaded chain"]
 ```
+
+The hosted implementation is outside this repository.
+Its skill and plugin bundles are in this repository.
+A browser skill upload and an MCP connection are separate setup steps.
 
 ### Artifacts between commands
 
 ```mermaid
 flowchart LR
-    provider[("Provider")] -->|quotes| chain["chain<br/><i>chain_SYM_EXPIRY.json</i>"]
-    provider -->|daily closes| sim["simulate<br/><i>simulation_SYM_Nd.json</i>"]
-    provider -->|daily closes| bt["backtest<br/><i>backtest_SYM_STRAT.json</i>"]
-
-    chain --> greeks["greeks<br/><i>greeks_SYM_EXPIRY.json</i>"]
-    chain --> exposure["exposure<br/><i>exposure_SYM_EXPIRY.json</i>"]
-    chain --> strategy["strategy<br/><i>strategy_SYM_NAME_EXPIRY.json</i>"]
-    strategy --> compare["compare<br/><i>comparison_SYM_EXPIRY.json</i>"]
-    strategy --> forward["forward<br/><i>forward_ledger.json</i>"]
-    chain --> forward
-    strategy --> sim
-
-    greeks --> dash["dashboard"]
+    input["Permitted import or enabled provider"] --> chain["Chain snapshot"]
+    chain --> greeks["Greek ladder"]
+    chain --> exposure["Positioning"]
+    chain --> strategy["Strategy plans"]
+    far["Far-expiry snapshot"] --> strategy
+    strategy --> compare["Comparison"]
+    strategy --> forward["Paper ledger"]
+    later["Later chain"] --> forward
+    strategy --> sim["Simulation and structure outcomes"]
+    history["Underlying history"] --> sim
+    history --> bt["Backtest"]
+    greeks --> dash["Dashboard"]
     exposure --> dash
     compare --> dash
     sim --> dash
@@ -199,78 +164,129 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant A as Agent
-    participant M as MCP server
-    participant C as CLI command
-    participant P as Provider
-    participant E as Engine
-    participant D as Disk
-
-    A->>M: tools/call option_chain_snapshot {symbol: SPY}
-    M->>C: chain.run(args)
-    C->>P: resolve(option_chain) then fetch
-    P-->>C: 607 contracts, spot, listed expiries
-    C->>E: implied_vol per contract (via bridge)
-    E-->>C: 595 solved, 12 refused as unidentified
-    C->>C: validate against chain_snapshot schema
-    C->>D: atomic write, tmp then replace
-    C-->>M: {artifact, contracts, with_iv, degraded, notes}
-    M-->>A: JSON summary
+    participant M as Local MCP
+    participant C as Chain command
+    participant P as Snapshot parser
+    participant D as Artifact directory
+    A->>M: Snapshot text/data and rights acknowledgement
+    M->>C: Validated tool arguments
+    C->>P: Parse and normalize supplied snapshot
+    alt Missing rights, source, spot or invalid fields
+        P-->>C: Validation error
+        C-->>M: Failure
+        M-->>A: Tool error, prior artifact preserved
+    else Valid permitted input
+        P-->>C: Normalized snapshot with provenance
+        C->>C: Validate chain_snapshot schema
+        C->>D: Archive previous file, atomic replacement
+        C-->>M: Summary and quality flags
+        M-->>A: Structured result
+    end
 ```
+
+This sequence describes the import route without historical market counts.
+Imported IV remains user-supplied. The provider route has separate access checks and IV provenance.
 
 ### Structure outlook map
 
 ```mermaid
-flowchart LR
-    sb["-2<br/>strong bearish"] --- mb["-1<br/>mild bearish"] --- n["0<br/>neutral"] --- mu["+1<br/>mild bullish"] --- su["+2<br/>strong bullish"]
-
-    sb -.-> lp["long put<br/>protective put"]
-    mb -.-> bps["bear put spread"]
-    n -.-> ic["iron condor<br/>iron butterfly<br/>butterfly<br/>cash-secured put"]
-    mu -.-> bcs["bull call spread<br/>covered call"]
-    su -.-> lc["long call<br/>straddle, strangle"]
+flowchart TB
+    registry["PLAYBOOK: 23 structures"] --> direction["Five directional outlook tags: -2 through +2"]
+    registry --> volatility["Volatility view: crush, expand, any"]
+    registry --> ownership["Underlying ownership requirement"]
+    direction --> filter["Filter and score candidates against stated inputs"]
+    volatility --> filter
+    ownership --> filter
+    filter --> build["Build from available contracts"]
+    build --> check["Payoff, missing inputs, friction and rankability"]
+    check --> output["Research comparison with assumptions"]
 ```
+
+The [complete outlook diagram](../diagrams/04_structures_by_outlook.svg) shows every registered membership.
+A structure can have several outlook tags. These tags do not establish a forecast or a recommendation.
 
 ### Skills and generated runtime instructions
 
 ```mermaid
 flowchart TB
-    skill["shell/skills/*/SKILL.md<br/>one source of truth"]
-    gen["shell/tools/gen_runtime_docs.py"]
-    agents["AGENTS.md<br/>rules and commands<br/>for Codex"]
-    gemini["GEMINI.md<br/>for Gemini CLI"]
-    claude["Claude Code reads<br/>SKILL.md directly"]
-    mcpserver["optiondesk-mcp<br/>typed tool schemas"]
-
-    skill --> gen
-    gen --> agents
-    gen --> gemini
-    skill --> claude
-    skill -. "same capabilities" .-> mcpserver
-    mcpserver --> claude
-    mcpserver --> agents
-    mcpserver --> gemini
+    local["shell/skills: 6 local skills"] --> gen["gen_runtime_docs.py"]
+    parsers["CLI argparse parsers"] --> gen
+    gen --> agents["AGENTS.md"]
+    gen --> gemini["GEMINI.md"]
+    local --> claude["Claude Code skill discovery"]
+    local --> package["scripts/package.py"]
+    hosted["openai-skills: 4 hosted skills"] --> package
+    package --> lp["Local plugin bundle"]
+    package --> hp["Hosted plugin bundle"]
+    gen --> tests["Generated-file and packaging checks"]
+    package --> tests
 ```
 
 ### Provider resolution
 
 ```mermaid
 flowchart LR
-    need["A command needs<br/>option_chain"] --> reg{"Registry<br/>priority order"}
-    reg -->|"key present"| paid["Alpha Vantage<br/>key required, history and quotes"]
-    reg -->|"local acknowledgement"| yahoo["Yahoo<br/>local personal research<br/>delayed"]
-    reg -->|"nothing can answer"| err["ProviderUnavailable<br/>naming every candidate<br/>and why each was skipped"]
-    paid --> art["artifact records<br/>provider_used"]
-    yahoo --> art
+    need["Requested capability / explicit provider"] --> reg["Registry"]
+    reg --> single["Chains, rates, dividends: Yahoo"]
+    reg --> fallback["History, quotes: Yahoo then Alpha Vantage"]
+    single --> gate["Access mode, rights, key and dependency checks"]
+    fallback --> gate
+    gate -->|"available"| chosen["Chosen provider and skipped reasons"]
+    gate -->|"none permitted"| error["ProviderUnavailable"]
+    upload["Permitted uploaded snapshot"] --> parse["Import validation without provider resolution"]
 ```
+
+Demo mode refuses external providers. Yahoo requires local-use acknowledgement.
+An explicit provider is strict by default. Its failure does not silently select a substitute.
+Alpha Vantage supplies history and quotes, not option chains.
 
 ### License boundaries
 
 ```mermaid
 flowchart LR
-    free["Noncommercial use<br/>study, research, hobby,<br/>charities, schools, government"]
-    work["option desk<br/>engine, shell, agent, skills"]
-    paid["Commercial use<br/>funds, products, paid research,<br/>fundraising on the back of it"]
-
-    free -->|"no permission needed"| work
-    paid -.->|"written agreement first"| work
+    nc["Permitted noncommercial uses<br/>subject to the full licence"] --> work["Option Desk source<br/>PolyForm Noncommercial 1.0.0"]
+    commercial["Commercial use<br/>separate written agreement"] --> work
+    third["Third-party components<br/>their own terms"] -.-> work
+    data["Market data<br/>separate provider and user rights"] -.-> work
 ```
+
+[LICENSE](../../LICENSE) is the controlling text.
+[LICENSES.md](../../LICENSES.md), [THIRD-PARTY.md](../../THIRD-PARTY.md), and [DISCLAIMER.md](../../DISCLAIMER.md) explain the separate boundaries.
+
+## Hosted and local access
+
+![Local and hosted connection boundaries](../diagrams/08_hosted_boundary.png)
+
+## Test layers and coverage
+
+![Unit, BDD, integration and validation layers](../diagrams/09_testing_layers.png)
+
+The [testing guide](../TESTING.md) gives the commands and defines the 80% per-package unit line-coverage gate.
+
+## Bounded agent workflow
+
+![Bounded LangGraph workflow](../diagrams/10_bounded_workflow.png)
+
+Planning and calculation nodes are deterministic. A supplied model can write the final summary.
+Completion means the required artifacts exist. It does not establish that a trading thesis is correct.
+
+## Research loops and prompts
+
+![Watch and completion loops](../diagrams/11_research_loops.png)
+
+The loop commands contain instructions for a host agent. They are distinct from the Python graph's artifact-completion checks.
+
+![Prompt assembly and model boundary](../diagrams/12_prompt_assembly.png)
+
+Prompt rules constrain the requested answer. The repository does not prove that every model will follow them.
+
+## Backtest and forward test
+
+![Historical backtest workflow](../diagrams/13_backtest_workflow.png)
+
+![Forward paper-test lifecycle](../diagrams/14_forward_paper_lifecycle.png)
+
+Backtests use model premiums and historical underlying moves.
+Forward tests record entry plans and later paper marks.
+The close command uses intrinsic settlement and does not enforce expiry or snapshot freshness.
+Check the date and price before interpreting a settlement. See the [paper workflow](Examples.md#open-and-mark-a-paper-position).

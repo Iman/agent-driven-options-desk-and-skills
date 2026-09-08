@@ -1,0 +1,31 @@
+@startuml
+!include theme.iuml
+title Option Desk - The optional LangGraph routine
+start
+:Plan from artifacts for underlying and expiry;
+while (Missing artifacts, no failure and budget remains?) is (yes)
+ :Run next handler
+chain, greeks, exposure, comparison;
+ :Check expected artifact in the store;
+ if (Handler failed or artifact missing?) then (yes)
+  :Record failure;
+ else (no)
+  :Update progress and consumed budget;
+ endif
+endwhile (no)
+if (Failure recorded?) then (yes)
+ :Outcome = failed;
+elseif (No missing artifacts?) then (yes)
+ :Outcome = complete;
+else (budget exhausted)
+ :Outcome = exhausted;
+endif
+:Re-read report context
+and surface degradation;
+if (A summary model was supplied?) then (yes)
+ :Model writes final summary;
+endif
+:Return summary, outcome and failures;
+stop
+caption Source: agent/src/optiondesk_agent/graph.py. Artifact completion does not establish a trading thesis.
+@enduml

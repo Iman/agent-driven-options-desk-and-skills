@@ -1,0 +1,37 @@
+@startuml
+!include theme.iuml
+title Option Desk - Historical backtest from prices to uncertainty
+
+start
+:Load permitted history and settings;
+:Validate history length;
+while (Entry plus holding period fits history?) is (yes)
+ :Estimate volatility from trailing returns;
+ if (Volatility is usable?) then (yes)
+  :Build model-priced option chain;
+  :Call structure builder;
+  if (A viable plan exists?) then (yes)
+   :Record entry legs and capital at risk;
+   :Settle payoff at historical exit spot;
+   :Record return on risk when defined;
+  else (no)
+   :Record skipped entry and reason;
+  endif
+ else (no)
+  :Record skipped entry and reason;
+ endif
+ :Advance by entry spacing;
+endwhile (no)
+:Summarize returns and drawdown in risk units;
+:Block sign test and moving-block bootstrap;
+:Include buy-and-hold benchmark and model limitations;
+:Validate and save backtest artifact;
+stop
+note right
+The pricing tenor uses trading days / 252.
+Historical option quotes and execution are not replayed.
+Two-expiry builders need inputs this runner does not supply.
+end note
+
+caption Sources: engine backtest/runner.py and stats.py; shell cli/backtest.py.
+@enduml

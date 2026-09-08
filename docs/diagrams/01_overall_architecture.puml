@@ -1,103 +1,56 @@
 @startuml
 !include theme.iuml
-title Option desk - Overall Architecture (eight ways in, one set of artifacts out)
+title Option Desk - Current runtime and package boundaries
 
-actor "Trader / Developer\n(terminal)" as human
-package "Ways in (agent runtimes)" as ways {
-  component "Claude Code\n(reads SKILL.md,\nplugin: 6 skills, 6 commands,\n2 subagents)" as claude
-  component "Codex\n(scans .agents/skills,\nsymlinked to shell/skills)" as codex
-  component "Gemini CLI\n(no skill discovery:\nGEMINI.md compiles all six)" as gemini
-  component "ChatGPT (browser)\nskills as knowledge only:\nno local process possible" as chatgpt
+actor "Person / local agent" as user
+component "Local skills\n6 skills in shell/skills" as skills
+component "Local MCP\noptiondesk-mcp, stdio\n12 typed tools" as mcp
+component "CLI\noptiondesk commands" as cli
+component "Optional agent package\nLangChain bindings\nbounded LangGraph workflow" as agent
+package "Shell: input, output and presentation" {
+ component "Snapshot import\nCSV / JSON + rights\nsource + timestamp" as imp
+ component "Provider registry\ncapability + access checks" as reg
+ component "engine_bridge\nsole shell-to-engine import" as bridge #C6E9C6
+ component "Schema validation\n8 JSON schemas" as valid
+ component "Artifact writer\narchive + atomic replacement" as writer
+ component "Plots and dashboard\nECharts served locally" as dash
 }
-
-component "MCP server (optiondesk-mcp)\nlocal stdio, standard library only\n10 typed tools" as mcp
-component "CLI (optiondesk)\nexpiries | chain | greeks | exposure\nstrategy | compare | simulate\nbacktest | forward | keys | doctor | dashboard" as cli
-
-package "shell  -  everything that touches the outside world" as shell {
-  component "Provider registry\nresolve by capability,\nnever by vendor name" as providers
-  component "JSON contracts\n8 schemas + validator\n(jsonschema, stdlib fallback)" as contracts
-  component "Artifact writer\natomic tmp-then-replace,\nprovenance meta block,\ndegraded and notes kept apart" as artifacts
-  rectangle "engine_bridge\nTHE ONLY IMPORT OF THE ENGINE\n(boundary checkable with one grep)" as bridge #C6E9C6
+package "Engine: standard-library analytics" {
+ component "BSM pricing\n16 Greeks, IV solver" as pricing
+ component "23 registered structures\nsingle and two expiries" as strategies
+ component "Exposure, smile\ncomparison and ranking" as analytics
+ component "GARCH-t posterior\nindependent predictive paths" as simulation
+ component "Historical backtest\nstatistics and paper marking" as backtest
 }
-
-package "engine  -  the numbers, standard library only, no network" as engine {
-  component "pricing\nBlack-Scholes-Merton,\n16 Greeks, implied-vol solver\nwith identifiability guards" as pricing
-  component "strategies\n17 structures, payoff engine,\noutlook tags, friction verdicts" as strategies
-  component "analytics\ndealer gamma exposure, walls,\nflip, max pain, smile, ranking" as analytics
-  component "simulation\nGARCH-t by MCMC,\nantithetic paths, VaR and ES" as simulation
-  component "backtest\nrunner, statistics, significance,\nforward marking" as backtest
-}
-
-cloud "External market data" as ext {
-  component "Yahoo\nfree, delayed,\nall capabilities, no key" as yahoo
-  component "Alpha Vantage\nkey required,\nhistory and quotes,\n~25 requests/day" as av
-}
-
-database "Artifact directory\n~/TradingDesk/option-desk\n+ archive/<date>/ for every\nreplaced measurement" as disk
-component "Dashboard\nFastAPI or stdlib, ECharts vendored,\nreads artifacts, writes nothing" as dash
-
-claude --> mcp : 1. tools/call
-codex --> mcp : 1. tools/call
-gemini --> mcp : 1. tools/call
-human --> cli : 1. subcommand
-mcp --> cli : 2. same entry points
-cli --> providers : 3. ask for a capability
-providers --> yahoo : 4. priority order
-providers --> av : 4. only if key present
-cli --> bridge : 5. numbers via the bridge
+database "Local JSON artifacts\nconfigured output directory" as disk
+cloud "Separate hosted deployment\n4 hosted skills, remote MCP\nSYNTH sample / permitted uploads\nsee hosted boundary diagram" as hosted
+user --> skills : reads rules
+user --> mcp
+user --> cli
+user --> agent
+mcp --> cli : shared handlers
+agent --> cli : shared handlers
+cli --> imp
+cli --> reg
+cli --> bridge
 bridge --> pricing
 bridge --> strategies
 bridge --> analytics
 bridge --> simulation
 bridge --> backtest
-cli --> contracts : 6. validate
-contracts --> artifacts : 7. write
-artifacts --> disk
-disk --> dash : 8. render
-
-note right of ways
-Runtime coverage:
-- Claude Code: skills + commands + agents + MCP
-- Codex: skills (progressive) + MCP
-- Gemini: compiled docs + MCP
-- Browser ChatGPT: knowledge only,
-  each skill says so itself
+cli --> valid
+cli --> writer
+writer --> disk
+disk --> dash : read
+note bottom of agent
+Planning and calculation nodes are deterministic.
+An optional model can write the final summary.
+end note
+note bottom of hosted
+The hosted deployment implementation is separate.
+This repository supplies its skill and plugin bundles.
+Local simulation and backtests require price history.
 end note
 
-note right of engine
-Engine rules:
-- standard library only, no network
-- testable against closed form and
-  central finite differences
-- a missing number is never guessed:
-  iv: null is counted, not defaulted
-end note
-
-note left of bridge
-The invariant:
-an audit found one command importing
-the engine directly. Harmless at runtime,
-still routed back through the bridge:
-an invariant with exceptions is not one.
-end note
-
-note bottom of disk
-Nothing passes between commands
-in memory. Every step is a file,
-so any step can be re-run,
-inspected or replaced.
-end note
-
-legend right
-|= Flow |= Step |
-| 1 | agent or person asks |
-| 2 | MCP maps to a CLI entry point |
-| 3-4 | registry resolves a provider by capability |
-| 5 | engine computes through the single bridge |
-| 6-7 | schema validation, atomic artifact write |
-| 8 | dashboard renders what is on disk |
-Tests: 829 passing, 0 skipped. Mutations: 48 run, 0 survived.
-endlegend
-
-caption Option desk: agent-driven options analytics. github.com/Iman/agent-driven-options-desk-and-skills. Research software, not investment advice.
+caption Source: engine_bridge.py, mcp/server.py, strategies/playbook.py, agent graph.py and hosted plugin README.
 @enduml

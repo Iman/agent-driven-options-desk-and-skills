@@ -1,0 +1,33 @@
+@startuml
+!include theme.iuml
+title Option Desk - Behavior tests and the unit coverage gate
+
+component "Production packages\nengine / shell / agent" as code
+component "Unit\nin-process, external boundaries replaced\nhappy and failure cases" as unit
+component "BDD\nGherkin + synthetic command workflows\nhappy and failure scenarios" as bdd
+component "Integration\nCLI / MCP processes, loopback HTTP\nChromium, installer checks" as integration
+component "Validation\ndocs, packaging, evidence\nand coverage-gate checks" as validation
+component "Unit line coverage\n80% minimum in EACH package\ncomplete production file denominator" as gate #C6E9C6
+component "CI\nPython 3.11 and 3.13\nreports, refresh, mutation checks" as ci
+code --> unit
+code --> bdd
+code --> integration
+code --> validation
+unit --> gate
+gate --> ci
+bdd --> ci
+integration --> ci
+validation --> ci
+note bottom of gate
+BDD and integration coverage do not enter this measurement.
+Branch coverage is recorded without a separate minimum.
+A passing total cannot offset an under-covered package.
+end note
+note bottom of unit
+TDD is a sequence: observe the intended failure,
+implement the behavior, then observe the same test pass.
+It is not a fifth test layer.
+end note
+
+caption Sources: conftest.py, .coveragerc, scripts/check_unit_coverage.py and .github/workflows/refresh.yml.
+@enduml

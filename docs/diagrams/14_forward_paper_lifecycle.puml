@@ -1,0 +1,33 @@
+@startuml
+!include theme.iuml
+title Option Desk - Forward paper testing and ledger states
+state "Open paper position" as Open
+state "Mark requested" as Mark
+state "Append complete mark\nand quality notes" as Marked
+state "Report unmarkable\nkeep numeric P/L unavailable" as Missing
+state "Closed paper position\nsettlement and close time" as Closed
+[*] --> Open : open from a saved plan
+Open --> Mark : mark
+Mark --> Marked : all legs have marks
+Mark --> Missing : chain or leg unavailable
+Marked --> Open : keep open
+Missing --> Open : keep open
+Open --> Closed : close with ID and settlement price
+Closed --> Closed : repeat close rejected
+note left of Open
+Entry preserves legs, prices, spot,
+time, source plan and optional thesis.
+Status reads the ledger.
+end note
+note right of Mark
+Newest matching chain on disk.
+Last-trade marks carry a quality note.
+A missing quote is not zero.
+end note
+note bottom of Closed
+Close uses intrinsic-payoff settlement.
+It is not an early-close fill or a general two-expiry mark.
+Expiry and quote freshness are not enforced by the command.
+end note
+caption Sources: shell cli/forward.py and engine backtest/forward.py. Paper results are not executions.
+@enduml

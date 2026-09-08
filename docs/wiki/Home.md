@@ -31,6 +31,7 @@ The hosted and local SYNTH examples are separate teaching samples. Their numbers
 
 - [Read the results](Reading-Results.md): units, missing data, model assumptions, and comparison limits.
 - [Architecture](Architecture.md): packages, artifacts, and the calculation path.
+- [Master algorithm](Algorithm.md): skills, loops, graph routing, prompts, backtests, and paper tests in one pseudocode reference.
 - [Development](Development.md): checks, screenshots, and documentation maintenance.
 - [Documentation map](Documentation-Map.md): guides and reference material.
 

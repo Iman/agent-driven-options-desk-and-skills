@@ -1,38 +1,34 @@
 @startuml
 !include theme.iuml
-title Option desk - One source of truth for four runtimes
+title Option Desk - Local and hosted skill sources
 
-component "shell/skills/*/SKILL.md\n6 skills, each carrying the\nreporting rules an agent must\nfollow, not just the commands" as skill #C6E9C6
-component "shell/tools/gen_runtime_docs.py\nreads skills + argparse parsers" as gen
-component "AGENTS.md (4,366 bytes)\nrules + command inventory for Codex,\nwhich loads skills itself\nfrom .agents/skills" as agents
-component "GEMINI.md\nthe same plus all six skills\ncompiled in: Gemini CLI\ndiscovers none" as gemini
-component "Claude Code\nreads SKILL.md directly\n(plugin adds commands + agents)" as claude
-component "optiondesk-mcp\n10 typed tool schemas:\nbetter than prose describing\na command line" as mcpserver
-
-skill --> gen : generate
+component "shell/skills\n6 local SKILL.md files" as local #C6E9C6
+component "CLI argparse parsers" as parsers
+component "gen_runtime_docs.py" as gen
+component "AGENTS.md\nprogressive skill discovery" as agents
+component "GEMINI.md\ncompiled runtime instructions" as gemini
+component "Claude Code\nreads skill files" as claude
+component "openai-skills\n4 hosted SKILL.md files" as hosted
+component "scripts/package.py" as pack
+component "Local plugin bundle\ncommands + reviewers + skills" as lp
+component "Hosted plugin bundle\nremote MCP connection + skills" as hp
+component "Runtime and packaging tests\nsource/copy consistency" as tests
+local --> gen
+parsers --> gen
 gen --> agents
 gen --> gemini
-skill --> claude : read as-is
-skill ..> mcpserver : same capabilities,\ntyped instead of prose
-mcpserver --> claude
-mcpserver --> agents
-mcpserver --> gemini
-
-note right of gen
-Two tests guard this:
-- generated text vs what is on disk:
-  a stale AGENTS.md fails the suite
-- every argparse subcommand must
-  appear in both copies: a command
-  added without documentation fails
+local --> claude
+local --> pack
+hosted --> pack
+pack --> lp
+pack --> hp
+gen --> tests
+pack --> tests
+note bottom of hosted
+Hosted and local skills are different editions.
+Some names overlap. Their tool and runtime assumptions differ.
+See the installation guide for each product and account route.
 end note
 
-note bottom of agents
-Embedding all skills in AGENTS.md
-took it to 25,851 bytes and defeated
-progressive disclosure. Naming where
-they live instead: 4,366 bytes.
-end note
-
-caption Edit a skill, run the generator, and every runtime gets the change in the same commit.
+caption Sources: shell/tools/gen_runtime_docs.py and scripts/package.py. Edit sources before regenerating copies.
 @enduml

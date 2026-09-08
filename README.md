@@ -192,7 +192,8 @@ The [results guide](docs/wiki/Reading-Results.md) explains how to interpret each
 | [Troubleshooting](docs/wiki/Troubleshooting.md) | Installation, provider, import, and chart problems. |
 | [FAQ](FAQ.md) | Common questions and interpretation limits. |
 | [Capabilities](docs/CAPABILITIES.md) | Feature and interface catalogue. |
-| [Architecture](docs/wiki/Architecture.md) | Packages, data flow, contracts, and all seven restored design diagrams. |
+| [Master algorithm](docs/wiki/Algorithm.md) | One pseudocode reference for skills, loops, graph routing, prompts, backtests, and paper tests. |
+| [Architecture](docs/wiki/Architecture.md) | Packages, data flow, contracts, current diagrams, and preserved design references. |
 | [Preserved project reference](docs/wiki/Reference-README.md) | Complete earlier README, with its engineering detail, measurements, and examples. |
 | [API inventory](docs/INVENTORY.md) | Generated public function and class reference. |
 | [Documentation map](docs/wiki/Documentation-Map.md) | All guides, policies, and maintenance references. |

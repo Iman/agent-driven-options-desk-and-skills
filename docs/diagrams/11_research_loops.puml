@@ -1,0 +1,34 @@
+@startuml
+!include theme.iuml
+title Option Desk - Watch and completion loops are command instructions
+
+rectangle "Host runtime / local scheduler\nstarts a requested command" as host
+rectangle "desk-watch\nread baseline before refresh" as watch
+rectangle "Refresh chain, Greeks and exposure\ncompare same underlying / expiry" as refresh
+rectangle "Material change or unavailable input?\nspot, IV, regime, walls, RR, degradation" as change
+rectangle "Report changes with prior values\nor no material change; stop" as report
+rectangle "desk-complete\nread six criteria from artifacts" as complete
+rectangle "Run only missing / failing stages\nchoose expiry, widen band or raise draws" as work
+rectangle "Stop\nall criteria met, structural blocker\nor configured attempt limit" as stop
+host --> watch
+watch --> refresh
+refresh --> change
+change --> report
+host --> complete
+complete --> work : unmet and repairable
+work --> complete : re-check
+complete --> stop
+note bottom of watch
+Observation only. This command does not open,
+mark or close a paper or real position.
+Unavailable values are not numeric changes.
+end note
+note bottom of complete
+Six criteria: IV coverage, ladder size, walls/smile,
+rankable plans, converged horizon, degradation reasons.
+These are prompt instructions, not the LangGraph evaluator.
+The host supplies recurrence and attempt limits.
+end note
+
+caption Sources: .claude/commands/desk-watch.md and desk-complete.md. Commands depend on the host runtime for scheduling.
+@enduml

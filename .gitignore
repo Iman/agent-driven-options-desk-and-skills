@@ -26,11 +26,13 @@ htmlcov/
 .DS_Store
 *.ansi
 
-# Personal material. An agent once wrote CV and article notes into docs/;
-# nothing of that kind belongs in this repository, tracked or untracked.
+# Keep personal material out of version control.
 campaign_notes.md
 *campaign-notes*
 *_cv.*
 *-cv.*
 cv.*
 resume.*
+
+# Private article drafts, math, LaTeX, diagrams, images, and build outputs.
+/article/

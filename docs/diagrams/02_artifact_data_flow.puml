@@ -1,58 +1,46 @@
 @startuml
 !include theme.iuml
-title Option desk - How data flows (every arrow is an artifact on disk)
+title Option Desk - Snapshots, history and saved results
 
-database "Provider\n(Yahoo / Alpha Vantage)" as provider
-component "chain\nchain_SYM_EXPIRY.json\nquotes + per-contract implied vol\n+ counts.without_iv" as chain #C6E9C6
-component "greeks\ngreeks_SYM_EXPIRY.json\n16 Greeks per contract,\nunits block, skip counts" as greeks
-component "exposure\nexposure_SYM_EXPIRY.json\ngamma by strike, walls, flip,\nmax pain, ratios, smile" as exposure
-component "strategy\nstrategy_SYM_NAME_EXPIRY.json\nlegs, risk graph, probabilities,\nnet Greeks, friction, payoff" as strategy
-component "compare\ncomparison_SYM_EXPIRY.json\nevery structure scored and ranked,\nwith the ranking caveat" as compare
-component "simulate\nsimulation_SYM_Nd.json\nposterior, diagnostics, fan,\nVaR and ES, per-structure dists" as sim
-component "backtest\nbacktest_SYM_STRAT_Nd.json\ntrades, statistics, significance,\nbenchmark, honesty statement" as bt
-component "forward\nforward_ledger.json\npositions, marks,\nsettlements, thesis" as forward
-component "Dashboard\nreads artifacts, writes nothing\n?u=SYM&e=EXPIRY addressable" as dash
-
-provider --> chain : quotes
-provider --> sim : daily closes
-provider --> bt : daily closes
+component "Permitted CSV / JSON\nor explicitly enabled provider" as input
+component "Chain snapshot\nchain_*.json" as chain #C6E9C6
+component "Far-expiry snapshot" as far
+component "Greek ladder\ngreeks_*.json" as greeks
+component "Positioning\nexposure_*.json" as exposure
+component "Strategy plans\nstrategy_*.json" as plan
+component "Comparison\ncomparison_*.json" as compare
+component "Permitted underlying history" as history
+component "Simulation\nsimulation_*.json" as sim
+component "Backtest\nbacktest_*.json" as bt
+component "Paper ledger\nforward_ledger.json" as forward
+component "Local dashboard / readers" as dash
+input --> chain
 chain --> greeks
 chain --> exposure
-chain --> strategy
-strategy --> compare
-strategy --> sim : per-structure\ndistributions
-strategy --> forward
-chain --> forward : marks
+chain --> plan
+far --> plan : two-expiry structures
+plan --> compare
+plan --> sim : terminal P/L distributions
+history --> sim
+history --> bt
+plan --> forward : paper entry
+chain --> forward : later mark
 greeks --> dash
 exposure --> dash
 compare --> dash
 sim --> dash
 bt --> dash
 forward --> dash
-
 note bottom of chain
-Replaced artifacts move to
-archive/<date>/ with a timestamp:
-the 595-solved / 12-refused chain
-became 590 / 17 six hours later,
-and both remain provable.
+Provider IV may be solved or retained as a labelled fallback.
+Imported IV stays user-supplied. Missing IV stays absent.
+Missing inputs and degradation remain visible.
 end note
-
-note right of sim
-simulate and backtest read the
-underlying's price history, not the
-chain: they answer questions about
-the underlying's own behaviour,
-so the dashboard files them under
-the symbol, not an expiry.
-end note
-
 note bottom of dash
-Every artifact carries the same meta block:
-schema, timestamp, tool, versions,
-provider used, degraded + reason, notes,
-disclaimer and licence note.
+Artifacts carry schema, time, versions and source metadata.
+Replaced files are archived by default before atomic writes.
+The dashboard reads artifacts. It does not create trades.
 end note
 
-caption Eight schemas under shell/src/optiondesk/contracts/. The schema is the interface: skills, MCP, dashboard and third parties read artifacts, never Python objects.
+caption Schemas: shell/src/optiondesk/contracts/. Simulation and backtests consume history, not a chain in place of history.
 @enduml

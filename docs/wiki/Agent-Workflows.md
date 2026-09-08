@@ -2,6 +2,8 @@
 
 [Guide home](Home.md) | [Installation](Installation.md) | [Examples](Examples.md)
 
+For manual, shell, `npx`, or browser ZIP installation, start with [Install skills in your agent](Skill-Installation.md).
+
 Install the local tools before the local plugin.
 For a browser agent, use the separate hosted connection.
 
@@ -75,6 +77,9 @@ Provider commands require an enabled data source.
 Use [Loops](../../LOOPS.md) for budgets, stop conditions, and scheduling limits.
 
 ## Browser agents and the hosted service
+
+Follow the separate [ChatGPT steps](Skill-Installation.md#chatgpt) or [Claude chat steps](Skill-Installation.md#claude-chat).
+They include individual skill uploads, account requirements, and the MCP connection.
 
 The hosted MCP endpoint is:
 

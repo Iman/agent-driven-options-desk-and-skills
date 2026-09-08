@@ -76,6 +76,11 @@ If a new capture changes filenames, remove obsolete captures only after updating
 
 ## Wiki source and publication
 
+When shortening the README or a guide, move detailed content into linked wiki pages before removing it from the overview.
+Preserve diagrams, examples, measurements, explanations, and their source references.
+Label superseded instructions as historical and link the current procedure.
+Retain useful badges, with values that match current evidence.
+
 The editable guide pages live in `docs/wiki/`.
 They use relative Markdown links so the guide also works in a repository checkout.
 The sidebar and footer live beside the pages.

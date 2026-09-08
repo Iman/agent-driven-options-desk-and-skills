@@ -3,11 +3,13 @@
 Options research with a local dashboard, agent skills, and MCP tools.
 Import a chain, inspect its Greeks and positioning, compare structures, and keep the results as readable files.
 
-[![Checks](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml/badge.svg)](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
-[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
+[![Checks](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml/badge.svg)](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml) [![Tests](https://img.shields.io/badge/tests-1085%20collected-blue)](docs/TESTING.md) [![Unit coverage gate](https://img.shields.io/badge/unit%20coverage%20gate-80%25%20per%20package-blue)](docs/TESTING.md#run-the-80-unit-coverage-gate) [![Mutation cases](https://img.shields.io/badge/mutation%20cases-99-blue)](scripts/mutate.py) [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 
-[Wiki](https://github.com/Iman/agent-driven-options-desk-and-skills/wiki) · [Get started](#get-started) · [User guide](docs/wiki/Home.md) · [Examples](docs/wiki/Examples.md) · [Install](INSTALL.md) · [Troubleshooting](docs/wiki/Troubleshooting.md)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills) [![Local skills](https://img.shields.io/badge/local%20skills-6-blue)](docs/wiki/Skill-Installation.md#choose-the-correct-skill-edition) [![Hosted skills](https://img.shields.io/badge/hosted%20skills-4-blue)](docs/wiki/Skill-Installation.md#prepare-individual-browser-skill-zips) [![Local MCP tools](https://img.shields.io/badge/local%20MCP%20tools-12-blue)](docs/CAPABILITIES.md)
+
+[![Agent guides](https://img.shields.io/badge/guides-Codex%20%7C%20ChatGPT%20%7C%20Claude%20chat%20%7C%20Claude%20Code-blue)](docs/wiki/Skill-Installation.md) [![Stars](https://img.shields.io/github/stars/Iman/agent-driven-options-desk-and-skills?style=flat)](https://github.com/Iman/agent-driven-options-desk-and-skills/stargazers) [![Forks](https://img.shields.io/github/forks/Iman/agent-driven-options-desk-and-skills?style=flat)](https://github.com/Iman/agent-driven-options-desk-and-skills/forks) [![Open issues](https://img.shields.io/github/issues/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/issues) [![Last commit](https://img.shields.io/github/last-commit/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/commits/main)
+
+[Wiki](https://github.com/Iman/agent-driven-options-desk-and-skills/wiki) · [Architecture and diagrams](docs/wiki/Architecture.md) · [Install skills](docs/wiki/Skill-Installation.md) · [Get started](#get-started) · [User guide](docs/wiki/Home.md) · [Examples](docs/wiki/Examples.md) · [Install](INSTALL.md) · [Troubleshooting](docs/wiki/Troubleshooting.md)
 
 ## See the desk
 
@@ -121,6 +123,17 @@ Read [provider setup](docs/wiki/Installation.md#local-provider-demo) before enab
 
 ## Ask your agent
 
+### Install skills in your product
+
+| Product | Installation choices |
+|---|---|
+| [Codex](docs/wiki/Skill-Installation.md#codex) | `npx`, manual copy, shell installer, or plugin. |
+| [Claude Code](docs/wiki/Skill-Installation.md#claude-code) | `npx`, manual copy, shell installer, or plugin. |
+| [ChatGPT](docs/wiki/Skill-Installation.md#chatgpt) | Individual hosted-skill uploads where the account supports Skills, plus a separate MCP app. |
+| [Claude chat](docs/wiki/Skill-Installation.md#claude-chat) | Individual hosted-skill ZIPs plus a custom MCP connector. |
+
+The [installation guide](docs/wiki/Skill-Installation.md) includes single-skill and all-skill commands, user/project scope, ZIP preparation, and connection checks.
+
 After connecting the local tools, ask:
 
 ```text
@@ -171,7 +184,8 @@ The [results guide](docs/wiki/Reading-Results.md) explains how to interpret each
 | [Troubleshooting](docs/wiki/Troubleshooting.md) | Installation, provider, import, and chart problems. |
 | [FAQ](FAQ.md) | Common questions and interpretation limits. |
 | [Capabilities](docs/CAPABILITIES.md) | Feature and interface catalogue. |
-| [Architecture](docs/wiki/Architecture.md) | Packages, data flow, and artifact contracts. |
+| [Architecture](docs/wiki/Architecture.md) | Packages, data flow, contracts, and all seven restored design diagrams. |
+| [Preserved project reference](docs/wiki/Reference-README.md) | Complete earlier README, with its engineering detail, measurements, and examples. |
 | [API inventory](docs/INVENTORY.md) | Generated public function and class reference. |
 | [Documentation map](docs/wiki/Documentation-Map.md) | All guides, policies, and maintenance references. |
 

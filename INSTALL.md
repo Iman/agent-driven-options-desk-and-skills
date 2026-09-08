@@ -4,6 +4,10 @@
 
 Eight ways in cover local tools, skills, plugins, and hosted connections.
 Choose where you want calculations to run.
+For individual skill installation, use [Install skills in your agent](docs/wiki/Skill-Installation.md):
+[Codex](docs/wiki/Skill-Installation.md#codex), [ChatGPT](docs/wiki/Skill-Installation.md#chatgpt),
+[Claude chat](docs/wiki/Skill-Installation.md#claude-chat), or [Claude Code](docs/wiki/Skill-Installation.md#claude-code).
+The guide covers manual copies, shell installation, `npx`, individual ZIPs, and MCP connection checks.
 The [sample walkthrough](docs/wiki/Getting-Started.md) is the shortest route to a local dashboard without a data-provider account.
 
 | Route | Includes | Requires |
@@ -130,16 +134,18 @@ See [the OpenAI packaging guide](https://developers.openai.com/plugins/build/plu
 
 ## 5. Skills only
 
+For explicit source selection, user/project scope, and manual installation, use the [platform guide](docs/wiki/Skill-Installation.md).
+
 ```sh
-npx skills add Iman/agent-driven-options-desk-and-skills --list
-npx skills add Iman/agent-driven-options-desk-and-skills
+npx skills add https://github.com/Iman/agent-driven-options-desk-and-skills/tree/main/shell/skills --list
+npx skills add https://github.com/Iman/agent-driven-options-desk-and-skills/tree/main/shell/skills
 ```
 
 Select the skills and agent when prompted.
 To name Claude Code explicitly:
 
 ```sh
-npx skills add Iman/agent-driven-options-desk-and-skills -a claude-code
+npx skills add https://github.com/Iman/agent-driven-options-desk-and-skills/tree/main/shell/skills -a claude-code
 ```
 
 These commands install instructions. Calculations need separately installed CLI or MCP tools.
@@ -166,6 +172,7 @@ Do not enable it beside the local plugin in the same session: they expose overla
 Directory review status is not a guarantee of account-level availability.
 
 Skills ZIP files are instruction packages, not running MCP servers.
+Personal upload instructions are in [ChatGPT setup](docs/wiki/Skill-Installation.md#chatgpt) and [Claude chat setup](docs/wiki/Skill-Installation.md#claude-chat).
 Maintainer upload and directory-submission instructions are in [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
 ## 7. MCP without a plugin

@@ -2,6 +2,9 @@
 
 [Guide home](Home.md) | [First walkthrough](Getting-Started.md)
 
+[Install individual skills](Skill-Installation.md) covers Codex, ChatGPT, Claude chat, and Claude Code.
+It includes manual, shell, `npx`, and browser-upload routes.
+
 Choose the calculation location first. A plugin or skill installation does not always install the local tools.
 
 | You want | Install | Then do this |
@@ -66,8 +69,8 @@ For a shorter first run, omit the history calculations:
 ## Skills only
 
 ```sh
-npx skills add Iman/agent-driven-options-desk-and-skills --list
-npx skills add Iman/agent-driven-options-desk-and-skills
+npx skills add https://github.com/Iman/agent-driven-options-desk-and-skills/tree/main/shell/skills --list
+npx skills add https://github.com/Iman/agent-driven-options-desk-and-skills/tree/main/shell/skills
 ```
 
 Select the skills and agent in the install prompt.

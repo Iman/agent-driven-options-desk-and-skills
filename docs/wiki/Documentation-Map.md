@@ -40,3 +40,5 @@
 
 Maintainers can find directory packaging and evaluation material in the [submission pack](../SUBMISSION.md).
 Those instructions are separate from end-user installation.
+
+[Install skills by platform](Skill-Installation.md) · [Architecture and preserved reference](Architecture.md#detailed-reference-and-preserved-content)

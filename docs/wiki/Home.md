@@ -39,3 +39,5 @@ The software is free for noncommercial use under the [project license](../../LIC
 [Privacy](../../PRIVACY.md) and the [research disclaimer](../../DISCLAIMER.md) explain the boundaries.
 
 Next: [Complete the first walkthrough](Getting-Started.md).
+
+[Install skills by platform](Skill-Installation.md) · [Architecture and preserved reference](Architecture.md#detailed-reference-and-preserved-content)

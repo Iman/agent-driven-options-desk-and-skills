@@ -20,3 +20,6 @@ The editable wiki source lives in `docs/wiki/`.
 [Development](wiki/Development.md) describes validation and publication.
 
 For contributors: [Testing and coverage](TESTING.md) describes the test layers and required unit coverage.
+
+[Platform skill installation](wiki/Skill-Installation.md) covers manual and automated setup.
+[Architecture and diagrams](wiki/Architecture.md) links the complete preserved README, FAQ, and installation guide.

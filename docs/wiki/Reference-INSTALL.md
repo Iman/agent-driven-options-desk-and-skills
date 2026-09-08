@@ -1,0 +1,329 @@
+# Earlier installation guide: preserved edition
+
+[Architecture](Architecture.md) | [Current installation guide](Skill-Installation.md) | [Guide home](Home.md)
+
+This page preserves the complete `INSTALL.md` from [revision `9626273`](https://github.com/Iman/agent-driven-options-desk-and-skills/blob/9626273b5ea0f3374c48d3424605a57377473359/INSTALL.md).
+It contains earlier measurements, examples, diagrams, and explanations.
+Installation steps, platform support, test counts, and status claims describe that edition and can differ from the current guides.
+Repository links and images point to the same revision, so later file changes do not change the referenced material.
+The original body is retained, with relative file links expanded for this wiki page.
+
+---
+
+# Installing
+
+Nine ways in, depending on what you want and which runtime you use. Every
+one of them has been run and verified; none is written from memory.
+
+If you only want to try it, use the first. If you only want the skills and
+not the tools, use the second, which needs no Python. If you use claude.ai
+in the browser rather than a terminal, use the seventh. If you are in
+Codex or ChatGPT, use the second or the fourth.
+
+---
+
+## 1. One command, everything (Claude Code, Codex, Gemini CLI)
+
+```
+./install.sh
+```
+
+Creates a virtualenv at `~/.optiondesk`, installs the shell with the free
+data provider and the analytics engine, links `optiondesk` and
+`optiondesk-mcp` into `~/.local/bin`, copies the skills into both
+`~/.claude/skills` and `~/.agents/skills` so Claude Code and Codex each
+find them, registers the MCP server with every agent runtime CLI it finds,
+then offers an optional prompt for provider keys and runs a verification.
+
+Each installed skill also receives a copy of `DISCLAIMER.md`, because the
+skills point at it and a skill installed on its own has no repository root
+to find it in.
+
+Re-running is safe. It never overwrites a file it did not create: a skill
+directory or a binary it does not recognise is left alone with a warning.
+
+Flags:
+
+| flag | effect |
+|---|---|
+| `--dry-run` | print the plan, change nothing |
+| `--no-engine` | shell only, no analytics engine, Greeks unavailable |
+| `--skills-only` | just the markdown skills, no Python at all |
+| `--no-mcp` | leave every runtime config untouched |
+| `--no-keys` | skip the optional key prompt |
+| `--prefix DIR` | install somewhere other than `~/.optiondesk` |
+| `--bin-dir DIR` | put the two commands somewhere other than `~/.local/bin` |
+| `--skills-dir DIR` | Claude skills somewhere other than `~/.claude/skills` |
+| `--agents-skills-dir DIR` | Codex and ChatGPT skills somewhere other than `~/.agents/skills` |
+| `--no-skills` | Python only, no skills |
+| `--repo NAME` `--ref REF` | install from a different repository or branch |
+| `--yes`, `-y` | do not prompt |
+| `--version`, `--help` | print and exit |
+| `--uninstall` | remove exactly what it created, and nothing else |
+
+## 2. Skills only, through the skills CLI
+
+```
+npx skills add Iman/agent-driven-options-desk-and-skills
+```
+
+Installs the six skills and nothing else, with no Python involved. Add
+`--list` to see them first, or `--skill options-greeks options-strategy` to
+take a subset.
+
+The CLI finds them through `.claude-plugin/marketplace.json`, which this
+repository generates, so the skills stay in `shell/skills` where the rest
+of the build expects them.
+
+It detects which agents you have installed and asks where to put them.
+Claude Code reads `.claude/skills/`; universal agents share
+`.agents/skills/`. Asking an agent to run the command for you is the case
+that goes wrong: the CLI then runs non-interactively and may install only
+to `.agents/skills/`, which Claude Code does not read. Name the agent when
+that happens:
+
+```
+npx skills add Iman/agent-driven-options-desk-and-skills -a claude-code
+```
+
+One caveat worth knowing. This path gives you the skills as knowledge, not
+the tools they describe, the same as option 6 below. An agent holding them
+can explain the desk and its conventions and cannot run anything until the
+CLI is installed too.
+
+## 3. As a Claude Code plugin, which also brings the commands and agents
+
+```
+/plugin marketplace add /path/to/option-desk
+/plugin install option-desk@option-desk
+```
+
+Or, once published, `/plugin marketplace add Iman/agent-driven-options-desk-and-skills`.
+
+That gives you the six skills, six commands (`/desk-open`, `/desk-risk`,
+`/desk-test`, `/desk-mark`, plus `/desk-watch` and `/desk-complete` which
+are shaped for loops), two agents (an adversarial risk reviewer and a data
+auditor) and the MCP server declaration, in one step.
+
+The plugin's MCP entry names the bare command `optiondesk-mcp`, so it
+resolves through your PATH. `install.sh` creates that binary in
+`~/.local/bin`, but it does not edit your shell profile: if that
+directory is not already on PATH it warns and leaves it to you. A plugin
+install on its own creates no binary at all, since nothing in the plugin
+runs the installer. The skills, commands and agents work regardless;
+only the tools need the binary.
+
+The plugin directory is generated. Edit `shell/skills`, `.claude/commands`
+or `.claude/agents`, then run `python3 scripts/refresh.py` to rebuild it
+along with everything else generated, or `python3 scripts/package.py` for
+the installable forms alone.
+
+## 4. In Codex or ChatGPT, as a plugin
+
+```
+codex plugin marketplace add Iman/agent-driven-options-desk-and-skills
+codex plugin add option-desk@option-desk
+```
+
+Both verified against codex-cli 0.149.1 on a real install, not read off a
+documentation page: the first registers the marketplace, `codex plugin
+list` then shows `option-desk@option-desk`, and the second installs it into
+`~/.codex/plugins/cache/`. An earlier draft of this file claimed there was
+no `codex plugin add` command, on the strength of a docs page that does not
+mention it. The binary has it, and the binary is the authority.
+
+The bundle carries two manifests over one set of files. Codex and ChatGPT
+read `.codex-plugin/plugin.json`, Claude Code reads
+`.claude-plugin/plugin.json`, and both point at the same six skills. The
+six commands and two agents in it are Claude-only, so what Codex gets from
+this path is the six skills plus the MCP server declaration.
+
+Codex also finds the skills with no plugin at all, because it scans
+`.agents/skills` in a repository and `~/.agents/skills` for your user. This
+repository symlinks the former to `shell/skills`, so cloning it is enough,
+and option 2 above installs to the latter.
+
+### Public plugin with hosted MCP
+
+The public Option Desk submission uses the hosted Streamable HTTP service at
+`https://optiondesk.avidquant.com/mcp`. It includes four supporting skills.
+Browser ChatGPT connects to that service without a local Python installation.
+
+Build the package:
+
+```sh
+python3 scripts/package.py
+```
+
+`dist/option-desk-hosted.zip` contains the complete public plugin.
+For the portal, select **With MCP** and enter the hosted URL.
+Upload `dist/option-desk-skills.zip` on the Skills page of that submission.
+
+The hosted plugin validates permitted snapshots and calculates Greeks,
+positioning, and strategy plots. SYNTH provides examples without uploads.
+It fetches no market data. Simulation and backtesting remain local capabilities.
+
+There is no separate skills-only submission. The build removes the retired
+standalone archive. See [the submission pack](https://github.com/Iman/agent-driven-options-desk-and-skills/blob/9626273b5ea0f3374c48d3424605a57377473359/docs/SUBMISSION.md) for listing
+text, starter prompts, and evaluation cases.
+
+## 5. From a checkout, by hand
+
+```
+python -m venv .venv && . .venv/bin/activate
+pip install -e "shell[yahoo,dev]" -e engine
+optiondesk doctor
+```
+
+Add `-e agent` for the LangChain bindings, which are optional and pull in
+`langchain-core`.
+
+## 6. Skills only, no Python
+
+```
+./install.sh --skills-only
+```
+
+Or copy them yourself: the skills are plain directories of markdown under
+`shell/skills`, and they work in `~/.claude/skills` (personal) or a
+project's `.claude/skills`.
+
+An agent with the skills but not the tools can explain the desk, the
+conventions and the reporting rules. It cannot run anything, because the
+commands the skills describe are not there. Using them as domain knowledge
+without the automation is a legitimate choice.
+
+## 7. claude.ai, in the browser
+
+Upload the zips from `dist/skills/`:
+
+```
+python3 scripts/package.py     # builds them
+```
+
+Then in claude.ai, Settings, Capabilities, Skills, upload a zip. There is
+one per skill, plus `dist/option-desk-local-skills.zip` with all six.
+
+Two things to know before you do. Custom skills on claude.ai are per user:
+each person on a team uploads their own, and an admin cannot distribute
+them centrally. And the runtime there has no access to your machine, so the
+skills work as knowledge and instructions rather than as tools, the same
+as options 2 and 6.
+
+For tools in the browser, use the hosted service instead. Add
+`https://optiondesk.avidquant.com/mcp` as a custom MCP connector, or
+install the `option-desk-hosted` plugin from this repository's
+marketplace, which declares that connector and carries the four skills
+that match it. The service serves a synthetic sample and privately
+processes an option-chain snapshot you are permitted to send; it fetches
+no market data, and its own privacy policy and terms are linked from
+`PRIVACY.md`. Do not install it beside the local `option-desk` plugin: the
+two servers expose tools with the same names.
+
+## 8. Docker, for the CLI and the dashboard
+
+```
+docker run --rm -v "$PWD/artifacts:/artifacts" \
+    ghcr.io/iman/agent-driven-options-desk-and-skills chain SPY
+
+docker run --rm -p 8787:8787 -v "$PWD/artifacts:/artifacts" \
+    ghcr.io/iman/agent-driven-options-desk-and-skills dashboard --host 0.0.0.0
+```
+
+No Python on the machine, a pinned interpreter and pinned optional
+dependencies, and the same behaviour on Windows as on anything else. The
+image runs as an unprivileged user and carries the licence, the disclaimer
+and the six skills as files you can read from inside it.
+
+**Mount a volume.** Artifacts are the product: every command writes a
+schema-validated JSON file, and those are what the dashboard renders and
+what an agent reads. Without `-v` they are written inside the container and
+lost when it exits. The entrypoint refuses to run a writing command without
+a mount rather than working and discarding the result, and exits 64.
+`OPTIONDESK_ALLOW_EPHEMERAL=1` overrides it for a deliberate throwaway run.
+
+**What this path does not give you**, and it is most of the project. The
+six skills have to sit in `~/.claude/skills` or `~/.agents/skills` on the
+HOST, because the host's agent reads them. The MCP server is a stdio
+process an agent runtime launches itself. Neither reaches an agent outside
+the container. Use `./install.sh` or one of the plugin paths above for
+those; this image is the tools and the page.
+
+Keys, if you use a paid provider, come in as environment variables:
+`-e ALPHAVANTAGE_API_KEY=...`, or mount your config with
+`-v ~/.optiondesk:/home/desk/.optiondesk:ro`.
+
+## 9. MCP only, without skills
+
+If you want the tools in a runtime and nothing else:
+
+```
+claude mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
+codex  mcp add optiondesk -- /abs/path/to/.venv/bin/optiondesk-mcp
+gemini mcp add -s user optiondesk /abs/path/to/.venv/bin/optiondesk-mcp
+```
+
+Twelve tools, typed schemas, no prose. This is the right choice when the
+runtime already has its own conventions and you want capability, not
+guidance.
+
+---
+
+## Verifying an install
+
+```
+optiondesk doctor
+```
+
+Reports the shell version, whether the analytics engine is present, which
+providers can answer, which optional keys are configured (never their
+values), and where artifacts are written.
+
+Then the shortest useful run:
+
+```
+optiondesk chain SPY
+optiondesk greeks --band 0.06
+optiondesk dashboard
+```
+
+## Provider keys
+
+Optional. Everything works with none: chains, Greeks, positioning,
+structures, simulation and backtests all run on free sources.
+
+```
+optiondesk keys list                 # what is needed, what is set, masked
+optiondesk keys set alphavantage     # prompts with hidden input
+optiondesk keys unset alphavantage   # remove one
+optiondesk keys path                 # where they are stored
+```
+
+Keys live in `~/.optiondesk/config.env`, outside any repository, readable
+only by you. Resolution order is a command line flag, then the
+environment, then `.env` in the working directory, then that file. They are
+never printed in full, never logged, and never written into an artifact.
+
+## Uninstalling
+
+```
+./install.sh --uninstall
+```
+
+Removes the virtualenv and source it created, the two symlinks if they
+still point into that virtualenv, the skills it marked as its own, and the
+MCP registrations under its own server name. It leaves your artifacts, any
+skill it did not install, and any binary it did not create.
+
+For the plugin: `/plugin uninstall option-desk@option-desk`.
+
+## Requirements
+
+Python 3.11 or newer. Everything else is optional: `yfinance` for the free
+data provider, `fastapi` and `uvicorn` for the richer dashboard server
+(there is a standard library fallback), `jsonschema` for full schema
+validation (there is a built-in subset validator), `langchain-core` only if
+you want the agent bindings.
+
+The engine itself has no dependencies outside the standard library and no
+network access at all.

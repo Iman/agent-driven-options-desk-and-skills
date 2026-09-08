@@ -533,8 +533,12 @@ def test_the_readme_contents_list_names_every_section():
     cover them.
     """
     text = read("README.md")
-    body = text.split("## Contents", 1)[1].split("\n---", 1)[0]
-    listed = set(re.findall(r"^- \[([^\]]+)\]", body, re.M))
+    assert text.count("## Contents\n") == 1
+    assert "Page index" not in text
+    body = text.split("## Contents\n", 1)[1].split("\n## ", 1)[0]
+    # The shared contents also links to wiki pages and installation guides.
+    # Only same-page links describe sections of this README.
+    listed = set(re.findall(r"^- \[([^\]]+)\]\(#[^)]+\)", body, re.M))
     actual = [h for h in re.findall(r"^## (.+)$", text, re.M)
               if h != "Contents"]
 

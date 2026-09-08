@@ -9,12 +9,23 @@ Import a chain, inspect its Greeks and positioning, compare structures, and keep
 
 [![Agent guides](https://img.shields.io/badge/guides-Codex%20%7C%20ChatGPT%20%7C%20Claude%20chat%20%7C%20Claude%20Code-blue)](docs/wiki/Skill-Installation.md) [![Last commit](https://img.shields.io/github/last-commit/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/commits/main)
 
-**Page index**
+## Contents
+
+**On this page**
+
+- [See the desk](#see-the-desk)
+- [Get started](#get-started)
+- [Ask your agent](#ask-your-agent)
+- [Follow a research workflow](#follow-a-research-workflow)
+- [Read the documentation](#read-the-documentation)
+- [Development](#development)
+- [Licensing](#licensing)
+
+**Guides and wiki**
 
 - [Wiki](https://github.com/Iman/agent-driven-options-desk-and-skills/wiki)
 - [Architecture and diagrams](docs/wiki/Architecture.md)
 - [Install skills](docs/wiki/Skill-Installation.md)
-- [Get started](#get-started)
 - [User guide](docs/wiki/Home.md)
 - [Examples](docs/wiki/Examples.md)
 - [Install](INSTALL.md)
@@ -55,18 +66,6 @@ The [dashboard guide](docs/wiki/Dashboard.md) explains how to read them.
 | Inspect the formula and disagreements between models. | Compare sensitivities and payoff shapes. |
 
 ![The dashboard pipeline from input through saved research artifacts](docs/screenshots/dashboard-pipeline.png)
-
-## Contents
-
-- [See the desk](#see-the-desk)
-- [Get started](#get-started)
-- [Ask your agent](#ask-your-agent)
-- [Follow a research workflow](#follow-a-research-workflow)
-- [Read the documentation](#read-the-documentation)
-- [Development](#development)
-- [Licensing](#licensing)
-
----
 
 ## Get started
 

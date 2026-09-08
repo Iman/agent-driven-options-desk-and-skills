@@ -1,0 +1,801 @@
+{
+  "capture_utc": "2026-09-08T22:32:48+00:00",
+  "code_revision": "9626273b5ea0f3374c48d3424605a57377473359",
+  "scenario": "Synthetic teaching inputs. No observed market data.",
+  "underlying": "SYNTH",
+  "expiry": "2026-10-08",
+  "gallery_viewport_width": 1600,
+  "readme_viewport_width": 1400,
+  "inputs": [
+    {
+      "path": "examples/chain-synth-far.json",
+      "sha256": "88107d16be0c8e54594b19716ed4239138296566a99eb5beda27e3c02bdb43bb"
+    },
+    {
+      "path": "examples/chain-synth.json",
+      "sha256": "d5747f90e71d440d898092de283603a06ca48d58310900a4f15c9b88dde53c13"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_bear_put_spread_30d.json",
+      "sha256": "e9e569813552c34949938cd7b87bcfb670772450dd9f9aa9c4a74e2913415688"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_broken_wing_butterfly_30d.json",
+      "sha256": "fad33afd1046fc12c676a9985ed10a1b8e1a97a67c5f2b4e8b55f4ad0a2f645e"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_bull_call_spread_30d.json",
+      "sha256": "ed3e086eae7bd442397182e0df1e4388a0e4ee1bf3706fe2f71a130cd070308d"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_cash_secured_put_30d.json",
+      "sha256": "e276ea1b3a8a17838ec8b26b480bc78309849114b52cdc6b5de458eb8c86c571"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_covered_call_30d.json",
+      "sha256": "9b1d576647fa8e923c3cd97a1d3ad2f7db60be6443b906455953ae7cb7668138"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_iron_butterfly_30d.json",
+      "sha256": "398ba81a9136717e228a6dcfa7c6c51c9c5658e8bd3c408f449ab5f1fc3af614"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_iron_condor_30d.json",
+      "sha256": "f65aec6b90b1b9d36627d5cfe9fc16548159c4d759458ac07dfe40283bbff96b"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_jade_lizard_30d.json",
+      "sha256": "b51f9d1bb2d6e4fc63f2354b97f7b071052bf1e745a6cc23f3f2515a8935bac3"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_long_call_30d.json",
+      "sha256": "2ddf3836db2b8b1c13f33a820f7dea900f1a23e3558f6404d6886bcae3355365"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_long_call_butterfly_30d.json",
+      "sha256": "be60881b6f88184b4dbb3b7523508c68e43f4a0eae9abe63c04f2b59e5efea2c"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_long_put_30d.json",
+      "sha256": "0585524b383b6ea933257055afd29f1b7dfea3ca68bbb7567dd8c6bae60946d4"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_protective_put_30d.json",
+      "sha256": "f191368754eb7948640103a7c347abcdd8e455ff61e5384cda686c89966fdbd0"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_ratio_spread_30d.json",
+      "sha256": "08359ce481198a4ce638489749d73c21990fbc1eea675a87ab992fa49ff7f76d"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_straddle_30d.json",
+      "sha256": "86a8183c91987c1f7a51b8a163629aea034c03d7e4d0a29c295084e826280d41"
+    },
+    {
+      "path": "examples/dashboard/backtest_SYNTH_strangle_30d.json",
+      "sha256": "27f6742a5a69890f116df189175790a03bec59a8c6c476f14dbf4121070fcf0e"
+    },
+    {
+      "path": "examples/dashboard/chain_SYNTH_2026-10-08.json",
+      "sha256": "83c88d9d32dbb0e461b8c7e35b09be590a215742a6c3553784332935ce6af753"
+    },
+    {
+      "path": "examples/dashboard/chain_SYNTH_2026-11-07.json",
+      "sha256": "af2e1f8b507c543e3234b6349694b1c4d123c21096442d09e2190c75407823ed"
+    },
+    {
+      "path": "examples/dashboard/comparison_SYNTH_2026-10-08.json",
+      "sha256": "5f657962b786c03cd41af5c580e5a79079718beb89ce18f4857f155186778a2b"
+    },
+    {
+      "path": "examples/dashboard/exposure_SYNTH_2026-10-08.json",
+      "sha256": "427a5b0b8195f5c7f643e5f6030ffef8e6d6c8a5eb8ea7827dea4237ecdbf6de"
+    },
+    {
+      "path": "examples/dashboard/exposure_SYNTH_2026-11-07.json",
+      "sha256": "32241b5bf9ff76affd616fa05c05a78fafbd01120d6787dd0f4105d6c8d09433"
+    },
+    {
+      "path": "examples/dashboard/greeks_SYNTH_2026-10-08.json",
+      "sha256": "c5f588a6b02101c889df45b896de65ac65c8f3f17860d59f0eab9287bfe7b4f3"
+    },
+    {
+      "path": "examples/dashboard/greeks_SYNTH_2026-11-07.json",
+      "sha256": "c98074fb5f87c854db5aea59433a8aa763f5e64c35a18b328270252de98405b5"
+    },
+    {
+      "path": "examples/dashboard/simulation_SYNTH_30d.json",
+      "sha256": "857978a90704ddc296855d7f2afbfe21788a6e8a36b68cad54aef836cf2a92e8"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_bear_call_spread_2026-10-08.json",
+      "sha256": "42f03c564ae502e35d18e8be1cadc2821aa8a388d57eaf1bed72d255434c228a"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_bear_put_spread_2026-10-08.json",
+      "sha256": "c5e7d8ed9d14f7a26d177a7e0a9dd63775b11efd97ffbc3084b3d67915dfedfb"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_broken_wing_butterfly_2026-10-08.json",
+      "sha256": "8fa2e40cd4e150ed1669b34f2dc7c6fba4cec58e829a1968ff26e847efe67577"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_bull_call_spread_2026-10-08.json",
+      "sha256": "7fdf122030d109a42acb6554e01f392a16dc30f99d646e84ee1931106e6d0230"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_bull_put_spread_2026-10-08.json",
+      "sha256": "5447aefc15150f5c4d1e75a11dde879cd44b138ff486733c3d1ab56133dcfb97"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_calendar_put_spread_2026-10-08.json",
+      "sha256": "8b0cb8a5aa838682d0707c6ae0b48b106108393d1670906ffa166d58731811da"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_calendar_spread_2026-10-08.json",
+      "sha256": "fecede1e743d49444a2c94851d2b4598dc6ca556d58c0c98ce88a0ba5f94f52d"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_cash_secured_put_2026-10-08.json",
+      "sha256": "353aced0ba3bfa7c63faac5ab245a335f2d3a8f995a626c421c0aa2e045fed2b"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_diagonal_put_spread_2026-10-08.json",
+      "sha256": "890002ac42fd61b7d0e0142007a2f0f5fd45fe449ffb72dbc816d4e4991fbe96"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_diagonal_spread_2026-10-08.json",
+      "sha256": "b5fd27eca9f5447e7ac1dc68a82b4cb912d9fce36984931f304ac9d687d2c2f7"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_iron_butterfly_2026-10-08.json",
+      "sha256": "f234a311fa59de93dde2217dde6ee111e71c7c7bbc108690ae0b6e779afd11c8"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_iron_condor_2026-10-08.json",
+      "sha256": "b3c71b23814930788556e062574b1a6f1a0bbda0c2bafd142d55731f3baca9a6"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_jade_lizard_2026-10-08.json",
+      "sha256": "cb44928b47fdd0af938454c65cb78967426dd35d5497b246031cf60b8ae3250e"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_long_call_2026-10-08.json",
+      "sha256": "80940fe946bd45f56183069e7430b50ccf182ca29ae8e9febd806b12b289b909"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_long_call_butterfly_2026-10-08.json",
+      "sha256": "5edbb83c34cff81cb0e8dca6e0d2b69329e47303a53992c59edf3285facddd25"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_long_put_2026-10-08.json",
+      "sha256": "7ec730e69cee1eacf7e85f9d37ab164b928f76269de51c520f2574ef2bb1778d"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_ratio_call_diagonal_2026-10-08.json",
+      "sha256": "378320c352a8720b6d0bfe231472ede879040c1d97817302d4583874dcd77f48"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_ratio_put_diagonal_2026-10-08.json",
+      "sha256": "a41662770a7ab30582e13bb059f85e8b480d001fcf8580546a3f9ec348d4423f"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_ratio_spread_2026-10-08.json",
+      "sha256": "32990e0060e7ba83e79a126f5a38d73631e1a72e934a26cb3335ae464ee558f8"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_straddle_2026-10-08.json",
+      "sha256": "8c07273975d6a0b78875a83087e532412ee9123ea789d6810a814699dbeca638"
+    },
+    {
+      "path": "examples/dashboard/strategy_SYNTH_strangle_2026-10-08.json",
+      "sha256": "5a5037f513b31f812eb34efb4e6873157535104e9a486c586824ecf43122f119"
+    },
+    {
+      "path": "examples/synthetic-history.json",
+      "sha256": "3b8a2c97266d12e295102611339ba8e6724cdc292e40783a246aa7201d388308"
+    }
+  ],
+  "images": [
+    {
+      "path": "docs/screenshots/dashboard-backtest.png",
+      "sha256": "cb5fe2b4c51a1aa163ea6291382fca0ad23d12ecb1093ee17b86c79e8ff71898",
+      "width": 1360,
+      "height": 1599
+    },
+    {
+      "path": "docs/screenshots/dashboard-comparison.png",
+      "sha256": "6d9091878d30fcdef6abc8381bf01be26e1b198e6156ca3c3953c321ffba67f2",
+      "width": 1360,
+      "height": 639
+    },
+    {
+      "path": "docs/screenshots/dashboard-composite.png",
+      "sha256": "98663eeaf8f708b20e5fbed2699fb3bee29549eac8f147f986deb2620d71764a",
+      "width": 1360,
+      "height": 1073
+    },
+    {
+      "path": "docs/screenshots/dashboard-ladder.png",
+      "sha256": "15320131590d0c90b67628e6128895b369281996392e38bf635727704a3260e2",
+      "width": 1360,
+      "height": 1929
+    },
+    {
+      "path": "docs/screenshots/dashboard-pipeline.png",
+      "sha256": "da3d5b9e80216e0604e041474cdd54c71633deb4556aa25ca3e0d27fe65df332",
+      "width": 1360,
+      "height": 806
+    },
+    {
+      "path": "docs/screenshots/dashboard-positioning.png",
+      "sha256": "2116e33aa25d5709f9d375eca468b555c5918f9f897e6a8590bfd4f1e57c119e",
+      "width": 1360,
+      "height": 1728
+    },
+    {
+      "path": "docs/screenshots/dashboard-simulation.png",
+      "sha256": "f3ddbf4d6fcb25a6214a51dd0fefe7655045bb7279b1e9ec48d292c2bbbe5443",
+      "width": 1360,
+      "height": 2465
+    },
+    {
+      "path": "docs/screenshots/dashboard-structures.png",
+      "sha256": "5408ebc0e34860d317d44236c799f3f09b74d96c1e1de3fa63b90828c13a5799",
+      "width": 1360,
+      "height": 1374
+    },
+    {
+      "path": "docs/screenshots/dashboard-time-spreads.png",
+      "sha256": "bdfb96f0f84b01a9ee5d640430c36c44088d7a604ecb8ce295fa3662e9294a33",
+      "width": 1360,
+      "height": 687
+    },
+    {
+      "path": "docs/screenshots/dashboard-volatility.png",
+      "sha256": "b88258a68f8374fed270d97f6d580bfc00d37c1eff443ffaf142c240592fc4aa",
+      "width": 1360,
+      "height": 2399
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/all-structures-on-one-payoff-axis.png",
+      "sha256": "611172c62296f5ca9ac4047546b94f38a38834be310e82ea20f9a0fe81b0da3a",
+      "width": 1406,
+      "height": 404
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/backtest-drawdown-from-peak.png",
+      "sha256": "bcff08c7a7e7c89e693143276cfe3ec18201aa8caa34ad554f7b741021387b9f",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/backtest-equity-curves.png",
+      "sha256": "bd2f689874bf03d2c08881fd2dc7ccbb572da58d3a8d37c1e7d3a4e98b8ffc58",
+      "width": 1406,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/backtest-trade-outcomes.png",
+      "sha256": "0917caa04cc5f4a06b80051f9fde398dbdbba87cd1c402024b57d4c06fa09d56",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/condor-search.png",
+      "sha256": "acdaf07c356a8e13024bc80a22cb8afb7515ab9389c8800d503fbace46983b9a",
+      "width": 1406,
+      "height": 324
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/cumulative-gamma-exposure.png",
+      "sha256": "9acb6f212876962cf1b36d5b3d41831c2ffbe3b30345e5a6bf30ec6335015d13",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/dealer-gamma-by-strike.png",
+      "sha256": "bfa0658caca17eb4dd3d2655c7b7de0200cbe6a3dd3160eeb82e35a6cf96f231",
+      "width": 1406,
+      "height": 324
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/delta-hedge-corridor.png",
+      "sha256": "ba0736b6a678f63d3771c983c2b381cd5052fdc90499cf323d357a4d7795e070",
+      "width": 1406,
+      "height": 404
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-charm-by-strike.png",
+      "sha256": "632fa7ad789d44288cd3e2c339fed43db14a80270d2ed430af42d0736bd22788",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-delta-by-strike.png",
+      "sha256": "31fa6b67f939a602eb8318afcedb3b9b0400ae164e164cf5eee55da89efca860",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-gamma-by-strike.png",
+      "sha256": "f8790d5bc9217f63571f68ee1d38614e7ac0cc5154a8b088821c11e63fb338a4",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-theta-by-strike.png",
+      "sha256": "24a7c53ef30b6aadf7a5130b814308b27373f24c6faddb40ef92dbf47bdf905b",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-vanna-by-strike.png",
+      "sha256": "8f38afc764d7eda26f6eae1afc0cd6f9f78dbd15da4cce7c97f055b7e4072e45",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/greek-vega-by-strike.png",
+      "sha256": "a8784ea282f7f7464c8d8613cafbb5046390571498da0365f9d4654acca5fc3b",
+      "width": 318,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/implied-volatility-smile.png",
+      "sha256": "b41b374b8ba1abef3090e9d19263f3ca1fca492f49c54be10a0bae480c482b91",
+      "width": 1406,
+      "height": 324
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/implied-volatility-surface.png",
+      "sha256": "63496735fe31dd71b81470e24d85e084fa7b63048ca4f4594966a0d44b167c9a",
+      "width": 1406,
+      "height": 404
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/max-pain-profile.png",
+      "sha256": "d2eb5a83acd719aec4e576b80773464ff2b5222cb9414662d4496de7da148c2d",
+      "width": 1406,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/open-interest-by-strike.png",
+      "sha256": "06ebc4a8da2ad40d7db5246820bd675ef351269ed430695c1c31a9252b575c29",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/payoff-at-expiry.png",
+      "sha256": "d2d3c3bde5e852610c768e08bd7069974386887a6a99ee1c4e4883121ee25637",
+      "width": 1406,
+      "height": 404
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/posterior-predictive-fan.png",
+      "sha256": "6badf76213d05fa53d77148d839a979c442f8bb0e39eb261442ed914051ff968",
+      "width": 1406,
+      "height": 324
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/probability-against-expected-return.png",
+      "sha256": "2fe7c76a738d4ef984379447e3b31278601eb40fb0a32b2a3c92820864c41e48",
+      "width": 1406,
+      "height": 324
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-1.png",
+      "sha256": "6df766529a7f55b30fa4e07543541eb9cc7cebd348f70b149c8486b4658ca877",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-2.png",
+      "sha256": "275a3f943064b1721eddfa0df60760fd2c947857b6f00205bcaede468a076057",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-3.png",
+      "sha256": "c2567c47a2c2075c99e74bc2a9bb2b48456085ce04ea31108e2d12ea6328b2a8",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-4.png",
+      "sha256": "2d88ae9675de77561da1946ce98405a6004ca062c36c5b77ced16dc49f1b49dc",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-5.png",
+      "sha256": "ced5332d0b024d0d59af3c4f5bf1b0e0593e11e82046ad6695a18fb9aa62f06c",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/profit-distribution-6.png",
+      "sha256": "f213bce32f7b5b6a470fef973702e3f8ecd4da47825fc2f86d32b97a7b1aafff",
+      "width": 310,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/skew-across-expiries.png",
+      "sha256": "bebe761b9bdced578c1a359ad88fb3dcb7ae73c4f251e75f1ec91b7416765b4c",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/terminal-distribution.png",
+      "sha256": "342756d4a7afb0cbd4ad816513c0ddc46f1106b8c3a1cb6783278d442d76c8a9",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/variance-risk-premium.png",
+      "sha256": "a2efd15e444416a7f98382e45e1bcabfc898e26bab767a4502cad9f74da23f0f",
+      "width": 1406,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/volatility-and-expected-move-by-expiry.png",
+      "sha256": "c28dbf99be6d3d49a05b4597b2c65f675724e2310199394f82d33d8e1d1cc45b",
+      "width": 681,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/charts/volume-by-strike.png",
+      "sha256": "bada967cabdb4360cbf5c53da3a4a574c91b24db7f9ad372145929571156696e",
+      "width": 1406,
+      "height": 254
+    },
+    {
+      "path": "docs/screenshots/gallery/dashboard-full-page.png",
+      "sha256": "77fd0ac5bc7c92a758ed95c978488e23278ee0a6e3d46164ea1d2d754b67f60c",
+      "width": 1600,
+      "height": 18399
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/22-graded-contracts.png",
+      "sha256": "14e2e5e6b306cef8b8aa317c9d4a2d27b6f5aa2071f8ab35614cf0bbbb4b02b9",
+      "width": 1440,
+      "height": 516
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/analysing-something-else.png",
+      "sha256": "2d56cbb4fd1a4efdb6ad79a11666b222b9e6ae36dfdacc6f82b26ffabcfd504f",
+      "width": 1440,
+      "height": 331
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/charm.png",
+      "sha256": "ab1cd1f241084f11f793ce066409b66780951d20737dfa22d5807b6d29f75b4d",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/cumulative-exposure-and-the-flip.png",
+      "sha256": "9aa2b85d6d64930f3bf4a6321a0ff9df52e3b2913f56442844979ecde70bd6df",
+      "width": 715,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/dealer-gamma-exposure-by-strike.png",
+      "sha256": "410a71d86c7f24ced1fbbdd43961e0d812679a910209a93405fe5f5c66b26c67",
+      "width": 1440,
+      "height": 476
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/delta.png",
+      "sha256": "d68939b67c5012c04a59cce3c6537d1f9e5d24934917262a1f73226a2ade3a3a",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/drawdown-from-peak.png",
+      "sha256": "2f634e4f0decd406deb08a117f49fd32af39eb874e80c45f6e18f15f98c63fa7",
+      "width": 715,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/every-condor-on-file-by-the-distance-between-its-shorts.png",
+      "sha256": "d07177a02f533793e568a91176bfd3af8a26bd0b021849f66838e1e35876d943",
+      "width": 1440,
+      "height": 528
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/every-expiry-on-file.png",
+      "sha256": "25d0aa460da3aa6bd1c54ac8511c605a8e318dc151bd69a1ebf48641382a692e",
+      "width": 1440,
+      "height": 163
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/every-structure-on-one-axis.png",
+      "sha256": "ab1ef9dc8fb0e2c6baacf8ed5819e93e2cb8497847de49e13fa3ff96a8a1272d",
+      "width": 1440,
+      "height": 479
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/every-structure-side-by-side.png",
+      "sha256": "2404e82489fab2307e14719fc9496244b5551d9feb168716ed778fa50c72a2b2",
+      "width": 1440,
+      "height": 609
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/gamma.png",
+      "sha256": "f69a4da757d172c188d6830180ec7ad4bcf03c3e18d7bed3c19320e56d29471f",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/how-this-page-was-built.png",
+      "sha256": "7e100c7295a00c5ebf1c63c8edc6a449c2fef1ec2dd4fa9e5fd7780cba5c9011",
+      "width": 1440,
+      "height": 807
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/implied-volatility-by-strike-and-expiry.png",
+      "sha256": "108207326060b573c5589c075840fa7fce04b21eeb3f636798fa6e751c56094b",
+      "width": 1440,
+      "height": 625
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/max-pain-profile.png",
+      "sha256": "4fb192087fd7263a8b8e2deb74115ccf44ab46427fb6789c8294df64f1c627e0",
+      "width": 1440,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/open-interest.png",
+      "sha256": "0b13aa29ea80ac3ea617d7833f8ff87041e97bd22b4a8db52e27bf0bc98dff03",
+      "width": 715,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/outcome-distribution-per-trade.png",
+      "sha256": "769591fb9efe3bc199173dee90d84a75d6522bed7041b32931f3fc23abb0153d",
+      "width": 715,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/payoff-at-expiry.png",
+      "sha256": "b40d4b16c5423a95daea914f220db038b41f33b0a0104174057efa9717fbacfc",
+      "width": 1440,
+      "height": 913
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/posterior-parameters.png",
+      "sha256": "3dae2a69e4aafdf7003a486447db183beac60530f56406e3c3fa99034d950140",
+      "width": 715,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/posterior-predictive-fan.png",
+      "sha256": "c5b1b39ff263cfec662b9d8dd5997b6be4271a2685f826b97146bfa4d8eb7cc3",
+      "width": 1440,
+      "height": 416
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/probability-against-expected-return.png",
+      "sha256": "f66600c9e374c15d35e281599270a70ddc471f2145faf76895aacf1f0ad5a607",
+      "width": 1440,
+      "height": 416
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-1.png",
+      "sha256": "c9762d4dc7dcafbf19e8b31012b45d7b0c576e5db489937469d2c7f994781157",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-2.png",
+      "sha256": "42dbc24009220f6b9929b7cc85228e4a026061c838e1f0b0007743d954898a4a",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-3.png",
+      "sha256": "2eba4ebbb9c762f8a78758e883c5c91dfd12171948c1f1c452cb409470151409",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-4.png",
+      "sha256": "f855632f7203e46ae3566e91a15c907ae7b894b1390a8a31e5eee3504bd3fabf",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-5.png",
+      "sha256": "76ed071a4621597fb2575217346f54ab2d849cf57e4ff8dfdb9eaf6f96459e30",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/profit-distribution-6.png",
+      "sha256": "55d7bc536fe09ccfe8007990dd477739d7c63c7b836527b1fe1dfb7a37bae0ca",
+      "width": 344,
+      "height": 280
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/realised-volatility-against-implied.png",
+      "sha256": "3813bfeb2af0e9b3addda79acd20ed174292932b15ca6fa708235cc8f4ce6e56",
+      "width": 1440,
+      "height": 534
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/skew-across-expiries.png",
+      "sha256": "0eba8f70f7c474fda2ce918e506797cc6f0cc6042f0c9348cba096ad03a4c198",
+      "width": 715,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/structures-across-real-history-with-modelled-premiums.png",
+      "sha256": "c43c6aa3fd98365e1c8f6ed449947d29a6c696a63d57f4e45c950ed5b5726c0b",
+      "width": 1440,
+      "height": 857
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/structures-with-legs-on-two-expiries.png",
+      "sha256": "95daa731210468144f4d3b1e309eb68a3214e40299ea50a42a880d8e8169dc10",
+      "width": 1440,
+      "height": 408
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/terminal-distribution.png",
+      "sha256": "1de60cb53c805cc6c3ff5edc74cee7300d7c3f5fdec07c351b9f8c7d071f81f1",
+      "width": 715,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/the-smile.png",
+      "sha256": "d355c5c9e6504c615a63e6cd464ba55614dfda1ea4abe586533a207c22a81576",
+      "width": 1440,
+      "height": 416
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/theta.png",
+      "sha256": "60785fa98722628c4982bd65c9703316d7f6d4ab1d2e3b9b4a76521f91665dc9",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/vanna.png",
+      "sha256": "40704f1abf84546faf4aa401754d45b0c16a03165ee4f9e0d93dbf5c458a1ae9",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/vega.png",
+      "sha256": "a54f26d8ddb884a8181badd0dae63c4a886d0c2dfbc0a3af2ec3748b5e5dfaff",
+      "width": 352,
+      "height": 329
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/volatility-and-expected-move-by-expiry.png",
+      "sha256": "34e56b92b93b6af24d8e67ba754ebc513d6820d4e747f25e4624e1ee4449ceb9",
+      "width": 715,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/volume-by-strike.png",
+      "sha256": "cb0c90daed61c7042310aa5569d2529fde849bcd5dc7a590c218a06e2f3bbe40",
+      "width": 1440,
+      "height": 346
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/what-the-options-are-priced-at-against-what-the-underlying-has-done.png",
+      "sha256": "64444d5fb11f6104471936f22f96c6c963102aab517374d093860c45b7ffe054",
+      "width": 1440,
+      "height": 554
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/where-a-delta-hedge-would-be-working.png",
+      "sha256": "b2eb229bfef16e24dc65c406a50364c552a012ce29af60026e7c18af3f640182",
+      "width": 1440,
+      "height": 608
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/where-each-structure-lands.png",
+      "sha256": "b894a2f4d1a0f1f37343814a193b5f685274c7316a3361328b9dd945a7aed322",
+      "width": 1440,
+      "height": 708
+    },
+    {
+      "path": "docs/screenshots/gallery/panels/which-structure-has-the-most-support-under-one-printed-formula.png",
+      "sha256": "aa1d205a5d5b15865020de47b0c5c8fa58dee2633f521751c93418860d542d4e",
+      "width": 1440,
+      "height": 1043
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/adding-data.png",
+      "sha256": "bd5d7d4f147aa3b2d87b7e06213519197ab73b5ae8455839cf122934cd147ba0",
+      "width": 1440,
+      "height": 461
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/backtest.png",
+      "sha256": "48c5c97503786b1ac8c318148ef120e23eb4531238b0fcc8c516fe12d182cc07",
+      "width": 1440,
+      "height": 1599
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/composite-support.png",
+      "sha256": "fa9a23e97e5b03226f1737df36dcbe52172f25cd2b5dd9f013d4ad0c625ad7f7",
+      "width": 1440,
+      "height": 1073
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/condor-search.png",
+      "sha256": "50af738e759597b25546e8911ba4a82d915654fa3e19260e34106f3e68cc2887",
+      "width": 1440,
+      "height": 558
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/positioning.png",
+      "sha256": "100535a14d5e39819b1b3a366667de64f38d65e5bba80904c874f48140955171",
+      "width": 1440,
+      "height": 1728
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/simulation.png",
+      "sha256": "e3f904e344098267db0a50a0d3110978494c45dc1e36ba01d68281715d292d1c",
+      "width": 1440,
+      "height": 3084
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/structure-comparison.png",
+      "sha256": "0630cb9cdacaaf8951f79e708b5fb5f9980788f2a987e3f1ef46814243932868",
+      "width": 1440,
+      "height": 639
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/structures.png",
+      "sha256": "14f19de1180019493c6dc5cc8dc6350490e926b242cb85731eb3b6bc6f1eac23",
+      "width": 1440,
+      "height": 1374
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/term-structure.png",
+      "sha256": "049d6d29860ce160467e8c0bd896d33c62b3cc946a673e95ae3b78301215772e",
+      "width": 1440,
+      "height": 550
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/the-ladder.png",
+      "sha256": "515a3e4ddf3e7bf8a007e9631cb6b068ae0e0f2614fcc89f9e06b8aae6182492",
+      "width": 1440,
+      "height": 1929
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/the-pipeline.png",
+      "sha256": "2b2d4830793254de97be31338345bf59baf86658190e02c02ce64f400acb5751",
+      "width": 1440,
+      "height": 837
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/time-spreads.png",
+      "sha256": "fcae980d6d9ecf770771f9da3e7ca9e1ae56d93632612663fe9933c98448c028",
+      "width": 1440,
+      "height": 687
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/variance-risk-premium.png",
+      "sha256": "f585393a0ad755428148050d3aa2384eb7a4bdf848556e25aacd4c384a204ad3",
+      "width": 1440,
+      "height": 2060
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/volatility-surface.png",
+      "sha256": "5fac9b3e0adfa6fa164b7eff81d3abe4dfc1814af84d8dc9d8cf701b9729e7a4",
+      "width": 1440,
+      "height": 655
+    },
+    {
+      "path": "docs/screenshots/gallery/sections/volatility.png",
+      "sha256": "41ccc3a4b3fb2f688504c1702c1b87e4f64748a3d31d9f7521812435b4b72a6b",
+      "width": 1440,
+      "height": 437
+    }
+  ]
+}

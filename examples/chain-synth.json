@@ -1,0 +1,570 @@
+{
+  "underlying": "SYNTH",
+  "spot": 100.0,
+  "expiry": "2026-10-08",
+  "days_to_expiry": 30,
+  "snapshot_timestamp": "2026-09-08T00:00:00Z",
+  "risk_free_rate": 0.04,
+  "dividend_yield": 0.01,
+  "data_source": "Synthetic teaching sample; authored inputs, model prices, no market observations",
+  "contracts": [
+    {
+      "strike": 70,
+      "type": "call",
+      "bid": 29.243357,
+      "ask": 31.052224,
+      "iv": 0.3365,
+      "volume": 66,
+      "open_interest": 214
+    },
+    {
+      "strike": 70,
+      "type": "put",
+      "bid": 0.000184,
+      "ask": 0.000195,
+      "iv": 0.3365,
+      "volume": 66,
+      "open_interest": 260
+    },
+    {
+      "strike": 72,
+      "type": "call",
+      "bid": 27.309986,
+      "ask": 28.999264,
+      "iv": 0.32944,
+      "volume": 67,
+      "open_interest": 221
+    },
+    {
+      "strike": 72,
+      "type": "put",
+      "bid": 0.000446,
+      "ask": 0.000473,
+      "iv": 0.32944,
+      "volume": 67,
+      "open_interest": 273
+    },
+    {
+      "strike": 74,
+      "type": "call",
+      "bid": 25.376958,
+      "ask": 26.946667,
+      "iv": 0.32266,
+      "volume": 68,
+      "open_interest": 229
+    },
+    {
+      "strike": 74,
+      "type": "put",
+      "bid": 0.00105,
+      "ask": 0.001115,
+      "iv": 0.32266,
+      "volume": 68,
+      "open_interest": 290
+    },
+    {
+      "strike": 76,
+      "type": "call",
+      "bid": 23.444678,
+      "ask": 24.894864,
+      "iv": 0.31616,
+      "volume": 70,
+      "open_interest": 237
+    },
+    {
+      "strike": 76,
+      "type": "put",
+      "bid": 0.002402,
+      "ask": 0.002551,
+      "iv": 0.31616,
+      "volume": 70,
+      "open_interest": 310
+    },
+    {
+      "strike": 78,
+      "type": "call",
+      "bid": 21.513973,
+      "ask": 22.844734,
+      "iv": 0.30994,
+      "volume": 71,
+      "open_interest": 248
+    },
+    {
+      "strike": 78,
+      "type": "put",
+      "bid": 0.005329,
+      "ask": 0.005659,
+      "iv": 0.30994,
+      "volume": 71,
+      "open_interest": 335
+    },
+    {
+      "strike": 80,
+      "type": "call",
+      "bid": 19.586455,
+      "ask": 20.797988,
+      "iv": 0.304,
+      "volume": 73,
+      "open_interest": 260
+    },
+    {
+      "strike": 80,
+      "type": "put",
+      "bid": 0.011444,
+      "ask": 0.012152,
+      "iv": 0.304,
+      "volume": 73,
+      "open_interest": 366
+    },
+    {
+      "strike": 82,
+      "type": "call",
+      "bid": 17.665116,
+      "ask": 18.757804,
+      "iv": 0.29834,
+      "volume": 76,
+      "open_interest": 273
+    },
+    {
+      "strike": 82,
+      "type": "put",
+      "bid": 0.023738,
+      "ask": 0.025206,
+      "iv": 0.29834,
+      "volume": 76,
+      "open_interest": 407
+    },
+    {
+      "strike": 84,
+      "type": "call",
+      "bid": 15.755215,
+      "ask": 16.729764,
+      "iv": 0.29296,
+      "volume": 79,
+      "open_interest": 290
+    },
+    {
+      "strike": 84,
+      "type": "put",
+      "bid": 0.047469,
+      "ask": 0.050405,
+      "iv": 0.29296,
+      "volume": 79,
+      "open_interest": 463
+    },
+    {
+      "strike": 86,
+      "type": "call",
+      "bid": 13.865456,
+      "ask": 14.723113,
+      "iv": 0.28786,
+      "volume": 83,
+      "open_interest": 310
+    },
+    {
+      "strike": 86,
+      "type": "put",
+      "bid": 0.091342,
+      "ask": 0.096992,
+      "iv": 0.28786,
+      "volume": 83,
+      "open_interest": 544
+    },
+    {
+      "strike": 88,
+      "type": "call",
+      "bid": 12.009328,
+      "ask": 12.752173,
+      "iv": 0.28304,
+      "volume": 88,
+      "open_interest": 335
+    },
+    {
+      "strike": 88,
+      "type": "put",
+      "bid": 0.168847,
+      "ask": 0.179291,
+      "iv": 0.28304,
+      "volume": 88,
+      "open_interest": 671
+    },
+    {
+      "strike": 90,
+      "type": "call",
+      "bid": 10.20625,
+      "ask": 10.837564,
+      "iv": 0.2785,
+      "volume": 95,
+      "open_interest": 366
+    },
+    {
+      "strike": 90,
+      "type": "put",
+      "bid": 0.2994,
+      "ask": 0.31792,
+      "iv": 0.2785,
+      "volume": 95,
+      "open_interest": 900
+    },
+    {
+      "strike": 92,
+      "type": "call",
+      "bid": 8.481953,
+      "ask": 9.00661,
+      "iv": 0.27424,
+      "volume": 105,
+      "open_interest": 407
+    },
+    {
+      "strike": 92,
+      "type": "put",
+      "bid": 0.508737,
+      "ask": 0.540205,
+      "iv": 0.27424,
+      "volume": 105,
+      "open_interest": 1433
+    },
+    {
+      "strike": 94,
+      "type": "call",
+      "bid": 6.867448,
+      "ask": 7.292238,
+      "iv": 0.27026,
+      "volume": 121,
+      "open_interest": 463
+    },
+    {
+      "strike": 94,
+      "type": "put",
+      "bid": 0.827863,
+      "ask": 0.879071,
+      "iv": 0.27026,
+      "volume": 121,
+      "open_interest": 4100
+    },
+    {
+      "strike": 96,
+      "type": "call",
+      "bid": 5.396085,
+      "ask": 5.729864,
+      "iv": 0.26656,
+      "volume": 150,
+      "open_interest": 544
+    },
+    {
+      "strike": 96,
+      "type": "put",
+      "bid": 1.290133,
+      "ask": 1.369935,
+      "iv": 0.26656,
+      "volume": 150,
+      "open_interest": 1433
+    },
+    {
+      "strike": 98,
+      "type": "call",
+      "bid": 4.098856,
+      "ask": 4.352394,
+      "iv": 0.26314,
+      "volume": 216,
+      "open_interest": 671
+    },
+    {
+      "strike": 98,
+      "type": "put",
+      "bid": 1.926536,
+      "ask": 2.045704,
+      "iv": 0.26314,
+      "volume": 216,
+      "open_interest": 900
+    },
+    {
+      "strike": 100,
+      "type": "call",
+      "bid": 2.998824,
+      "ask": 3.184319,
+      "iv": 0.26,
+      "volume": 550,
+      "open_interest": 900
+    },
+    {
+      "strike": 100,
+      "type": "put",
+      "bid": 2.760137,
+      "ask": 2.930867,
+      "iv": 0.26,
+      "volume": 550,
+      "open_interest": 671
+    },
+    {
+      "strike": 102,
+      "type": "call",
+      "bid": 2.106311,
+      "ask": 2.236598,
+      "iv": 0.25714,
+      "volume": 216,
+      "open_interest": 1433
+    },
+    {
+      "strike": 102,
+      "type": "put",
+      "bid": 3.801256,
+      "ask": 4.036385,
+      "iv": 0.25714,
+      "volume": 216,
+      "open_interest": 544
+    },
+    {
+      "strike": 104,
+      "type": "call",
+      "bid": 1.41648,
+      "ask": 1.504097,
+      "iv": 0.25456,
+      "volume": 150,
+      "open_interest": 4100
+    },
+    {
+      "strike": 104,
+      "type": "put",
+      "bid": 5.045057,
+      "ask": 5.357123,
+      "iv": 0.25456,
+      "volume": 150,
+      "open_interest": 463
+    },
+    {
+      "strike": 106,
+      "type": "call",
+      "bid": 0.910271,
+      "ask": 0.966576,
+      "iv": 0.25226,
+      "volume": 121,
+      "open_interest": 1433
+    },
+    {
+      "strike": 106,
+      "type": "put",
+      "bid": 6.472481,
+      "ask": 6.87284,
+      "iv": 0.25226,
+      "volume": 121,
+      "open_interest": 407
+    },
+    {
+      "strike": 108,
+      "type": "call",
+      "bid": 0.558384,
+      "ask": 0.592923,
+      "iv": 0.25024,
+      "volume": 105,
+      "open_interest": 900
+    },
+    {
+      "strike": 108,
+      "type": "put",
+      "bid": 8.054226,
+      "ask": 8.552426,
+      "iv": 0.25024,
+      "volume": 105,
+      "open_interest": 366
+    },
+    {
+      "strike": 110,
+      "type": "call",
+      "bid": 0.326916,
+      "ask": 0.347137,
+      "iv": 0.2485,
+      "volume": 95,
+      "open_interest": 671
+    },
+    {
+      "strike": 110,
+      "type": "put",
+      "bid": 9.75639,
+      "ask": 10.359879,
+      "iv": 0.2485,
+      "volume": 95,
+      "open_interest": 335
+    },
+    {
+      "strike": 112,
+      "type": "call",
+      "bid": 0.182828,
+      "ask": 0.194137,
+      "iv": 0.24704,
+      "volume": 88,
+      "open_interest": 544
+    },
+    {
+      "strike": 112,
+      "type": "put",
+      "bid": 11.545935,
+      "ask": 12.260117,
+      "iv": 0.24704,
+      "volume": 88,
+      "open_interest": 310
+    },
+    {
+      "strike": 114,
+      "type": "call",
+      "bid": 0.097846,
+      "ask": 0.103899,
+      "iv": 0.24586,
+      "volume": 83,
+      "open_interest": 463
+    },
+    {
+      "strike": 114,
+      "type": "put",
+      "bid": 13.394586,
+      "ask": 14.223117,
+      "iv": 0.24586,
+      "volume": 83,
+      "open_interest": 290
+    },
+    {
+      "strike": 116,
+      "type": "call",
+      "bid": 0.050251,
+      "ask": 0.053359,
+      "iv": 0.24496,
+      "volume": 79,
+      "open_interest": 407
+    },
+    {
+      "strike": 116,
+      "type": "put",
+      "bid": 15.280623,
+      "ask": 16.225816,
+      "iv": 0.24496,
+      "volume": 79,
+      "open_interest": 273
+    },
+    {
+      "strike": 118,
+      "type": "call",
+      "bid": 0.024856,
+      "ask": 0.026394,
+      "iv": 0.24434,
+      "volume": 76,
+      "open_interest": 366
+    },
+    {
+      "strike": 118,
+      "type": "put",
+      "bid": 17.18886,
+      "ask": 18.252089,
+      "iv": 0.24434,
+      "volume": 76,
+      "open_interest": 260
+    },
+    {
+      "strike": 120,
+      "type": "call",
+      "bid": 0.011895,
+      "ask": 0.01263,
+      "iv": 0.244,
+      "volume": 73,
+      "open_interest": 335
+    },
+    {
+      "strike": 120,
+      "type": "put",
+      "bid": 19.109531,
+      "ask": 20.291564,
+      "iv": 0.244,
+      "volume": 73,
+      "open_interest": 248
+    },
+    {
+      "strike": 122,
+      "type": "call",
+      "bid": 0.005535,
+      "ask": 0.005878,
+      "iv": 0.24394,
+      "volume": 71,
+      "open_interest": 310
+    },
+    {
+      "strike": 122,
+      "type": "put",
+      "bid": 21.036805,
+      "ask": 22.33805,
+      "iv": 0.24394,
+      "volume": 71,
+      "open_interest": 237
+    },
+    {
+      "strike": 124,
+      "type": "call",
+      "bid": 0.00252,
+      "ask": 0.002675,
+      "iv": 0.24416,
+      "volume": 70,
+      "open_interest": 290
+    },
+    {
+      "strike": 124,
+      "type": "put",
+      "bid": 22.967421,
+      "ask": 24.388086,
+      "iv": 0.24416,
+      "volume": 70,
+      "open_interest": 229
+    },
+    {
+      "strike": 126,
+      "type": "call",
+      "bid": 0.001129,
+      "ask": 0.001199,
+      "iv": 0.24466,
+      "volume": 68,
+      "open_interest": 273
+    },
+    {
+      "strike": 126,
+      "type": "put",
+      "bid": 24.899663,
+      "ask": 26.439848,
+      "iv": 0.24466,
+      "volume": 68,
+      "open_interest": 221
+    },
+    {
+      "strike": 128,
+      "type": "call",
+      "bid": 0.000501,
+      "ask": 0.000532,
+      "iv": 0.24544,
+      "volume": 67,
+      "open_interest": 260
+    },
+    {
+      "strike": 128,
+      "type": "put",
+      "bid": 26.832667,
+      "ask": 28.49242,
+      "iv": 0.24544,
+      "volume": 67,
+      "open_interest": 214
+    },
+    {
+      "strike": 130,
+      "type": "call",
+      "bid": 0.000222,
+      "ask": 0.000235,
+      "iv": 0.2465,
+      "volume": 66,
+      "open_interest": 248
+    },
+    {
+      "strike": 130,
+      "type": "put",
+      "bid": 28.76602,
+      "ask": 30.545362,
+      "iv": 0.2465,
+      "volume": 66,
+      "open_interest": 208
+    }
+  ]
+}

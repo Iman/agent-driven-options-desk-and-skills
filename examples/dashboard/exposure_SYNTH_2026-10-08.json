@@ -1,0 +1,558 @@
+{
+ "meta": {
+  "schema": "optiondesk/exposure/v1",
+  "generated_utc": "2026-09-08T22:15:38+00:00",
+  "tool": "optiondesk exposure",
+  "shell_version": "0.3.0",
+  "engine_version": "0.3.0",
+  "provider_used": "user snapshot",
+  "degraded": false,
+  "degraded_reason": null,
+  "notes": [
+   "Synthetic teaching inputs. No observed quotes, holdings, or price history. Not market-performance evidence.",
+   "row 1: calculated mid from bid and ask",
+   "row 2: calculated mid from bid and ask",
+   "row 3: calculated mid from bid and ask",
+   "row 4: calculated mid from bid and ask",
+   "row 5: calculated mid from bid and ask",
+   "row 6: calculated mid from bid and ask",
+   "row 7: calculated mid from bid and ask",
+   "row 8: calculated mid from bid and ask",
+   "row 9: calculated mid from bid and ask",
+   "row 10: calculated mid from bid and ask",
+   "row 11: calculated mid from bid and ask",
+   "row 12: calculated mid from bid and ask",
+   "row 13: calculated mid from bid and ask",
+   "row 14: calculated mid from bid and ask",
+   "row 15: calculated mid from bid and ask",
+   "row 16: calculated mid from bid and ask",
+   "row 17: calculated mid from bid and ask",
+   "row 18: calculated mid from bid and ask",
+   "row 19: calculated mid from bid and ask",
+   "row 20: calculated mid from bid and ask",
+   "row 21: calculated mid from bid and ask",
+   "row 22: calculated mid from bid and ask",
+   "row 23: calculated mid from bid and ask",
+   "row 24: calculated mid from bid and ask",
+   "row 25: calculated mid from bid and ask",
+   "row 26: calculated mid from bid and ask",
+   "row 27: calculated mid from bid and ask",
+   "row 28: calculated mid from bid and ask",
+   "row 29: calculated mid from bid and ask",
+   "row 30: calculated mid from bid and ask",
+   "row 31: calculated mid from bid and ask",
+   "row 32: calculated mid from bid and ask",
+   "row 33: calculated mid from bid and ask",
+   "row 34: calculated mid from bid and ask",
+   "row 35: calculated mid from bid and ask",
+   "row 36: calculated mid from bid and ask",
+   "row 37: calculated mid from bid and ask",
+   "row 38: calculated mid from bid and ask",
+   "row 39: calculated mid from bid and ask",
+   "row 40: calculated mid from bid and ask",
+   "row 41: calculated mid from bid and ask",
+   "row 42: calculated mid from bid and ask",
+   "row 43: calculated mid from bid and ask",
+   "row 44: calculated mid from bid and ask",
+   "row 45: calculated mid from bid and ask",
+   "row 46: calculated mid from bid and ask",
+   "row 47: calculated mid from bid and ask",
+   "row 48: calculated mid from bid and ask",
+   "row 49: calculated mid from bid and ask",
+   "row 50: calculated mid from bid and ask",
+   "row 51: calculated mid from bid and ask",
+   "row 52: calculated mid from bid and ask",
+   "row 53: calculated mid from bid and ask",
+   "row 54: calculated mid from bid and ask",
+   "row 55: calculated mid from bid and ask",
+   "row 56: calculated mid from bid and ask",
+   "row 57: calculated mid from bid and ask",
+   "row 58: calculated mid from bid and ask",
+   "row 59: calculated mid from bid and ask",
+   "row 60: calculated mid from bid and ask",
+   "row 61: calculated mid from bid and ask",
+   "row 62: calculated mid from bid and ask"
+  ],
+  "inputs": {
+   "snapshot": "examples/dashboard/chain_SYNTH_2026-10-08.json",
+   "multiplier": 100.0
+  },
+  "disclaimer": "Research output, not investment advice, and not a recommendation or solicitation. Option premiums here are theoretical model values, not quotes and not achievable fills. Market data is third-party, may be delayed or wrong, and its redistribution is governed by the provider's terms. No warranty. See DISCLAIMER.md.",
+  "license": "Produced by optiondesk under the PolyForm Noncommercial License 1.0.0. Noncommercial use is permitted; commercial use requires a separate written agreement with the copyright holder. See LICENSE and LICENSES.md."
+ },
+ "source_artifact": "examples/dashboard/chain_SYNTH_2026-10-08.json",
+ "underlying": "SYNTH",
+ "spot": 100.0,
+ "expiry": "2026-10-08",
+ "days_to_expiry": 30.0,
+ "exposure": {
+  "rows": [
+   {
+    "strike": 70.0,
+    "call_gex": 72.21718109476058,
+    "put_gex": -87.7405003955035,
+    "net_gex": -15.523319300742926,
+    "call_oi": 214,
+    "put_oi": 260,
+    "cumulative_gex": -15.523319300742926
+   },
+   {
+    "strike": 72.0,
+    "call_gex": 170.15684804183408,
+    "put_gex": -210.19375346344216,
+    "net_gex": -40.03690542160808,
+    "call_oi": 221,
+    "put_oi": 273,
+    "cumulative_gex": -55.56022472235101
+   },
+   {
+    "strike": 74.0,
+    "call_gex": 388.3703002276267,
+    "put_gex": -491.82265094328267,
+    "net_gex": -103.452350715656,
+    "call_oi": 229,
+    "put_oi": 290,
+    "cumulative_gex": -159.012575438007
+   },
+   {
+    "strike": 76.0,
+    "call_gex": 852.7358895393352,
+    "put_gex": -1115.3929356843626,
+    "net_gex": -262.6570461450274,
+    "call_oi": 237,
+    "put_oi": 310,
+    "cumulative_gex": -421.66962158303437
+   },
+   {
+    "strike": 78.0,
+    "call_gex": 1818.5421307724698,
+    "put_gex": -2456.4984427773284,
+    "net_gex": -637.9563120048585,
+    "call_oi": 248,
+    "put_oi": 335,
+    "cumulative_gex": -1059.6259335878929
+   },
+   {
+    "strike": 80.0,
+    "call_gex": 3721.65505398581,
+    "put_gex": -5238.945191380024,
+    "net_gex": -1517.290137394214,
+    "call_oi": 260,
+    "put_oi": 366,
+    "cumulative_gex": -2576.916070982107
+   },
+   {
+    "strike": 82.0,
+    "call_gex": 7283.644906478268,
+    "put_gex": -10858.767314786282,
+    "net_gex": -3575.122408308014,
+    "call_oi": 273,
+    "put_oi": 407,
+    "cumulative_gex": -6152.038479290121
+   },
+   {
+    "strike": 84.0,
+    "call_gex": 13725.330096917605,
+    "put_gex": -21913.199430596036,
+    "net_gex": -8187.869333678431,
+    "call_oi": 290,
+    "put_oi": 463,
+    "cumulative_gex": -14339.907812968551
+   },
+   {
+    "strike": 86.0,
+    "call_gex": 24688.142175641926,
+    "put_gex": -43323.70755983615,
+    "net_gex": -18635.565384194222,
+    "call_oi": 310,
+    "put_oi": 544,
+    "cumulative_gex": -32975.47319716278
+   },
+   {
+    "strike": 88.0,
+    "call_gex": 42440.52209618354,
+    "put_gex": -85007.73231802732,
+    "net_gex": -42567.21022184379,
+    "call_oi": 335,
+    "put_oi": 671,
+    "cumulative_gex": -75542.68341900656
+   },
+   {
+    "strike": 90.0,
+    "call_gex": 69503.65619234521,
+    "put_gex": -170910.62998117675,
+    "net_gex": -101406.97378883154,
+    "call_oi": 366,
+    "put_oi": 900,
+    "cumulative_gex": -176949.65720783809
+   },
+   {
+    "strike": 92.0,
+    "call_gex": 108826.25169709497,
+    "put_gex": -383164.6650661845,
+    "net_gex": -274338.4133690895,
+    "call_oi": 407,
+    "put_oi": 1433,
+    "cumulative_gex": -451288.07057692757
+   },
+   {
+    "strike": 94.0,
+    "call_gex": 163267.5743388557,
+    "put_gex": -1445781.975786843,
+    "net_gex": -1282514.4014479874,
+    "call_oi": 463,
+    "put_oi": 4100,
+    "cumulative_gex": -1733802.472024915
+   },
+   {
+    "strike": 96.0,
+    "call_gex": 236348.44612270335,
+    "put_gex": -622586.9913489593,
+    "net_gex": -386238.5452262559,
+    "call_oi": 544,
+    "put_oi": 1433,
+    "cumulative_gex": -2120041.017251171
+   },
+   {
+    "strike": 98.0,
+    "call_gex": 334839.6577189035,
+    "put_gex": -449114.2950030003,
+    "net_gex": -114274.6372840968,
+    "call_oi": 671,
+    "put_oi": 900,
+    "cumulative_gex": -2234315.654535268
+   },
+   {
+    "strike": 100.0,
+    "call_gex": 480101.87518368306,
+    "put_gex": -357942.62027583475,
+    "net_gex": 122159.25490784831,
+    "call_oi": 900,
+    "put_oi": 671,
+    "cumulative_gex": -2112156.3996274197
+   },
+   {
+    "strike": 102.0,
+    "call_gex": 759758.3872146813,
+    "put_gex": -288421.8860047359,
+    "net_gex": 471336.50120994536,
+    "call_oi": 1433,
+    "put_oi": 544,
+    "cumulative_gex": -1640819.8984174742
+   },
+   {
+    "strike": 104.0,
+    "call_gex": 2007921.8040636645,
+    "put_gex": -226748.24275157962,
+    "net_gex": 1781173.561312085,
+    "call_oi": 4100,
+    "put_oi": 463,
+    "cumulative_gex": 140353.66289461078
+   },
+   {
+    "strike": 106.0,
+    "call_gex": 602678.5377169612,
+    "put_gex": -171172.4807053756,
+    "net_gex": 431506.0570115856,
+    "call_oi": 1433,
+    "put_oi": 407,
+    "cumulative_gex": 571859.7199061965
+   },
+   {
+    "strike": 108.0,
+    "call_gex": 302541.33938362217,
+    "put_gex": -123033.47801600635,
+    "net_gex": 179507.8613676158,
+    "call_oi": 900,
+    "put_oi": 366,
+    "cumulative_gex": 751367.5812738123
+   },
+   {
+    "strike": 110.0,
+    "call_gex": 168122.40692154254,
+    "put_gex": -83935.92595933942,
+    "net_gex": 84186.48096220312,
+    "call_oi": 671,
+    "put_oi": 335,
+    "cumulative_gex": 835554.0622360155
+   },
+   {
+    "strike": 112.0,
+    "call_gex": 94996.48821296084,
+    "put_gex": -54134.028209591655,
+    "net_gex": 40862.46000336919,
+    "call_oi": 544,
+    "put_oi": 310,
+    "cumulative_gex": 876416.5222393846
+   },
+   {
+    "strike": 114.0,
+    "call_gex": 52878.29741012768,
+    "put_gex": -33120.315872434185,
+    "net_gex": 19757.981537693493,
+    "call_oi": 463,
+    "put_oi": 290,
+    "cumulative_gex": 896174.5037770781
+   },
+   {
+    "strike": 116.0,
+    "call_gex": 28650.808694646905,
+    "put_gex": -19217.864308694363,
+    "net_gex": 9432.944385952542,
+    "call_oi": 407,
+    "put_oi": 273,
+    "cumulative_gex": 905607.4481630307
+   },
+   {
+    "strike": 118.0,
+    "call_gex": 15042.508647374334,
+    "put_gex": -10685.93510469215,
+    "net_gex": 4356.573542682185,
+    "call_oi": 366,
+    "put_oi": 260,
+    "cumulative_gex": 909964.0217057129
+   },
+   {
+    "strike": 120.0,
+    "call_gex": 7657.90418150603,
+    "put_gex": -5669.13503586118,
+    "net_gex": 1988.7691456448501,
+    "call_oi": 335,
+    "put_oi": 248,
+    "cumulative_gex": 911952.7908513577
+   },
+   {
+    "strike": 122.0,
+    "call_gex": 3778.3997869987793,
+    "put_gex": -2888.647579092615,
+    "net_gex": 889.7522079061641,
+    "call_oi": 310,
+    "put_oi": 237,
+    "cumulative_gex": 912842.543059264
+   },
+   {
+    "strike": 124.0,
+    "call_gex": 1818.897980148069,
+    "put_gex": -1436.3021981169238,
+    "net_gex": 382.5957820311453,
+    "call_oi": 290,
+    "put_oi": 229,
+    "cumulative_gex": 913225.1388412951
+   },
+   {
+    "strike": 126.0,
+    "call_gex": 856.4442578597616,
+    "put_gex": -693.3120182674261,
+    "net_gex": 163.1322395923355,
+    "call_oi": 273,
+    "put_oi": 221,
+    "cumulative_gex": 913388.2710808875
+   },
+   {
+    "strike": 128.0,
+    "call_gex": 399.45999456594126,
+    "put_gex": -328.7863032196595,
+    "net_gex": 70.67369134628177,
+    "call_oi": 260,
+    "put_oi": 214,
+    "cumulative_gex": 913458.9447722338
+   },
+   {
+    "strike": 130.0,
+    "call_gex": 184.06354521301424,
+    "put_gex": -154.37587663027003,
+    "net_gex": 29.68766858274421,
+    "call_oi": 248,
+    "put_oi": 208,
+    "cumulative_gex": 913488.6324408166
+   }
+  ],
+  "net_gex": 913488.6324408166,
+  "call_wall": {
+   "strike": 104.0,
+   "gex": 2007921.8040636645
+  },
+  "put_wall": {
+   "strike": 94.0,
+   "gex": -1445781.975786843
+  },
+  "gamma_flip": 103.84240315941898,
+  "gamma_flip_all": [
+   103.84240315941898
+  ],
+  "gamma_flip_note": "The crossing nearest spot. There is 1 crossing(s) in total, listed in gamma_flip_all. The cumulative profile starts at the lowest LISTED strike rather than at zero, so extending the strike ladder shifts the whole profile and can move every level.",
+  "spot": 100.0,
+  "regime": "dampening",
+  "skipped": 0,
+  "skipped_reasons": {
+   "no_gamma": 0,
+   "no_open_interest": 0,
+   "no_strike": 0,
+   "not_an_option": 0
+  },
+  "call_open_interest": 18001,
+  "put_open_interest": 17961,
+  "put_call_oi_ratio": 0.9977779012277096,
+  "put_call_volume_ratio": 1.0,
+  "assumption": "Signs assume dealers are long calls and short puts against the public. That convention is often wrong for a single name, especially around events and in heavily retail-traded tickers, and the walls move with it. Exposure is per one percent move in the underlying."
+ },
+ "max_pain": {
+  "strike": 100.0,
+  "payout_at_strike": 12816800.0,
+  "profile": [
+   {
+    "strike": 70.0,
+    "payout": 47285400.0
+   },
+   {
+    "strike": 72.0,
+    "payout": 43788000.0
+   },
+   {
+    "strike": 74.0,
+    "payout": 40389400.0
+   },
+   {
+    "strike": 76.0,
+    "payout": 37094600.0
+   },
+   {
+    "strike": 78.0,
+    "payout": 33909200.0
+   },
+   {
+    "strike": 80.0,
+    "payout": 30840400.0
+   },
+   {
+    "strike": 82.0,
+    "payout": 27896800.0
+   },
+   {
+    "strike": 84.0,
+    "payout": 25089200.0
+   },
+   {
+    "strike": 86.0,
+    "payout": 22432200.0
+   },
+   {
+    "strike": 88.0,
+    "payout": 19946000.0
+   },
+   {
+    "strike": 90.0,
+    "payout": 17661000.0
+   },
+   {
+    "strike": 92.0,
+    "payout": 15629200.0
+   },
+   {
+    "strike": 94.0,
+    "payout": 13965400.0
+   },
+   {
+    "strike": 96.0,
+    "payout": 13214200.0
+   },
+   {
+    "strike": 98.0,
+    "payout": 12858400.0
+   },
+   {
+    "strike": 100.0,
+    "payout": 12816800.0
+   },
+   {
+    "strike": 102.0,
+    "payout": 13089400.0
+   },
+   {
+    "strike": 104.0,
+    "payout": 13757400.0
+   },
+   {
+    "strike": 106.0,
+    "payout": 15338000.0
+   },
+   {
+    "strike": 108.0,
+    "payout": 17286600.0
+   },
+   {
+    "strike": 110.0,
+    "payout": 19488400.0
+   },
+   {
+    "strike": 112.0,
+    "payout": 21891400.0
+   },
+   {
+    "strike": 114.0,
+    "payout": 24465200.0
+   },
+   {
+    "strike": 116.0,
+    "payout": 27189600.0
+   },
+   {
+    "strike": 118.0,
+    "payout": 30050000.0
+   },
+   {
+    "strike": 120.0,
+    "payout": 33035600.0
+   },
+   {
+    "strike": 122.0,
+    "payout": 36137800.0
+   },
+   {
+    "strike": 124.0,
+    "payout": 39349400.0
+   },
+   {
+    "strike": 126.0,
+    "payout": 42664800.0
+   },
+   {
+    "strike": 128.0,
+    "payout": 46079000.0
+   },
+   {
+    "strike": 130.0,
+    "payout": 49588000.0
+   }
+  ],
+  "note": "The strike at which open contracts pay out least. It describes where open interest sits, not where price is going."
+ },
+ "smile": {
+  "atm_iv": 0.26,
+  "atm_strike": 100.0,
+  "atm_type": "call",
+  "spot": 100.0,
+  "risk_reversal": 0.014300000000000035,
+  "butterfly": -0.0005899999999999794,
+  "skew_slope_per_percent": -0.0015000000000000002,
+  "call_wing": {
+   "strike": 106.0,
+   "delta": 0.23084394308109457,
+   "iv": 0.25226
+  },
+  "put_wing": {
+   "strike": 96.0,
+   "delta": -0.2724808520864671,
+   "iv": 0.26656
+  },
+  "expected_move": 7.453968328052946,
+  "expected_range": [
+   92.54603167194705,
+   107.45396832805295
+  ],
+  "expected_range_floored": false,
+  "graded_contracts": 62,
+  "target_delta": 0.25,
+  "convention": "wings must sit within 0.1 of the target delta or they are reported as absent rather than substituted. risk reversal is 25-delta put volatility minus 25-delta call volatility, so a positive number means the downside is bid. Butterfly is the average wing minus at-the-money. At-the-money is the nearest listed strike, not an interpolated forward."
+ }
+}

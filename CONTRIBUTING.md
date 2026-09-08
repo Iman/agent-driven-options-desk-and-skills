@@ -35,6 +35,9 @@ stale within six hours. All of them read as fine.
 
 ## Tests
 
+Follow [Testing and coverage](docs/TESTING.md) for the separate test layers,
+success and failure scenarios, and the 80% unit line-coverage gate per package.
+
 Every behavioural change needs a test, and the test must be one you have
 watched fail.
 

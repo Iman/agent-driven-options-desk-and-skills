@@ -713,9 +713,12 @@ Roughly 1915 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `engine/tests/test_strategies.py`: 28
 - `engine/tests/test_timespread.py`: 29
 
-### shell/tests (472 test functions)
+### shell/tests (503 test functions)
 
+- `shell/tests/bdd/test_sample_desk.py`: 0
+- `shell/tests/integration/test_sample_journey.py`: 5
 - `shell/tests/test_agent_findings.py`: 7
+- `shell/tests/test_alphavantage.py`: 10
 - `shell/tests/test_artifact_archive.py`: 8
 - `shell/tests/test_artifacts.py`: 4
 - `shell/tests/test_backtest_overlap.py`: 3
@@ -724,6 +727,7 @@ Roughly 1915 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_compare_cli.py`: 7
 - `shell/tests/test_container.py`: 5
 - `shell/tests/test_contracts.py`: 8
+- `shell/tests/test_coverage_gate.py`: 7
 - `shell/tests/test_dashboard_app.py`: 9
 - `shell/tests/test_dashboard_data.py`: 25
 - `shell/tests/test_dashboard_maths.py`: 16
@@ -734,6 +738,7 @@ Roughly 1915 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 - `shell/tests/test_documented_evidence.py`: 6
 - `shell/tests/test_expiries_cli.py`: 10
 - `shell/tests/test_exposure_cli.py`: 9
+- `shell/tests/test_forward_cli.py`: 9
 - `shell/tests/test_greeks_cli.py`: 6
 - `shell/tests/test_house_rules.py`: 10
 - `shell/tests/test_installer.py`: 26
@@ -761,7 +766,7 @@ Roughly 1915 tokens in SKILL.md. Bundled: `.DS_Store`, `reference.md`, `workflow
 
 ## Totals
 
-60 modules, 16964 lines of source, 180 public functions, 15 public classes, 817 test functions.
+60 modules, 16964 lines of source, 180 public functions, 15 public classes, 848 test functions.
 
 Public names with no docstring: 2.
 

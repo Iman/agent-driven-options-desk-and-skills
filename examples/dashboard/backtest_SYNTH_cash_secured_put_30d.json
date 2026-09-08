@@ -1,0 +1,4389 @@
+{
+ "meta": {
+  "schema": "optiondesk/backtest/v1",
+  "generated_utc": "2026-09-08T22:15:42+00:00",
+  "tool": "optiondesk backtest",
+  "shell_version": "0.3.0",
+  "engine_version": "0.3.0",
+  "provider_used": "synthetic teaching sample",
+  "degraded": false,
+  "degraded_reason": null,
+  "notes": [
+   "Synthetic teaching inputs. No observed quotes, holdings, or price history. Not market-performance evidence.",
+   "Entries overlap: each trade shares days with 5 of its neighbours, so the significance test flips signs a block at a time and the interval resamples blocks. Treating these as 134 independent trades would understate the standard error by roughly a factor of two.",
+   "the permutation test cannot distinguish this result from a rule with no edge"
+  ],
+  "inputs": {
+   "symbol": "SYNTH",
+   "strategy": "cash_secured_put",
+   "holding_days": 30,
+   "entry_every": 5,
+   "period": "5y"
+  },
+  "disclaimer": "Research output, not investment advice, and not a recommendation or solicitation. Option premiums here are theoretical model values, not quotes and not achievable fills. Market data is third-party, may be delayed or wrong, and its redistribution is governed by the provider's terms. No warranty. See DISCLAIMER.md.",
+  "license": "Produced by optiondesk under the PolyForm Noncommercial License 1.0.0. Noncommercial use is permitted; commercial use requires a separate written agreement with the copyright holder. See LICENSE and LICENSES.md."
+ },
+ "underlying": "SYNTH",
+ "strategy": "cash_secured_put",
+ "premium_source": "model",
+ "honesty": "Synthetic teaching history with modeled option premiums. These outcomes describe an authored scenario, not observed market performance. No spread, slippage, assignment, or early exercise.",
+ "settings": {
+  "holding_days": 30,
+  "entry_every": 5,
+  "lookback": 60,
+  "rate": 0.04,
+  "dividend_yield": 0.0,
+  "size": 1.0,
+  "first_date": "2023-10-16",
+  "last_date": "2026-09-08",
+  "equity_curve": [
+   0.005168933551284798,
+   0.010120635061788803,
+   0.014604116767792627,
+   0.018984748176842512,
+   0.024061918930989357,
+   0.028571294729299913,
+   0.03276635214283385,
+   0.037985870413445734,
+   0.04252479234280637,
+   0.04662954558868087,
+   0.05076371937219793,
+   0.05463885155368083,
+   0.05831582082462108,
+   0.04675047679806375,
+   -0.008774162670386082,
+   -0.0823383484727073,
+   -0.11360251075253461,
+   -0.12116161222173367,
+   -0.1171359914932117,
+   -0.11238133945005112,
+   -0.10791513904543346,
+   -0.10419257992615004,
+   -0.09994965853214119,
+   -0.09549960021091349,
+   -0.0909250639311726,
+   -0.08660192044102431,
+   -0.08253251703164416,
+   -0.07755627264712389,
+   -0.07305070030438482,
+   -0.071246461848822,
+   -0.06619100216022641,
+   -0.061210201218191596,
+   -0.055994939706681575,
+   -0.05147587472545827,
+   -0.04744657137900407,
+   -0.04322487440459865,
+   -0.03924827988596363,
+   -0.034523180167408976,
+   -0.02938492100333129,
+   -0.023831532555656742,
+   -0.019218971966819293,
+   -0.014684895242286607,
+   -0.009998247867207563,
+   -0.004789602624395359,
+   9.767266818365514e-05,
+   0.005295248146731947,
+   0.010798350095680701,
+   0.016151593517890944,
+   0.020563981102096354,
+   0.02472381536816027,
+   0.02863024633112609,
+   0.025890078071490935,
+   -0.004847965516852935,
+   -0.06470973691582242,
+   -0.11349820425853953,
+   -0.14404143309123846,
+   -0.1902075549215848,
+   -0.20683008027612967,
+   -0.2029954184306524,
+   -0.22164785064899375,
+   -0.24766996457792748,
+   -0.2507170443422192,
+   -0.2468378606293779,
+   -0.2419603958691343,
+   -0.23851083498441633,
+   -0.23527355973581743,
+   -0.23187879694408908,
+   -0.22697032859365626,
+   -0.22204566433675324,
+   -0.21654345168752712,
+   -0.2119720005901642,
+   -0.20720637689817215,
+   -0.20199597128720173,
+   -0.19580119919532069,
+   -0.19025356617575861,
+   -0.1849023708515237,
+   -0.17894061375506964,
+   -0.17324608557298118,
+   -0.16719513686323106,
+   -0.16200643632694142,
+   -0.15730076810338794,
+   -0.15179065336326278,
+   -0.14725133352639527,
+   -0.1426566307289935,
+   -0.13755807148673874,
+   -0.13281120440687916,
+   -0.12812211997594758,
+   -0.12406798093585243,
+   -0.12041493349679094,
+   -0.11572965956616742,
+   -0.11210804033652609,
+   -0.15032215920179262,
+   -0.2140665700612619,
+   -0.26806136580465184,
+   -0.33507455710905193,
+   -0.4514260635770437,
+   -0.5716061540366224,
+   -0.6949153942913465,
+   -0.7406856933867403,
+   -0.7361866647686189,
+   -0.7312407873714138,
+   -0.7261195382833044,
+   -0.7203130757148036,
+   -0.7158723572266614,
+   -0.7111756081797399,
+   -0.7058534104618589,
+   -0.701506530883701,
+   -0.6966580744464496,
+   -0.6913798675477877,
+   -0.6859413076097948,
+   -0.6806440647337538,
+   -0.6757788764281323,
+   -0.6709528884236478,
+   -0.6670871539263561,
+   -0.6627082750922694,
+   -0.6590691594867077,
+   -0.6541328165098219,
+   -0.6493988925519434,
+   -0.6453234577024851,
+   -0.6412049481427807,
+   -0.6362606786627588,
+   -0.6317173597088624,
+   -0.627178660352604,
+   -0.62258747032958,
+   -0.6181729888094625,
+   -0.6136102002176592,
+   -0.6091471718916766,
+   -0.6051590206788359,
+   -0.6014330825448909,
+   -0.5971285098938178,
+   -0.5933103706912516,
+   -0.5893960122722229,
+   -0.585223667480081,
+   -0.5805981671778383
+  ]
+ },
+ "statistics": {
+  "trades": 134,
+  "win_rate": 0.8283582089552238,
+  "mean_return": -0.0043328221431181944,
+  "median_return": 0.004499028618121394,
+  "stdev": 0.024378896182581822,
+  "best": 0.006194772091881039,
+  "worst": -0.12330924025472416,
+  "mean_win": 0.004600350193131112,
+  "mean_loss": -0.047445088635451806,
+  "profit_factor": 0.46794495913140377,
+  "total_return_on_risk": -0.5805981671778383,
+  "max_drawdown_in_risk_units": 0.7990015142113613,
+  "accounting": "one unit of capital at risk per trade, returns summed rather than compounded, so the curve and the drawdown are in units of per-trade risk",
+  "sharpe_per_trade": -0.17772839716237437,
+  "sharpe_annualised": -0.5151058323552706,
+  "trades_per_year": 8.4
+ },
+ "significance": {
+  "p_value": 0.2748625687156422,
+  "trials": 2000,
+  "block": 6,
+  "observed_mean": -0.0043328221431181944,
+  "null": "the sign of each block of overlapping trades is arbitrary, which is what a rule with no edge produces",
+  "caveat": "A p-value is only a p-value for a hypothesis chosen before seeing the data. A rule selected because its backtest looked good has already spent its degrees of freedom, and this number then understates how easily the result could be chance."
+ },
+ "interval": {
+  "mean": -0.0043328221431181944,
+  "lower": -0.012056153030870246,
+  "upper": 0.0016059624095273125,
+  "level": 0.9,
+  "trials": 2000,
+  "block": 6,
+  "excludes_zero": false
+ },
+ "benchmark": {
+  "description": "buy and hold the underlying over the same windows, for comparison",
+  "statistics": {
+   "trades": 134,
+   "win_rate": 0.5223880597014925,
+   "mean_return": 0.005934032155219264,
+   "median_return": 0.007653808197260581,
+   "stdev": 0.08108143295250098,
+   "best": 0.16895327064570576,
+   "worst": -0.19648878187765184,
+   "mean_win": 0.06896520915584918,
+   "mean_loss": -0.0630063176892197,
+   "profit_factor": 1.1971926035461065,
+   "total_return_on_risk": 0.7951603087993814,
+   "max_drawdown_in_risk_units": 1.3712362566981058,
+   "accounting": "one unit of capital at risk per trade, returns summed rather than compounded, so the curve and the drawdown are in units of per-trade risk",
+   "sharpe_per_trade": 0.07318607897193345,
+   "sharpe_annualised": 0.21211340859173206,
+   "trades_per_year": 8.4
+  }
+ },
+ "trades": [
+  {
+   "entry_date": "2024-01-08",
+   "exit_date": "2024-02-19",
+   "entry_spot": 88.34348309394733,
+   "exit_spot": 91.67126046519869,
+   "underlying_return": 0.03766862313672292,
+   "entry_volatility": 0.22466293372254093,
+   "net_cash": 0.41797045752707085,
+   "trade_type": "credit",
+   "capital_at_risk": 80.86202954247292,
+   "profit": 0.41797045752707085,
+   "return_on_risk": 0.005168933551284798,
+   "breakevens": [
+    80.86203
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.28,
+     "price": 0.41797045752707085,
+     "qty": 1.0,
+     "symbol": "SYNP81.28",
+     "bid": 0.41797045752707085,
+     "ask": 0.41797045752707085,
+     "iv": 0.22466293372254093,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-01-15",
+   "exit_date": "2024-02-26",
+   "entry_spot": 88.29984983599215,
+   "exit_spot": 92.0247411227337,
+   "underlying_return": 0.04218457102316875,
+   "entry_volatility": 0.22176825750890305,
+   "net_cash": 0.4002940938442112,
+   "trade_type": "credit",
+   "capital_at_risk": 80.83970590615579,
+   "profit": 0.4002940938442112,
+   "return_on_risk": 0.004951701510504006,
+   "breakevens": [
+    80.839706
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.24,
+     "price": 0.4002940938442112,
+     "qty": 1.0,
+     "symbol": "SYNP81.24",
+     "bid": 0.4002940938442112,
+     "ask": 0.4002940938442112,
+     "iv": 0.22176825750890305,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-01-22",
+   "exit_date": "2024-03-04",
+   "entry_spot": 91.8116447953633,
+   "exit_spot": 93.78903473238744,
+   "underlying_return": 0.021537463373316967,
+   "entry_volatility": 0.2337685774998436,
+   "net_cash": 0.3729229035209336,
+   "trade_type": "credit",
+   "capital_at_risk": 83.17707709647907,
+   "profit": 0.3729229035209336,
+   "return_on_risk": 0.004483481706003824,
+   "breakevens": [
+    83.177077
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.55,
+     "price": 0.3729229035209336,
+     "qty": 1.0,
+     "symbol": "SYNP83.55",
+     "bid": 0.3729229035209336,
+     "ask": 0.3729229035209336,
+     "iv": 0.2337685774998436,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-01-29",
+   "exit_date": "2024-03-11",
+   "entry_spot": 91.59575641834935,
+   "exit_spot": 95.32322635003933,
+   "underlying_return": 0.04069478846449326,
+   "entry_volatility": 0.23232479501148193,
+   "net_cash": 0.36353312332603593,
+   "trade_type": "credit",
+   "capital_at_risk": 82.98646687667396,
+   "profit": 0.36353312332603593,
+   "return_on_risk": 0.004380631409049886,
+   "breakevens": [
+    82.986467
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.35,
+     "price": 0.36353312332603593,
+     "qty": 1.0,
+     "symbol": "SYNP83.35",
+     "bid": 0.36353312332603593,
+     "ask": 0.36353312332603593,
+     "iv": 0.23232479501148193,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-02-05",
+   "exit_date": "2024-03-18",
+   "entry_spot": 97.65761979046705,
+   "exit_spot": 95.64200745535702,
+   "underlying_return": -0.02063958080726014,
+   "entry_volatility": 0.22343652615930693,
+   "net_cash": 0.4538793692008767,
+   "trade_type": "credit",
+   "capital_at_risk": 89.39612063079912,
+   "profit": 0.4538793692008767,
+   "return_on_risk": 0.005077170754146845,
+   "breakevens": [
+    89.396121
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 89.85,
+     "price": 0.4538793692008767,
+     "qty": 1.0,
+     "symbol": "SYNP89.85",
+     "bid": 0.4538793692008767,
+     "ask": 0.4538793692008767,
+     "iv": 0.22343652615930693,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-02-12",
+   "exit_date": "2024-03-25",
+   "entry_spot": 92.95839137940108,
+   "exit_spot": 93.80448776430578,
+   "underlying_return": 0.009101882813908002,
+   "entry_volatility": 0.21583582688669117,
+   "net_cash": 0.3839106210084289,
+   "trade_type": "credit",
+   "capital_at_risk": 85.13608937899157,
+   "profit": 0.3839106210084289,
+   "return_on_risk": 0.004509375798310555,
+   "breakevens": [
+    85.136089
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 85.52,
+     "price": 0.3839106210084289,
+     "qty": 1.0,
+     "symbol": "SYNP85.52",
+     "bid": 0.3839106210084289,
+     "ask": 0.3839106210084289,
+     "iv": 0.21583582688669117,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-02-19",
+   "exit_date": "2024-04-01",
+   "entry_spot": 91.67126046519869,
+   "exit_spot": 89.78482291237212,
+   "underlying_return": -0.020578287494396497,
+   "entry_volatility": 0.21129902723287858,
+   "net_cash": 0.3523330847382873,
+   "trade_type": "credit",
+   "capital_at_risk": 83.98766691526171,
+   "profit": 0.3523330847382873,
+   "return_on_risk": 0.004195057413533933,
+   "breakevens": [
+    83.987667
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.34,
+     "price": 0.3523330847382873,
+     "qty": 1.0,
+     "symbol": "SYNP84.34",
+     "bid": 0.3523330847382873,
+     "ask": 0.3523330847382873,
+     "iv": 0.21129902723287858,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-02-26",
+   "exit_date": "2024-04-08",
+   "entry_spot": 92.0247411227337,
+   "exit_spot": 90.43843479626607,
+   "underlying_return": -0.01723782438411836,
+   "entry_volatility": 0.22547157600601467,
+   "net_cash": 0.43958996891566926,
+   "trade_type": "credit",
+   "capital_at_risk": 84.22041003108433,
+   "profit": 0.43958996891566926,
+   "return_on_risk": 0.0052195182706118864,
+   "breakevens": [
+    84.22041
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.66,
+     "price": 0.43958996891566926,
+     "qty": 1.0,
+     "symbol": "SYNP84.66",
+     "bid": 0.43958996891566926,
+     "ask": 0.43958996891566926,
+     "iv": 0.22547157600601467,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-03-04",
+   "exit_date": "2024-04-15",
+   "entry_spot": 93.78903473238744,
+   "exit_spot": 94.44748797694999,
+   "underlying_return": 0.007020578113863252,
+   "entry_volatility": 0.2161328770454986,
+   "net_cash": 0.3898938754232475,
+   "trade_type": "credit",
+   "capital_at_risk": 85.90010612457675,
+   "profit": 0.3898938754232475,
+   "return_on_risk": 0.004538921929360638,
+   "breakevens": [
+    85.900106
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.29,
+     "price": 0.3898938754232475,
+     "qty": 1.0,
+     "symbol": "SYNP86.29",
+     "bid": 0.3898938754232475,
+     "ask": 0.3898938754232475,
+     "iv": 0.2161328770454986,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-03-11",
+   "exit_date": "2024-04-22",
+   "entry_spot": 95.32322635003933,
+   "exit_spot": 94.12612153439204,
+   "underlying_return": -0.012558374925869198,
+   "entry_volatility": 0.20999186330645822,
+   "net_cash": 0.3585152430555656,
+   "trade_type": "credit",
+   "capital_at_risk": 87.34148475694444,
+   "profit": 0.3585152430555656,
+   "return_on_risk": 0.004104753245874497,
+   "breakevens": [
+    87.341485
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 87.7,
+     "price": 0.3585152430555656,
+     "qty": 1.0,
+     "symbol": "SYNP87.7",
+     "bid": 0.3585152430555656,
+     "ask": 0.3585152430555656,
+     "iv": 0.20999186330645822,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-03-18",
+   "exit_date": "2024-04-29",
+   "entry_spot": 95.64200745535702,
+   "exit_spot": 93.14871877378282,
+   "underlying_return": -0.0260689706114543,
+   "entry_volatility": 0.21048110637820422,
+   "net_cash": 0.3622682712221792,
+   "trade_type": "credit",
+   "capital_at_risk": 87.62773172877782,
+   "profit": 0.3622682712221792,
+   "return_on_risk": 0.004134173783517059,
+   "breakevens": [
+    87.627732
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 87.99,
+     "price": 0.3622682712221792,
+     "qty": 1.0,
+     "symbol": "SYNP87.99",
+     "bid": 0.3622682712221792,
+     "ask": 0.3622682712221792,
+     "iv": 0.21048110637820422,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-03-25",
+   "exit_date": "2024-05-06",
+   "entry_spot": 93.80448776430578,
+   "exit_spot": 91.2947367290624,
+   "underlying_return": -0.0267551275536988,
+   "entry_volatility": 0.20666823890927608,
+   "net_cash": 0.33313297295775257,
+   "trade_type": "credit",
+   "capital_at_risk": 85.96686702704224,
+   "profit": 0.33313297295775257,
+   "return_on_risk": 0.0038751321814828998,
+   "breakevens": [
+    85.966867
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.3,
+     "price": 0.33313297295775257,
+     "qty": 1.0,
+     "symbol": "SYNP86.3",
+     "bid": 0.33313297295775257,
+     "ask": 0.33313297295775257,
+     "iv": 0.20666823890927608,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-04-01",
+   "exit_date": "2024-05-13",
+   "entry_spot": 89.78482291237212,
+   "exit_spot": 87.05015750427664,
+   "underlying_return": -0.030457991889837,
+   "entry_volatility": 0.20372211814129243,
+   "net_cash": 0.30260499252093176,
+   "trade_type": "credit",
+   "capital_at_risk": 82.29739500747907,
+   "profit": 0.30260499252093176,
+   "return_on_risk": 0.003676969270940246,
+   "breakevens": [
+    82.297395
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.6,
+     "price": 0.30260499252093176,
+     "qty": 1.0,
+     "symbol": "SYNP82.6",
+     "bid": 0.30260499252093176,
+     "ask": 0.30260499252093176,
+     "iv": 0.20372211814129243,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-04-08",
+   "exit_date": "2024-05-20",
+   "entry_spot": 90.43843479626607,
+   "exit_spot": 81.93521852688401,
+   "underlying_return": -0.09402215206994191,
+   "entry_volatility": 0.20398424024450207,
+   "net_cash": 0.3060848264253373,
+   "trade_type": "credit",
+   "capital_at_risk": 82.89391517357467,
+   "profit": -0.958696646690651,
+   "return_on_risk": -0.01156534402655732,
+   "breakevens": [
+    82.893915
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.2,
+     "price": 0.3060848264253373,
+     "qty": 1.0,
+     "symbol": "SYNP83.2",
+     "bid": 0.3060848264253373,
+     "ask": 0.3060848264253373,
+     "iv": 0.20398424024450207,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-04-15",
+   "exit_date": "2024-05-27",
+   "entry_spot": 94.44748797694999,
+   "exit_spot": 82.63343965928063,
+   "underlying_return": -0.12508589239083412,
+   "entry_volatility": 0.18998232639567394,
+   "net_cash": 0.34863377444322907,
+   "trade_type": "credit",
+   "capital_at_risk": 87.49136622555677,
+   "profit": -4.857926566276149,
+   "return_on_risk": -0.055524639468449835,
+   "breakevens": [
+    87.491366
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 87.84,
+     "price": 0.34863377444322907,
+     "qty": 1.0,
+     "symbol": "SYNP87.84",
+     "bid": 0.34863377444322907,
+     "ask": 0.34863377444322907,
+     "iv": 0.18998232639567394,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-04-22",
+   "exit_date": "2024-06-03",
+   "entry_spot": 94.12612153439204,
+   "exit_spot": 80.75850946664252,
+   "underlying_return": -0.1420180907259121,
+   "entry_volatility": 0.1933999768971244,
+   "net_cash": 0.3688131471020384,
+   "trade_type": "credit",
+   "capital_at_risk": 87.17118685289796,
+   "profit": -6.412677386255446,
+   "return_on_risk": -0.07356418580232121,
+   "breakevens": [
+    87.171187
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 87.54,
+     "price": 0.3688131471020384,
+     "qty": 1.0,
+     "symbol": "SYNP87.54",
+     "bid": 0.3688131471020384,
+     "ask": 0.3688131471020384,
+     "iv": 0.1933999768971244,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-04-29",
+   "exit_date": "2024-06-10",
+   "entry_spot": 93.14871877378282,
+   "exit_spot": 83.56900516576063,
+   "underlying_return": -0.10284321388560469,
+   "entry_volatility": 0.19325770206515633,
+   "net_cash": 0.36395933980071504,
+   "trade_type": "credit",
+   "capital_at_risk": 86.26604066019928,
+   "profit": -2.6970354944386514,
+   "return_on_risk": -0.03126416227982731,
+   "breakevens": [
+    86.266041
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.63,
+     "price": 0.36395933980071504,
+     "qty": 1.0,
+     "symbol": "SYNP86.63",
+     "bid": 0.36395933980071504,
+     "ask": 0.36395933980071504,
+     "iv": 0.19325770206515633,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-05-06",
+   "exit_date": "2024-06-17",
+   "entry_spot": 91.2947367290624,
+   "exit_spot": 83.86345945146107,
+   "underlying_return": -0.08139874809711434,
+   "entry_volatility": 0.19989219114737186,
+   "net_cash": 0.39777969084945397,
+   "trade_type": "credit",
+   "capital_at_risk": 84.50222030915054,
+   "profit": -0.6387608576894834,
+   "return_on_risk": -0.007559101469199071,
+   "breakevens": [
+    84.50222
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.9,
+     "price": 0.39777969084945397,
+     "qty": 1.0,
+     "symbol": "SYNP84.9",
+     "bid": 0.39777969084945397,
+     "ask": 0.39777969084945397,
+     "iv": 0.19989219114737186,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-05-13",
+   "exit_date": "2024-06-24",
+   "entry_spot": 87.05015750427664,
+   "exit_spot": 86.77482359669192,
+   "underlying_return": -0.003162934054096289,
+   "entry_volatility": 0.20880760184125885,
+   "net_cash": 0.3211192597987509,
+   "trade_type": "credit",
+   "capital_at_risk": 79.76888074020125,
+   "profit": 0.3211192597987509,
+   "return_on_risk": 0.004025620728521967,
+   "breakevens": [
+    79.768881
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.09,
+     "price": 0.3211192597987509,
+     "qty": 1.0,
+     "symbol": "SYNP80.09",
+     "bid": 0.3211192597987509,
+     "ask": 0.3211192597987509,
+     "iv": 0.20880760184125885,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-05-20",
+   "exit_date": "2024-07-01",
+   "entry_spot": 81.93521852688401,
+   "exit_spot": 87.54699442865493,
+   "underlying_return": 0.0684904001315334,
+   "entry_volatility": 0.20041844572824208,
+   "net_cash": 0.36059000568157984,
+   "trade_type": "credit",
+   "capital_at_risk": 75.83940999431843,
+   "profit": 0.36059000568157984,
+   "return_on_risk": 0.00475465204316059,
+   "breakevens": [
+    75.83941
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.2,
+     "price": 0.36059000568157984,
+     "qty": 1.0,
+     "symbol": "SYNP76.2",
+     "bid": 0.36059000568157984,
+     "ask": 0.36059000568157984,
+     "iv": 0.20041844572824208,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-05-27",
+   "exit_date": "2024-07-08",
+   "entry_spot": 82.63343965928063,
+   "exit_spot": 88.40960741322014,
+   "underlying_return": 0.06990109304122116,
+   "entry_volatility": 0.19660509595011294,
+   "net_cash": 0.34170139418987766,
+   "trade_type": "credit",
+   "capital_at_risk": 76.50829860581011,
+   "profit": 0.34170139418987766,
+   "return_on_risk": 0.004466200404617657,
+   "breakevens": [
+    76.508299
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.85,
+     "price": 0.34170139418987766,
+     "qty": 1.0,
+     "symbol": "SYNP76.85",
+     "bid": 0.34170139418987766,
+     "ask": 0.34170139418987766,
+     "iv": 0.19660509595011294,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-06-03",
+   "exit_date": "2024-07-15",
+   "entry_spot": 80.75850946664252,
+   "exit_spot": 85.77124422587671,
+   "underlying_return": 0.062070669609184836,
+   "entry_volatility": 0.2043260281207012,
+   "net_cash": 0.27556035285831193,
+   "trade_type": "credit",
+   "capital_at_risk": 74.02443964714169,
+   "profit": 0.27556035285831193,
+   "return_on_risk": 0.003722559119283413,
+   "breakevens": [
+    74.02444
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 74.3,
+     "price": 0.27556035285831193,
+     "qty": 1.0,
+     "symbol": "SYNP74.3",
+     "bid": 0.27556035285831193,
+     "ask": 0.27556035285831193,
+     "iv": 0.2043260281207012,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-06-10",
+   "exit_date": "2024-07-22",
+   "entry_spot": 83.56900516576063,
+   "exit_spot": 86.17408187396036,
+   "underlying_return": 0.031172761995102327,
+   "entry_volatility": 0.2121110680578696,
+   "net_cash": 0.3248176211375249,
+   "trade_type": "credit",
+   "capital_at_risk": 76.55518237886247,
+   "profit": 0.3248176211375249,
+   "return_on_risk": 0.00424292139400885,
+   "breakevens": [
+    76.555182
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.88,
+     "price": 0.3248176211375249,
+     "qty": 1.0,
+     "symbol": "SYNP76.88",
+     "bid": 0.3248176211375249,
+     "ask": 0.3248176211375249,
+     "iv": 0.2121110680578696,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-06-17",
+   "exit_date": "2024-07-29",
+   "entry_spot": 83.86345945146107,
+   "exit_spot": 89.19321742600445,
+   "underlying_return": 0.06355280368118099,
+   "entry_volatility": 0.2150676942791737,
+   "net_cash": 0.3418009652530891,
+   "trade_type": "credit",
+   "capital_at_risk": 76.80819903474692,
+   "profit": 0.3418009652530891,
+   "return_on_risk": 0.004450058321227702,
+   "breakevens": [
+    76.808199
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.15,
+     "price": 0.3418009652530891,
+     "qty": 1.0,
+     "symbol": "SYNP77.15",
+     "bid": 0.3418009652530891,
+     "ask": 0.3418009652530891,
+     "iv": 0.2150676942791737,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-06-24",
+   "exit_date": "2024-08-05",
+   "entry_spot": 86.77482359669192,
+   "exit_spot": 82.54857674919295,
+   "underlying_return": -0.048703606326433224,
+   "entry_volatility": 0.21676905356514595,
+   "net_cash": 0.36352228532898323,
+   "trade_type": "credit",
+   "capital_at_risk": 79.46647771467102,
+   "profit": 0.36352228532898323,
+   "return_on_risk": 0.004574536279740886,
+   "breakevens": [
+    79.466478
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.83,
+     "price": 0.36352228532898323,
+     "qty": 1.0,
+     "symbol": "SYNP79.83",
+     "bid": 0.36352228532898323,
+     "ask": 0.36352228532898323,
+     "iv": 0.21676905356514595,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-07-01",
+   "exit_date": "2024-08-12",
+   "entry_spot": 87.54699442865493,
+   "exit_spot": 81.89877773759784,
+   "underlying_return": -0.06451639748363969,
+   "entry_volatility": 0.21324690561886503,
+   "net_cash": 0.34668719819255855,
+   "trade_type": "credit",
+   "capital_at_risk": 80.19331280180745,
+   "profit": 0.34668719819255855,
+   "return_on_risk": 0.004323143490148279,
+   "breakevens": [
+    80.193313
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.54,
+     "price": 0.34668719819255855,
+     "qty": 1.0,
+     "symbol": "SYNP80.54",
+     "bid": 0.34668719819255855,
+     "ask": 0.34668719819255855,
+     "iv": 0.21324690561886503,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-07-08",
+   "exit_date": "2024-08-19",
+   "entry_spot": 88.40960741322014,
+   "exit_spot": 83.79195175497681,
+   "underlying_return": -0.052230247292703647,
+   "entry_volatility": 0.20946273228430465,
+   "net_cash": 0.32966373857726694,
+   "trade_type": "credit",
+   "capital_at_risk": 81.01033626142274,
+   "profit": 0.32966373857726694,
+   "return_on_risk": 0.004069403409380161,
+   "breakevens": [
+    81.010336
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.34,
+     "price": 0.32966373857726694,
+     "qty": 1.0,
+     "symbol": "SYNP81.34",
+     "bid": 0.32966373857726694,
+     "ask": 0.32966373857726694,
+     "iv": 0.20946273228430465,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-07-15",
+   "exit_date": "2024-08-26",
+   "entry_spot": 85.77124422587671,
+   "exit_spot": 82.29423466754379,
+   "underlying_return": -0.04053817325042286,
+   "entry_volatility": 0.2221755190108902,
+   "net_cash": 0.3907310710841543,
+   "trade_type": "credit",
+   "capital_at_risk": 78.51926892891584,
+   "profit": 0.3907310710841543,
+   "return_on_risk": 0.004976244384520269,
+   "breakevens": [
+    78.519269
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 78.91,
+     "price": 0.3907310710841543,
+     "qty": 1.0,
+     "symbol": "SYNP78.91",
+     "bid": 0.3907310710841543,
+     "ask": 0.3907310710841543,
+     "iv": 0.2221755190108902,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-07-22",
+   "exit_date": "2024-09-02",
+   "entry_spot": 86.17408187396036,
+   "exit_spot": 84.09758867364039,
+   "underlying_return": -0.024096493460262103,
+   "entry_volatility": 0.21575186437108088,
+   "net_cash": 0.3555995956291973,
+   "trade_type": "credit",
+   "capital_at_risk": 78.9244004043708,
+   "profit": 0.3555995956291973,
+   "return_on_risk": 0.004505572342739069,
+   "breakevens": [
+    78.9244
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.28,
+     "price": 0.3555995956291973,
+     "qty": 1.0,
+     "symbol": "SYNP79.28",
+     "bid": 0.3555995956291973,
+     "ask": 0.3555995956291973,
+     "iv": 0.21575186437108088,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-07-29",
+   "exit_date": "2024-09-09",
+   "entry_spot": 89.19321742600445,
+   "exit_spot": 81.8834830546881,
+   "underlying_return": -0.08195392634401355,
+   "entry_volatility": 0.20793458190005676,
+   "net_cash": 0.3239882010039885,
+   "trade_type": "credit",
+   "capital_at_risk": 81.73601179899602,
+   "profit": 0.14747125569208563,
+   "return_on_risk": 0.0018042384555628276,
+   "breakevens": [
+    81.736012
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.06,
+     "price": 0.3239882010039885,
+     "qty": 1.0,
+     "symbol": "SYNP82.06",
+     "bid": 0.3239882010039885,
+     "ask": 0.3239882010039885,
+     "iv": 0.20793458190005676,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-08-05",
+   "exit_date": "2024-09-16",
+   "entry_spot": 82.54857674919295,
+   "exit_spot": 80.77048228541227,
+   "underlying_return": -0.021539977232836516,
+   "entry_volatility": 0.22335084373595784,
+   "net_cash": 0.3819805216230545,
+   "trade_type": "credit",
+   "capital_at_risk": 75.55801947837695,
+   "profit": 0.3819805216230545,
+   "return_on_risk": 0.0050554596885955825,
+   "breakevens": [
+    75.558019
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.94,
+     "price": 0.3819805216230545,
+     "qty": 1.0,
+     "symbol": "SYNP75.94",
+     "bid": 0.3819805216230545,
+     "ask": 0.3819805216230545,
+     "iv": 0.22335084373595784,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-08-12",
+   "exit_date": "2024-09-23",
+   "entry_spot": 81.89877773759784,
+   "exit_spot": 83.85041653024022,
+   "underlying_return": 0.02382988912112216,
+   "entry_volatility": 0.2221749046030269,
+   "net_cash": 0.3734433042208636,
+   "trade_type": "credit",
+   "capital_at_risk": 74.97655669577912,
+   "profit": 0.3734433042208636,
+   "return_on_risk": 0.004980800942034818,
+   "breakevens": [
+    74.976557
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.35,
+     "price": 0.3734433042208636,
+     "qty": 1.0,
+     "symbol": "SYNP75.35",
+     "bid": 0.3734433042208636,
+     "ask": 0.3734433042208636,
+     "iv": 0.2221749046030269,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-08-19",
+   "exit_date": "2024-09-30",
+   "entry_spot": 83.79195175497681,
+   "exit_spot": 82.53081410443264,
+   "underlying_return": -0.015050820802360199,
+   "entry_volatility": 0.22532709172193946,
+   "net_cash": 0.39995862111938685,
+   "trade_type": "credit",
+   "capital_at_risk": 76.69004137888062,
+   "profit": 0.39995862111938685,
+   "return_on_risk": 0.005215261511510019,
+   "breakevens": [
+    76.690041
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.09,
+     "price": 0.39995862111938685,
+     "qty": 1.0,
+     "symbol": "SYNP77.09",
+     "bid": 0.39995862111938685,
+     "ask": 0.39995862111938685,
+     "iv": 0.22532709172193946,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-08-26",
+   "exit_date": "2024-10-07",
+   "entry_spot": 82.29423466754379,
+   "exit_spot": 82.92409895542953,
+   "underlying_return": 0.007653808197260581,
+   "entry_volatility": 0.21595245684722325,
+   "net_cash": 0.3405992197219394,
+   "trade_type": "credit",
+   "capital_at_risk": 75.36940078027806,
+   "profit": 0.3405992197219394,
+   "return_on_risk": 0.004519064981223311,
+   "breakevens": [
+    75.369401
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.71,
+     "price": 0.3405992197219394,
+     "qty": 1.0,
+     "symbol": "SYNP75.71",
+     "bid": 0.3405992197219394,
+     "ask": 0.3405992197219394,
+     "iv": 0.21595245684722325,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-09-02",
+   "exit_date": "2024-10-14",
+   "entry_spot": 84.09758867364039,
+   "exit_spot": 82.5026129091716,
+   "underlying_return": -0.018965772855372154,
+   "entry_volatility": 0.20893716935828607,
+   "net_cash": 0.3104961168723861,
+   "trade_type": "credit",
+   "capital_at_risk": 77.05950388312762,
+   "profit": 0.3104961168723861,
+   "return_on_risk": 0.004029303346454194,
+   "breakevens": [
+    77.059504
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.37,
+     "price": 0.3104961168723861,
+     "qty": 1.0,
+     "symbol": "SYNP77.37",
+     "bid": 0.3104961168723861,
+     "ask": 0.3104961168723861,
+     "iv": 0.20893716935828607,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-09-09",
+   "exit_date": "2024-10-21",
+   "entry_spot": 81.8834830546881,
+   "exit_spot": 82.43840521173463,
+   "underlying_return": 0.0067769730395557115,
+   "entry_volatility": 0.21179310259949344,
+   "net_cash": 0.3166834913447065,
+   "trade_type": "credit",
+   "capital_at_risk": 75.0133165086553,
+   "profit": 0.3166834913447065,
+   "return_on_risk": 0.004221696974405424,
+   "breakevens": [
+    75.013317
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.33,
+     "price": 0.3166834913447065,
+     "qty": 1.0,
+     "symbol": "SYNP75.33",
+     "bid": 0.3166834913447065,
+     "ask": 0.3166834913447065,
+     "iv": 0.21179310259949344,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-09-16",
+   "exit_date": "2024-10-28",
+   "entry_spot": 80.77048228541227,
+   "exit_spot": 86.14032260597155,
+   "underlying_return": 0.06648270715512505,
+   "entry_volatility": 0.20814208618332722,
+   "net_cash": 0.2943303063966827,
+   "trade_type": "credit",
+   "capital_at_risk": 74.01566969360331,
+   "profit": 0.2943303063966827,
+   "return_on_risk": 0.003976594518635014,
+   "breakevens": [
+    74.01567
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 74.31,
+     "price": 0.2943303063966827,
+     "qty": 1.0,
+     "symbol": "SYNP74.31",
+     "bid": 0.2943303063966827,
+     "ask": 0.2943303063966827,
+     "iv": 0.20814208618332722,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-09-23",
+   "exit_date": "2024-11-04",
+   "entry_spot": 83.85041653024022,
+   "exit_spot": 83.82262111713774,
+   "underlying_return": -0.0003314880742716353,
+   "entry_volatility": 0.23738098825248163,
+   "net_cash": 0.3588296028701894,
+   "trade_type": "credit",
+   "capital_at_risk": 75.94117039712981,
+   "profit": 0.3588296028701894,
+   "return_on_risk": 0.0047250997185546584,
+   "breakevens": [
+    75.94117
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.3,
+     "price": 0.3588296028701894,
+     "qty": 1.0,
+     "symbol": "SYNP76.3",
+     "bid": 0.3588296028701894,
+     "ask": 0.3588296028701894,
+     "iv": 0.23738098825248163,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-09-30",
+   "exit_date": "2024-11-11",
+   "entry_spot": 82.53081410443264,
+   "exit_spot": 86.34863339092082,
+   "underlying_return": 0.04625931935746097,
+   "entry_volatility": 0.2431766267630652,
+   "net_cash": 0.3839106309048006,
+   "trade_type": "credit",
+   "capital_at_risk": 74.71608936909519,
+   "profit": 0.3839106309048006,
+   "return_on_risk": 0.005138259164077685,
+   "breakevens": [
+    74.716089
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.1,
+     "price": 0.3839106309048006,
+     "qty": 1.0,
+     "symbol": "SYNP75.1",
+     "bid": 0.3839106309048006,
+     "ask": 0.3839106309048006,
+     "iv": 0.2431766267630652,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-10-07",
+   "exit_date": "2024-11-18",
+   "entry_spot": 82.92409895542953,
+   "exit_spot": 90.53175530013027,
+   "underlying_return": 0.09174240589324634,
+   "entry_volatility": 0.2297541462739652,
+   "net_cash": 0.4213282054840768,
+   "trade_type": "credit",
+   "capital_at_risk": 75.86867179451593,
+   "profit": 0.4213282054840768,
+   "return_on_risk": 0.0055533884476745505,
+   "breakevens": [
+    75.868672
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.29,
+     "price": 0.4213282054840768,
+     "qty": 1.0,
+     "symbol": "SYNP76.29",
+     "bid": 0.4213282054840768,
+     "ask": 0.4213282054840768,
+     "iv": 0.2297541462739652,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-10-14",
+   "exit_date": "2024-11-25",
+   "entry_spot": 82.5026129091716,
+   "exit_spot": 89.99956921325696,
+   "underlying_return": 0.09086931964614098,
+   "entry_volatility": 0.23561741490650343,
+   "net_cash": 0.3447210024996412,
+   "trade_type": "credit",
+   "capital_at_risk": 74.73527899750036,
+   "profit": 0.3447210024996412,
+   "return_on_risk": 0.004612560588837448,
+   "breakevens": [
+    74.735279
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.08,
+     "price": 0.3447210024996412,
+     "qty": 1.0,
+     "symbol": "SYNP75.08",
+     "bid": 0.3447210024996412,
+     "ask": 0.3447210024996412,
+     "iv": 0.23561741490650343,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-10-21",
+   "exit_date": "2024-12-02",
+   "entry_spot": 82.43840521173463,
+   "exit_spot": 89.02391940958528,
+   "underlying_return": 0.07988405623491168,
+   "entry_volatility": 0.23451250277923164,
+   "net_cash": 0.3386111469543689,
+   "trade_type": "credit",
+   "capital_at_risk": 74.68138885304563,
+   "profit": 0.3386111469543689,
+   "return_on_risk": 0.0045340767245326844,
+   "breakevens": [
+    74.681389
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.02,
+     "price": 0.3386111469543689,
+     "qty": 1.0,
+     "symbol": "SYNP75.02",
+     "bid": 0.3386111469543689,
+     "ask": 0.3386111469543689,
+     "iv": 0.23451250277923164,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-10-28",
+   "exit_date": "2024-12-09",
+   "entry_spot": 86.14032260597155,
+   "exit_spot": 89.72015596704007,
+   "underlying_return": 0.04155816060085615,
+   "entry_volatility": 0.2182368008431452,
+   "net_cash": 0.36968422487290553,
+   "trade_type": "credit",
+   "capital_at_risk": 78.88031577512709,
+   "profit": 0.36968422487290553,
+   "return_on_risk": 0.004686647375079045,
+   "breakevens": [
+    78.880316
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.25,
+     "price": 0.36968422487290553,
+     "qty": 1.0,
+     "symbol": "SYNP79.25",
+     "bid": 0.36968422487290553,
+     "ask": 0.36968422487290553,
+     "iv": 0.2182368008431452,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-11-04",
+   "exit_date": "2024-12-16",
+   "entry_spot": 83.82262111713774,
+   "exit_spot": 86.68267354828434,
+   "underlying_return": 0.03412029346051848,
+   "entry_volatility": 0.22519979982211158,
+   "net_cash": 0.39960929805637235,
+   "trade_type": "credit",
+   "capital_at_risk": 76.72039070194363,
+   "profit": 0.39960929805637235,
+   "return_on_risk": 0.005208645242812204,
+   "breakevens": [
+    76.720391
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.12,
+     "price": 0.39960929805637235,
+     "qty": 1.0,
+     "symbol": "SYNP77.12",
+     "bid": 0.39960929805637235,
+     "ask": 0.39960929805637235,
+     "iv": 0.22519979982211158,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-11-11",
+   "exit_date": "2024-12-23",
+   "entry_spot": 86.34863339092082,
+   "exit_spot": 87.88947390663425,
+   "underlying_return": 0.017844411141258787,
+   "entry_volatility": 0.22100467942169266,
+   "net_cash": 0.3863569166297154,
+   "trade_type": "credit",
+   "capital_at_risk": 79.05364308337028,
+   "profit": 0.3863569166297154,
+   "return_on_risk": 0.004887275292579014,
+   "breakevens": [
+    79.053643
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.44,
+     "price": 0.3863569166297154,
+     "qty": 1.0,
+     "symbol": "SYNP79.44",
+     "bid": 0.3863569166297154,
+     "ask": 0.3863569166297154,
+     "iv": 0.22100467942169266,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-11-18",
+   "exit_date": "2024-12-30",
+   "entry_spot": 90.53175530013027,
+   "exit_spot": 89.93697348826518,
+   "underlying_return": -0.006569869433032394,
+   "entry_volatility": 0.22510963157948802,
+   "net_cash": 0.43066763407401965,
+   "trade_type": "credit",
+   "capital_at_risk": 82.85933236592598,
+   "profit": 0.43066763407401965,
+   "return_on_risk": 0.0051975754785482916,
+   "breakevens": [
+    82.859332
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.29,
+     "price": 0.43066763407401965,
+     "qty": 1.0,
+     "symbol": "SYNP83.29",
+     "bid": 0.43066763407401965,
+     "ask": 0.43066763407401965,
+     "iv": 0.22510963157948802,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-11-25",
+   "exit_date": "2025-01-06",
+   "entry_spot": 89.99956921325696,
+   "exit_spot": 89.44273816119131,
+   "underlying_return": -0.006187041304011376,
+   "entry_volatility": 0.2290955597849024,
+   "net_cash": 0.4531630389700094,
+   "trade_type": "credit",
+   "capital_at_risk": 82.34683696103,
+   "profit": 0.4531630389700094,
+   "return_on_risk": 0.005503101948948754,
+   "breakevens": [
+    82.346837
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.8,
+     "price": 0.4531630389700094,
+     "qty": 1.0,
+     "symbol": "SYNP82.8",
+     "bid": 0.4531630389700094,
+     "ask": 0.4531630389700094,
+     "iv": 0.2290955597849024,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-12-02",
+   "exit_date": "2025-01-13",
+   "entry_spot": 89.02391940958528,
+   "exit_spot": 91.55805981252519,
+   "underlying_return": 0.028465837268753846,
+   "entry_volatility": 0.22720693411584889,
+   "net_cash": 0.4360961076592407,
+   "trade_type": "credit",
+   "capital_at_risk": 81.46390389234077,
+   "profit": 0.4360961076592407,
+   "return_on_risk": 0.005353243422210244,
+   "breakevens": [
+    81.463904
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.9,
+     "price": 0.4360961076592407,
+     "qty": 1.0,
+     "symbol": "SYNP81.9",
+     "bid": 0.4360961076592407,
+     "ask": 0.4360961076592407,
+     "iv": 0.22720693411584889,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-12-09",
+   "exit_date": "2025-01-20",
+   "entry_spot": 89.72015596704007,
+   "exit_spot": 89.6896377930639,
+   "underlying_return": -0.0003401484721826664,
+   "entry_volatility": 0.23265689894903108,
+   "net_cash": 0.3586887723645962,
+   "trade_type": "credit",
+   "capital_at_risk": 81.2913112276354,
+   "profit": 0.3586887723645962,
+   "return_on_risk": 0.004412387584205408,
+   "breakevens": [
+    81.291311
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.65,
+     "price": 0.3586887723645962,
+     "qty": 1.0,
+     "symbol": "SYNP81.65",
+     "bid": 0.3586887723645962,
+     "ask": 0.3586887723645962,
+     "iv": 0.23265689894903108,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-12-16",
+   "exit_date": "2025-01-27",
+   "entry_spot": 86.68267354828434,
+   "exit_spot": 88.39399048011268,
+   "underlying_return": 0.019742318294729166,
+   "entry_volatility": 0.2107990357671876,
+   "net_cash": 0.3303724879227712,
+   "trade_type": "credit",
+   "capital_at_risk": 79.41962751207723,
+   "profit": 0.3303724879227712,
+   "return_on_risk": 0.004159834266063913,
+   "breakevens": [
+    79.419628
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.75,
+     "price": 0.3303724879227712,
+     "qty": 1.0,
+     "symbol": "SYNP79.75",
+     "bid": 0.3303724879227712,
+     "ask": 0.3303724879227712,
+     "iv": 0.2107990357671876,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-12-23",
+   "exit_date": "2025-02-03",
+   "entry_spot": 87.88947390663425,
+   "exit_spot": 83.69309022367185,
+   "underlying_return": -0.04774614634080365,
+   "entry_volatility": 0.20709636955571797,
+   "net_cash": 0.31464486920601153,
+   "trade_type": "credit",
+   "capital_at_risk": 80.545355130794,
+   "profit": 0.31464486920601153,
+   "return_on_risk": 0.00390643096296582,
+   "breakevens": [
+    80.545355
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.86,
+     "price": 0.31464486920601153,
+     "qty": 1.0,
+     "symbol": "SYNP80.86",
+     "bid": 0.31464486920601153,
+     "ask": 0.31464486920601153,
+     "iv": 0.20709636955571797,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2024-12-30",
+   "exit_date": "2025-02-10",
+   "entry_spot": 89.93697348826518,
+   "exit_spot": 82.2026586506579,
+   "underlying_return": -0.08599705479989772,
+   "entry_volatility": 0.20526246349321717,
+   "net_cash": 0.31147331683640544,
+   "trade_type": "credit",
+   "capital_at_risk": 82.4285266831636,
+   "profit": -0.22586803250569432,
+   "return_on_risk": -0.002740168259635155,
+   "breakevens": [
+    82.428527
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.74,
+     "price": 0.31147331683640544,
+     "qty": 1.0,
+     "symbol": "SYNP82.74",
+     "bid": 0.31147331683640544,
+     "ask": 0.31147331683640544,
+     "iv": 0.20526246349321717,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-01-06",
+   "exit_date": "2025-02-17",
+   "entry_spot": 89.44273816119131,
+   "exit_spot": 79.40393512401789,
+   "underlying_return": -0.11223720610030696,
+   "entry_volatility": 0.21549452519884296,
+   "net_cash": 0.36794105735625493,
+   "trade_type": "credit",
+   "capital_at_risk": 81.92205894264376,
+   "profit": -2.5181238186258597,
+   "return_on_risk": -0.03073804358834387,
+   "breakevens": [
+    81.922059
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.29,
+     "price": 0.36794105735625493,
+     "qty": 1.0,
+     "symbol": "SYNP82.29",
+     "bid": 0.36794105735625493,
+     "ask": 0.36794105735625493,
+     "iv": 0.21549452519884296,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-01-13",
+   "exit_date": "2025-02-24",
+   "entry_spot": 91.55805981252519,
+   "exit_spot": 78.8183150813419,
+   "underlying_return": -0.13914389139819328,
+   "entry_volatility": 0.21834905329596713,
+   "net_cash": 0.39305700213125583,
+   "trade_type": "credit",
+   "capital_at_risk": 83.83694299786875,
+   "profit": -5.018627916526855,
+   "return_on_risk": -0.05986177139896949,
+   "breakevens": [
+    83.836943
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.23,
+     "price": 0.39305700213125583,
+     "qty": 1.0,
+     "symbol": "SYNP84.23",
+     "bid": 0.39305700213125583,
+     "ask": 0.39305700213125583,
+     "iv": 0.21834905329596713,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-01-20",
+   "exit_date": "2025-03-03",
+   "entry_spot": 89.6896377930639,
+   "exit_spot": 78.13008432195971,
+   "underlying_return": -0.12888393526323427,
+   "entry_volatility": 0.21626158046331018,
+   "net_cash": 0.3725556571025965,
+   "trade_type": "credit",
+   "capital_at_risk": 82.13744434289741,
+   "profit": -4.0073600209376945,
+   "return_on_risk": -0.04878846734271711,
+   "breakevens": [
+    82.137444
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.51,
+     "price": 0.3725556571025965,
+     "qty": 1.0,
+     "symbol": "SYNP82.51",
+     "bid": 0.3725556571025965,
+     "ask": 0.3725556571025965,
+     "iv": 0.21626158046331018,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-01-27",
+   "exit_date": "2025-03-10",
+   "entry_spot": 88.39399048011268,
+   "exit_spot": 79.31136770817797,
+   "underlying_return": -0.10275158664749007,
+   "entry_volatility": 0.20207205250260812,
+   "net_cash": 0.399887298759138,
+   "trade_type": "credit",
+   "capital_at_risk": 81.81011270124085,
+   "profit": -2.4987449930628873,
+   "return_on_risk": -0.030543228832698915,
+   "breakevens": [
+    81.810113
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.21,
+     "price": 0.399887298759138,
+     "qty": 1.0,
+     "symbol": "SYNP82.21",
+     "bid": 0.399887298759138,
+     "ask": 0.399887298759138,
+     "iv": 0.20207205250260812,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-02-03",
+   "exit_date": "2025-03-17",
+   "entry_spot": 83.69309022367185,
+   "exit_spot": 73.15884482326034,
+   "underlying_return": -0.12586756412337596,
+   "entry_volatility": 0.20719642487285517,
+   "net_cash": 0.30022397228383824,
+   "trade_type": "credit",
+   "capital_at_risk": 76.69977602771615,
+   "profit": -3.5409312044558234,
+   "return_on_risk": -0.046166121830346366,
+   "breakevens": [
+    76.699776
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.0,
+     "price": 0.30022397228383824,
+     "qty": 1.0,
+     "symbol": "SYNP77.0",
+     "bid": 0.30022397228383824,
+     "ask": 0.30022397228383824,
+     "iv": 0.20719642487285517,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-02-10",
+   "exit_date": "2025-03-24",
+   "entry_spot": 82.2026586506579,
+   "exit_spot": 74.85255531671115,
+   "underlying_return": -0.08941442350645823,
+   "entry_volatility": 0.19522083826629918,
+   "net_cash": 0.3321741938940299,
+   "trade_type": "credit",
+   "capital_at_risk": 76.11782580610597,
+   "profit": -1.2652704893948261,
+   "return_on_risk": -0.016622525354544868,
+   "breakevens": [
+    76.117826
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.45,
+     "price": 0.3321741938940299,
+     "qty": 1.0,
+     "symbol": "SYNP76.45",
+     "bid": 0.3321741938940299,
+     "ask": 0.3321741938940299,
+     "iv": 0.19522083826629918,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-02-17",
+   "exit_date": "2025-03-31",
+   "entry_spot": 79.40393512401789,
+   "exit_spot": 74.83178227080973,
+   "underlying_return": -0.05758093532854636,
+   "entry_volatility": 0.18784290016877694,
+   "net_cash": 0.28210798854850516,
+   "trade_type": "credit",
+   "capital_at_risk": 73.56789201145149,
+   "profit": 0.28210798854850516,
+   "return_on_risk": 0.003834661845477271,
+   "breakevens": [
+    73.567892
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 73.85,
+     "price": 0.28210798854850516,
+     "qty": 1.0,
+     "symbol": "SYNP73.85",
+     "bid": 0.28210798854850516,
+     "ask": 0.28210798854850516,
+     "iv": 0.18784290016877694,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-02-24",
+   "exit_date": "2025-04-07",
+   "entry_spot": 78.8183150813419,
+   "exit_spot": 71.63995330951943,
+   "underlying_return": -0.09107479352247339,
+   "entry_volatility": 0.19150781002941536,
+   "net_cash": 0.2983890911739646,
+   "trade_type": "credit",
+   "capital_at_risk": 73.00161090882604,
+   "profit": -1.3616575993066053,
+   "return_on_risk": -0.018652432218341338,
+   "breakevens": [
+    73.001611
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 73.3,
+     "price": 0.2983890911739646,
+     "qty": 1.0,
+     "symbol": "SYNP73.3",
+     "bid": 0.2983890911739646,
+     "ask": 0.2983890911739646,
+     "iv": 0.19150781002941536,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-03-03",
+   "exit_date": "2025-04-14",
+   "entry_spot": 78.13008432195971,
+   "exit_spot": 70.54541962958105,
+   "underlying_return": -0.09707739033179152,
+   "entry_volatility": 0.178187356240043,
+   "net_cash": 0.22979327923498172,
+   "trade_type": "credit",
+   "capital_at_risk": 72.43020672076501,
+   "profit": -1.8847870911839673,
+   "return_on_risk": -0.02602211392893371,
+   "breakevens": [
+    72.430207
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 72.66,
+     "price": 0.22979327923498172,
+     "qty": 1.0,
+     "symbol": "SYNP72.66",
+     "bid": 0.22979327923498172,
+     "ask": 0.22979327923498172,
+     "iv": 0.178187356240043,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-03-10",
+   "exit_date": "2025-04-21",
+   "entry_spot": 79.31136770817797,
+   "exit_spot": 73.2718176126876,
+   "underlying_return": -0.07614986691078862,
+   "entry_volatility": 0.18448742125873793,
+   "net_cash": 0.2642349288028232,
+   "trade_type": "credit",
+   "capital_at_risk": 73.49576507119718,
+   "profit": -0.22394745850958309,
+   "return_on_risk": -0.003047079764291719,
+   "breakevens": [
+    73.495765
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 73.76,
+     "price": 0.2642349288028232,
+     "qty": 1.0,
+     "symbol": "SYNP73.76",
+     "bid": 0.2642349288028232,
+     "ask": 0.2642349288028232,
+     "iv": 0.18448742125873793,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-03-17",
+   "exit_date": "2025-04-28",
+   "entry_spot": 73.15884482326034,
+   "exit_spot": 75.7235062221858,
+   "underlying_return": 0.03505606745324186,
+   "entry_volatility": 0.18851640474364964,
+   "net_cash": 0.26291974582592914,
+   "trade_type": "credit",
+   "capital_at_risk": 67.77708025417408,
+   "profit": 0.26291974582592914,
+   "return_on_risk": 0.003879183712841291,
+   "breakevens": [
+    67.77708
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 68.04,
+     "price": 0.26291974582592914,
+     "qty": 1.0,
+     "symbol": "SYNP68.04",
+     "bid": 0.26291974582592914,
+     "ask": 0.26291974582592914,
+     "iv": 0.18851640474364964,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-03-24",
+   "exit_date": "2025-05-05",
+   "entry_spot": 74.85255531671115,
+   "exit_spot": 75.0502105515322,
+   "underlying_return": 0.0026405943522536113,
+   "entry_volatility": 0.2020865509044818,
+   "net_cash": 0.33787236142425137,
+   "trade_type": "credit",
+   "capital_at_risk": 69.27212763857575,
+   "profit": 0.33787236142425137,
+   "return_on_risk": 0.00487746476024362,
+   "breakevens": [
+    69.272128
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 69.61,
+     "price": 0.33787236142425137,
+     "qty": 1.0,
+     "symbol": "SYNP69.61",
+     "bid": 0.33787236142425137,
+     "ask": 0.33787236142425137,
+     "iv": 0.2020865509044818,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-03-31",
+   "exit_date": "2025-05-12",
+   "entry_spot": 74.83178227080973,
+   "exit_spot": 79.22443233417621,
+   "underlying_return": 0.058700326653585044,
+   "entry_volatility": 0.1824380900700882,
+   "net_cash": 0.23922970453629233,
+   "trade_type": "credit",
+   "capital_at_risk": 69.35077029546372,
+   "profit": 0.23922970453629233,
+   "return_on_risk": 0.0034495608847179672,
+   "breakevens": [
+    69.35077
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 69.59,
+     "price": 0.23922970453629233,
+     "qty": 1.0,
+     "symbol": "SYNP69.59",
+     "bid": 0.23922970453629233,
+     "ask": 0.23922970453629233,
+     "iv": 0.1824380900700882,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-04-07",
+   "exit_date": "2025-05-19",
+   "entry_spot": 71.63995330951943,
+   "exit_spot": 83.74375773006838,
+   "underlying_return": 0.16895327064570576,
+   "entry_volatility": 0.17903667770001905,
+   "net_cash": 0.21500362390412153,
+   "trade_type": "credit",
+   "capital_at_risk": 66.41499637609587,
+   "profit": 0.21500362390412153,
+   "return_on_risk": 0.003237275248598911,
+   "breakevens": [
+    66.414996
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 66.63,
+     "price": 0.21500362390412153,
+     "qty": 1.0,
+     "symbol": "SYNP66.63",
+     "bid": 0.21500362390412153,
+     "ask": 0.21500362390412153,
+     "iv": 0.17903667770001905,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-04-14",
+   "exit_date": "2025-05-26",
+   "entry_spot": 70.54541962958105,
+   "exit_spot": 79.79492941133023,
+   "underlying_return": 0.13111424994445264,
+   "entry_volatility": 0.1814661886069776,
+   "net_cash": 0.22197682808867558,
+   "trade_type": "credit",
+   "capital_at_risk": 65.38802317191133,
+   "profit": 0.22197682808867558,
+   "return_on_risk": 0.0033947627917283478,
+   "breakevens": [
+    65.388023
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 65.61,
+     "price": 0.22197682808867558,
+     "qty": 1.0,
+     "symbol": "SYNP65.61",
+     "bid": 0.22197682808867558,
+     "ask": 0.22197682808867558,
+     "iv": 0.1814661886069776,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-04-21",
+   "exit_date": "2025-06-02",
+   "entry_spot": 73.2718176126876,
+   "exit_spot": 77.50527394916351,
+   "underlying_return": 0.05777741667135672,
+   "entry_volatility": 0.202484733596754,
+   "net_cash": 0.3328293510627063,
+   "trade_type": "credit",
+   "capital_at_risk": 67.8071706489373,
+   "profit": 0.3328293510627063,
+   "return_on_risk": 0.004908468350432824,
+   "breakevens": [
+    67.807171
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 68.14,
+     "price": 0.3328293510627063,
+     "qty": 1.0,
+     "symbol": "SYNP68.14",
+     "bid": 0.3328293510627063,
+     "ask": 0.3328293510627063,
+     "iv": 0.202484733596754,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-04-28",
+   "exit_date": "2025-06-09",
+   "entry_spot": 75.7235062221858,
+   "exit_spot": 80.64840714050665,
+   "underlying_return": 0.06503794084587611,
+   "entry_volatility": 0.22138436083468344,
+   "net_cash": 0.3414199800063038,
+   "trade_type": "credit",
+   "capital_at_risk": 69.3285800199937,
+   "profit": 0.3414199800063038,
+   "return_on_risk": 0.00492466425690302,
+   "breakevens": [
+    69.32858
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 69.67,
+     "price": 0.3414199800063038,
+     "qty": 1.0,
+     "symbol": "SYNP69.67",
+     "bid": 0.3414199800063038,
+     "ask": 0.3414199800063038,
+     "iv": 0.22138436083468344,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-05-05",
+   "exit_date": "2025-06-16",
+   "entry_spot": 75.0502105515322,
+   "exit_spot": 83.9442819239999,
+   "underlying_return": 0.1185082800848467,
+   "entry_volatility": 0.22899570123699786,
+   "net_cash": 0.3778487790972207,
+   "trade_type": "credit",
+   "capital_at_risk": 68.67215122090278,
+   "profit": 0.3778487790972207,
+   "return_on_risk": 0.005502212649226127,
+   "breakevens": [
+    68.672151
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 69.05,
+     "price": 0.3778487790972207,
+     "qty": 1.0,
+     "symbol": "SYNP69.05",
+     "bid": 0.3778487790972207,
+     "ask": 0.3778487790972207,
+     "iv": 0.22899570123699786,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-05-12",
+   "exit_date": "2025-06-23",
+   "entry_spot": 79.22443233417621,
+   "exit_spot": 83.31788233087569,
+   "underlying_return": 0.051669035373240746,
+   "entry_volatility": 0.23517757585318563,
+   "net_cash": 0.32805621665725937,
+   "trade_type": "credit",
+   "capital_at_risk": 71.76194378334274,
+   "profit": 0.32805621665725937,
+   "return_on_risk": 0.004571451097362934,
+   "breakevens": [
+    71.761944
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 72.09,
+     "price": 0.32805621665725937,
+     "qty": 1.0,
+     "symbol": "SYNP72.09",
+     "bid": 0.32805621665725937,
+     "ask": 0.32805621665725937,
+     "iv": 0.23517757585318563,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-05-19",
+   "exit_date": "2025-06-30",
+   "entry_spot": 83.74375773006838,
+   "exit_spot": 81.24071044792498,
+   "underlying_return": -0.029889359517535463,
+   "entry_volatility": 0.23780510496229645,
+   "net_cash": 0.36146557266975954,
+   "trade_type": "credit",
+   "capital_at_risk": 75.84853442733024,
+   "profit": 0.36146557266975954,
+   "return_on_risk": 0.004765623691992049,
+   "breakevens": [
+    75.848534
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.21,
+     "price": 0.36146557266975954,
+     "qty": 1.0,
+     "symbol": "SYNP76.21",
+     "bid": 0.36146557266975954,
+     "ask": 0.36146557266975954,
+     "iv": 0.23780510496229645,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-05-26",
+   "exit_date": "2025-07-07",
+   "entry_spot": 79.79492941133023,
+   "exit_spot": 83.42592899121738,
+   "underlying_return": 0.04550413925639196,
+   "entry_volatility": 0.262613783741986,
+   "net_cash": 0.37227164471347507,
+   "trade_type": "credit",
+   "capital_at_risk": 71.44772835528651,
+   "profit": 0.37227164471347507,
+   "return_on_risk": 0.005210405610970418,
+   "breakevens": [
+    71.447728
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 71.82,
+     "price": 0.37227164471347507,
+     "qty": 1.0,
+     "symbol": "SYNP71.82",
+     "bid": 0.37227164471347507,
+     "ask": 0.37227164471347507,
+     "iv": 0.262613783741986,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-06-02",
+   "exit_date": "2025-07-14",
+   "entry_spot": 77.50527394916351,
+   "exit_spot": 83.36391611935774,
+   "underlying_return": 0.07559023885312599,
+   "entry_volatility": 0.25714538499735085,
+   "net_cash": 0.4342273362561979,
+   "trade_type": "credit",
+   "capital_at_risk": 70.0957726637438,
+   "profit": 0.4342273362561979,
+   "return_on_risk": 0.006194772091881039,
+   "breakevens": [
+    70.095773
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 70.53,
+     "price": 0.4342273362561979,
+     "qty": 1.0,
+     "symbol": "SYNP70.53",
+     "bid": 0.4342273362561979,
+     "ask": 0.4342273362561979,
+     "iv": 0.25714538499735085,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-06-09",
+   "exit_date": "2025-07-21",
+   "entry_spot": 80.64840714050665,
+   "exit_spot": 89.57619601774584,
+   "underlying_return": 0.11070012655904149,
+   "entry_volatility": 0.24867828189196453,
+   "net_cash": 0.4048945807599935,
+   "trade_type": "credit",
+   "capital_at_risk": 72.98510541924,
+   "profit": 0.4048945807599935,
+   "return_on_risk": 0.005547633019562058,
+   "breakevens": [
+    72.985105
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 73.39,
+     "price": 0.4048945807599935,
+     "qty": 1.0,
+     "symbol": "SYNP73.39",
+     "bid": 0.4048945807599935,
+     "ask": 0.4048945807599935,
+     "iv": 0.24867828189196453,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-06-16",
+   "exit_date": "2025-07-28",
+   "entry_spot": 83.9442819239999,
+   "exit_spot": 91.08078412676753,
+   "underlying_return": 0.08501475072749765,
+   "entry_volatility": 0.24601094785738128,
+   "net_cash": 0.4066020040752729,
+   "trade_type": "credit",
+   "capital_at_risk": 75.98339799592473,
+   "profit": 0.4066020040752729,
+   "return_on_risk": 0.005351195324234914,
+   "breakevens": [
+    75.983398
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 76.39,
+     "price": 0.4066020040752729,
+     "qty": 1.0,
+     "symbol": "SYNP76.39",
+     "bid": 0.4066020040752729,
+     "ask": 0.4066020040752729,
+     "iv": 0.24601094785738128,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-06-23",
+   "exit_date": "2025-08-04",
+   "entry_spot": 83.31788233087569,
+   "exit_spot": 90.43981075628601,
+   "underlying_return": 0.08547898993792713,
+   "entry_volatility": 0.2541256944838996,
+   "net_cash": 0.4493415578320086,
+   "trade_type": "credit",
+   "capital_at_risk": 75.37065844216798,
+   "profit": 0.4493415578320086,
+   "return_on_risk": 0.005961757096454041,
+   "breakevens": [
+    75.370658
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.82,
+     "price": 0.4493415578320086,
+     "qty": 1.0,
+     "symbol": "SYNP75.82",
+     "bid": 0.4493415578320086,
+     "ask": 0.4493415578320086,
+     "iv": 0.2541256944838996,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-06-30",
+   "exit_date": "2025-08-11",
+   "entry_spot": 81.24071044792498,
+   "exit_spot": 87.9053297205775,
+   "underlying_return": 0.08203546271206608,
+   "entry_volatility": 0.25061176545453456,
+   "net_cash": 0.418612666872912,
+   "trade_type": "credit",
+   "capital_at_risk": 73.51138733312709,
+   "profit": 0.418612666872912,
+   "return_on_risk": 0.005694528182088448,
+   "breakevens": [
+    73.511387
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 73.93,
+     "price": 0.418612666872912,
+     "qty": 1.0,
+     "symbol": "SYNP73.93",
+     "bid": 0.418612666872912,
+     "ask": 0.418612666872912,
+     "iv": 0.25061176545453456,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-07-07",
+   "exit_date": "2025-08-18",
+   "entry_spot": 83.42592899121738,
+   "exit_spot": 94.5157414699547,
+   "underlying_return": 0.13293004480543225,
+   "entry_volatility": 0.2552439575008612,
+   "net_cash": 0.4566250115199324,
+   "trade_type": "credit",
+   "capital_at_risk": 75.46337498848007,
+   "profit": 0.4566250115199324,
+   "return_on_risk": 0.006050948709750112,
+   "breakevens": [
+    75.463375
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.92,
+     "price": 0.4566250115199324,
+     "qty": 1.0,
+     "symbol": "SYNP75.92",
+     "bid": 0.4566250115199324,
+     "ask": 0.4566250115199324,
+     "iv": 0.2552439575008612,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-07-14",
+   "exit_date": "2025-08-25",
+   "entry_spot": 83.36391611935774,
+   "exit_spot": 96.74060191525848,
+   "underlying_return": 0.16046134129241763,
+   "entry_volatility": 0.24382985591256046,
+   "net_cash": 0.3915830156794744,
+   "trade_type": "credit",
+   "capital_at_risk": 75.46841698432053,
+   "profit": 0.3915830156794744,
+   "return_on_risk": 0.005188700536289644,
+   "breakevens": [
+    75.468417
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.86,
+     "price": 0.3915830156794744,
+     "qty": 1.0,
+     "symbol": "SYNP75.86",
+     "bid": 0.3915830156794744,
+     "ask": 0.3915830156794744,
+     "iv": 0.24382985591256046,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-07-21",
+   "exit_date": "2025-09-01",
+   "entry_spot": 89.57619601774584,
+   "exit_spot": 99.41642271755573,
+   "underlying_return": 0.1098531433268326,
+   "entry_volatility": 0.2371063834099698,
+   "net_cash": 0.3817625689123716,
+   "trade_type": "credit",
+   "capital_at_risk": 81.12823743108763,
+   "profit": 0.3817625689123716,
+   "return_on_risk": 0.004705668223553487,
+   "breakevens": [
+    81.128237
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.51,
+     "price": 0.3817625689123716,
+     "qty": 1.0,
+     "symbol": "SYNP81.51",
+     "bid": 0.3817625689123716,
+     "ask": 0.3817625689123716,
+     "iv": 0.2371063834099698,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-07-28",
+   "exit_date": "2025-09-08",
+   "entry_spot": 91.08078412676753,
+   "exit_spot": 102.28410886498243,
+   "underlying_return": 0.12300426314536295,
+   "entry_volatility": 0.2292848147362058,
+   "net_cash": 0.45916247614715644,
+   "trade_type": "credit",
+   "capital_at_risk": 83.33083752385285,
+   "profit": 0.45916247614715644,
+   "return_on_risk": 0.005510114740125161,
+   "breakevens": [
+    83.330838
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.79,
+     "price": 0.45916247614715644,
+     "qty": 1.0,
+     "symbol": "SYNP83.79",
+     "bid": 0.45916247614715644,
+     "ask": 0.45916247614715644,
+     "iv": 0.2292848147362058,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-08-04",
+   "exit_date": "2025-09-15",
+   "entry_spot": 90.43981075628601,
+   "exit_spot": 99.48199173612424,
+   "underlying_return": 0.09998009620127113,
+   "entry_volatility": 0.23461685226194448,
+   "net_cash": 0.37189785924443974,
+   "trade_type": "credit",
+   "capital_at_risk": 81.92810214075556,
+   "profit": 0.37189785924443974,
+   "return_on_risk": 0.004539319836867516,
+   "breakevens": [
+    81.928102
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.3,
+     "price": 0.37189785924443974,
+     "qty": 1.0,
+     "symbol": "SYNP82.3",
+     "bid": 0.37189785924443974,
+     "ask": 0.37189785924443974,
+     "iv": 0.23461685226194448,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-08-11",
+   "exit_date": "2025-09-22",
+   "entry_spot": 87.9053297205775,
+   "exit_spot": 100.72612119952893,
+   "underlying_return": 0.1458477150328037,
+   "entry_volatility": 0.2354973789941378,
+   "net_cash": 0.3658493079256129,
+   "trade_type": "credit",
+   "capital_at_risk": 79.62415069207438,
+   "profit": 0.3658493079256129,
+   "return_on_risk": 0.004594702797401753,
+   "breakevens": [
+    79.624151
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.99,
+     "price": 0.3658493079256129,
+     "qty": 1.0,
+     "symbol": "SYNP79.99",
+     "bid": 0.3658493079256129,
+     "ask": 0.3658493079256129,
+     "iv": 0.2354973789941378,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-08-18",
+   "exit_date": "2025-09-29",
+   "entry_spot": 94.5157414699547,
+   "exit_spot": 102.50214999405054,
+   "underlying_return": 0.08449818411078769,
+   "entry_volatility": 0.22390630344214596,
+   "net_cash": 0.44107090000036564,
+   "trade_type": "credit",
+   "capital_at_risk": 86.50892909999963,
+   "profit": 0.44107090000036564,
+   "return_on_risk": 0.005098559242254769,
+   "breakevens": [
+    86.508929
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.95,
+     "price": 0.44107090000036564,
+     "qty": 1.0,
+     "symbol": "SYNP86.95",
+     "bid": 0.44107090000036564,
+     "ask": 0.44107090000036564,
+     "iv": 0.22390630344214596,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-08-25",
+   "exit_date": "2025-10-06",
+   "entry_spot": 96.74060191525848,
+   "exit_spot": 109.52328586418035,
+   "underlying_return": 0.13213359950064274,
+   "entry_volatility": 0.21910744501735765,
+   "net_cash": 0.4204752300799388,
+   "trade_type": "credit",
+   "capital_at_risk": 88.57952476992006,
+   "profit": 0.4204752300799388,
+   "return_on_risk": 0.00474686707985957,
+   "breakevens": [
+    88.579525
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 89.0,
+     "price": 0.4204752300799388,
+     "qty": 1.0,
+     "symbol": "SYNP89.0",
+     "bid": 0.4204752300799388,
+     "ask": 0.4204752300799388,
+     "iv": 0.21910744501735765,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-09-01",
+   "exit_date": "2025-10-13",
+   "entry_spot": 99.41642271755573,
+   "exit_spot": 107.99955466977097,
+   "underlying_return": 0.08633515185514273,
+   "entry_volatility": 0.21834792258831143,
+   "net_cash": 0.4268620697675001,
+   "trade_type": "credit",
+   "capital_at_risk": 91.0331379302325,
+   "profit": 0.4268620697675001,
+   "return_on_risk": 0.004689084430931577,
+   "breakevens": [
+    91.033138
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 91.46,
+     "price": 0.4268620697675001,
+     "qty": 1.0,
+     "symbol": "SYNP91.46",
+     "bid": 0.4268620697675001,
+     "ask": 0.4268620697675001,
+     "iv": 0.21834792258831143,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-09-08",
+   "exit_date": "2025-10-20",
+   "entry_spot": 102.28410886498243,
+   "exit_spot": 104.16592774787111,
+   "underlying_return": 0.018397959407093545,
+   "entry_volatility": 0.20932952103118324,
+   "net_cash": 0.3799540969351245,
+   "trade_type": "credit",
+   "capital_at_risk": 93.72004590306487,
+   "profit": 0.3799540969351245,
+   "return_on_risk": 0.004054139040095147,
+   "breakevens": [
+    93.720046
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 94.1,
+     "price": 0.3799540969351245,
+     "qty": 1.0,
+     "symbol": "SYNP94.1",
+     "bid": 0.3799540969351245,
+     "ask": 0.3799540969351245,
+     "iv": 0.20932952103118324,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-09-15",
+   "exit_date": "2025-10-27",
+   "entry_spot": 99.48199173612424,
+   "exit_spot": 103.71953930542169,
+   "underlying_return": 0.04259612715171146,
+   "entry_volatility": 0.2033782190703701,
+   "net_cash": 0.3331100348631253,
+   "trade_type": "credit",
+   "capital_at_risk": 91.18688996513687,
+   "profit": 0.3331100348631253,
+   "return_on_risk": 0.003653047439061492,
+   "breakevens": [
+    91.18689
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 91.52,
+     "price": 0.3331100348631253,
+     "qty": 1.0,
+     "symbol": "SYNP91.52",
+     "bid": 0.3331100348631253,
+     "ask": 0.3331100348631253,
+     "iv": 0.2033782190703701,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-09-22",
+   "exit_date": "2025-11-03",
+   "entry_spot": 100.72612119952893,
+   "exit_spot": 102.10414600918809,
+   "underlying_return": 0.013680908122426505,
+   "entry_volatility": 0.19943095108111503,
+   "net_cash": 0.43686960803520236,
+   "trade_type": "credit",
+   "capital_at_risk": 93.2431303919648,
+   "profit": 0.43686960803520236,
+   "return_on_risk": 0.00468527393062352,
+   "breakevens": [
+    93.24313
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 93.68,
+     "price": 0.43686960803520236,
+     "qty": 1.0,
+     "symbol": "SYNP93.68",
+     "bid": 0.43686960803520236,
+     "ask": 0.43686960803520236,
+     "iv": 0.19943095108111503,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-09-29",
+   "exit_date": "2025-11-10",
+   "entry_spot": 102.50214999405054,
+   "exit_spot": 100.86774161296721,
+   "underlying_return": -0.015945113162779467,
+   "entry_volatility": 0.1848285345853304,
+   "net_cash": 0.34400311287306984,
+   "trade_type": "credit",
+   "capital_at_risk": 94.98599688712693,
+   "profit": 0.34400311287306984,
+   "return_on_risk": 0.003621619229641324,
+   "breakevens": [
+    94.985997
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 95.33,
+     "price": 0.34400311287306984,
+     "qty": 1.0,
+     "symbol": "SYNP95.33",
+     "bid": 0.34400311287306984,
+     "ask": 0.34400311287306984,
+     "iv": 0.1848285345853304,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-10-06",
+   "exit_date": "2025-11-17",
+   "entry_spot": 109.52328586418035,
+   "exit_spot": 97.53354672705855,
+   "underlying_return": -0.10947205466415844,
+   "entry_volatility": 0.19634382832640893,
+   "net_cash": 0.45120554776017663,
+   "trade_type": "credit",
+   "capital_at_risk": 101.40879445223982,
+   "profit": -3.875247725181273,
+   "return_on_risk": -0.03821411886526653,
+   "breakevens": [
+    101.408794
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 101.86,
+     "price": 0.45120554776017663,
+     "qty": 1.0,
+     "symbol": "SYNP101.86",
+     "bid": 0.45120554776017663,
+     "ask": 0.45120554776017663,
+     "iv": 0.19634382832640893,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-10-13",
+   "exit_date": "2025-11-24",
+   "entry_spot": 107.99955466977097,
+   "exit_spot": 93.61936619035582,
+   "underlying_return": -0.1331504423641865,
+   "entry_volatility": 0.19662150241064083,
+   "net_cash": 0.4466143516461525,
+   "trade_type": "credit",
+   "capital_at_risk": 99.99338564835385,
+   "profit": -6.374019457998026,
+   "return_on_risk": -0.06374441085946927,
+   "breakevens": [
+    99.993386
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 100.44,
+     "price": 0.4466143516461525,
+     "qty": 1.0,
+     "symbol": "SYNP100.44",
+     "bid": 0.4466143516461525,
+     "ask": 0.4466143516461525,
+     "iv": 0.19662150241064083,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-10-20",
+   "exit_date": "2025-12-01",
+   "entry_spot": 104.16592774787111,
+   "exit_spot": 90.23867644384505,
+   "underlying_return": -0.133702560953869,
+   "entry_volatility": 0.2174005438535602,
+   "net_cash": 0.4408033678774306,
+   "trade_type": "credit",
+   "capital_at_risk": 95.38919663212256,
+   "profit": -5.1505201882775165,
+   "return_on_risk": -0.05399479574338993,
+   "breakevens": [
+    95.389197
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 95.83,
+     "price": 0.4408033678774306,
+     "qty": 1.0,
+     "symbol": "SYNP95.83",
+     "bid": 0.4408033678774306,
+     "ask": 0.4408033678774306,
+     "iv": 0.2174005438535602,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-10-27",
+   "exit_date": "2025-12-08",
+   "entry_spot": 103.71953930542169,
+   "exit_spot": 88.57832995566865,
+   "underlying_return": -0.14598222717868903,
+   "entry_volatility": 0.22319960197999825,
+   "net_cash": 0.4793972711048511,
+   "trade_type": "credit",
+   "capital_at_risk": 94.94060272889516,
+   "profit": -6.3622727732265005,
+   "return_on_risk": -0.06701319130440009,
+   "breakevens": [
+    94.940603
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 95.42,
+     "price": 0.4793972711048511,
+     "qty": 1.0,
+     "symbol": "SYNP95.42",
+     "bid": 0.4793972711048511,
+     "ask": 0.4793972711048511,
+     "iv": 0.22319960197999825,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-11-03",
+   "exit_date": "2025-12-15",
+   "entry_spot": 102.10414600918809,
+   "exit_spot": 82.64015690107976,
+   "underlying_return": -0.1906287831481085,
+   "entry_volatility": 0.21523991925135288,
+   "net_cash": 0.41847248540994286,
+   "trade_type": "credit",
+   "capital_at_risk": 93.52152751459005,
+   "profit": -10.881370613510292,
+   "return_on_risk": -0.11635150646799175,
+   "breakevens": [
+    93.521528
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 93.94,
+     "price": 0.41847248540994286,
+     "qty": 1.0,
+     "symbol": "SYNP93.94",
+     "bid": 0.41847248540994286,
+     "ask": 0.41847248540994286,
+     "iv": 0.21523991925135288,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-11-10",
+   "exit_date": "2025-12-22",
+   "entry_spot": 100.86774161296721,
+   "exit_spot": 82.13945243054626,
+   "underlying_return": -0.18567174086520155,
+   "entry_volatility": 0.2013007243022891,
+   "net_cash": 0.4506073108163129,
+   "trade_type": "credit",
+   "capital_at_risk": 93.3593926891837,
+   "profit": -11.219940258637433,
+   "return_on_risk": -0.12018009045957877,
+   "breakevens": [
+    93.359393
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 93.81,
+     "price": 0.4506073108163129,
+     "qty": 1.0,
+     "symbol": "SYNP93.81",
+     "bid": 0.4506073108163129,
+     "ask": 0.4506073108163129,
+     "iv": 0.2013007243022891,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-11-17",
+   "exit_date": "2025-12-29",
+   "entry_spot": 97.53354672705855,
+   "exit_spot": 78.36929893845178,
+   "underlying_return": -0.19648878187765184,
+   "entry_volatility": 0.20524352874180604,
+   "net_cash": 0.3378191570969431,
+   "trade_type": "credit",
+   "capital_at_risk": 89.39218084290306,
+   "profit": -11.022881904451284,
+   "return_on_risk": -0.12330924025472416,
+   "breakevens": [
+    89.392181
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 89.73,
+     "price": 0.3378191570969431,
+     "qty": 1.0,
+     "symbol": "SYNP89.73",
+     "bid": 0.3378191570969431,
+     "ask": 0.3378191570969431,
+     "iv": 0.20524352874180604,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-11-24",
+   "exit_date": "2026-01-05",
+   "entry_spot": 93.61936619035582,
+   "exit_spot": 81.85310590383654,
+   "underlying_return": -0.12568190498742537,
+   "entry_volatility": 0.20980971591143782,
+   "net_cash": 0.35075227144984034,
+   "trade_type": "credit",
+   "capital_at_risk": 85.77924772855016,
+   "profit": -3.9261418247136195,
+   "return_on_risk": -0.04577029909539379,
+   "breakevens": [
+    85.779248
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.13,
+     "price": 0.35075227144984034,
+     "qty": 1.0,
+     "symbol": "SYNP86.13",
+     "bid": 0.35075227144984034,
+     "ask": 0.35075227144984034,
+     "iv": 0.20980971591143782,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-12-01",
+   "exit_date": "2026-01-12",
+   "entry_spot": 90.23867644384505,
+   "exit_spot": 83.8344876575461,
+   "underlying_return": -0.07096944501711777,
+   "entry_volatility": 0.23396727266835582,
+   "net_cash": 0.36780546281701376,
+   "trade_type": "credit",
+   "capital_at_risk": 81.75219453718299,
+   "profit": 0.36780546281701376,
+   "return_on_risk": 0.004499028618121394,
+   "breakevens": [
+    81.752195
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.12,
+     "price": 0.36780546281701376,
+     "qty": 1.0,
+     "symbol": "SYNP82.12",
+     "bid": 0.36780546281701376,
+     "ask": 0.36780546281701376,
+     "iv": 0.23396727266835582,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-12-08",
+   "exit_date": "2026-01-19",
+   "entry_spot": 88.57832995566865,
+   "exit_spot": 85.00207620796373,
+   "underlying_return": -0.04037391255281908,
+   "entry_volatility": 0.24034919099306126,
+   "net_cash": 0.3967250236612738,
+   "trade_type": "credit",
+   "capital_at_risk": 80.21327497633872,
+   "profit": 0.3967250236612738,
+   "return_on_risk": 0.004945877397205134,
+   "breakevens": [
+    80.213275
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.61,
+     "price": 0.3967250236612738,
+     "qty": 1.0,
+     "symbol": "SYNP80.61",
+     "bid": 0.3967250236612738,
+     "ask": 0.3967250236612738,
+     "iv": 0.24034919099306126,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-12-15",
+   "exit_date": "2026-01-26",
+   "entry_spot": 82.64015690107976,
+   "exit_spot": 87.37229794534007,
+   "underlying_return": 0.05726200459571573,
+   "entry_volatility": 0.24292994175439586,
+   "net_cash": 0.3831556956687834,
+   "trade_type": "credit",
+   "capital_at_risk": 74.81684430433123,
+   "profit": 0.3831556956687834,
+   "return_on_risk": 0.005121249088109455,
+   "breakevens": [
+    74.816844
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 75.2,
+     "price": 0.3831556956687834,
+     "qty": 1.0,
+     "symbol": "SYNP75.2",
+     "bid": 0.3831556956687834,
+     "ask": 0.3831556956687834,
+     "iv": 0.24292994175439586,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-12-22",
+   "exit_date": "2026-02-02",
+   "entry_spot": 82.13945243054626,
+   "exit_spot": 89.99287077673254,
+   "underlying_return": 0.09561079498097236,
+   "entry_volatility": 0.25203968849234565,
+   "net_cash": 0.43152742913090947,
+   "trade_type": "credit",
+   "capital_at_risk": 74.31847257086909,
+   "profit": 0.43152742913090947,
+   "return_on_risk": 0.005806462568500863,
+   "breakevens": [
+    74.318473
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 74.75,
+     "price": 0.43152742913090947,
+     "qty": 1.0,
+     "symbol": "SYNP74.75",
+     "bid": 0.43152742913090947,
+     "ask": 0.43152742913090947,
+     "iv": 0.25203968849234565,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2025-12-29",
+   "exit_date": "2026-02-09",
+   "entry_spot": 78.36929893845178,
+   "exit_spot": 90.32569478888573,
+   "underlying_return": 0.152564792749059,
+   "entry_volatility": 0.23307715291376652,
+   "net_cash": 0.3153118314946548,
+   "trade_type": "credit",
+   "capital_at_risk": 71.00468816850534,
+   "profit": 0.3153118314946548,
+   "return_on_risk": 0.00444071848814222,
+   "breakevens": [
+    71.004688
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 71.32,
+     "price": 0.3153118314946548,
+     "qty": 1.0,
+     "symbol": "SYNP71.32",
+     "bid": 0.3153118314946548,
+     "ask": 0.3153118314946548,
+     "iv": 0.23307715291376652,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-01-05",
+   "exit_date": "2026-02-16",
+   "entry_spot": 81.85310590383654,
+   "exit_spot": 91.74946140246455,
+   "underlying_return": 0.12090384829446243,
+   "entry_volatility": 0.23680667921615964,
+   "net_cash": 0.34822530961414344,
+   "trade_type": "credit",
+   "capital_at_risk": 74.14177469038586,
+   "profit": 0.34822530961414344,
+   "return_on_risk": 0.004696749046921568,
+   "breakevens": [
+    74.141775
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 74.49,
+     "price": 0.34822530961414344,
+     "qty": 1.0,
+     "symbol": "SYNP74.49",
+     "bid": 0.34822530961414344,
+     "ask": 0.34822530961414344,
+     "iv": 0.23680667921615964,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-01-12",
+   "exit_date": "2026-02-23",
+   "entry_spot": 83.8344876575461,
+   "exit_spot": 89.55086129458405,
+   "underlying_return": 0.06818642060996005,
+   "entry_volatility": 0.22670812496888423,
+   "net_cash": 0.40832790811941777,
+   "trade_type": "credit",
+   "capital_at_risk": 76.72167209188058,
+   "profit": 0.40832790811941777,
+   "return_on_risk": 0.005322197717880955,
+   "breakevens": [
+    76.721672
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.13,
+     "price": 0.40832790811941777,
+     "qty": 1.0,
+     "symbol": "SYNP77.13",
+     "bid": 0.40832790811941777,
+     "ask": 0.40832790811941777,
+     "iv": 0.22670812496888423,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-01-19",
+   "exit_date": "2026-03-02",
+   "entry_spot": 85.00207620796373,
+   "exit_spot": 89.32683796295254,
+   "underlying_return": 0.05087830730637655,
+   "entry_volatility": 0.21355722819085549,
+   "net_cash": 0.3384547609235611,
+   "trade_type": "credit",
+   "capital_at_risk": 77.86154523907643,
+   "profit": 0.3384547609235611,
+   "return_on_risk": 0.004346879578157929,
+   "breakevens": [
+    77.861545
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 78.2,
+     "price": 0.3384547609235611,
+     "qty": 1.0,
+     "symbol": "SYNP78.2",
+     "bid": 0.3384547609235611,
+     "ask": 0.3384547609235611,
+     "iv": 0.21355722819085549,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-01-26",
+   "exit_date": "2026-03-09",
+   "entry_spot": 87.37229794534007,
+   "exit_spot": 89.5368773300024,
+   "underlying_return": 0.024774206877521854,
+   "entry_volatility": 0.22051735937340364,
+   "net_cash": 0.38783851030436445,
+   "trade_type": "credit",
+   "capital_at_risk": 79.99216148969563,
+   "profit": 0.38783851030436445,
+   "return_on_risk": 0.0048484564372513516,
+   "breakevens": [
+    79.992161
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.38,
+     "price": 0.38783851030436445,
+     "qty": 1.0,
+     "symbol": "SYNP80.38",
+     "bid": 0.38783851030436445,
+     "ask": 0.38783851030436445,
+     "iv": 0.22051735937340364,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-02-02",
+   "exit_date": "2026-03-16",
+   "entry_spot": 89.99287077673254,
+   "exit_spot": 88.53064825798619,
+   "underlying_return": -0.016248203953555973,
+   "entry_volatility": 0.22625719323104557,
+   "net_cash": 0.4346883739659795,
+   "trade_type": "credit",
+   "capital_at_risk": 82.35531162603402,
+   "profit": 0.4346883739659795,
+   "return_on_risk": 0.005278206898661853,
+   "breakevens": [
+    82.355312
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.79,
+     "price": 0.4346883739659795,
+     "qty": 1.0,
+     "symbol": "SYNP82.79",
+     "bid": 0.4346883739659795,
+     "ask": 0.4346883739659795,
+     "iv": 0.22625719323104557,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-02-09",
+   "exit_date": "2026-03-23",
+   "entry_spot": 90.32569478888573,
+   "exit_spot": 88.00928019320305,
+   "underlying_return": -0.025645134544458603,
+   "entry_volatility": 0.2282634907552775,
+   "net_cash": 0.4494996997878058,
+   "trade_type": "credit",
+   "capital_at_risk": 82.65050030021219,
+   "profit": 0.4494996997878058,
+   "return_on_risk": 0.00543855993799292,
+   "breakevens": [
+    82.6505
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.1,
+     "price": 0.4494996997878058,
+     "qty": 1.0,
+     "symbol": "SYNP83.1",
+     "bid": 0.4494996997878058,
+     "ask": 0.4494996997878058,
+     "iv": 0.2282634907552775,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-02-16",
+   "exit_date": "2026-03-30",
+   "entry_spot": 91.74946140246455,
+   "exit_spot": 86.71834494241595,
+   "underlying_return": -0.05483537868390631,
+   "entry_volatility": 0.22642344707093073,
+   "net_cash": 0.4447841415414633,
+   "trade_type": "credit",
+   "capital_at_risk": 83.96521585845854,
+   "profit": 0.4447841415414633,
+   "return_on_risk": 0.005297242876040989,
+   "breakevens": [
+    83.965216
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.41,
+     "price": 0.4447841415414633,
+     "qty": 1.0,
+     "symbol": "SYNP84.41",
+     "bid": 0.4447841415414633,
+     "ask": 0.4447841415414633,
+     "iv": 0.22642344707093073,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-02-23",
+   "exit_date": "2026-04-06",
+   "entry_spot": 89.55086129458405,
+   "exit_spot": 86.86209000574127,
+   "underlying_return": -0.030025074577427868,
+   "entry_volatility": 0.20190419165499265,
+   "net_cash": 0.4032111837562553,
+   "trade_type": "credit",
+   "capital_at_risk": 82.87678881624375,
+   "profit": 0.4032111837562553,
+   "return_on_risk": 0.004865188305621542,
+   "breakevens": [
+    82.876789
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.28,
+     "price": 0.4032111837562553,
+     "qty": 1.0,
+     "symbol": "SYNP83.28",
+     "bid": 0.4032111837562553,
+     "ask": 0.4032111837562553,
+     "iv": 0.20190419165499265,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-03-02",
+   "exit_date": "2026-04-13",
+   "entry_spot": 89.32683796295254,
+   "exit_spot": 87.53891945522928,
+   "underlying_return": -0.020015468458256414,
+   "entry_volatility": 0.2014333050834784,
+   "net_cash": 0.3989694019843988,
+   "trade_type": "credit",
+   "capital_at_risk": 82.67103059801559,
+   "profit": 0.3989694019843988,
+   "return_on_risk": 0.004825988004484554,
+   "breakevens": [
+    82.671031
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 83.07,
+     "price": 0.3989694019843988,
+     "qty": 1.0,
+     "symbol": "SYNP83.07",
+     "bid": 0.3989694019843988,
+     "ask": 0.3989694019843988,
+     "iv": 0.2014333050834784,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-03-09",
+   "exit_date": "2026-04-20",
+   "entry_spot": 89.5368773300024,
+   "exit_spot": 86.07003281254038,
+   "underlying_return": -0.038719738959450356,
+   "entry_volatility": 0.20660483066568291,
+   "net_cash": 0.31719436135686685,
+   "trade_type": "credit",
+   "capital_at_risk": 82.05280563864314,
+   "profit": 0.31719436135686685,
+   "return_on_risk": 0.0038657344972916168,
+   "breakevens": [
+    82.052806
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.37,
+     "price": 0.31719436135686685,
+     "qty": 1.0,
+     "symbol": "SYNP82.37",
+     "bid": 0.31719436135686685,
+     "ask": 0.31719436135686685,
+     "iv": 0.20660483066568291,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-03-16",
+   "exit_date": "2026-04-27",
+   "entry_spot": 88.53064825798619,
+   "exit_spot": 83.54894141302367,
+   "underlying_return": -0.056270985731917134,
+   "entry_volatility": 0.19553009278677344,
+   "net_cash": 0.35894133380110205,
+   "trade_type": "credit",
+   "capital_at_risk": 81.9710586661989,
+   "profit": 0.35894133380110205,
+   "return_on_risk": 0.0043788788340867555,
+   "breakevens": [
+    81.971059
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.33,
+     "price": 0.35894133380110205,
+     "qty": 1.0,
+     "symbol": "SYNP82.33",
+     "bid": 0.35894133380110205,
+     "ask": 0.35894133380110205,
+     "iv": 0.19553009278677344,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-03-23",
+   "exit_date": "2026-05-04",
+   "entry_spot": 88.00928019320305,
+   "exit_spot": 87.34795540629166,
+   "underlying_return": -0.007514261967142777,
+   "entry_volatility": 0.20307387665371,
+   "net_cash": 0.2935907797939237,
+   "trade_type": "credit",
+   "capital_at_risk": 80.67640922020607,
+   "profit": 0.2935907797939237,
+   "return_on_risk": 0.0036391156055615753,
+   "breakevens": [
+    80.676409
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.97,
+     "price": 0.2935907797939237,
+     "qty": 1.0,
+     "symbol": "SYNP80.97",
+     "bid": 0.2935907797939237,
+     "ask": 0.2935907797939237,
+     "iv": 0.20307387665371,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-03-30",
+   "exit_date": "2026-05-11",
+   "entry_spot": 86.71834494241595,
+   "exit_spot": 88.48732634868941,
+   "underlying_return": 0.020399160148272255,
+   "entry_volatility": 0.20272752478804226,
+   "net_cash": 0.3961604770970055,
+   "trade_type": "credit",
+   "capital_at_risk": 80.25383952290301,
+   "profit": 0.3961604770970055,
+   "return_on_risk": 0.00493634297688584,
+   "breakevens": [
+    80.25384
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.65,
+     "price": 0.3961604770970055,
+     "qty": 1.0,
+     "symbol": "SYNP80.65",
+     "bid": 0.3961604770970055,
+     "ask": 0.3961604770970055,
+     "iv": 0.20272752478804226,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-04-06",
+   "exit_date": "2026-05-18",
+   "entry_spot": 86.86209000574127,
+   "exit_spot": 89.67018080818136,
+   "underlying_return": 0.03232815146693446,
+   "entry_volatility": 0.20019219382639888,
+   "net_cash": 0.38060462396954264,
+   "trade_type": "credit",
+   "capital_at_risk": 80.39939537603045,
+   "profit": 0.38060462396954264,
+   "return_on_risk": 0.004733923957878577,
+   "breakevens": [
+    80.399395
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.78,
+     "price": 0.38060462396954264,
+     "qty": 1.0,
+     "symbol": "SYNP80.78",
+     "bid": 0.38060462396954264,
+     "ask": 0.38060462396954264,
+     "iv": 0.20019219382639888,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-04-13",
+   "exit_date": "2026-05-25",
+   "entry_spot": 87.53891945522928,
+   "exit_spot": 92.14200879237487,
+   "underlying_return": 0.05258334653650576,
+   "entry_volatility": 0.20952851924655513,
+   "net_cash": 0.32690324987841635,
+   "trade_type": "credit",
+   "capital_at_risk": 80.2130967501216,
+   "profit": 0.32690324987841635,
+   "return_on_risk": 0.004075434849458306,
+   "breakevens": [
+    80.213097
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.54,
+     "price": 0.32690324987841635,
+     "qty": 1.0,
+     "symbol": "SYNP80.54",
+     "bid": 0.32690324987841635,
+     "ask": 0.32690324987841635,
+     "iv": 0.20952851924655513,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-04-20",
+   "exit_date": "2026-06-01",
+   "entry_spot": 86.07003281254038,
+   "exit_spot": 93.68236216940211,
+   "underlying_return": 0.08844343505063268,
+   "entry_volatility": 0.21033550496397418,
+   "net_cash": 0.3247660349179178,
+   "trade_type": "credit",
+   "capital_at_risk": 78.85523396508209,
+   "profit": 0.3247660349179178,
+   "return_on_risk": 0.004118509559704401,
+   "breakevens": [
+    78.855234
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 79.18,
+     "price": 0.3247660349179178,
+     "qty": 1.0,
+     "symbol": "SYNP79.18",
+     "bid": 0.3247660349179178,
+     "ask": 0.3247660349179178,
+     "iv": 0.21033550496397418,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-04-27",
+   "exit_date": "2026-06-08",
+   "entry_spot": 83.54894141302367,
+   "exit_spot": 92.98831550446513,
+   "underlying_return": 0.1129801758322464,
+   "entry_volatility": 0.20288335823930467,
+   "net_cash": 0.38227964501601797,
+   "trade_type": "credit",
+   "capital_at_risk": 77.31772035498399,
+   "profit": 0.38227964501601797,
+   "return_on_risk": 0.004944269480021934,
+   "breakevens": [
+    77.31772
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 77.7,
+     "price": 0.38227964501601797,
+     "qty": 1.0,
+     "symbol": "SYNP77.7",
+     "bid": 0.38227964501601797,
+     "ask": 0.38227964501601797,
+     "iv": 0.20288335823930467,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-05-04",
+   "exit_date": "2026-06-15",
+   "entry_spot": 87.34795540629166,
+   "exit_spot": 98.23702165269967,
+   "underlying_return": 0.12466309252183905,
+   "entry_volatility": 0.21627722521965548,
+   "net_cash": 0.36344984257654467,
+   "trade_type": "credit",
+   "capital_at_risk": 79.99655015742346,
+   "profit": 0.36344984257654467,
+   "return_on_risk": 0.004543318953896383,
+   "breakevens": [
+    79.99655
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 80.36,
+     "price": 0.36344984257654467,
+     "qty": 1.0,
+     "symbol": "SYNP80.36",
+     "bid": 0.36344984257654467,
+     "ask": 0.36344984257654467,
+     "iv": 0.21627722521965548,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-05-11",
+   "exit_date": "2026-06-22",
+   "entry_spot": 88.48732634868941,
+   "exit_spot": 97.25645188750927,
+   "underlying_return": 0.09910035595679112,
+   "entry_volatility": 0.2161757118107698,
+   "net_cash": 0.3678260626791108,
+   "trade_type": "credit",
+   "capital_at_risk": 81.04217393732088,
+   "profit": 0.3678260626791108,
+   "return_on_risk": 0.0045386993562585385,
+   "breakevens": [
+    81.042174
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 81.41,
+     "price": 0.3678260626791108,
+     "qty": 1.0,
+     "symbol": "SYNP81.41",
+     "bid": 0.3678260626791108,
+     "ask": 0.3678260626791108,
+     "iv": 0.2161757118107698,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-05-18",
+   "exit_date": "2026-06-29",
+   "entry_spot": 89.67018080818136,
+   "exit_spot": 97.38915725451406,
+   "underlying_return": 0.08608186552946528,
+   "entry_volatility": 0.2168684307856756,
+   "net_cash": 0.37704210494898227,
+   "trade_type": "credit",
+   "capital_at_risk": 82.12295789505102,
+   "profit": 0.37704210494898227,
+   "return_on_risk": 0.004591190023024049,
+   "breakevens": [
+    82.122958
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 82.5,
+     "price": 0.37704210494898227,
+     "qty": 1.0,
+     "symbol": "SYNP82.5",
+     "bid": 0.37704210494898227,
+     "ask": 0.37704210494898227,
+     "iv": 0.2168684307856756,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-05-25",
+   "exit_date": "2026-07-06",
+   "entry_spot": 92.14200879237487,
+   "exit_spot": 96.71945097953257,
+   "underlying_return": 0.04967812452919418,
+   "entry_volatility": 0.21448407790859778,
+   "net_cash": 0.3725708911464629,
+   "trade_type": "credit",
+   "capital_at_risk": 84.39742910885353,
+   "profit": 0.3725708911464629,
+   "return_on_risk": 0.004414481520117527,
+   "breakevens": [
+    84.397429
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 84.77,
+     "price": 0.3725708911464629,
+     "qty": 1.0,
+     "symbol": "SYNP84.77",
+     "bid": 0.3725708911464629,
+     "ask": 0.3725708911464629,
+     "iv": 0.21448407790859778,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-06-01",
+   "exit_date": "2026-07-13",
+   "entry_spot": 93.68236216940211,
+   "exit_spot": 92.8062276947578,
+   "underlying_return": -0.009352181716554497,
+   "entry_volatility": 0.19800019045082293,
+   "net_cash": 0.39570462556663877,
+   "trade_type": "credit",
+   "capital_at_risk": 86.72429537443337,
+   "profit": 0.39570462556663877,
+   "return_on_risk": 0.0045627885918032365,
+   "breakevens": [
+    86.724295
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 87.12,
+     "price": 0.39570462556663877,
+     "qty": 1.0,
+     "symbol": "SYNP87.12",
+     "bid": 0.39570462556663877,
+     "ask": 0.39570462556663877,
+     "iv": 0.19800019045082293,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-06-08",
+   "exit_date": "2026-07-20",
+   "entry_spot": 92.98831550446513,
+   "exit_spot": 92.65056278985963,
+   "underlying_return": -0.0036322059688164154,
+   "entry_volatility": 0.19656575459710385,
+   "net_cash": 0.3842477809006244,
+   "trade_type": "credit",
+   "capital_at_risk": 86.09575221909938,
+   "profit": 0.3842477809006244,
+   "return_on_risk": 0.004463028325982653,
+   "breakevens": [
+    86.095752
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.48,
+     "price": 0.3842477809006244,
+     "qty": 1.0,
+     "symbol": "SYNP86.48",
+     "bid": 0.3842477809006244,
+     "ask": 0.3842477809006244,
+     "iv": 0.19656575459710385,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-06-15",
+   "exit_date": "2026-07-27",
+   "entry_spot": 98.23702165269967,
+   "exit_spot": 92.50509091958416,
+   "underlying_return": -0.05834796939772635,
+   "entry_volatility": 0.19011204465968848,
+   "net_cash": 0.36291015423336503,
+   "trade_type": "credit",
+   "capital_at_risk": 90.99708984576664,
+   "profit": 0.36291015423336503,
+   "return_on_risk": 0.003988151212840663,
+   "breakevens": [
+    90.99709
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 91.36,
+     "price": 0.36291015423336503,
+     "qty": 1.0,
+     "symbol": "SYNP91.36",
+     "bid": 0.36291015423336503,
+     "ask": 0.36291015423336503,
+     "iv": 0.19011204465968848,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-06-22",
+   "exit_date": "2026-08-03",
+   "entry_spot": 97.25645188750927,
+   "exit_spot": 94.71341231764268,
+   "underlying_return": -0.026147772415222148,
+   "entry_volatility": 0.20435050149566183,
+   "net_cash": 0.33215933907738204,
+   "trade_type": "credit",
+   "capital_at_risk": 89.14784066092263,
+   "profit": 0.33215933907738204,
+   "return_on_risk": 0.003725938133944975,
+   "breakevens": [
+    89.147841
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 89.48,
+     "price": 0.33215933907738204,
+     "qty": 1.0,
+     "symbol": "SYNP89.48",
+     "bid": 0.33215933907738204,
+     "ask": 0.33215933907738204,
+     "iv": 0.20435050149566183,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-06-29",
+   "exit_date": "2026-08-10",
+   "entry_spot": 97.38915725451406,
+   "exit_spot": 91.3615908184063,
+   "underlying_return": -0.06189155554920234,
+   "entry_volatility": 0.21287779564547832,
+   "net_cash": 0.38403659610753316,
+   "trade_type": "credit",
+   "capital_at_risk": 89.21596340389246,
+   "profit": 0.38403659610753316,
+   "return_on_risk": 0.00430457265107309,
+   "breakevens": [
+    89.215963
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 89.6,
+     "price": 0.38403659610753316,
+     "qty": 1.0,
+     "symbol": "SYNP89.6",
+     "bid": 0.38403659610753316,
+     "ask": 0.38403659610753316,
+     "iv": 0.21287779564547832,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-07-06",
+   "exit_date": "2026-08-17",
+   "entry_spot": 96.71945097953257,
+   "exit_spot": 95.94316824701515,
+   "underlying_return": -0.008026128401842247,
+   "entry_volatility": 0.205849694755048,
+   "net_cash": 0.3384457930937863,
+   "trade_type": "credit",
+   "capital_at_risk": 88.64155420690622,
+   "profit": 0.3384457930937863,
+   "return_on_risk": 0.003818139202566209,
+   "breakevens": [
+    88.641554
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 88.98,
+     "price": 0.3384457930937863,
+     "qty": 1.0,
+     "symbol": "SYNP88.98",
+     "bid": 0.3384457930937863,
+     "ask": 0.3384457930937863,
+     "iv": 0.205849694755048,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-07-13",
+   "exit_date": "2026-08-24",
+   "entry_spot": 92.8062276947578,
+   "exit_spot": 99.107146750817,
+   "underlying_return": 0.06789327842074444,
+   "entry_volatility": 0.20728220084821167,
+   "net_cash": 0.3329048130589296,
+   "trade_type": "credit",
+   "capital_at_risk": 85.04709518694106,
+   "profit": 0.3329048130589296,
+   "return_on_risk": 0.0039143584190286015,
+   "breakevens": [
+    85.047095
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 85.38,
+     "price": 0.3329048130589296,
+     "qty": 1.0,
+     "symbol": "SYNP85.38",
+     "bid": 0.3329048130589296,
+     "ask": 0.3329048130589296,
+     "iv": 0.20728220084821167,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-07-20",
+   "exit_date": "2026-08-31",
+   "entry_spot": 92.65056278985963,
+   "exit_spot": 105.00596184658289,
+   "underlying_return": 0.13335481927666737,
+   "entry_volatility": 0.21099123362347955,
+   "net_cash": 0.3541729384668493,
+   "trade_type": "credit",
+   "capital_at_risk": 84.88582706153315,
+   "profit": 0.3541729384668493,
+   "return_on_risk": 0.004172344792141941,
+   "breakevens": [
+    84.885827
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 85.24,
+     "price": 0.3541729384668493,
+     "qty": 1.0,
+     "symbol": "SYNP85.24",
+     "bid": 0.3541729384668493,
+     "ask": 0.3541729384668493,
+     "iv": 0.21099123362347955,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  },
+  {
+   "entry_date": "2026-07-27",
+   "exit_date": "2026-09-07",
+   "entry_spot": 92.50509091958416,
+   "exit_spot": 97.8476208203762,
+   "underlying_return": 0.05775390140891146,
+   "entry_volatility": 0.19872962073003586,
+   "net_cash": 0.396099632034252,
+   "trade_type": "credit",
+   "capital_at_risk": 85.63390036796575,
+   "profit": 0.396099632034252,
+   "return_on_risk": 0.004625500302242761,
+   "breakevens": [
+    85.6339
+   ],
+   "legs": [
+    {
+     "kind": "put",
+     "side": "short",
+     "strike": 86.03,
+     "price": 0.396099632034252,
+     "qty": 1.0,
+     "symbol": "SYNP86.03",
+     "bid": 0.396099632034252,
+     "ask": 0.396099632034252,
+     "iv": 0.19872962073003586,
+     "open_interest": 1000,
+     "volume": 100
+    }
+   ]
+  }
+ ],
+ "skipped": []
+}

@@ -723,14 +723,13 @@ non-finite expectation stays out of the ranking. Both are now covered.
 
 ## 16. Installing
 
-Nine paths, each verified rather than written from memory. See
+Eight install paths cover local tools, skills, plugins, and hosted connections. See
 `INSTALL.md`.
 
-One command for everything (`./install.sh`), as a Claude Code plugin with
-the commands and agents, from a checkout by hand, skills only with no
-Python, zip upload for claude.ai in the browser, a container for the CLI
-and the dashboard on a machine with no Python, or the MCP server alone for
-a runtime that has its own conventions.
+The routes cover the full installer, a manual checkout, Claude Code and Codex plugins,
+the skills CLI, a hosted connection, MCP alone, and Docker.
+The [installation guide](../INSTALL.md) gives prerequisites and follow-up checks.
+The [first walkthrough](wiki/Getting-Started.md) uses a supplied synthetic chain.
 
 The container is the tools and the page, not the agent surfaces: skills
 have to sit on the host where the host's agent reads them, and the MCP

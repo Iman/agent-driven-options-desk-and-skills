@@ -1,12 +1,5 @@
 name: refresh
 
-# The ten stages that this project already runs by hand before every push.
-# Nothing new is checked here: the point is that it stops depending on
-# somebody remembering. Every figure in the documentation, every generated
-# file, and all three test suites are verified by the same script a
-# contributor runs locally, so a green tick here and a green run there mean
-# the same thing.
-
 on:
   push:
     branches: [main]
@@ -44,10 +37,39 @@ jobs:
           python -m pip install -e "shell[yahoo,dashboard,dev]" -e engine \
               -e "agent[graph,dev]"
 
-      - name: Refresh, which is the whole check
+      - name: Install Chromium for integration tests
+        run: python -m playwright install --with-deps chromium
+
+      - name: Unit tests and coverage
+        run: |
+          mkdir -p artifacts/coverage
+          python -m coverage run -m pytest -m unit -q --color=no --junitxml=artifacts/coverage/unit-tests.xml
+          python -m coverage json
+          python -m coverage xml
+          python -m coverage html
+          python scripts/check_unit_coverage.py artifacts/coverage/unit.json
+
+      - name: BDD scenarios
+        run: python -m pytest -m bdd -q --color=no --junitxml=artifacts/coverage/bdd-tests.xml
+
+      - name: Integration tests
+        run: python -m pytest -m integration -q --color=no --junitxml=artifacts/coverage/integration-tests.xml
+
+      - name: Repository validation
+        run: python -m pytest -m validation -q --color=no --junitxml=artifacts/coverage/validation-tests.xml
+
+      - name: Upload test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-python-${{ matrix.python-version }}
+          path: artifacts/coverage/
+          if-no-files-found: error
+
+      - name: Refresh generated files
         # No network in CI, so the stages that would reach a provider skip
         # themselves the same way they do offline. Everything else runs.
-        run: python scripts/refresh.py
+        run: python scripts/refresh.py --fast --no-index
 
       - name: Mutation harness
         # Slower than the suite and worth its own step, because a survivor

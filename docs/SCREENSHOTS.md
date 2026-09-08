@@ -1,8 +1,13 @@
 # Screenshot gallery
 
-Every panel and every chart the dashboard renders, captured from one live run by `scripts/screenshots.py`. SPY at the 2026-10-16 expiry on 2026-09-03, with 2026-09-30 and 2026-11-30 also on disk.
+Every image is a browser capture of the current local dashboard with supplied synthetic teaching artifacts.
+No image contains observed market data or a measured trading result.
+See [capture provenance](SCREENSHOT-PROVENANCE.md) for the source revision, capture time, and input hashes.
 
-Each image is clipped to the element's own bounding box read from the live DOM, so a panel image is exactly that panel. The images used in [README.md](../README.md) are in the directory above this one; this page is the complete set.
+[Read the dashboard](wiki/Dashboard.md) · [Run the sample](wiki/Getting-Started.md) · [Return to the README](../README.md)
+
+Each section, panel, and chart is clipped to its browser DOM bounds.
+The README images use a separate viewport width for readability.
 
 ## The whole page
 
@@ -72,9 +77,9 @@ Each image is clipped to the element's own bounding box read from the live DOM, 
 
 ## Panels
 
-### 189 graded contracts
+### 22 graded contracts
 
-![189 graded contracts](screenshots/gallery/panels/189-graded-contracts.png)
+![22 graded contracts](screenshots/gallery/panels/22-graded-contracts.png)
 
 ### Analysing something else
 

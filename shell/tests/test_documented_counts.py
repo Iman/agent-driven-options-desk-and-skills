@@ -367,7 +367,7 @@ def test_the_install_path_count_matches_the_numbered_sections():
         "sections".format(n))
     assert "{} install paths".format(word) in read("README.md"), (
         "the README documentation map disagrees with INSTALL.md")
-    assert "{} paths, each verified".format(word.capitalize()) in read(
+    assert "{} install paths".format(word.capitalize()) in read(
         "docs/CAPABILITIES.md"), (
         "docs/CAPABILITIES.md disagrees with INSTALL.md")
 

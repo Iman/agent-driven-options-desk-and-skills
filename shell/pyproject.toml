@@ -15,7 +15,7 @@ engine = ["optiondesk-engine"]
 # suite actually exercises the richer server. Without them the test for
 # its routes skips, and a skipped test reads like a pass.
 dev = ["pytest", "yfinance>=0.2", "pyyaml", "fastapi>=0.110",
-       "uvicorn>=0.27"]
+       "uvicorn>=0.27", "coverage>=7.6,<8", "pytest-bdd>=8.1,<9", "playwright>=1.49,<2"]
 
 [project.scripts]
 optiondesk = "optiondesk.cli.__main__:main"

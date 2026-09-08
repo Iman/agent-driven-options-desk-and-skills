@@ -1,0 +1,20 @@
+[run]
+branch = True
+relative_files = True
+source =
+    engine/src
+    shell/src
+    agent/src
+
+[report]
+show_missing = True
+skip_empty = True
+
+[html]
+directory = artifacts/coverage/html
+
+[xml]
+output = artifacts/coverage/unit.xml
+
+[json]
+output = artifacts/coverage/unit.json

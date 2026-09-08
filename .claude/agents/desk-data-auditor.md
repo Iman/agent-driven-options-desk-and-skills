@@ -21,6 +21,16 @@ the first thing to report, never a footnote.
 the pipeline working correctly, and a large count still changes what the
 output can support.
 
+For a refusal that cites no price, check whether the contract has a positive mid.
+A positive mid can come from a quote or a last trade.
+Missing two-sided quotes alone do not explain this refusal.
+
+The note "as a bisection that gave up" reports a provider volatility near a power of two.
+This is a rejection heuristic, not proof of how the provider computed the value.
+Report the refusal counts and their effect on coverage.
+Check timestamps and quote fields before attributing refusals to market hours or a provider problem.
+Without evidence for the cause, leave it unknown.
+
 **Coverage.** How much of the chain was graded against how much exists, and
 whether the band hid the strikes that matter. A ladder covering six percent
 around spot says nothing about a wall twenty points away.
@@ -79,6 +89,8 @@ different reasons. Cross-check a stated cause against the data it claims to
 describe.
 
 **A degraded flag that reflects a bug rather than the market.** A high
-provider-volatility share meant the solver was refusing contracts it could
-identify, not that the chain was untidy. If degradation looks structural,
-say so rather than passing it on as a data quality note.
+provider-volatility share can indicate solver refusals that need investigation.
+Requiring a positive mid does not bound that share.
+Measure it alongside the usable-volatility count on each snapshot.
+If degradation disappears while coverage decreases, check both reasons against their thresholds before accepting the change.
+Do not assume that fewer provider fallbacks mean better data.

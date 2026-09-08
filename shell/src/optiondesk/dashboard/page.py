@@ -872,6 +872,24 @@ def _term_section(term_structure):
                 _percent(row.get("risk_reversal"), 2),
                 _percent(row.get("butterfly"), 2),
                 _num(row.get("expected_move"))))
+
+    # An empty chart is indistinguishable from a broken one. The skew needs
+    # a 25-delta put and a 25-delta call on the same expiry, and neither
+    # exists on a snapshot whose contracts carry no usable volatility, so
+    # the panel says that rather than drawing nothing.
+    has_skew = any(row.get("risk_reversal") is not None
+                   or row.get("butterfly") is not None
+                   for row in term_structure)
+    skew_body = "<div id='skewterm' class='chart short'></div>"
+    if not has_skew:
+        skew_body = (
+            "<p class='caveat'><strong>Nothing to draw.</strong> No expiry "
+            "on file has both a 25-delta put and a 25-delta call carrying a "
+            "usable implied volatility, so no risk reversal or butterfly "
+            "can be formed. That is what a snapshot pulled outside the "
+            "session looks like: with no two-sided quotes there is no mid "
+            "to solve a volatility from. Re-pull between 09:30 and 16:00 "
+            "America/New_York and this fills.</p>")
     return (
         "<h2 class='section'>Term structure</h2>"
         + "<div class='grid2'>"
@@ -884,7 +902,7 @@ def _term_section(term_structure):
                  "The 25-delta risk reversal and butterfly by tenor. A "
                  "steepening risk reversal means the downside is getting "
                  "relatively dearer as you go out.",
-                 "<div id='skewterm' class='chart short'></div>")
+                 skew_body)
         + "</div>"
         + _panel("Every expiry on file",
                  "Pulled chains only. Add more with optiondesk chain SYM "

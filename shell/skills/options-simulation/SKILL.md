@@ -31,7 +31,7 @@ had the right to share. Otherwise, state that current figures are unavailable.
 optiondesk simulate SPY --horizon 14
 ```
 
-Options: `--paths` (default 20000, run in antithetic pairs), `--draws` and
+Options: `--paths` (default 20000, independent draws), `--draws` and
 `--burn` per chain, `--chains` (default 2, needed for the R-hat
 diagnostic), `--period` for how much history to fit, and
 `--no-structures` to skip the per-structure distributions.
@@ -149,5 +149,5 @@ the artifact's inputs block.
 
 ## Going deeper
 
-- `reference.md`: the model written out, the convergence gate and why the effective sample size estimator overstates, what the risk numbers are, and how the antithetic pairs behave.
+- `reference.md`: the model, convergence gate, effective sample size limits, risk measures, and independent path generation.
 - `workflows/run-a-projection.md`: running one and reporting it without overclaiming.

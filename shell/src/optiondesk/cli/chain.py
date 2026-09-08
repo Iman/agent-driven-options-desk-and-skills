@@ -264,12 +264,30 @@ def _build_contract_from_row(row, underlying, requested_symbol, repairs=None,
                         ("last", last)):
         if value is not None and value < 0:
             raise ValueError("{} cannot be negative".format(name))
-    if mid is None:
-        if bid is not None and ask is not None:
-            mid = (bid + ask) / 2.0
-            repairs.append("{}calculated mid from bid and ask".format(prefix))
-        else:
-            mid = None
+    # Which price this contract actually has, and where it came from.
+    #
+    # Two rules, both of which the provider adapter applies as well so an
+    # uploaded snapshot and a pulled one mean the same thing:
+    #
+    #   A zero is not a price. An explicit mid of zero, or a zero bid
+    #   against a zero ask, is the absence of a market. Carrying 0.0
+    #   forward made every structure built on it free.
+    #
+    #   The label has to match the number. mid_source said "last_trade"
+    #   while mid stayed None, so the artifact claimed a price it did not
+    #   have. The substitution now happens, or the label does not.
+    mid_source = None
+    if mid is not None and mid <= 0:
+        mid = None
+    if mid is None and bid is not None and ask is not None and (
+            bid > 0 or ask > 0):
+        mid = (bid + ask) / 2.0
+        repairs.append("{}calculated mid from bid and ask".format(prefix))
+    if mid is not None:
+        mid_source = "quote"
+    elif (bid is None or ask is None) and last is not None and last > 0:
+        mid = last
+        mid_source = "last_trade"
 
     iv = _to_float(_first(row, "iv", "implied_volatility", "implied vol",
                           "implied-volatility", "sigma"))
@@ -317,10 +335,8 @@ def _build_contract_from_row(row, underlying, requested_symbol, repairs=None,
         contract["iv_provider"] = None
         contract["_provided_iv"] = False
 
-    if mid is not None:
-        contract["mid_source"] = "quote"
-    elif contract["last"] is not None:
-        contract["mid_source"] = "last_trade"
+    if mid_source is not None:
+        contract["mid_source"] = mid_source
     return contract
 
 
@@ -353,18 +369,58 @@ def add_arguments(parser):
     return parser
 
 
+def _looks_like_a_failed_solve(iv):
+    """True when a published volatility is a bisection that gave up.
+
+    A solver that brackets on powers of two and exits on its iteration cap
+    returns the edge of the bracket: 1/4, 1/8, 1/16, 1/32 and downwards,
+    plus the last sliver of a halving. Those are not volatilities, and on
+    an unquoted chain they arrive in bulk. Measured on QQQ 2026-09-30
+    pulled outside the session: 256 of 275 published volatilities sat on a
+    power of two, and the at-the-money reading they produced was 0.196
+    percent against 16.5 percent for the same expiry with a quoted book.
+
+    The tolerance is one part in a thousand above the power itself, which
+    caught 256 of those 275 while matching 1 of 1022 volatilities solved
+    from real quotes. A genuine volatility that happens to land on the
+    pattern loses nothing it cannot get back: it is refused here and the
+    contract carries iv null, which is the same treatment as a contract
+    the solver could not identify at all.
+    """
+    if not iv or iv <= 0:
+        return False
+    nearest = 2.0 ** round(math.log2(iv))
+    return 0 <= (iv - nearest) / nearest < 1e-3
+
+
 def _solve_iv(engine, contract, spot, t, rate, q):
-    """Prefer a solved volatility, fall back to the provider's, else None."""
+    """Prefer a solved volatility, fall back to the provider's, else None.
+
+    The fallback is fenced twice. A published volatility is only accepted
+    for a contract that has a price it could have been derived from, and
+    only when it does not carry the signature of a solver that gave up.
+    Neither fence costs anything on a quoted chain: across the two chains
+    pulled during a session on 2026-08-31, 1022 of 1063 contracts solved
+    from their own mid and all 15 provider fallbacks had a mid, so nothing
+    was dropped.
+    """
     mid = contract.get("mid")
     if engine and mid and mid > 0:
         solved = engine["implied_vol"](mid, spot, contract["strike"], t,
                                        contract["type"], rate, q)
         if solved is not None:
-            return solved, "solved_mid"
+            return solved, "solved_mid", None
     published = contract.get("iv_provider")
-    if published is not None and IV_MIN < published < IV_MAX:
-        return float(published), "provider"
-    return None, None
+    if published is None or not (IV_MIN < published < IV_MAX):
+        return None, None, None
+    if not (mid and mid > 0):
+        # No price, no volatility. There is nothing the published number
+        # could have been checked against, and outside the session it is
+        # junk in bulk.
+        return None, None, "unpriced"
+    if _looks_like_a_failed_solve(published):
+        return None, None, "failed_solve"
+    return float(published), "provider", None
 
 
 def _chain_from_user_data(args):
@@ -622,6 +678,8 @@ def run(args):
     with_iv = 0
     from_provider = 0
     from_last_trade = 0
+    unpriced_iv = 0
+    failed_solve_iv = 0
     for contract in chain["contracts"]:
         provided_iv = has_user_data and contract.pop("_provided_iv", False)
         if provided_iv:
@@ -629,9 +687,14 @@ def run(args):
             # Snapshot-provided volatility is explicit input, not a fallback
             # from a live provider capability.
         else:
-            iv, source = _solve_iv(engine, contract, spot, t, rate, q)
+            iv, source, refusal = _solve_iv(engine, contract, spot, t,
+                                            rate, q)
             contract["iv"] = iv
             contract["iv_source"] = source
+            if refusal == "unpriced":
+                unpriced_iv += 1
+            elif refusal == "failed_solve":
+                failed_solve_iv += 1
         if iv is not None:
             with_iv += 1
         if source == "provider" and not provided_iv:
@@ -662,6 +725,44 @@ def run(args):
         notes.append(
             "{} of {} contracts have no two-sided quote, so their mid is the "
             "last traded price".format(from_last_trade, total))
+    if unpriced_iv:
+        notes.append(
+            "{} of {} contracts had a published implied volatility refused "
+            "because the contract carries no price it could have been "
+            "derived from".format(unpriced_iv, total))
+    if failed_solve_iv:
+        notes.append(
+            "{} of {} contracts had a published implied volatility refused "
+            "as a bisection that gave up: the value sits on a power of two"
+            .format(failed_solve_iv, total))
+
+    # An empty quote book is the loudest thing a chain can be, and it used
+    # to be reported only sideways, through the volatility fallback. A bid
+    # of zero against an ask of zero is the absence of a quote, not a quote
+    # of zero: no mid can be formed from it, so no volatility can be solved
+    # from it, and every structure priced off it rests on the provider's
+    # published figures alone. Measured on a live SPY chain pulled at 05:42
+    # America/New_York: 0 of 257 contracts quoted, 0 carried open interest,
+    # and the artifact's only complaint was that 61 percent of the
+    # volatilities came from the provider.
+    quoted = sum(1 for c in chain["contracts"]
+                 if (c.get("bid") or 0) > 0 and (c.get("ask") or 0) > 0)
+    with_open_interest = sum(1 for c in chain["contracts"]
+                             if (c.get("open_interest") or 0) > 0)
+    if total and not quoted:
+        degraded = True
+        reasons.append(
+            "no contract has a two-sided quote: every bid and ask is zero, "
+            "which is what a delayed provider publishes outside the 09:30 "
+            "to 16:00 America/New_York session")
+        if not with_open_interest:
+            notes.append(
+                "no contract carries open interest either, so depth and "
+                "positioning cannot be read from this snapshot")
+    elif total and quoted < total / 2:
+        notes.append(
+            "only {} of {} contracts have a two-sided quote".format(
+                quoted, total))
     if chain.get("expired"):
         degraded = True
         reasons.append(
@@ -669,11 +770,27 @@ def run(args):
             "quarter day and every value derived from it is meaningless"
             .format(chain["expiry"]))
     if without_iv:
-        # Not a degradation. Wing contracts with no two-sided quote cannot
-        # imply a volatility, and that is what a real chain looks like.
-        notes.append(
-            "{} of {} contracts have no usable implied volatility and carry "
-            "iv null".format(without_iv, len(chain["contracts"])))
+        # A handful is not a degradation. Wing contracts with no two-sided
+        # quote cannot imply a volatility, and that is what a real chain
+        # looks like: 479 of 487 and 558 of 576 carried one on the two
+        # chains pulled during a session on 2026-08-31, so between two and
+        # four percent were missing.
+        #
+        # Most of the chain missing is a different animal, and it stopped
+        # being visible once the junk published figures were refused: the
+        # provider-fallback share fell below its own threshold and the
+        # artifact went from degraded to clean while 446 of 488 contracts
+        # had become unusable. Half is the line, which no quoted chain
+        # measured here comes close to crossing.
+        share = without_iv / total if total else 0.0
+        message = ("{} of {} contracts ({:.1%}) have no usable implied "
+                   "volatility and carry iv null".format(
+                       without_iv, total, share))
+        if share > 0.5:
+            degraded = True
+            reasons.append(message)
+        else:
+            notes.append(message)
     if has_user_data:
         notes.extend(chain["normalization"]["repairs"])
 

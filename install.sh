@@ -32,6 +32,26 @@
 
 set -euo pipefail
 
+# Re-exec natively on Apple silicon before anything is built.
+#
+# A Homebrew bash under /usr/local is an x86_64 binary, so a script whose
+# shebang is /usr/bin/env bash runs translated on an arm64 machine, and
+# every wheel installed from it is x86_64. The virtualenv then imports
+# cleanly from that shell and fails from every native one with
+# "incompatible architecture (have 'x86_64', need 'arm64')". The system
+# bash is universal, so the run continues in it. A script arriving on
+# stdin, as curl into bash does, has no file to re-exec and is left alone.
+if [ "$(uname -s)" = "Darwin" ] \
+    && [ "${OPTIONDESK_NATIVE_ARCH:-0}" != "1" ] \
+    && [ "$(sysctl -n hw.optional.arm64 2>/dev/null || echo 0)" = "1" ] \
+    && [ "$(uname -m)" != "arm64" ] \
+    && [ -r "$0" ] \
+    && [ -x /usr/bin/arch ] \
+    && [ -x /bin/bash ]; then
+  export OPTIONDESK_NATIVE_ARCH=1
+  exec /usr/bin/arch -arm64 /bin/bash "$0" "$@"
+fi
+
 VERSION="0.1.1"
 PREFIX="${OPTIONDESK_PREFIX:-$HOME/.optiondesk}"
 BIN_DIR="${OPTIONDESK_BIN_DIR:-$HOME/.local/bin}"
@@ -293,6 +313,21 @@ once the repository is public."
 
 # ------------------------------------------------------------------- python
 
+# The host architecture, and whether this shell is being translated.
+#
+# A universal2 python started from a Rosetta shell reports x86_64 and
+# installs x86_64 wheels into a virtualenv that a native shell will later
+# refuse to import. That failure surfaces much later and reads like a
+# corrupt numpy: "incompatible architecture (have 'x86_64', need 'arm64')"
+# on the first import of a native package. It is caught here instead.
+host_arch() {
+  uname -m
+}
+
+running_translated() {
+  [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]
+}
+
 python_bin() {
   for candidate in python3.13 python3.12 python3.11 python3; do
     if command -v "$candidate" >/dev/null 2>&1; then
@@ -303,6 +338,98 @@ python_bin() {
     fi
   done
   return 1
+}
+
+# Every native wheel in the virtualenv whose Mach-O binaries lack the
+# architecture this machine runs, repaired in place.
+#
+# The reinstall is pinned to the version already present and skips
+# dependencies, so a repair changes architecture and nothing else. A
+# machine that is not macOS has nothing to check and returns at once.
+repair_wheel_architecture() {
+  if [ "$DRY_RUN" -eq 1 ]; then
+    say "  would check wheel architecture"
+    return 0
+  fi
+  [ "$(uname -s)" = "Darwin" ] || return 0
+  [ -x "$VENV/bin/python" ] || return 0
+
+  local wanted
+  wanted="$(host_arch)"
+  local broken
+  broken="$("$VENV/bin/python" - "$wanted" <<'ARCHCHECK'
+import struct
+import sys
+from importlib.metadata import distributions
+
+CPU = {0x01000007: "x86_64", 0x0100000C: "arm64"}
+FAT = (0xCAFEBABE, 0xCAFEBABF)
+THIN = (0xFEEDFACE, 0xFEEDFACF)
+
+
+def architectures(path):
+    """Every architecture in one Mach-O file, read from its own header.
+
+    Parsing the header beats shelling out to file(1): there is no text to
+    match, and a fat binary reports each slice rather than one summary
+    line that has to be picked apart.
+    """
+    try:
+        with open(path, "rb") as handle:
+            head = handle.read(8)
+            if len(head) < 8:
+                return set()
+            magic = struct.unpack(">I", head[:4])[0]
+            if magic in FAT:
+                count = struct.unpack(">I", head[4:8])[0]
+                width = 20 if magic == FAT[0] else 32
+                found = set()
+                for _ in range(min(count, 32)):
+                    entry = handle.read(width)
+                    if len(entry) < 8:
+                        break
+                    cpu = struct.unpack(">I", entry[:4])[0]
+                    found.add(CPU.get(cpu, hex(cpu)))
+                return found
+            for endian in ("<", ">"):
+                value = struct.unpack(endian + "I", head[:4])[0]
+                if value in THIN:
+                    cpu = struct.unpack(endian + "I", head[4:8])[0]
+                    return {CPU.get(cpu, hex(cpu))}
+    except OSError:
+        return set()
+    return set()
+
+
+wanted = sys.argv[1]
+broken = {}
+for dist in distributions():
+    name = dist.metadata["Name"]
+    if not name:
+        continue
+    for entry in dist.files or ():
+        if entry.suffix not in (".so", ".dylib"):
+            continue
+        found = architectures(dist.locate_file(entry))
+        if found and wanted not in found:
+            broken[name] = dist.version
+            break
+for name, version in sorted(broken.items()):
+    print("{}=={}".format(name, version))
+ARCHCHECK
+)" || return 0
+
+  [ -z "$broken" ] && return 0
+
+  warn "these packages were built for another architecture, not $wanted:"
+  printf '%s\n' "$broken" | sed 's/^/    /' >&2
+  say "  reinstalling them for $wanted"
+  # word splitting is wanted here: one pip argument per package
+  # shellcheck disable=SC2086
+  run "$VENV/bin/pip" install --quiet --force-reinstall --no-cache-dir \
+      --no-deps $broken || die "could not reinstall the wheels for $wanted.
+Delete $VENV and re-run this installer."
+  say "  wheel architecture repaired"
 }
 
 licence_notice() {
@@ -332,6 +459,19 @@ install_packages() {
   local py
   py="$(python_bin)" || die "python 3.11 or newer is required and was not found"
   say "Using $($py --version 2>&1)"
+
+  if running_translated; then
+    die "this shell runs under Rosetta on a $(host_arch) machine.
+Every wheel installed from here would be x86_64 and would fail to import
+from a native shell. Re-run with: arch -$(host_arch) $0"
+  fi
+
+  local reported
+  reported="$("$py" -c 'import platform; print(platform.machine())')"
+  if [ "$reported" != "$(host_arch)" ]; then
+    die "$py reports $reported on a $(host_arch) machine.
+Install a python built for $(host_arch), or re-run under arch -$(host_arch)."
+  fi
 
   if [ ! -d "$VENV" ]; then
     say "Creating the virtualenv at $VENV"
@@ -637,6 +777,7 @@ main() {
   fi
 
   install_packages
+  repair_wheel_architecture
   acknowledge_yahoo_terms
   link_commands
   install_skills

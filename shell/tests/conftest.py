@@ -7,13 +7,23 @@ exercises the skip paths rather than only the happy path.
 
 import pytest
 
+from optiondesk import config
 from optiondesk.artifacts import envelope
 from optiondesk.contracts import CHAIN_SNAPSHOT
 
 
 @pytest.fixture(autouse=True)
-def acknowledge_local_yahoo_terms(monkeypatch):
-    """Tests use fakes, but they still cross the production access gate."""
+def sealed_settings(monkeypatch):
+    """Tests use fakes, but they still cross the production access gate.
+
+    The dotenv cache is emptied as well as seeded, because settings resolve
+    through ~/.optiondesk/config.env and a .env in the working directory.
+    Without this a developer who has acknowledged the Yahoo terms on their
+    own machine cannot see a test that asserts the refusal fail, and a
+    developer who has not gets a different suite from everyone else. Tests
+    read the environment this fixture sets and nothing else.
+    """
+    monkeypatch.setattr(config, "_DOTENV_CACHE", {})
     monkeypatch.setenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", "personal-use")
     monkeypatch.delenv("PUBLIC_DATA_MODE", raising=False)
 

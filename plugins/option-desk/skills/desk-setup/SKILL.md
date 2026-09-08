@@ -39,6 +39,49 @@ disabled until the user accepts its local personal-use boundary. Use
 `--accept-yahoo-terms` only after the user reads Yahoo's terms. The flag does
 not permit hosting, business use, public display, or redistribution.
 
+The acknowledgement is recorded as one line in `~/.optiondesk/config.env`,
+and that is where the provider gate reads it from. Nothing needs exporting
+into a shell profile. Remove the line to withdraw it.
+
+## Run the demo from a checkout
+
+This workflow installs the tools and runs analytics, including a paper position.
+Use it when the user requests the demo.
+For installation alone, use the installer described above.
+
+If Yahoo access is already acknowledged, run:
+
+```
+./run.sh
+```
+
+For a first run, obtain the user's acknowledgement after they read Yahoo's terms.
+Then run `./run.sh --accept-yahoo-terms`.
+Without that flag, the runner leaves acknowledgement to the installer's interactive prompt or the existing configuration.
+Never add the flag merely because the user asked to install the tools.
+
+From a checkout, this installs anything missing, repairs a virtualenv built
+for the wrong CPU architecture, pulls live chains for SPY and QQQ, runs the
+Greek ladder, dealer positioning, the structure comparison, a simulation and
+a backtest per structure, opens a paper position, then serves the dashboard
+and opens a browser. `./run.sh --help` lists the options; `--dry-run` prints
+every command without running one.
+
+## When the tools are installed but nothing imports
+
+On Apple silicon, a script whose shebang is `/usr/bin/env bash` picks up a
+Homebrew bash under `/usr/local` when one is installed, and that binary is
+x86_64. Everything it installs is x86_64 too, so the virtualenv imports
+cleanly from that shell and fails from every native one:
+
+```
+ImportError: ... incompatible architecture (have 'x86_64', need 'arm64')
+```
+
+The installer refuses to build under translation now and repairs wheels that
+are already wrong. If a user is stuck on this before updating, re-running the
+installer fixes it, and `arch -arm64 ./install.sh` forces the point.
+
 ## The failure almost everyone hits
 
 `~/.local/bin` is not on the PATH. The installer creates the two commands

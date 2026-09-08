@@ -39,6 +39,15 @@ positive number means the downside is bid, which is normal for an index.
 The butterfly is the average wing minus the body. Wings must be within 0.10
 of the target delta or they are reported absent rather than substituted.
 
+The smile is absent when no graded contracts carry usable volatility.
+The risk reversal and butterfly are null when either wing is absent.
+A contract's volatility can come from a solved price, an accepted provider value or explicit user input.
+Missing two-sided quotes do not by themselves establish which smile fields are unavailable.
+
+Check the returned fields, coverage counts and timestamps before explaining a missing figure.
+Report the artifact's degraded reason, including any disagreement with its data.
+Without evidence for a session closure or provider problem, leave the cause unknown.
+
 The expected range is spot plus and minus the expected move. It is an
 arithmetic band on a lognormal, so it is floored at zero and flagged when
 the floor bites.

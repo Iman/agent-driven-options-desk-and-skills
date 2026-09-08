@@ -27,3 +27,17 @@ Use the hosted Option Desk MCP. Do not run a local command.
 7. Use `option_delete_snapshot` when the user asks for early deletion.
 
 For analysis that does not need a dashboard, use a plot or strategy tool. Those tools remove their temporary files before they respond.
+
+## What a zero in a quote column means
+
+Do not treat a zero bid and zero ask as an executable price of zero.
+Read the validation result for the accepted price, volatility and repairs.
+A row can also carry an explicit mid or user-supplied volatility.
+Do not infer that the service skipped it from the bid and ask alone.
+
+A zero bid with a positive ask differs from two zero quotes.
+Report how the service handled the row without substituting your own price.
+
+Before reporting analysis, read its degraded reason and skip counts.
+State which figures are unavailable and which remain supported by accepted inputs.
+Do not infer market hours or provider staleness from zero quotes alone.

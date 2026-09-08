@@ -137,6 +137,30 @@ def test_an_immaterial_fallback_is_a_note_not_a_degradation(
 
 
 @needs_engine
+def test_a_chain_where_most_contracts_have_no_price_is_degraded(
+        stub_provider, provider_chain, args_factory, tmp_path):
+    """Catches a chain going clean precisely because it got worse.
+
+    Refusing the provider's junk volatilities dropped the provider-share
+    reason below its own five percent threshold, so an unquoted QQQ chain
+    with 446 of 488 contracts unusable reported degraded false. The share
+    carrying no volatility is the reason now. Two chains pulled during a
+    session on 2026-08-31 sat at 1.6 and 3.1 percent missing, so half is a
+    line a working chain does not approach.
+    """
+    strikes = (80.0, 85.0, 90.0, 95.0, 100.0, 105.0, 110.0, 115.0, 120.0)
+    priced = ((100.0, "call"), (100.0, "put"))
+    no_price = tuple((strike, kind) for strike in strikes
+                     for kind in ("call", "put")
+                     if (strike, kind) not in priced)
+    stub_provider(chain=provider_chain(no_price=no_price))
+
+    result = chain_cmd.run(chain_args(args_factory, tmp_path))
+
+    assert result["degraded"] is True
+    assert "no usable implied volatility" in result["degraded_reason"]
+
+
 def test_an_expiry_already_past_degrades_the_snapshot(
         stub_provider, provider_chain, args_factory, tmp_path):
     """Catches the expired flag being ignored.
@@ -337,6 +361,85 @@ def test_inline_json_is_normalized_and_written_for_chat(tmp_path,
                for repair in result["normalization"]["repairs"])
 
 
+# --------------------------------------------------- a zero is not a price
+#
+# An uploaded row with a zero bid against a zero ask used to become a mid
+# of 0.0 labelled "quote", and every structure priced from it was free.
+# The sibling case was the label without the number: mid_source read
+# "last_trade" while mid stayed None, so the artifact named a source for a
+# price it did not carry.
+
+def test_a_zero_bid_and_a_zero_ask_carry_no_mid(tmp_path, args_factory):
+    source_data = {
+        "underlying": "SPY",
+        "spot": "600.00",
+        "snapshot_timestamp": "2026-09-02T14:00:00Z",
+        "expiry": "2026-09-18",
+        "contracts": [
+            {"strike_price": "600", "right": "C", "bid": "0", "ask": "0",
+             "last": "3.00"},
+        ],
+    }
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data=source_data, source_text=None,
+        source_format=None, data_source="user broker export",
+        rights_confirmed=True, rate=0.05, dividend_yield=0.0)
+
+    contract = read_json(chain_cmd.run(args)["artifact"])["contracts"][0]
+
+    assert contract["mid"] is None
+    assert "mid_source" not in contract
+    assert contract["last"] == pytest.approx(3.0)
+
+
+def test_a_zero_bid_against_a_real_ask_still_quotes(tmp_path, args_factory):
+    """The half of the rule that must not change: one side is a market."""
+    source_data = {
+        "underlying": "SPY",
+        "spot": "600.00",
+        "snapshot_timestamp": "2026-09-02T14:00:00Z",
+        "expiry": "2026-09-18",
+        "contracts": [
+            {"strike_price": "600", "right": "C", "bid": "0", "ask": "0.05",
+             "last": "3.00"},
+        ],
+    }
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data=source_data, source_text=None,
+        source_format=None, data_source="user broker export",
+        rights_confirmed=True, rate=0.05, dividend_yield=0.0)
+
+    contract = read_json(chain_cmd.run(args)["artifact"])["contracts"][0]
+
+    assert contract["mid"] == pytest.approx(0.025)
+    assert contract["mid_source"] == "quote"
+
+
+def test_the_last_trade_label_carries_the_last_trade(tmp_path, args_factory):
+    source_data = {
+        "underlying": "SPY",
+        "spot": "600.00",
+        "snapshot_timestamp": "2026-09-02T14:00:00Z",
+        "expiry": "2026-09-18",
+        "contracts": [
+            {"strike_price": "600", "right": "C", "ask": "5.6",
+             "last": "5.40"},
+        ],
+    }
+    args = args_factory(
+        symbol="SPY", out_dir=str(tmp_path), source_path=None,
+        from_file=None, source_data=source_data, source_text=None,
+        source_format=None, data_source="user broker export",
+        rights_confirmed=True, rate=0.05, dividend_yield=0.0)
+
+    contract = read_json(chain_cmd.run(args)["artifact"])["contracts"][0]
+
+    assert contract["mid_source"] == "last_trade"
+    assert contract["mid"] == pytest.approx(5.4)
+
+
 def test_user_snapshot_requires_rights_confirmation(tmp_path, args_factory):
     args = args_factory(
         symbol="SPY", out_dir=str(tmp_path), source_path=None,
@@ -425,9 +528,10 @@ def test_solve_iv_prefers_the_solved_value():
     engine = engine_bridge.require()
     contract = {"strike": 100.0, "type": "call", "mid": 3.5911230320233614,
                 "iv_provider": 0.99}
-    iv, source = chain_cmd._solve_iv(engine, contract, 100.0, 30 / 365.0,
-                                     0.04, 0.0)
+    iv, source, refusal = chain_cmd._solve_iv(engine, contract, 100.0,
+                                              30 / 365.0, 0.04, 0.0)
     assert source == "solved_mid"
+    assert refusal is None
     assert iv == pytest.approx(0.30, abs=1e-6)
 
 
@@ -441,9 +545,9 @@ def test_solve_iv_falls_back_to_the_published_figure():
     engine = engine_bridge.require()
     contract = {"strike": 90.0, "type": "call", "mid": 0.01,
                 "iv_provider": 0.42}
-    iv, source = chain_cmd._solve_iv(engine, contract, 100.0, 30 / 365.0,
-                                     0.04, 0.0)
-    assert (iv, source) == (0.42, "provider")
+    iv, source, refusal = chain_cmd._solve_iv(engine, contract, 100.0,
+                                              30 / 365.0, 0.04, 0.0)
+    assert (iv, source, refusal) == (0.42, "provider", None)
 
 
 def test_solve_iv_without_an_engine_uses_the_published_figure():
@@ -454,9 +558,9 @@ def test_solve_iv_without_an_engine_uses_the_published_figure():
     """
     contract = {"strike": 100.0, "type": "call", "mid": 3.6,
                 "iv_provider": 0.31}
-    iv, source = chain_cmd._solve_iv(None, contract, 100.0, 30 / 365.0,
-                                     0.04, 0.0)
-    assert (iv, source) == (0.31, "provider")
+    iv, source, refusal = chain_cmd._solve_iv(None, contract, 100.0,
+                                              30 / 365.0, 0.04, 0.0)
+    assert (iv, source, refusal) == (0.31, "provider", None)
 
 
 @pytest.mark.parametrize("published", [None, 0.0, 0.001, 5.0, 6.0, -0.2])
@@ -470,19 +574,63 @@ def test_solve_iv_refuses_an_out_of_range_published_figure(published):
     contract = {"strike": 100.0, "type": "call", "mid": None,
                 "iv_provider": published}
     assert chain_cmd._solve_iv(None, contract, 100.0, 30 / 365.0, 0.04,
-                               0.0) == (None, None)
+                               0.0) == (None, None, None)
 
 
 @needs_engine
 def test_solve_iv_does_not_solve_from_a_zero_or_missing_mid():
     """Catches a zero mid being fed to the solver as though it were a price.
 
-    Zero is not a premium any model can invert, so the published figure is
-    the only remaining source.
+    Zero is not a premium any model can invert. This used to end by
+    accepting the published figure instead, which is no longer true: with
+    no price there is nothing the published figure could have been checked
+    against. See the test below for the measurement that changed it.
     """
     engine = engine_bridge.require()
     for mid in (None, 0.0):
         contract = {"strike": 100.0, "type": "call", "mid": mid,
                     "iv_provider": 0.27}
         assert chain_cmd._solve_iv(engine, contract, 100.0, 30 / 365.0,
-                                   0.04, 0.0) == (0.27, "provider")
+                                   0.04, 0.0) == (None, None, "unpriced")
+
+
+def test_a_published_figure_needs_a_price_to_have_come_from():
+    """Catches the unpriced fallback coming back.
+
+    An unquoted chain publishes a volatility for every contract and a
+    price for none of them. Taking those on trust put an at-the-money
+    reading of 0.196 percent on QQQ 2026-09-30, against 16.5 percent for
+    the same expiry pulled during a session. The cost of the rule on a
+    quoted chain is nothing: of 1063 contracts pulled on 2026-08-31, 1022
+    solved from their own mid and all 15 provider fallbacks had a mid.
+    """
+    contract = {"strike": 100.0, "type": "call", "mid": None,
+                "iv_provider": 0.27}
+    assert chain_cmd._solve_iv(None, contract, 100.0, 30 / 365.0, 0.04,
+                               0.0) == (None, None, "unpriced")
+
+
+@pytest.mark.parametrize("published", [0.5, 0.25, 0.125, 0.0625, 0.03125,
+                                       0.062509375, 0.12500875])
+def test_a_published_figure_on_a_power_of_two_is_a_solver_that_gave_up(
+        published):
+    """Catches a bisection's exit bracket being read as a volatility.
+
+    256 of 275 published volatilities on one unquoted QQQ chain sat on a
+    power of two. The same pattern matched 1 of 1022 volatilities solved
+    from real quotes, so the rule is worth its false positive.
+    """
+    contract = {"strike": 100.0, "type": "call", "mid": 3.6,
+                "iv_provider": published}
+    assert chain_cmd._solve_iv(None, contract, 100.0, 30 / 365.0, 0.04,
+                               0.0) == (None, None, "failed_solve")
+
+
+@pytest.mark.parametrize("published", [0.1645, 0.42, 0.31, 0.2, 0.113584])
+def test_an_ordinary_volatility_is_not_mistaken_for_a_failed_solve(published):
+    """The other half of the rule: real figures must survive it."""
+    contract = {"strike": 100.0, "type": "call", "mid": 3.6,
+                "iv_provider": published}
+    iv, source, refusal = chain_cmd._solve_iv(None, contract, 100.0,
+                                              30 / 365.0, 0.04, 0.0)
+    assert (iv, source, refusal) == (published, "provider", None)

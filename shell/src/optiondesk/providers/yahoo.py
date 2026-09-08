@@ -348,9 +348,26 @@ class YahooProvider(Provider):
                 # last traded price for the mid on 181 of 492 contracts in
                 # one live SPY chain, and 178 of those had an implied
                 # volatility solved from the substituted number.
+                #
+                # A zero bid against a zero ask is the separate case, and
+                # it is not a quote at all: it is what this provider
+                # publishes for every contract outside the session. The
+                # midpoint of nothing is not zero, and carrying 0.0
+                # forward as a price made every structure free. Measured
+                # on SPY 2026-09-30 pulled at 05:57 America/New_York: 553
+                # of 578 contracts priced at 0.0, and the comparison that
+                # followed ranked a long call at zero cost, zero maximum
+                # loss and unlimited gain. No mid is the honest answer,
+                # and the stale last trade is not substituted for it
+                # because that is the fabrication the paragraph above
+                # records.
                 if bid is not None and ask is not None:
-                    mid = (bid + ask) / 2.0
-                    mid_source = "quote"
+                    if bid > 0 or ask > 0:
+                        mid = (bid + ask) / 2.0
+                        mid_source = "quote"
+                    else:
+                        mid = None
+                        mid_source = None
                 else:
                     mid = last
                     mid_source = "last_trade" if last is not None else None

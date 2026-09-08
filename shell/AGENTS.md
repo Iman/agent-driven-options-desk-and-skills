@@ -15,11 +15,11 @@ They are not copied into this file. You discover skills in `.agents/skills`, sca
 - `options-simulation`
 - `options-strategy`
 
-Compiling their bodies into this file as well would add about 41 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
+Compiling their bodies into this file as well would add about 43 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
 
 ## What else is here
 
-The skills listed above are the knowledge. The capabilities they describe are reachable four other ways, all calling the same commands: the command line (`optiondesk --help`), the MCP server (`optiondesk-mcp`, ten typed tools), the LangChain bindings in the optional `optiondesk-agent` package, and a bounded LangGraph routine in that same package (`open_desk`).
+The skills listed above are the knowledge. The capabilities they describe are reachable four other ways, all calling the same commands: the command line (`optiondesk --help`), the MCP server (`optiondesk-mcp`), the LangChain bindings in the optional `optiondesk-agent` package, and a bounded LangGraph routine in that same package (`open_desk`).
 
 Two commands are shaped for repetition rather than a single answer. `/desk-watch` refreshes an underlying and reports only material change. `/desk-complete` drives the artifact set to completeness against six criteria that can be checked without judgement. LOOPS.md at the repository root explains when to use each and what makes a poor loop here.
 

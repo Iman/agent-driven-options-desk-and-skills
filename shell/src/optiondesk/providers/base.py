@@ -11,9 +11,8 @@ cannot answer raises ProviderUnavailable with a message a user can act on.
 It never returns an empty result that looks like a real one.
 """
 
-import os
-
-from optiondesk.config import PUBLIC_DATA_MODES, has_key, public_data_mode
+from optiondesk.config import (PUBLIC_DATA_MODES, has_key, public_data_mode,
+                               setting)
 
 CAP_OPTION_CHAIN = "option_chain"
 CAP_UNDERLYING_QUOTE = "underlying_quote"
@@ -102,7 +101,12 @@ class Provider:
                 ),
             }
         if self.local_acknowledgement_env:
-            accepted = os.environ.get(self.local_acknowledgement_env)
+            # The acknowledgement resolves through the documented chain in
+            # config.py, so the line install.sh writes to
+            # ~/.optiondesk/config.env counts as well as an exported
+            # environment variable. Reading os.environ alone made the
+            # installer's own record invisible to the gate it feeds.
+            accepted = setting(self.local_acknowledgement_env)
             expected = self.local_acknowledgement_value
             if accepted != expected:
                 return {

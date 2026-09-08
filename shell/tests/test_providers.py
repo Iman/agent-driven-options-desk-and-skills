@@ -174,6 +174,33 @@ def test_the_refusal_names_the_missing_acknowledgement(registry,
     assert "acknowledgement is missing" in str(excinfo.value)
 
 
+# The installer records the acknowledgement as a line in
+# ~/.optiondesk/config.env. The gate used to read os.environ directly, so
+# that record was invisible to the only code that consults it: a completed
+# install still reported the terms as missing until the user exported the
+# variable by hand. The gate resolves through the documented chain now.
+
+def test_the_acknowledgement_is_honoured_from_the_config_file(registry,
+                                                              monkeypatch):
+    monkeypatch.delenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", raising=False)
+    monkeypatch.setattr(
+        config, "_DOTENV_CACHE",
+        {"OPTIONDESK_ACCEPT_YAHOO_TERMS": "personal-use"})
+    described = providers.get("yahoo").describe()
+    assert described["access_allowed"] is True
+    assert described["access_reason"] == "local use"
+
+
+def test_a_wrong_value_in_the_config_file_is_still_a_refusal(registry,
+                                                             monkeypatch):
+    monkeypatch.delenv("OPTIONDESK_ACCEPT_YAHOO_TERMS", raising=False)
+    monkeypatch.setattr(
+        config, "_DOTENV_CACHE", {"OPTIONDESK_ACCEPT_YAHOO_TERMS": "yes"})
+    described = providers.get("yahoo").describe()
+    assert described["access_allowed"] is False
+    assert "acknowledgement" in described["access_reason"]
+
+
 def test_the_refusal_names_the_missing_key(registry, monkeypatch):
     class Keyed(Dummy):
         name = "keyed"

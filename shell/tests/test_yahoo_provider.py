@@ -114,14 +114,30 @@ def test_a_zero_bid_is_a_real_quote_and_not_the_last_trade():
     assert contract["last"] == 3.0
 
 
-def test_a_zero_bid_and_a_zero_ask_are_still_a_quote():
-    """Catches the same substitution at the other end of the same branch."""
+def test_a_zero_bid_and_a_zero_ask_are_no_quote_at_all():
+    """Catches a price of zero being carried forward as if it were one.
+
+    This case used to assert the opposite, that a zero against a zero is
+    still a quote. It is not: it is what this provider publishes for every
+    contract outside the session, and the midpoint of nothing is not zero.
+    Measured on SPY 2026-09-30 pulled at 05:57 America/New_York, 553 of
+    578 contracts carried mid 0.0 and the comparison built from them
+    ranked a long call at zero cost, zero maximum loss and unlimited
+    gain.
+
+    The other half of the original decision still holds and is asserted
+    here too: the stale last trade is not substituted for the missing
+    mid, because a volatility solved from it would be fabricated.
+    """
     provider = provider_with(calls=[call_row(bid=0.0, ask=0.0,
                                              lastPrice=3.0)])
     contract = provider.option_chain("TEST")["contracts"][0]
 
-    assert contract["mid"] == 0.0
-    assert contract["mid_source"] == "quote"
+    assert contract["mid"] is None
+    assert contract["mid_source"] is None
+    assert contract["bid"] == 0.0
+    assert contract["ask"] == 0.0
+    assert contract["last"] == 3.0
 
 
 def test_a_missing_side_falls_back_to_the_last_trade_and_says_so():

@@ -54,10 +54,19 @@ bare `--expiry` is rejected before anything is refreshed.
 - the 25 delta risk reversal moved more than half a point
 - an artifact is newly degraded for a reason that was not there before
 
-On that last one, be specific. Most chains here are marked degraded because
-some contracts fall back to the provider's published implied volatility,
-which is routine and is not news. A degradation that appeared since the
-last run, or one with a different reason, is.
+On that last one, compare the degraded reason with the previous run.
+Report a new reason even outside market hours.
+Check the quote coverage, usable volatility counts, open interest and timestamps.
+Missing quotes alone do not establish that the market is closed or the provider is stale.
+Without evidence for the cause, report it as unknown.
+Do not promise a recovery time.
+
+At-the-money implied volatility requires a contract with usable volatility.
+The risk reversal also requires both wings within the tool's delta tolerance.
+Use the returned fields to determine which figures are available.
+Accepted provider volatility or explicit user input can support these figures without a solved volatility.
+If a figure becomes null, report it as unavailable with the tool's reason.
+Never compare a null against a previous reading and call it a move.
 
 If none of the six is true, say "no material change", give the spot and the
 session it belongs to, and stop. Do not restate the desk.

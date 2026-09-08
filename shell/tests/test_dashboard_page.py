@@ -391,6 +391,45 @@ SIMULATION = {
 }
 
 
+def test_an_unformable_skew_says_why_instead_of_drawing_nothing():
+    """Catches an empty chart passing for a working one.
+
+    A snapshot with no two-sided quotes carries no usable volatility, so
+    no 25-delta wings exist and the risk reversal and butterfly are null
+    for every expiry. The panel used to mount a chart over that and draw
+    a blank rectangle, which reads as a broken page rather than an honest
+    one.
+    """
+    term = [{"expiry": "2026-09-30", "days": 22.4, "atm_iv": None,
+             "risk_reversal": None, "butterfly": None,
+             "expected_move": 0.35},
+            {"expiry": "2026-10-09", "days": 31.5, "atm_iv": None,
+             "risk_reversal": None, "butterfly": None,
+             "expected_move": 0.41}]
+    rendered = page_module.render(payload(ladder=ladder(),
+                                          term_structure=term))
+
+    assert "Skew across expiries" in rendered
+    assert "id='skewterm'" not in rendered
+    assert "Nothing to draw" in rendered
+    assert "09:30" in rendered
+
+
+def test_a_formable_skew_still_draws_its_chart():
+    """The other half: a real skew must not be replaced by the notice."""
+    term = [{"expiry": "2026-09-30", "days": 22.4, "atm_iv": 0.1645,
+             "risk_reversal": 0.047, "butterfly": 0.0065,
+             "expected_move": 0.35},
+            {"expiry": "2026-10-09", "days": 31.5, "atm_iv": 0.17,
+             "risk_reversal": 0.051, "butterfly": 0.0071,
+             "expected_move": 0.41}]
+    rendered = page_module.render(payload(ladder=ladder(),
+                                          term_structure=term))
+
+    assert "id='skewterm'" in rendered
+    assert "Nothing to draw" not in rendered
+
+
 def test_the_surface_canvas_appears_only_with_more_than_one_chain():
     """Catches a surface panel drawn over a single expiry, or none at all.
 

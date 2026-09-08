@@ -7,9 +7,18 @@ Import a chain, inspect its Greeks and positioning, compare structures, and keep
 
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills) [![Local skills](https://img.shields.io/badge/local%20skills-6-blue)](docs/wiki/Skill-Installation.md#choose-the-correct-skill-edition) [![Hosted skills](https://img.shields.io/badge/hosted%20skills-4-blue)](docs/wiki/Skill-Installation.md#prepare-individual-browser-skill-zips) [![Local MCP tools](https://img.shields.io/badge/local%20MCP%20tools-12-blue)](docs/CAPABILITIES.md)
 
-[![Agent guides](https://img.shields.io/badge/guides-Codex%20%7C%20ChatGPT%20%7C%20Claude%20chat%20%7C%20Claude%20Code-blue)](docs/wiki/Skill-Installation.md) [![Stars](https://img.shields.io/github/stars/Iman/agent-driven-options-desk-and-skills?style=flat)](https://github.com/Iman/agent-driven-options-desk-and-skills/stargazers) [![Forks](https://img.shields.io/github/forks/Iman/agent-driven-options-desk-and-skills?style=flat)](https://github.com/Iman/agent-driven-options-desk-and-skills/forks) [![Open issues](https://img.shields.io/github/issues/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/issues) [![Last commit](https://img.shields.io/github/last-commit/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/commits/main)
+[![Agent guides](https://img.shields.io/badge/guides-Codex%20%7C%20ChatGPT%20%7C%20Claude%20chat%20%7C%20Claude%20Code-blue)](docs/wiki/Skill-Installation.md) [![Last commit](https://img.shields.io/github/last-commit/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/commits/main)
 
-[Wiki](https://github.com/Iman/agent-driven-options-desk-and-skills/wiki) · [Architecture and diagrams](docs/wiki/Architecture.md) · [Install skills](docs/wiki/Skill-Installation.md) · [Get started](#get-started) · [User guide](docs/wiki/Home.md) · [Examples](docs/wiki/Examples.md) · [Install](INSTALL.md) · [Troubleshooting](docs/wiki/Troubleshooting.md)
+**Page index**
+
+- [Wiki](https://github.com/Iman/agent-driven-options-desk-and-skills/wiki)
+- [Architecture and diagrams](docs/wiki/Architecture.md)
+- [Install skills](docs/wiki/Skill-Installation.md)
+- [Get started](#get-started)
+- [User guide](docs/wiki/Home.md)
+- [Examples](docs/wiki/Examples.md)
+- [Install](INSTALL.md)
+- [Troubleshooting](docs/wiki/Troubleshooting.md)
 
 ## See the desk
 

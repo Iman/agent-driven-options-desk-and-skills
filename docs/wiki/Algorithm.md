@@ -21,14 +21,14 @@ Input: request Q; operation mode; skill edition; artifact store A;
        graph step budget B; host attempt limit K; optional summary model L
 Output: artifacts, quality observations, outcome and grounded report
 
-001  Select the skill edition that matches the available execution surface.
+001  Select the skill edition for the available local or hosted tools.
 002  Read the relevant SKILL.md instructions and reporting requirements.
-003  IF execution surface is hosted THEN
+003  IF the tools run on the hosted service THEN
 004      Connect through the separately configured remote MCP service.
 005      Submit only operations exposed by that service with permitted input.
 006      Receive its result; apply REPORT below; RETURN.
 007  END IF
-008  Establish local tool availability and the chosen artifact directory.
+008  Check local tool availability and select the artifact directory.
 009  IF Q needs an upload schema THEN return option_snapshot_schema.
 010  IF an application uses the optional router prompt THEN
 011      Assemble the router instruction and Q; obtain a proposed tool call.
@@ -36,9 +36,9 @@ Output: artifacts, quality observations, outcome and grounded report
 013      Do not use this model proposal to route the bounded Python graph.
 014  END IF
 015  Dispatch through CLI handlers, local MCP, or optional agent bindings.
-016  A tool call checks required arguments and supported argument names.
-017  A user snapshot checks rights, source, time and contract fields.
-018  A provider request resolves capability and checks access/availability.
+016  Check each tool call for required arguments and supported names.
+017  For a user snapshot, check rights, source, time and contract fields.
+018  For a provider request, resolve the capability and check access and availability.
 019  An explicit provider is strict by default; report failure if unavailable.
 020  Route shell calculations through engine_bridge.
 021  Preserve IV provenance; count missing IV and skipped calculations.
@@ -46,7 +46,7 @@ Output: artifacts, quality observations, outcome and grounded report
 022  CASE mode OF
 023    SINGLE_RESEARCH:
 024      Run the requested handler using its declared inputs.
-025      Build only structures admitted by contracts, quotes and model inputs.
+025      Build only structures supported by the available contracts, quotes and model inputs.
 026      Retain payoff assumptions, friction, exclusions and degradation.
 027       WHEN the requested handler is simulation:
 028           Load permitted history and convert closes to daily log returns.
@@ -57,11 +57,11 @@ Output: artifacts, quality observations, outcome and grounded report
 033           Record convergence status and its diagnostic thresholds.
 034           For each predictive path, draw parameters and independent shocks.
 035           Propagate log price and conditional variance over the horizon.
-036           Discard and count non-finite paths; fail if none survive.
+036           Discard and count paths rejected by finite-value and upper-log-price guards; fail if none survive.
 037           Compute the quantile fan and empirical underlying VaR/ES.
-038           Evaluate available structure payoffs on the terminal scenarios.
+038           Evaluate intrinsic structure payoffs at horizon terminals; expiry alignment and surviving time value are not enforced.
 039           Preserve diagnostics even when the posterior did not converge.
-040           Reporting rules withhold unconverged quantiles from the answer.
+040           Withhold unconverged quantiles from the answer, as the reporting rules require.
 041       END WHEN
 
 042    BOUNDED_GRAPH:                                      [Python graph]
@@ -82,7 +82,7 @@ Output: artifacts, quality observations, outcome and grounded report
 057          Remove k from M; record progress and any degraded result.
 058      UNTIL an outcome is assigned.
 059      Re-read report context; if a complete result has no records, fail it.
-060      Do not equate presence of artifacts with a successful trading thesis.
+060      Artifact presence does not establish a successful trading thesis.
 
 061    COMPLETE_DESK:                                  [Host instructions]
 062      Select the requested expiry or the nearest listed expiry beyond a week.
@@ -97,10 +97,10 @@ Output: artifacts, quality observations, outcome and grounded report
 071          Run only missing or failing stages.
 072          For sparse input, consider a farther expiry or a wider Greek band.
 073          For unconverged sampling, try 4000 then 6000 draws.
-074          Two failures at 6000 draws are a stop condition.
+074          Stop after two failures at 6000 draws.
 075      END FOR
 076      Report each criterion, its observed value and any unmet condition.
-077      Do not silently map this policy onto BOUNDED_GRAPH's presence checks.
+077      Keep these quality criteria separate from BOUNDED_GRAPH's presence checks.
 
 078    WATCH:                                            [Host instructions]
 079      Read baseline values BEFORE refreshing the selected expiry.
@@ -126,7 +126,7 @@ Output: artifacts, quality observations, outcome and grounded report
 098      END FOR
 099      Sum returns in risk units; compute statistics and drawdown.
 100      Set block length to max(1, ceil(holding_days / entry_every)).
-101      Run the two-sided block sign test and moving-block bootstrap.
+101      Run block sign-flip randomization and moving-block bootstrap; report their assumptions and degenerate samples.
 102      Include the buy-and-hold benchmark and model-premium limitations.
 
 103    FORWARD_OPEN:
@@ -175,7 +175,7 @@ Output: artifacts, quality observations, outcome and grounded report
 141     State dealer-sign assumptions and model-premium limitations.
 142     Withhold unconverged simulation quantiles under the reporting rules.
 143     Present backtest context and uncertainty; give no trade recommendation.
-144     Treat these as prompt/reporting requirements, not model-compliance proof.
+144     Model compliance with these reporting requirements still needs verification.
 145 RETURN artifacts, outcome, observations and report.
 ```
 
@@ -230,3 +230,11 @@ Forward close uses intrinsic settlement and does not enforce expiry or snapshot 
 It does not perform general two-expiry valuation.
 
 The reviewed source revision is `79e8d7f`. Public reference archives retain their original contents and historical claims.
+
+## Numerical and inference limits
+
+The IV solver rounds its accepted candidate before returning it. The rounded IV need not reprice within the internal tolerance. Partial option quotes can still produce an ok friction verdict.
+
+Simulation rejects paths at its finite-value and upper-log-price guards. Its structure callback applies intrinsic payoff at the requested horizon without aligning plan expiries or retaining a far leg's time value. Sample means of unbounded payoffs need not estimate a finite expectation under Student-t log returns.
+
+Block sign-flip randomization requires symmetry under the allowed flips. Block methods retain within-block dependence but can lose it at boundaries. A bootstrap with one available block has no resampling variation; its zero-width interval cannot support a conclusion. The current even-sample median field selects the upper middle observation. These are documented runtime limits, not additional guards in the algorithm.

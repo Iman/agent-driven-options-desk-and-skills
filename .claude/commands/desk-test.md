@@ -14,6 +14,10 @@ Test $structure on $symbol over $period, defaulting to five years.
    selling itself: trade count, then the buy and hold benchmark, then the
    p-value, then the bootstrap interval, and only then the headline return.
 3. Under thirty trades, decline to draw a conclusion and say why.
+   Report the block sign-flip symmetry assumption and block-boundary limits.
+   Read `significance.block` and `interval.block` from available artifact
+   results. If the block covers the return sample, the bootstrap has no
+   variation; do not use its zero-width interval to support a conclusion.
 4. Quote the honesty statement from the artifact whenever you quote a
    number from it: real closes, modelled premiums, no spread, no slippage,
    no assignment, and entry and exit priced by the same model.

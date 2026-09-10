@@ -23,7 +23,7 @@ while (Entry plus holding period fits history?) is (yes)
  :Advance by entry spacing;
 endwhile (no)
 :Summarize returns and drawdown in risk units;
-:Block sign test and moving-block bootstrap;
+:Block sign-flip randomization and moving-block bootstrap;
 :Include buy-and-hold benchmark and model limitations;
 :Validate and save backtest artifact;
 stop
@@ -31,6 +31,9 @@ note right
 The pricing tenor uses trading days / 252.
 Historical option quotes and execution are not replayed.
 Two-expiry builders need inputs this runner does not supply.
+Sign flips require a symmetry assumption.
+Block boundaries lose some dependence.
+One available bootstrap block gives no interval variation.
 end note
 
 caption Sources: engine backtest/runner.py and stats.py; shell cli/backtest.py.

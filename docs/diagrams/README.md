@@ -104,6 +104,7 @@ plantuml -failfast2 -nometadata -tsvg docs/diagrams/*.puml
 plantuml -failfast2 -nometadata -tpng docs/diagrams/*.puml
 ```
 
+All diagrams use the PlantUML `sketchy-outline` theme on a white background.
 The shared style is in [theme.iuml](theme.iuml).
 Review both the source labels and rendered images after each update.
 Do not rewrite historical reference pages to describe current behavior.

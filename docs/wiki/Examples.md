@@ -110,3 +110,9 @@ Use `./run.sh --help` for directory, expiry-window, and stage controls.
 Read [Installation](Installation.md#local-provider-demo) for the provider acknowledgment.
 
 Next: [Read the dashboard](Dashboard.md) or [troubleshoot a result](Troubleshooting.md).
+
+## Before interpreting uncertainty
+
+For simulation, check the requested horizon against each structure's expiry. The current callback uses intrinsic payoff and omits a surviving leg's time value. The truncated ESS estimate can overstate mixing quality. Finite sample means of unbounded payoffs do not establish finite expectations under Student-t log returns.
+
+For backtests, report block length and the sign-flip symmetry assumption. Block boundaries can lose dependence. If a block covers the whole sample, the bootstrap interval has no resampling variation and cannot support a conclusion. See the [algorithm limits](Algorithm.md#numerical-and-inference-limits).

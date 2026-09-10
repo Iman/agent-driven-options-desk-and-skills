@@ -128,9 +128,10 @@ it `ess`. The standard quantity is pooled across chains, and on this
 posterior the published number is understated by roughly a factor of two:
 mu reads 444 where the pooled figure is 864, alpha 135 against 344.
 
-The direction is conservative, so the `MIN_ESS` gate is stricter than it
-appears rather than laxer, and nothing downstream is wrong because of it.
-But the field is labelled `ess` in the artifact and "ESS" in the dashboard
+Those are earlier recorded comparisons, not a general bias bound. Each
+single-chain estimator truncates its autocorrelation sum and can overstate
+ESS for slow mixing. Taking the minimum does not guarantee a conservative
+gate. The field is labelled `ess` in the artifact and "ESS" in the dashboard
 without saying which quantity it is.
 
 Either compute the pooled value or rename the field to say what it is.

@@ -60,3 +60,9 @@ inventing a complete and entirely fictional row.
 Volatility above 1000 percent or time beyond a century is refused as a unit
 error, because those are what a percentage or a day count looks like when
 it reaches a function expecting per 1.00 and years.
+
+## IV output precision
+
+The solver tests price residual and identifiability at its internal IV
+candidate, then rounds the returned IV to six decimal places. Repricing
+that rounded value need not satisfy the original price tolerance.

@@ -290,3 +290,9 @@ Backtests use model premiums and historical underlying moves.
 Forward tests record entry plans and later paper marks.
 The close command uses intrinsic settlement and does not enforce expiry or snapshot freshness.
 Check the date and price before interpreting a settlement. See the [paper workflow](Examples.md#open-and-mark-a-paper-position).
+
+## Limits when interpreting the calculations
+
+Read the [master algorithm's numerical limits](Algorithm.md#numerical-and-inference-limits) with the workflow diagrams. Artifact presence, an ok friction verdict and a passing sampling diagnostic each establish a narrower condition than numerical or statistical validity.
+
+The simulation's structure callback uses intrinsic payoff at the requested horizon. It does not align every saved plan expiry or retain surviving time value. The structure builder's time-aware valuation is a separate path.

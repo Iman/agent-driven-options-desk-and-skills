@@ -19,9 +19,9 @@ One unit of capital at risk per trade, returns summed rather than
 compounded, so the curve and the drawdown are in units of per trade risk.
 Compounding would assume the whole account is risked on every trade.
 
-The permutation test asks how often a rule with no edge produces a mean
-this large by chance, flipping signs at random. Two sided, because a rule
-that reliably loses is also a finding.
+The two-sided block sign-flip randomization test compares absolute means
+under independently signed contiguous blocks. Its null requires invariance
+under those block flips; a zero mean alone is insufficient.
 
 Signs are flipped a BLOCK at a time, not a trade at a time, and the
 bootstrap resamples blocks rather than single trades. The windows overlap:
@@ -33,14 +33,17 @@ independence the data does not have and understates the standard error by
 about a factor of two. Correcting it moved four structures on this desk
 from below 0.05 to above it, one of them from 0.0005 to 0.148.
 
-Every artifact carries `overlap_block`. When it is above one the p-value
-beside it is a block p-value and the trade count is not the number of
-independent observations. Say both.
+The CLI summary carries `overlap_block` when significance is available.
+The artifact stores `significance.block` and `interval.block` in available
+results. Above one, report that the p-value uses block sign flips and the
+trade count is not the count of independent observations.
 
-The bootstrap interval puts bounds on the mean the same way.
-excludes_zero is the honest version of "significant", and it is honest
-only at the right block: two structures stopped excluding zero when the
-overlap was respected.
+The moving-block bootstrap resamples non-circular contiguous blocks.
+Dependence is retained within blocks and can be lost at block joins.
+The schedule-derived length does not guarantee calibrated coverage.
+When block length reaches or exceeds the return count, every replicate
+is identical and the interval has zero width. Its excludes_zero flag then
+cannot support an inference. Neither method adjusts for strategy selection.
 
 The benchmark holds the underlying over the same windows. A structure that
 is simply long the market shows the market's drift, and without the
@@ -62,3 +65,9 @@ spread on every leg. What it removes is hindsight, not cost. A position
 with any leg missing from the later chain is reported unmarkable rather
 than marked at zero, because a missing wing marked at zero turns a losing
 short spread into a full credit win.
+
+## Current summary boundary
+
+The median_return field selects the upper middle observation for an even
+sample. It is not the midpoint median in that case. Do not describe it as
+the conventional median until the runtime calculation is corrected.

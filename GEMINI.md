@@ -213,9 +213,10 @@ Four things, in this order, every time. The full argument for each is in
 2. Give the benchmark alongside the result. A structure that is long the
    market shows the market's drift, and without the benchmark that drift
    gets credited to the strategy.
-3. Give the p-value with its caveat, not on its own. A strategy chosen
-   because its backtest looked good has already spent its degrees of
-   freedom.
+3. Report the block sign-flip symmetry assumption and the block length.
+   Block boundaries can lose dependence. A strategy chosen after viewing
+   results needs a selection caveat. If the block covers the return sample,
+   the bootstrap has no variation; do not use its interval as evidence.
 4. Under thirty trades, decline to draw conclusions.
 
 For a forward test, two more. It is paper, so entry and marks are mid
@@ -265,8 +266,10 @@ they are read did not, and both change what a result means.
 shares twenty-five of its thirty days with its neighbour. Measured
 autocorrelation is positive through lag five and collapses at lag six, and
 the effective sample is 64 to 88 rather than 233. The significance test and
-the interval now resample blocks rather than single trades, and every
-artifact carries `overlap_block`. When it is above one, say so: the
+the interval now use blocks: the test flips block signs and the bootstrap
+resamples blocks. The CLI summary carries `overlap_block` when significance is available;
+the artifact stores `significance.block` and `interval.block` in available
+results. When the block is above one, say so: the
 p-value beside it is a block p-value, and the trade count is not the number
 of independent observations. Correcting this moved four structures from
 below 0.05 to above it, one from 0.0005 to 0.148.
@@ -661,17 +664,17 @@ diagnostic), `--period` for how much history to fit, and
 
 GARCH(1,1) with standardised Student-t innovations: volatility clusters
 and the tail is fatter than a normal admits. Estimated by adaptive
-random-walk Metropolis rather than maximum likelihood, because a point
-estimate hides how uncertain alpha and beta are, and that uncertainty
-dominates at these horizons. Each simulated path draws its own parameter
-set, so the fan carries parameter uncertainty rather than being narrower
-than the data supports.
+random-walk Metropolis over model parameters. Each simulated path selects
+a retained parameter draw, so the fan includes parameter uncertainty and
+conditional shocks. Their relative contribution depends on the fitted
+sample and horizon; the diagnostics do not establish market calibration.
 
 ## Convergence is not optional
 
 Read `posterior.converged` before quoting a single quantile. It is false
-when split R-hat exceeds 1.05 or effective sample size falls below 100 on
-any parameter, and it means the chains have not agreed. Say so, and
+when any parameter lacks finite split R-hat below 1.05 or ESS of at least
+100, or when post-burn acceptance is zero. Say that the diagnostic gate
+failed, and
 suggest raising `--draws`, rather than reporting the numbers anyway.
 
 ## The comparison that matters
@@ -683,8 +686,14 @@ Neither side is the truth. Report the gap as a disagreement, never as an
 edge, and never as a reason to trade.
 
 Value at risk and expected shortfall are on the underlying's return over
-the horizon, as positive losses, from the model. They are not a limit and
-not a worst case.
+the horizon, using a loss sign convention. An all-gain sample can produce
+negative values. They are model statistics, not worst-case limits.
+
+The structure callback uses intrinsic payoff at the requested horizon.
+It does not align each plan expiry or preserve surviving time value. State
+that limitation when comparing simulated and analytic profit probabilities.
+Under Student-t log returns, finite sample means of unbounded payoffs do
+not establish finite model expectations. See `reference.md` for the scope.
 
 ## Reporting rules
 
@@ -732,11 +741,11 @@ of ten thousand pairs, none shared a shock sequence. The construction has
 been removed and the flag now reads false. If you are reading an older
 artifact, treat that field as unreliable rather than as history.
 
-**The effective sample size is the minimum over single chains**, not the
-pooled figure the name suggests, so it understates by roughly a factor of
-two on this posterior. The convergence gate is therefore stricter than it
-looks, which is the safe direction, but do not quote the number as a
-standard ESS.
+**The reported ESS is the minimum estimate across individual chains.**
+Each estimate truncates its autocorrelation sum, which can overstate ESS
+when mixing is slow. Taking the minimum does not guarantee a conservative
+result. Report it as this implementation's diagnostic estimate, not a
+pooled or tail ESS.
 
 **Persistence is the sum of the medians of alpha and beta**, not the median
 of their sum. On this posterior the two differ by 7e-05, which is nothing,
@@ -760,8 +769,8 @@ The command prints one line to stderr before it starts, saying how many
 iterations it is about to run and roughly how long that should take. When
 you see it, wait. Do not kill the run, do not retry it with a smaller draw
 count to make it finish, and do not report the tool as hung. A run
-interrupted partway writes nothing, and a run cut short by lowering
-`--draws` is the one thing guaranteed to produce `converged: false`.
+interrupted partway writes nothing. Fewer retained draws can reduce ESS;
+inspect the diagnostics rather than assuming a lower draw count must fail.
 
 If a user asks why it is taking so long, the answer is the iteration count
 and the observation count, both of which are in the notice on stderr and in

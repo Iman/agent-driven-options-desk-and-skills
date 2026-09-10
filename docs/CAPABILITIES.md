@@ -207,7 +207,7 @@ and by open interest, and the smile: at-the-money implied volatility, the
 25-delta risk reversal, the butterfly, the skew slope and the implied
 expected move.
 
-The arithmetic is exact. The sign convention is an assumption, namely that
+The calculations use the supplied chain. The sign convention assumes that
 dealers are long calls and short puts against the public. That is the
 market convention and it is frequently wrong for a single name, especially
 around events and in heavily retail-traded tickers. Every wall moves with
@@ -219,7 +219,7 @@ returning the lowest strike.
 ### 4.5 Comparison and ranking
 
 Every buildable structure from one chain, scored on model expected profit
-per unit of capital at risk, with a statistically picked leader and the
+per unit of capital at risk, with the highest-ranked structure and the
 caveat that goes with it. Structures whose expectation is not finite are
 unrankable rather than sorted to an end, because a NaN in a sort key makes
 the winner depend on the order the list happened to be in.
@@ -235,9 +235,8 @@ random-walk Metropolis, then simulated forward.
 
 What it reports about itself matters as much as what it reports about the
 market. Split R-hat and effective sample size are computed per parameter,
-and a chain that never moved reports R-hat as infinite and an effective
-sample size of one rather than the perfect 1.0 and large number that a
-naive calculation gives a stuck chain. Post-burn acceptance rate must be
+and constant chains produce infinite R-hat. A constant chain with at least
+ten retained draws produces ESS of one; shorter chains return their length. Post-burn acceptance rate must be
 above zero. `converged: false` means the quantiles are still written, so
 nothing is hidden, but they should not be quoted.
 
@@ -799,3 +798,11 @@ to become what their names suggest.
 
 Each of those is additive, and none of it requires removing what is
 already here.
+
+## Numerical interpretation limits
+
+The IV tolerance applies before six-decimal rounding. Strategy breakeven roots are also rounded. The engine netting helper includes veta, but the strategy artifact helper omits it. Friction sums spread costs only for quoted option legs; an ok verdict does not establish complete quote coverage.
+
+The simulation gate uses a truncated per-chain ESS estimate. Taking the minimum across chains does not guarantee a conservative estimate. Its structure callback applies intrinsic payoff at the requested horizon without aligning plan expiries or preserving far-leg time value. Untruncated Student-t log returns have no finite mean terminal price, so finite sample averages of unbounded payoffs need explicit qualification.
+
+Block sign-flip randomization assumes symmetry under the allowed block flips. Block methods can lose dependence across block boundaries. A bootstrap with one available block returns a zero-width interval without resampling variation. The current even-sample median field selects the upper middle observation. Read these limits before interpreting a result as calibrated uncertainty.

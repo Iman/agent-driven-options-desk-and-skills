@@ -58,9 +58,10 @@ Four things, in this order, every time. The full argument for each is in
 2. Give the benchmark alongside the result. A structure that is long the
    market shows the market's drift, and without the benchmark that drift
    gets credited to the strategy.
-3. Give the p-value with its caveat, not on its own. A strategy chosen
-   because its backtest looked good has already spent its degrees of
-   freedom.
+3. Report the block sign-flip symmetry assumption and the block length.
+   Block boundaries can lose dependence. A strategy chosen after viewing
+   results needs a selection caveat. If the block covers the return sample,
+   the bootstrap has no variation; do not use its interval as evidence.
 4. Under thirty trades, decline to draw conclusions.
 
 For a forward test, two more. It is paper, so entry and marks are mid
@@ -110,8 +111,10 @@ they are read did not, and both change what a result means.
 shares twenty-five of its thirty days with its neighbour. Measured
 autocorrelation is positive through lag five and collapses at lag six, and
 the effective sample is 64 to 88 rather than 233. The significance test and
-the interval now resample blocks rather than single trades, and every
-artifact carries `overlap_block`. When it is above one, say so: the
+the interval now use blocks: the test flips block signs and the bootstrap
+resamples blocks. The CLI summary carries `overlap_block` when significance is available;
+the artifact stores `significance.block` and `interval.block` in available
+results. When the block is above one, say so: the
 p-value beside it is a block p-value, and the trade count is not the number
 of independent observations. Correcting this moved four structures from
 below 0.05 to above it, one from 0.0005 to 0.148.

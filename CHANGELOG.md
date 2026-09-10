@@ -6,6 +6,20 @@ entry says otherwise.
 
 ## Unreleased
 
+- The wiki's dashboard tour names every section the page renders, with
+  the artifacts each one needs: term structure, volatility surface and
+  variance risk premium were missing from the table, as were the forward
+  ledger and adding-data sections. The guides now record defaults that
+  were only in the source: the standard-library dashboard fallback, the
+  ladder's per-1.00 vega and per-day theta units, the two-expiry
+  probability model, the desk command defaults, the installer's
+  `--uninstall`, the `keys` command, and the stale-feed warning. Every
+  command in the walkthrough and examples was run against the sample
+  before the text was changed. A validation test resolves every wiki link
+  and anchor, checks the sidebar, and compares the preserved reference
+  pages with the preservation manifest.
+- The plugin copies under `plugins/option-desk` were regenerated after
+  skill edits; the validation suite had been failing on the difference.
 - The maths printed beside each dashboard panel now matches the code that
   made the numbers. A line-by-line review found thirteen sentences that did
   not: the simulation block printed the engine's default chains, draws and

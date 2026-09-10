@@ -38,6 +38,7 @@ optiondesk doctor
 
 Restart your agent after installation so it can discover the tools.
 The [installation reference](../../INSTALL.md) covers custom paths, flags, Docker, and removal.
+To remove the installation later, run `./install.sh --uninstall` from the checkout with the same custom paths. Your artifacts stay in place.
 
 ## Local provider demo
 
@@ -59,6 +60,8 @@ If you have already acknowledged the provider terms, run:
 For an explicit acknowledgment, read the terms linked by `./run.sh --help`, then use its `--accept-yahoo-terms` flag.
 The flag grants no public display or redistribution rights.
 The default demo directory is `~/TradingDesk/option-desk-demo`.
+Alpha Vantage history needs a key. Store it with `optiondesk keys set alphavantage`, which prompts without echoing the value.
+`./run.sh --help` also lists `--port`, `--weeklies`, `--no-dashboard`, `--no-open`, and `--with-tests`.
 
 For a shorter first run, omit the history calculations:
 

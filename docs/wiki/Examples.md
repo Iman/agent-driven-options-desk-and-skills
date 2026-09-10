@@ -18,6 +18,19 @@ In the dashboard, select each structure and inspect its payoff and legs.
 Compare maximum loss, breakevens, net Greeks, and spread-cost estimates.
 A model ranking does not establish which structure suits a person or has a trading edge.
 
+## List and rank the playbook
+
+```sh
+optiondesk strategy --list
+optiondesk strategy --recommend 0 --vol-view crush --out-dir artifacts/tutorial
+```
+
+The first command prints the 23 registered structures with their outlook tags, volatility view, and ownership requirement.
+The second ranks candidates for a neutral outlook with an expected fall in implied volatility.
+Outlooks run from -2 (strong bearish) to +2 (strong bullish).
+Add `--owns-underlying` to include the covered call and the protective put, or `--direction-unknown` when a move is expected without a direction.
+The score orders the playbook under the stated inputs. It is not a forecast.
+
 ## Compare two expiries
 
 Import the second supplied sample:
@@ -34,6 +47,9 @@ Build a calendar with explicit near and far snapshots:
 optiondesk strategy calendar_spread --snapshot artifacts/tutorial/chain_SYNTH_2026-10-08.json --far-snapshot artifacts/tutorial/chain_SYNTH_2026-11-07.json --out-dir artifacts/tutorial
 optiondesk compare --snapshot artifacts/tutorial/chain_SYNTH_2026-10-08.json --far-snapshot artifacts/tutorial/chain_SYNTH_2026-11-07.json --out-dir artifacts/tutorial
 ```
+
+With a far snapshot on disk, `compare` also builds the calendar put spread, both diagonals, and both ratio diagonals.
+The walkthrough directory then holds 21 plans for the near expiry.
 
 Select the near expiry in the dashboard.
 The surviving far leg uses a model value at the near expiry.
@@ -63,6 +79,8 @@ optiondesk forward mark --out-dir artifacts/tutorial
 Save the position ID from the open result.
 A mark against the same sample chain demonstrates the workflow only.
 A useful forward test needs a later independent snapshot.
+The open result records the entry value from mid quotes and a note that says so.
+A mark against the same chain reports a profit of 0.0 and an underlying move of 0.0. It shows the workflow and nothing else.
 
 To close the paper record, replace `POSITION_ID` and the example settlement value:
 
@@ -109,10 +127,10 @@ The runner writes to its demo directory and serves its dashboard.
 Use `./run.sh --help` for directory, expiry-window, and stage controls.
 Read [Installation](Installation.md#local-provider-demo) for the provider acknowledgment.
 
-Next: [Read the dashboard](Dashboard.md) or [troubleshoot a result](Troubleshooting.md).
-
 ## Before interpreting uncertainty
 
 For simulation, check the requested horizon against each structure's expiry. The current callback uses intrinsic payoff and omits a surviving leg's time value. The truncated ESS estimate can overstate mixing quality. Finite sample means of unbounded payoffs do not establish finite expectations under Student-t log returns.
 
 For backtests, report block length and the sign-flip symmetry assumption. Block boundaries can lose dependence. If a block covers the whole sample, the bootstrap interval has no resampling variation and cannot support a conclusion. See the [algorithm limits](Algorithm.md#numerical-and-inference-limits).
+
+Next: [Read the dashboard](Dashboard.md) or [troubleshoot a result](Troubleshooting.md).

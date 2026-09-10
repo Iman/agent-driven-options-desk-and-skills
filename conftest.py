@@ -12,7 +12,7 @@ INTEGRATION = {
 VALIDATION = {
     'test_documented_counts.py', 'test_runtime_docs.py', 'test_packaging.py',
     'test_screenshots.py', 'test_house_rules.py', 'test_documented_evidence.py',
-    'test_license_claims.py', 'test_coverage_gate.py',
+    'test_license_claims.py', 'test_coverage_gate.py', 'test_wiki.py',
 }
 LAYERS = {'unit', 'bdd', 'integration', 'validation'}
 

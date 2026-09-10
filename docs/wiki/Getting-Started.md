@@ -51,6 +51,7 @@ The acknowledgment applies to this supplied teaching sample.
 
 Expected: the command writes `artifacts/tutorial/chain_SYNTH_2026-10-08.json`.
 The summary reports 62 contracts. Read `degraded`, its reason, and the source before the results.
+For this sample, `degraded` is false and `provider_used` reads `user snapshot`, because the file carries its own rate, dividend yield, and source label.
 
 ## 3. Calculate the desk
 
@@ -63,6 +64,7 @@ optiondesk compare --out-dir artifacts/tutorial
 
 Expected: the directory contains the chain, Greek ladder, positioning, strategy plans, and comparison artifacts.
 `compare` builds the available structures from the saved chain.
+It writes a plan for every structure it can build, so the `strategy` command above is optional. It shows how to build one structure at a time.
 Two-expiry structures require a second chain, covered in [Examples](Examples.md#compare-two-expiries).
 
 ## 4. Open the dashboard
@@ -73,6 +75,9 @@ optiondesk dashboard --out-dir artifacts/tutorial
 
 Open [the local dashboard](http://127.0.0.1:8787) in the browser on the same computer.
 Select **SYNTH** and **2026-10-08**.
+
+Without the `dashboard` extra, the command serves the page from Python's standard library and prints a note that says so.
+Install `-e './shell[dashboard]'` for the FastAPI server. The walkthrough page is the same either way.
 
 Read the comparison, positioning, payoff, and Greek ladder panels.
 Simulation and backtest panels need separate history-based calculations. A chain alone cannot populate them.

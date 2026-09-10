@@ -17,6 +17,7 @@ Run these commands inside Claude Code:
 ```
 
 The local plugin includes skills, commands, two reviewer agents, and an MCP declaration.
+The reviewer agents are `desk-data-auditor`, which checks the freshness and consistency of the artifacts on disk before anyone reports from them, and `options-risk-reviewer`, which re-derives the risk of a chosen structure and states what would have to be true for it to lose.
 The declaration starts `optiondesk-mcp`, which must be on the runtime's PATH.
 See the [official plugin instructions](https://code.claude.com/docs/en/discover-plugins).
 
@@ -73,6 +74,7 @@ The Claude Code plugin supplies these commands:
 | `/desk-watch SPY` | Report material changes since the previous run. |
 | `/desk-complete SPY` | Work toward a defined set of complete artifacts. |
 
+Omitted second arguments take defaults: `/desk-risk` uses fourteen business days, `/desk-test` uses five years, `/desk-open` uses the nearest listed expiry, and `/desk-complete` uses the nearest listed expiry beyond a week.
 Provider commands require an enabled data source.
 Use [Loops](../../LOOPS.md) for budgets, stop conditions, and scheduling limits.
 

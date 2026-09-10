@@ -31,15 +31,19 @@ python3 scripts/refresh.py --no-index
 
 This command rebuilds generated files and runs the configured checks.
 Use `--fast` only when you intend to skip the suites.
+`--no-package` skips rebuilding the installable forms.
+The stages are docs, inventory, counts, evidence, package, index, one pytest run per package, and rules. `--fast` drops the three pytest stages.
 Read every stage result before claiming that the refresh passed.
 
 Edit local skills in `shell/skills/` and hosted skills in `openai-skills/`.
 Do not edit generated plugin copies or runtime documents directly.
+After editing anything under `shell/skills/`, `.claude/commands/`, or `.claude/agents/`, run `python3 scripts/package.py` and commit the regenerated `plugins/` copies with the change.
+The validation suite compares each plugin copy with its source byte for byte, and CI fails when they differ.
 
 ## Documentation checks
 
 ```sh
-python -m pytest shell/tests/test_screenshots.py shell/tests/test_documented_counts.py shell/tests/test_documented_evidence.py -q
+python -m pytest shell/tests/test_screenshots.py shell/tests/test_documented_counts.py shell/tests/test_documented_evidence.py shell/tests/test_wiki.py -q
 python3 scripts/evidence.py check
 git diff --check
 ```
@@ -47,6 +51,7 @@ git diff --check
 The screenshot checks catch broken references and orphaned images.
 The count checks compare documented inventories with the current source.
 The evidence check preserves the relationship between historical figures and their recorded origin.
+The wiki checks resolve every relative link and anchor under `docs/wiki/` and compare the preserved reference pages with `docs/reference-preservation.json`.
 
 ## Capture the dashboard
 
@@ -99,5 +104,7 @@ When exporting these pages to that repository:
 
 Keep the repository pages as the editable source.
 Record the published revision and preserve unrelated wiki pages during updates.
+The wiki repository is `git@github.com:Iman/agent-driven-options-desk-and-skills.wiki.git`.
+Clone it beside the checkout, replace the exported pages, review `git diff`, and commit with the source revision in the message.
 
 Next: [Documentation map](Documentation-Map.md).

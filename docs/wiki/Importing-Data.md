@@ -27,6 +27,9 @@ SYNTH,100,2026-10-08,2026-09-08T00:00:00Z,100,put,2.8,3.0,0.26,900,80
 ```
 
 This small snippet explains columns. Use the complete supplied JSON for the walkthrough.
+It imports, but the result is flagged degraded because the rows carry no `risk_free_rate` or `dividend_yield`. The reason names the 0.04 default rate and the zero yield.
+The `normalization` block also records one repair per row, `calculated mid from bid and ask`.
+Add those two columns, or pass `--rate` and `--dividend-yield`, to clear the flag.
 A two-row chain cannot demonstrate a multi-leg spread or a full volatility smile.
 
 ## Import a permitted export

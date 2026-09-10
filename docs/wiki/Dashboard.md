@@ -15,21 +15,30 @@ Open `http://127.0.0.1:8787` on the same computer.
 Select the underlying and expiry at the top of the page.
 Keep the input source, date, and quality messages visible while interpreting a result.
 
+After the [first walkthrough](Getting-Started.md) and the [two-expiry example](Examples.md#compare-two-expiries), the page shows these sections in order: the pipeline, structure comparison, composite support, time spreads, positioning, volatility, term structure, volatility surface, structures, the ladder, condor search, and adding data.
+The forward ledger appears between the condor search and adding data once a paper position exists.
+Simulation, backtest, and variance risk premium stay absent until history-based artifacts exist.
+
 ## Follow the panels
 
 | Panel | Question it answers | Read with it |
 |---|---|---|
-| Pipeline | Which calculations produced this page? | The artifact inputs and missing stages. |
+| The pipeline | Which calculations produced this page? | The artifact inputs and missing stages. |
 | Structure comparison | How do the saved structures rank under this model? | The score definition, costs, and excluded cases. |
 | Composite support | Where do the model, simulation, and backtest agree? | Component weights and disagreements. |
 | Time spreads | What changes when legs use different expiries? | Surviving-leg valuation and scan boundaries. |
 | Positioning | Where does assumed dealer gamma concentrate? | Open interest, missing contracts, and sign convention. |
 | Volatility | How does IV vary by strike and expiry? | Data coverage and unavailable wings. |
+| Term structure | How do at-the-money IV, risk reversal, butterfly, and expected move change across saved expiries? | The days to each expiry and whether both 25-delta wings carry a usable IV. |
+| Volatility surface | How does IV vary across strike and expiry together? | At least two saved expiries for the same underlying. |
+| Variance risk premium | How does implied volatility compare with the simulation's realised volatility? | The term structure and the simulation that supplied the realised figure. |
 | Structures | What is the shape of this plan's payoff? | Leg quantities, breakevens, stock legs, and loss limits. |
-| Ladder | How sensitive is each usable contract? | Units and skipped-contract counts. |
+| The ladder | How sensitive is each usable contract? | Units and skipped-contract counts. |
 | Condor search | How do saved condors differ? | The selected strikes and the search coverage. |
 | Simulation | What distribution does the fitted model produce? | Source history and convergence diagnostics. |
 | Backtest | What happened in the modeled historical exercise? | Benchmark, overlap treatment, and cost omissions. |
+| Forward ledger | Which paper positions are open or settled? | Entry mids, mark quality, and settlement notes. |
+| Adding data | Which commands would fill the sections that are absent? | The selected underlying and expiry. |
 
 ## Inspect a structure
 
@@ -69,6 +78,9 @@ Their outcomes do not measure a strategy's market performance.
 An imported chain can support Greeks, positioning, and structures.
 Simulation and backtest panels need their own saved results.
 Time spreads need another expiry for the same underlying.
+Term structure and volatility surface also need a second saved expiry.
+The variance risk premium needs that term structure and a saved simulation.
+The forward ledger appears after `optiondesk forward open` writes `forward_ledger.json` in the directory.
 
 Use [Examples](Examples.md) to create the missing artifacts.
 Use [Troubleshooting](Troubleshooting.md) if existing files do not appear.

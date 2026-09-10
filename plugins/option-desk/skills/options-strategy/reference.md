@@ -72,3 +72,14 @@ are excluded from any ranking.
 max_gain and max_loss can be the string "unlimited". That is a fact about
 the structure. Never render it as a number, and never substitute a large
 one.
+
+## Quote coverage and reported Greeks
+
+The spread-cost estimate sums only option legs with bid/ask quotes. A
+partially quoted structure can still receive an ok verdict. Check missing
+quotes separately and do not present that cost as covering every leg.
+Commission counts all option-leg quantities.
+
+The engine netting helper includes veta. The strategy artifact helper
+sums eight Greeks and omits veta; report only the fields present.
+Single-expiry breakeven roots are rounded to six decimal places.

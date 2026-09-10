@@ -24,6 +24,10 @@ Synthetic screenshots demonstrate the interface, not market performance.
 The ladder contains contract sensitivities.
 Read its units block before combining or comparing values.
 In particular, a unit change in volatility is different from a one-percentage-point change.
+Vega is per 1.00 of volatility, so divide by 100 for the per-point figure.
+Theta, charm, veta, and color are per calendar day.
+The `skipped` block counts the contracts left out of the ladder and why.
+The sample ladder keeps 22 of 62 contracts inside the default strike band and counts the other 40 under `out_of_band`.
 
 Dealer exposure adds open interest and an assumed position sign to contract gamma.
 The assumed dealer holdings are not observed holdings.
@@ -39,6 +43,7 @@ The comparison score orders structures under that model.
 It is neither a recommendation nor evidence of an achievable return.
 
 For a two-expiry structure, inspect how the surviving leg is valued.
+The plan's `probability.model` field states the method: a lognormal underlying at the near expiry, at the near chain's at-the-money implied volatility, with the far leg marked at the volatility it carries today and the marking curve integrated numerically over the scan grid.
 A maximum found over a scan window does not establish a global maximum.
 An entry delta ratio does not establish bounded tail risk.
 
@@ -60,5 +65,7 @@ Read the benchmark over the same windows.
 A paper position records a plan before later marks.
 It has no broker execution, fill verification, or account reconciliation.
 A missing later quote can make a position unmarkable.
+Entry marks are mid quotes, not fills.
+A close settles the structure at intrinsic value against the supplied or newest spot. The result note says the profit still assumes the entry mid was achieved.
 
 Next: [Research examples](Examples.md).

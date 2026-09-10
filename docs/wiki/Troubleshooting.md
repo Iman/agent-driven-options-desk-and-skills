@@ -18,6 +18,8 @@ optiondesk doctor
 | Skills appear but no tools exist | Was only the skills CLI used? | Install the local tools or connect the hosted service. |
 | Duplicate tool names | Are both local and hosted Option Desk enabled? | Keep the connection intended for this session. |
 | Apple silicon wheel error | Does the error report incompatible architectures? | Rerun the current installer from the checkout, then run the doctor. |
+| Installed command exists but fails | Did an earlier installation finish? | Run `./run.sh --reinstall`, which runs the installer even when the command is present. |
+| Provider needs a key | Does `optiondesk keys list` show the provider without one? | Run `optiondesk keys set alphavantage` and enter the key at the hidden prompt. |
 
 ## Empty dashboard or browser error
 
@@ -51,6 +53,7 @@ Then open `http://127.0.0.1:8788`.
 | Date or spot looks stale | Generation time can differ from the input capture time. | Check the source timestamp. Refresh only through a permitted source. |
 | Simulation or backtest is absent | A chain does not contain underlying price history. | Run the separate history workflow locally. |
 | Paper mark unavailable | A required leg can lack a usable later quote. | Inspect the mark result and obtain the missing snapshot. |
+| Few quoted contracts during the session | Fewer than half of the contracts carry both a bid and an ask while the market is open. `run.sh` warns that the provider snapshot is stale, not the market. | Wait a few minutes and rerun. Results built on that book are flagged degraded. |
 
 Zero quotes do not establish a particular market session or recovery time.
 Report the observed data quality without guessing the cause.

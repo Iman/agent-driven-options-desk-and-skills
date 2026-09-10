@@ -14,7 +14,10 @@ Are there enough trades. Under thirty, stop.
 How does it compare to holding the underlying over the same windows. A
 structure that merely tracks the market is not a strategy.
 
-Could chance produce this. Report the p-value and its caveat.
+Could chance produce this. Report the block sign-flip symmetry assumption,
+block length and strategy-selection caveat. Block boundaries can lose
+dependence. A block covering the sample gives no bootstrap variation; its
+interval cannot support a conclusion.
 
 What does it cost to be wrong. Maximum drawdown in risk units, and the
 worst single trade.

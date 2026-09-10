@@ -23,6 +23,10 @@
 | [FAQ](../../FAQ.md) | Common questions and historical examples. |
 | [Capabilities](../CAPABILITIES.md) | Feature and interface catalogue. |
 | [Architecture](Architecture.md) | Package and artifact boundaries. |
+| [Master algorithm](Algorithm.md) | Pseudocode for skills, loops, graph routing, prompts, backtests, and paper tests. |
+| [Diagram gallery](../diagrams/README.md) | Editable PlantUML sources with SVG and PNG renderings. |
+| [Testing guide](../TESTING.md) | Test layers, commands, and the coverage gate. |
+| [Preserved reference pages](Reference-README.md) | Earlier README, [FAQ](Reference-FAQ.md), and [installation guide](Reference-INSTALL.md) at revision `9626273`, with hashes in the [preservation manifest](../reference-preservation.json). |
 | [API inventory](../INVENTORY.md) | Generated public source reference. |
 | [Loops](../../LOOPS.md) | Repeated workflows and the bounded graph. |
 | [Development](Development.md) | Validation, generation, screenshots, and wiki publication. |

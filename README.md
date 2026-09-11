@@ -9,6 +9,8 @@ Import a chain, inspect its Greeks and positioning, compare structures, and keep
 
 [![Agent guides](https://img.shields.io/badge/guides-Codex%20%7C%20ChatGPT%20%7C%20Claude%20chat%20%7C%20Claude%20Code-blue)](docs/wiki/Skill-Installation.md) [![Last commit](https://img.shields.io/github/last-commit/Iman/agent-driven-options-desk-and-skills)](https://github.com/Iman/agent-driven-options-desk-and-skills/commits/main)
 
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-com.avidquant%2Foptiondesk-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=com.avidquant/optiondesk) [![Smithery](https://img.shields.io/badge/Smithery-iman--samizadeh%2Foption--desk-blue)](https://smithery.ai/servers/iman-samizadeh/option-desk) [![Glama connector](https://img.shields.io/badge/Glama-Option%20Desk%20connector-blue)](https://glama.ai/mcp/connectors/com.avidquant.optiondesk/option-desk) [![Hosted sample](https://img.shields.io/badge/hosted%20sample-optiondesk.avidquant.com-blue)](https://optiondesk.avidquant.com)
+
 ## Contents
 
 **On this page**

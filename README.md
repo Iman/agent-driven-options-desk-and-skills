@@ -198,6 +198,20 @@ The [results guide](docs/wiki/Reading-Results.md) explains how to interpret each
 | [API inventory](docs/INVENTORY.md) | Generated public function and class reference. |
 | [Documentation map](docs/wiki/Documentation-Map.md) | All guides, policies, and maintenance references. |
 
+### Where the desk is listed
+
+| Listing | Link | Status |
+|---|---|---|
+| Official MCP Registry | [com.avidquant/optiondesk](https://registry.modelcontextprotocol.io/v0/servers?search=com.avidquant/optiondesk) | Published 2026-09-11. Remote entry for the hosted endpoint, domain verified. |
+| Smithery | [iman-samizadeh/option-desk](https://smithery.ai/servers/iman-samizadeh/option-desk) | Listed 2026-09-11. Hosted endpoint, 13 tools scanned, TXT record verified. |
+| Glama | [Iman/agent-driven-options-desk-and-skills](https://glama.ai/mcp/servers/Iman/agent-driven-options-desk-and-skills) | Indexed from the repository, 12 local tools listed. Hosted connector submitted for review 2026-09-11. |
+| Claude Code and Codex marketplaces | This repository: `/plugin marketplace add Iman/agent-driven-options-desk-and-skills` | Local plugin `option-desk` and hosted plugin `option-desk-hosted`. |
+| Hosted sample | [optiondesk.avidquant.com](https://optiondesk.avidquant.com), MCP at `/mcp` | Synthetic SYNTH data, no account needed. |
+| LinkedIn article | [I built an options desk an agent can drive](https://www.linkedin.com/pulse/i-built-options-desk-agent-can-drive-iman-samizadeh-phd-yjhke) | Published 2026-09-10. |
+| dev.to | [dev.to/imansamizadeh](https://dev.to/imansamizadeh) | Repost of the article, canonical link to LinkedIn, publishes after the first week. |
+
+Directory listings describe the hosted endpoint or the repository as they were on the date shown. The listing pages are maintained on each directory, not in this repository.
+
 ## Development
 
 [Testing and coverage](docs/TESTING.md) covers happy and failure paths, BDD scenarios, integration checks, and the 80% unit line-coverage gate per package.

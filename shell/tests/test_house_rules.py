@@ -48,6 +48,8 @@ PLANTED = [
     # every tracked text file including this one, and a test that
     # trips the guard it is testing fails for the wrong reason.
     ("possible key material", "token " + "AB12CD34" + "EF56GH78"),
+    # A profile link is personal material. Split for the same reason.
+    ("personal material", "see https://www.linkedin" + ".com/in/someone"),
 ]
 
 
@@ -74,6 +76,20 @@ def test_a_clean_tree_reports_nothing(refresh, tmp_path, monkeypatch):
         encoding="utf-8")
     (tmp_path / "clean.py").write_text(
         'VALUE = "SOME_CONSTANT_NAME"\n', encoding="utf-8")
+    assert refresh.check_rules() == []
+
+
+def test_a_published_article_link_is_not_personal_material(refresh, tmp_path,
+                                                           monkeypatch):
+    """The README lists the article that announced the project.
+
+    The host is the same one the profile scan watches, so the article path
+    is allowed on its own and everything else on that host still fires.
+    """
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    (tmp_path / "readme.md").write_text(
+        "Read the article at https://www.linkedin" + ".com/pulse/the-slug\n",
+        encoding="utf-8")
     assert refresh.check_rules() == []
 
 

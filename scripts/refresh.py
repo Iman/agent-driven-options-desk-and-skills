@@ -209,8 +209,12 @@ def tracked_text_files():
 # The words are deliberately mundane and the pattern deliberately narrow: a
 # repository about options will say "profile" and "position" constantly, so
 # matching those would train everyone to ignore the scan.
+#
+# A LinkedIn article URL (the /pulse/ path) is project material when the
+# article is about the project, and the README lists the published one.
+# Profile, job and message URLs on the same host stay flagged.
 PERSONAL = re.compile(
-    r"(?i)(curriculum vitae|campaign notes|recruiter|linkedin\.com"
+    r"(?i)(curriculum vitae|campaign notes|recruiter|linkedin\.com(?!/pulse/)"
     r"|\bmy cv\b|cv version|resume\.(docx|pdf))")
 
 

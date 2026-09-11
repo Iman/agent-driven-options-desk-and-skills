@@ -224,9 +224,9 @@ See [Development](docs/wiki/Development.md) for environment setup and screenshot
 
 ```sh
 python -m pytest engine/tests -q    # 355 tests
-python -m pytest shell/tests -q     # 572 tests
+python -m pytest shell/tests -q     # 574 tests
 python -m pytest agent/tests -q     # 161 tests
-python -m pytest -q                # 1088 tests
+python -m pytest -q                # 1090 tests
 ```
 
 These are collection counts, not a claim that this documentation edit ran every test.

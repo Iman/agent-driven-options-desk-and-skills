@@ -204,7 +204,8 @@ The [results guide](docs/wiki/Reading-Results.md) explains how to interpret each
 |---|---|---|
 | Official MCP Registry | [com.avidquant/optiondesk](https://registry.modelcontextprotocol.io/v0/servers?search=com.avidquant/optiondesk) | Published 2026-09-11. Remote entry for the hosted endpoint, domain verified. |
 | Smithery | [iman-samizadeh/option-desk](https://smithery.ai/servers/iman-samizadeh/option-desk) | Listed 2026-09-11. Hosted endpoint, 13 tools scanned, TXT record verified. |
-| Glama | [Iman/agent-driven-options-desk-and-skills](https://glama.ai/mcp/servers/Iman/agent-driven-options-desk-and-skills) | Indexed from the repository, 12 local tools listed. Hosted connector submitted for review 2026-09-11. |
+| Glama server | [Iman/agent-driven-options-desk-and-skills](https://glama.ai/mcp/servers/Iman/agent-driven-options-desk-and-skills) | Indexed from the repository, 12 local tools listed. |
+| Glama connector | [com.avidquant.optiondesk/option-desk](https://glama.ai/mcp/connectors/com.avidquant.optiondesk/option-desk) | Hosted endpoint, listed 2026-09-11, health checked by Glama, 13 tools. |
 | Claude Code and Codex marketplaces | This repository: `/plugin marketplace add Iman/agent-driven-options-desk-and-skills` | Local plugin `option-desk` and hosted plugin `option-desk-hosted`. |
 | Hosted sample | [optiondesk.avidquant.com](https://optiondesk.avidquant.com), MCP at `/mcp` | Synthetic SYNTH data, no account needed. |
 | LinkedIn article | [I built an options desk an agent can drive](https://www.linkedin.com/pulse/i-built-options-desk-agent-can-drive-iman-samizadeh-phd-yjhke) | Published 2026-09-10. |

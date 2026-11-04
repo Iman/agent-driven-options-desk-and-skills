@@ -1,6 +1,7 @@
 """LangChain bindings for the option desk.
 
-MIT licensed. This package is a language layer over the shell: it turns
+Licensed under the PolyForm Noncommercial License 1.0.0; see LICENSE.
+This package is a language layer over the shell: it turns
 commands into tools, artifacts into documents, and questions into prompts
 that can only be answered from what is on disk.
 

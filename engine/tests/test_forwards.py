@@ -161,6 +161,16 @@ def test_the_greeks_say_what_they_are_derivatives_of():
     assert set(b76) >= {"delta", "gamma", "vega", "theta", "vanna", "charm"}
 
 
+def test_black76_rho_is_the_rate_derivative_with_the_future_held_fixed():
+    """Only discounting depends on r once the futures price is given."""
+    future, strike, t, sigma, r, h = 100.0, 95.0, 0.75, 0.3, 0.05, 1e-6
+    for kind in ("call", "put"):
+        bumped = (black76_price(future, strike, t, sigma, kind, r + h)
+                  - black76_price(future, strike, t, sigma, kind, r - h)) / (2 * h)
+        rho = black76_greeks(future, strike, t, sigma, kind, r)["rho"]
+        assert rho == pytest.approx(bumped, rel=1e-7), kind
+
+
 def test_implied_volatility_round_trips_through_both_models():
     for price_fn, iv_fn, args in (
             (black76_price, black76_implied_vol, (100.0, 105.0, 0.75, 0.04)),

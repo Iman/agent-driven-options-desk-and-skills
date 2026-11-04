@@ -101,6 +101,8 @@ def black76_greeks(future, strike, t, sigma, kind, r=DEFAULT_R):
     delta is one futures contract, not one unit of the physical.
     """
     greeks = all_greeks(future, strike, t, sigma, kind, r, r)
+    # all_greeks moves r with the carry fixed; with the future held fixed only discounting moves.
+    greeks["rho"] = -t * greeks["price"]
     greeks["underlying_is"] = "futures_price"
     return greeks
 

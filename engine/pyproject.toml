@@ -1,6 +1,7 @@
 [project]
 name = "optiondesk-engine"
-version = "0.3.0"
+version = "0.3.0.post1"
+readme = "README.md"
 description = "Option pricing and Greek analytics engine for the option desk"
 requires-python = ">=3.11"
 license = { text = "PolyForm-Noncommercial-1.0.0" }

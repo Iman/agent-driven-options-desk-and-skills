@@ -176,6 +176,40 @@ how it is published.
   that one is a Black-Scholes teaching simulator with no chain behind it,
   so having both installed makes which one answers a matter of chance.
 
+## Optional production backends
+
+The QuantLib adapter in `engine/src/optiondesk_engine/pricing/quantlib_backend.py`
+uses QuantLib 1.43 through its public Python API. The engine wheel carries the
+full upstream notice in `optiondesk_engine/notices/QuantLib-LICENSE.TXT`.
+The LEAN handoff in `shell/src/optiondesk/integrations/` uses the upstream
+Python API and preserves the Apache-2.0 text in its `notices/` directory.
+The plugin carries both texts under `notices/`. The external LEAN runtime
+and licensed market data are installed separately; the handoff does not
+redistribute a runtime container or claim its full dependency set is audited.
+
+## Optional backend evaluation
+
+`research/backend-evaluation/` evaluates QuantLib 1.43 and QuantConnect LEAN.
+It is separate from the published engine, CLI and MCP server.
+
+- QuantLib is developed by the QuantLib contributors. The installed wheel's
+  complete modified BSD notice is preserved in
+  `research/backend-evaluation/notices/QuantLib-LICENSE.TXT`.
+- LEAN is developed by QuantConnect Corporation and its contributors under
+  Apache-2.0. Its licence is preserved in
+  `research/backend-evaluation/notices/LEAN-LICENSE`.
+- The evaluation scripts use upstream public APIs. The Python algorithm and
+  local configuration follow the LEAN examples; the synthetic CSV writer
+  follows `Common/Util/LeanData.cs`. Source URLs, captured hashes and the
+  pinned runtime image are recorded in the evaluation's `evidence.json`.
+- The upstream packages and runtime image are downloaded separately. Their
+  licences remain in force; this repository's PolyForm terms do not replace
+  them. The Docker image contains additional dependencies whose notices
+  must be retained if the image is redistributed. This evaluation does not
+  audit or redistribute that dependency set.
+- The smoke-test prices are synthetic. No historical market data is copied
+  into this repository. A real historical run needs separately licensed data.
+
 ## Market data is not covered by this licence
 
 No market data is vendored into this repository. Data is fetched at runtime

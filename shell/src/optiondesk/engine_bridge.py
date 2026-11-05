@@ -129,3 +129,10 @@ def status():
         "license": engine_license if AVAILABLE else None,
         "message": None if AVAILABLE else MISSING_MESSAGE,
     }
+
+
+def quantlib_price(payload):
+    if not AVAILABLE:
+        raise EngineUnavailable()
+    from optiondesk_engine.pricing.quantlib_backend import price
+    return price(payload)

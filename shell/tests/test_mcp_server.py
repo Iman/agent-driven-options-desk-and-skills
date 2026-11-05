@@ -720,6 +720,8 @@ def listed():
 # archive copy, whether a repeat leaves the directory as it was, and
 # whether it can resolve a provider.
 EXPECTED_HINTS = {
+    "option_price": (True, False, True, False),
+    "option_lean": (False, False, False, False),
     "option_snapshot_schema": (True, False, True, False),
     "option_chain_snapshot": (False, False, False, True),
     "option_greeks_ladder": (False, False, False, False),

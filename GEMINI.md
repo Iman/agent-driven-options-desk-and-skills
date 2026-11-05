@@ -476,6 +476,29 @@ measured values, the live at-the-money call moved 4.3 percent in price and
 
 ---
 
+## Skill: options-lean
+
+Export fixed option legs to a local LEAN backtest bundle or import completed tagged results. Use when handing a plan to a historical engine, not modeled-premium strategy backtests.
+
+# Options Lean
+
+Use `option_lean` with action export or import. Export requires plan, start, end, exercise_style, multiplier and data_mode. MCP writes a new bundle under the desk artifact directory. The CLI also accepts an explicit destination.
+
+```sh
+optiondesk lean export --plan PLAN.json --destination NEW_DIRECTORY --start 2016-01-04 --end 2016-01-06 --exercise-style american --multiplier 100 --data-mode user-licensed
+optiondesk lean import --result RESULT.json --bundle NEW_DIRECTORY/plan.json
+```
+
+Replace the example paths and dates with the actual plan and test interval. Only single-expiry American US equity option legs with integer contract quantities and multiplier 100 are supported. Stock legs, time spreads and degraded plans are refused. Model premiums do not become fill prices.
+
+The export provides main.py and plan.json; a local LEAN runtime, configuration and permitted historical data are separate requirements. The template permits backtests only, enters at the first common quote slice and liquidates on the final date using separate orders. It does not validate point-in-time selection, atomic spread fills or historical data coverage.
+
+Import requires completed status, fully filled orders, matching source-plan tags and data mode. Report degraded status first: passing those checks does not validate data coverage or financial model suitability. Preserve LEAN statistic units and distinguish synthetic fixtures from historical results. Assignment-generated orders without the plan tag are refused; do not label that path validated.
+
+Research software, not investment advice. See DISCLAIMER.md.
+
+---
+
 ## Skill: options-positioning
 
 Dealer gamma exposure by strike, call and put walls, the gamma flip level, max pain, put-call ratios, and volatility smile geometry including at-the-money implied volatility, 25-delta risk reversal, butterfly, skew slope and the implied expected move. Use when the user asks where the walls are, whether dealers are long or short gamma, what the gamma flip level is, where max pain sits, what the put-call ratio is, how steep the skew is, what the market implies for a move, or asks about positioning and dealer hedging. This is chain-wide geometry rather than per-contract Greeks. Not for order placement and not for recommendations.
@@ -620,6 +643,28 @@ missing thing was volatility.
 
 - `reference.md`: the exposure formula and its units, what the walls and the flip level are, why there is often more than one flip, and the limits of max pain and the smile metrics.
 - `workflows/read-the-book.md`: the order to read the numbers in, what each is worth, and what never to say.
+
+---
+
+## Skill: options-pricing
+
+Price a vanilla American or European option with the optional QuantLib backend. Use when comparing exercise-style prices, not the full chain Greek ladder.
+
+# Options Pricing
+
+Use the `option_price` MCP tool. Supply spot, strike, valuation_date, expiry, volatility, rate, dividend_yield, kind (call or put), and exercise_style (american or european). All rates and volatility are decimal fractions. No value is defaulted.
+
+CLI example with synthetic inputs:
+
+```sh
+optiondesk price --spot 80 --strike 100 --valuation-date 2026-09-12 --expiry 2027-09-12 --volatility .2 --rate .05 --dividend-yield 0 --kind put --exercise-style american
+```
+
+The backend requires `optiondesk-engine[quantlib]`. It runs each request in a fresh process to isolate QuantLib settings. Report price per underlying unit, exercise style, the European reference and the grid-difference warning. Multiply by a contract size only when that size is established.
+
+The model uses constant volatility, Actual/365 Fixed, flat continuously compounded rates and a continuous dividend yield. Discrete dividends and chain-wide American Greeks are not implemented. Do not combine this price with the existing European Greek ladder without identifying the model difference.
+
+Research software, not investment advice. See DISCLAIMER.md.
 
 ---
 
@@ -936,6 +981,10 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 
 Every command the CLI exposes, read from the argparse parsers in shell/src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
+- `optiondesk price`: explicit European or American QuantLib vanilla price
+  Flags: --spot, --strike, --valuation-date, --expiry, --volatility, --rate, --dividend-yield, --kind, --exercise-style
+- `optiondesk lean {export,import}`: export a historical LEAN plan or import its results
+  Flags: --plan, --destination, --start, --end, --exercise-style, --data-mode, --result, --bundle, --multiplier
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
   Flags: --from-file, --data-source, --accept-data-rights, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot

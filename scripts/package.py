@@ -263,10 +263,12 @@ def build_plugin():
 
     # The skills point at it, and a plugin install has no repository to
     # find it in.
-    for name in CARRIED:
+    for name in (*CARRIED, "LICENSE", "THIRD-PARTY.md"):
         source = ROOT / name
         if source.exists():
             shutil.copy2(source, PLUGIN / name)
+
+    _copy_tree(ROOT / "notices", PLUGIN / "notices")
 
     # The MCP server is what gives the plugin its tools. The command is
     # resolved at install time rather than hardcoded to one machine.
@@ -289,7 +291,7 @@ def build_plugin():
         "changes.\n\n"
         "The MCP server entry expects `optiondesk-mcp` on PATH, which "
         "`install.sh` puts there.\n\n"
-        "What reaches which host. The six skills work in Claude Code, "
+        "What reaches which host. The local skills work in Claude Code, "
         "ChatGPT and Codex. The two agents are Claude only: Codex reads "
         "agents as TOML under ~/.codex/agents and ignores these Markdown "
         "ones entirely, so they ship here as inert weight for that host. "

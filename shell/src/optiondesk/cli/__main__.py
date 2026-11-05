@@ -17,6 +17,8 @@ from optiondesk.cli import exposure as exposure_cmd
 from optiondesk.cli import expiries as expiries_cmd
 from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.cli import strategy as strategy_cmd
+from optiondesk.cli import price as price_cmd
+from optiondesk.cli import lean as lean_cmd
 from optiondesk.config import configured_providers
 from optiondesk.providers import describe_all
 
@@ -45,6 +47,8 @@ def build_parser():
     parser.add_argument("--version", action="version",
                         version="optiondesk {}".format(__version__))
     sub = parser.add_subparsers(dest="command", required=True)
+    price_cmd.add_arguments(sub.add_parser("price", help="explicit European or American QuantLib vanilla price"))
+    lean_cmd.add_arguments(sub.add_parser("lean", help="export a historical LEAN plan or import its results"))
 
     chain_cmd.add_arguments(sub.add_parser(
         "chain", help="retrieve an option chain snapshot"))
@@ -87,6 +91,8 @@ def _dashboard(args):
 
 
 HANDLERS = {
+    "price": price_cmd.run,
+    "lean": lean_cmd.run,
     "chain": chain_cmd.run,
     "greeks": greeks_cmd.run,
     "strategy": strategy_cmd.run,

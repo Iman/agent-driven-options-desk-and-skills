@@ -32,6 +32,8 @@ from optiondesk.cli import greeks as greeks_cmd
 from optiondesk.cli import plots as plots_cmd
 from optiondesk.cli import simulate as simulate_cmd
 from optiondesk.cli import strategy as strategy_cmd
+from optiondesk.cli import price as price_cmd
+from optiondesk.cli import lean as lean_cmd
 from optiondesk.providers import describe_all
 
 PROTOCOL_VERSION = "2025-06-18"
@@ -454,6 +456,20 @@ TOOLS = [
 # Applied in a loop rather than typed into each description, so a tool added
 # later cannot ship without the rule. Nine of the ten descriptions carried no
 # reporting instruction at all, and DISCLAIMER reached exactly one result.
+_PRICE_PROPERTIES = {name: {"type": "number" if name in ("spot", "strike", "volatility", "rate", "dividend_yield") else "string"} for name in price_cmd.FIELDS}
+TOOLS.extend([
+    {"name": "option_price", "description": "Price a vanilla European or American option with optional QuantLib. Continuous dividends, premium per unit; no chain Greeks are changed.",
+     "inputSchema": {"type": "object", "properties": _PRICE_PROPERTIES, "required": list(price_cmd.FIELDS)},
+     "defaults": {}, "handler": price_cmd.run},
+    {"name": "option_lean", "description": "Export fixed single-expiry option legs to a local LEAN bundle, or import completed tagged results. No backtest or order is executed by this tool.",
+     "inputSchema": {"type": "object", "properties": {
+         "action": {"type": "string", "enum": ["export", "import"]},
+         **{key: {"type": "string"} for key in ("plan", "start", "end", "exercise_style", "data_mode", "result", "bundle")},
+         "multiplier": {"type": "integer"}}, "required": ["action"]},
+     "defaults": {key: None for key in ("plan", "destination", "start", "end", "exercise_style", "data_mode", "multiplier", "result", "bundle")},
+     "handler": lean_cmd.run},
+])
+
 for _tool in TOOLS:
     _tool["description"] += REPORTING_RULE
 del _tool
@@ -583,6 +599,8 @@ _OUTPUT_SCHEMAS = {
     "option_desk_status": _STATUS_OUTPUT,
     "option_snapshot_schema": _SNAPSHOT_SCHEMA_OUTPUT,
 }
+
+_METADATA.update({"option_price": ("Vanilla price", _READS_ONLY), "option_lean": ("LEAN handoff", _WRITES_FROM_DISK)})
 
 for _tool in TOOLS:
     _tool["title"], _tool["annotations"] = _METADATA[_tool["name"]]

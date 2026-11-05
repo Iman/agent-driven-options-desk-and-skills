@@ -18,12 +18,13 @@ Three packages, one licence, one adapter between them.
 
 | package | licence | what it is | depends on |
 |---|---|---|---|
-| `engine` | PolyForm NC 1.0.0 | every number the desk reports | the standard library, nothing else |
+| `engine` | PolyForm NC 1.0.0 | every number the desk reports | standard library by default; optional QuantLib |
 | `shell` | PolyForm NC 1.0.0 | data, contracts, CLI, dashboard, MCP server | the engine, optionally |
 | `agent` | PolyForm NC 1.0.0 | LangChain tools, LangGraph routine | the shell, and langchain-core |
 
-The engine has no network access of any kind and no third-party
-dependency. The shell reaches the internet, validates what comes back
+The default engine uses the standard library. The optional QuantLib backend
+adds a native dependency and prices each request in an isolated process. Neither
+pricing path fetches market data. The shell reaches the internet, validates what comes back
 against a schema, and writes an artifact. The agent layer is optional and
 never sits in the compute path: it calls the same commands and reads the
 same artifacts as a human would.
@@ -61,7 +62,7 @@ ChatGPT scan `.agents/skills` and read `.agents/plugins/marketplace.json`.
 This repository symlinks `.agents/skills` to `shell/skills`, and the plugin
 bundle at `plugins/option-desk` carries both manifests over one copy of the
 skills, so neither host gets a stale or partial set. A test asserts the two
-discovery paths see the same six. A second bundle, `plugins/option-desk-hosted`,
+discovery paths see the same eight. A second bundle, `plugins/option-desk-hosted`,
 declares the remote Streamable HTTP MCP instead of the local process and
 carries the four hosted-safe skills; both marketplaces list both, and a
 user installs one or the other because the two servers expose tools with
@@ -76,7 +77,7 @@ not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
 
 The public submission is one plugin with hosted MCP and four supporting
 skills. Browser ChatGPT uses that service for calculations and charts.
-The six local skills require local tools for fresh results.
+The eight local skills require local tools for fresh results.
 
 `scripts/package.py` builds `dist/option-desk-hosted.zip` with the complete
 public plugin. It also builds `dist/option-desk-skills.zip` with four skill
@@ -89,11 +90,13 @@ See [the submission pack](SUBMISSION.md) for the public scope and evaluations.
 
 ## 3. The command line
 
-Thirteen commands. Each command does one task. Each command writes an artifact
-and prints a JSON summary to standard output.
+Fifteen commands. Each command prints JSON; artifact-producing commands also
+write their results to disk.
 
 | command | what it does |
 |---|---|
+| `optiondesk price` | explicit American or European vanilla pricing with optional QuantLib |
+| `optiondesk lean` | export a fixed-leg LEAN bundle or import completed tagged results |
 | `optiondesk expiries SPY` | what the provider lists, what is already on disk, days to each |
 | `optiondesk chain SPY` | pull one chain, solve implied volatility per contract, write a snapshot |
 | `optiondesk greeks` | the sixteen Greek ladder from a snapshot, graded |
@@ -423,7 +426,7 @@ without mixing. An empty dashboard says which commands would fill it.
 
 ## 8. Skills
 
-Six skills, following the progressive disclosure pattern: a name and
+Eight skills, following the progressive disclosure pattern: a name and
 description that decide whether the skill loads at all, a SKILL.md that is
 a router rather than a manual, and bundled resources loaded only when the
 work needs them.
@@ -806,3 +809,8 @@ The IV tolerance applies before six-decimal rounding. Strategy breakeven roots a
 The simulation gate uses a truncated per-chain ESS estimate. Taking the minimum across chains does not guarantee a conservative estimate. Its structure callback applies intrinsic payoff at the requested horizon without aligning plan expiries or preserving far-leg time value. Untruncated Student-t log returns have no finite mean terminal price, so finite sample averages of unbounded payoffs need explicit qualification.
 
 Block sign-flip randomization assumes symmetry under the allowed block flips. Block methods can lose dependence across block boundaries. A bootstrap with one available block returns a zero-width interval without resampling variation. The current even-sample median field selects the upper middle observation. Read these limits before interpreting a result as calibrated uncertainty.
+
+## Optional QuantLib and LEAN backends
+
+See [backend integration](BACKENDS.md) for installation, commands, model limits
+and validation. These capabilities are local; the hosted service is unchanged.

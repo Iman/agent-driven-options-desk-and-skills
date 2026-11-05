@@ -1,0 +1,62 @@
+[
+  {
+    "spot": 100,
+    "strike": 100,
+    "days": 365,
+    "sigma": 0.2,
+    "rate": 0.05,
+    "dividend_yield": 0,
+    "kind": "call",
+    "quantlib_version": "1.43",
+    "intrinsic": 0,
+    "european_optiondesk": 10.450583572185565,
+    "european_quantlib": 10.450583572185575,
+    "american_400": 10.450974896379112,
+    "american_800": 10.450681162659187
+  },
+  {
+    "spot": 80,
+    "strike": 100,
+    "days": 365,
+    "sigma": 0.2,
+    "rate": 0.05,
+    "dividend_yield": 0,
+    "kind": "put",
+    "quantlib_version": "1.43",
+    "intrinsic": 20,
+    "european_optiondesk": 16.982362022883578,
+    "european_quantlib": 16.98236202288358,
+    "american_400": 20.000000048179757,
+    "american_800": 20.000000000054747
+  },
+  {
+    "spot": 100,
+    "strike": 80,
+    "days": 365,
+    "sigma": 0.2,
+    "rate": 0.05,
+    "dividend_yield": 0.1,
+    "kind": "call",
+    "quantlib_version": "1.43",
+    "intrinsic": 20,
+    "european_optiondesk": 16.15412245369032,
+    "european_quantlib": 16.154122453690338,
+    "american_400": 20.00000001390457,
+    "american_800": 19.99999999999967
+  },
+  {
+    "spot": 100,
+    "strike": 100,
+    "days": 30,
+    "sigma": 0.4,
+    "rate": 0.03,
+    "dividend_yield": 0.02,
+    "kind": "put",
+    "quantlib_version": "1.43",
+    "intrinsic": 0,
+    "european_optiondesk": 4.522142488186461,
+    "european_quantlib": 4.522142488186443,
+    "american_400": 4.527322643535569,
+    "american_800": 4.527373344414537
+  }
+]

@@ -223,10 +223,10 @@ Run from the repository root with the development dependencies installed.
 See [Development](docs/wiki/Development.md) for environment setup and screenshot capture.
 
 ```sh
-python -m pytest engine/tests -q    # 355 tests
-python -m pytest shell/tests -q     # 574 tests
+python -m pytest engine/tests -q    # 362 tests
+python -m pytest shell/tests -q     # 577 tests
 python -m pytest agent/tests -q     # 161 tests
-python -m pytest -q                # 1090 tests
+python -m pytest -q                # 1100 tests
 ```
 
 These are collection counts, not a claim that this documentation edit ran every test.

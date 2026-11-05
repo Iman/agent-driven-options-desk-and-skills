@@ -11,11 +11,13 @@ They are not copied into this file. You discover skills in `.agents/skills`, sca
 - `desk-setup`
 - `options-backtest`
 - `options-greeks`
+- `options-lean`
 - `options-positioning`
+- `options-pricing`
 - `options-simulation`
 - `options-strategy`
 
-Compiling their bodies into this file as well would add about 44 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
+Compiling their bodies into this file as well would add about 47 KB to every session, relevant or not, which is the cost progressive disclosure exists to avoid. Read the one you need from `.agents/skills/<name>/SKILL.md`. That path is relative to the repository root, where you resolve it, not to this file.
 
 ## What else is here
 
@@ -29,6 +31,10 @@ Full catalogue in docs/CAPABILITIES.md, generated public API in docs/INVENTORY.m
 
 Every command the CLI exposes, read from the argparse parsers in src/optiondesk/cli/ when this file was generated, so it cannot name a command that does not exist or miss one that does. Flags are listed, not explained: run `optiondesk <command> --help` for the detail of any one of them.
 
+- `optiondesk price`: explicit European or American QuantLib vanilla price
+  Flags: --spot, --strike, --valuation-date, --expiry, --volatility, --rate, --dividend-yield, --kind, --exercise-style
+- `optiondesk lean {export,import}`: export a historical LEAN plan or import its results
+  Flags: --plan, --destination, --start, --end, --exercise-style, --data-mode, --result, --bundle, --multiplier
 - `optiondesk chain SYMBOL`: retrieve an option chain snapshot
   Flags: --from-file, --data-source, --accept-data-rights, --expiry, --provider, --rate, --dividend-yield, --out-dir
 - `optiondesk greeks`: full Greek ladder from a snapshot

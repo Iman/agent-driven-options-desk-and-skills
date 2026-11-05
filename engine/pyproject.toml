@@ -8,6 +8,7 @@ authors = [{ name = "Iman Samizadeh" }]
 dependencies = []
 
 [project.optional-dependencies]
+quantlib = ["QuantLib==1.43"]
 dev = ["pytest"]
 
 [build-system]

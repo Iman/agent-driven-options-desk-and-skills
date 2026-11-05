@@ -1,0 +1,155 @@
+{
+  "captured_at_utc": "2026-09-12T23:08:19.840491+00:00",
+  "quantlib_version": "1.43",
+  "lean_image": "quantconnect/lean@sha256:591e23a2e55fae410c699c8eef25e8ac66e0d63b8f1146c5c709d2f6041c6510",
+  "notices": {
+    "LEAN-LICENSE": "522cf0a716ce03f67d46f8fceb5bf78c5b84400ec5cd8d14bf9f02cddc1cb6ba",
+    "QuantLib-LICENSE.TXT": "6d900f97da09ba2a5907253c615d2d0ff48d5bc4e287f1b0ca57f057f7fdfb89"
+  },
+  "upstream_reference_files": {
+    "LICENSE": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/LICENSE",
+      "sha256": "522cf0a716ce03f67d46f8fceb5bf78c5b84400ec5cd8d14bf9f02cddc1cb6ba"
+    },
+    "Dockerfile": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Dockerfile",
+      "sha256": "a5cf67340ae7749504d680136e7a2418d118118e26667e95ab3b049b6b9e3557"
+    },
+    "Launcher/config.json": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Launcher/config.json",
+      "sha256": "d8c25c38e873c2354df58271f11b177208d98bb39af9249885f6137f45312658"
+    },
+    "Launcher/Program.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Launcher/Program.cs",
+      "sha256": "c68ccffee10be30a1c8c3e4467cb88108be1dd052ead3ac206eaa5f14ec43d0d"
+    },
+    "Algorithm/QCAlgorithm.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Algorithm/QCAlgorithm.cs",
+      "sha256": "d1cad25384cba7300a41e0cc17d26f0afa74966489b32b731422d05bd3ed6708"
+    },
+    "Common/Globals.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Globals.cs",
+      "sha256": "4a9cf38bb1704f01a50388e89b21fa802b99498f0e2642aa2bc4fa21a1ce4964"
+    },
+    "Common/Global.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Global.cs",
+      "sha256": "7fb0361a7ac6663e0162eb1ccbfca16fcdf2ad0e6dd3d2a95d5d266c7d7ae7dd"
+    },
+    "Common/Result.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Result.cs",
+      "sha256": "df7b8f17fa8d9f248ffb32af21a9b390e4658024a95d7fa7c987db9a5708a4fa"
+    },
+    "Algorithm.Python/BasicTemplateOptionsAlgorithm.py": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Algorithm.Python/BasicTemplateOptionsAlgorithm.py",
+      "sha256": "d482fabf7aa57c84e84daf8c221d02c71d9aba68e427cc8dc05eb302839deee0"
+    },
+    "Engine/Results/BaseResultsHandler.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Engine/Results/BaseResultsHandler.cs",
+      "sha256": "6f27613385720fb6242a06411d5a33a903bc4d5c0b7b8b260fb2b28a864633fd"
+    },
+    "Engine/Results/BacktestingResultHandler.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Engine/Results/BacktestingResultHandler.cs",
+      "sha256": "f80b03cebfdd0b5fc3b234cd643c2193a6d5682376221ca7beef5e9f9572c3d9"
+    },
+    "Common/Util/LeanData.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Util/LeanData.cs",
+      "sha256": "061f7774371de09e409df0d25aedda7ffed1dccf79d2fbb9bdb8f14aa185c5a0"
+    },
+    "Common/Packets/BacktestResultPacket.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Packets/BacktestResultPacket.cs",
+      "sha256": "c43e34a4832fc6bdc3879d90a7cfdcd071c092a025f3615983e0a88b9dd227e3"
+    },
+    "Common/Orders/Order.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Orders/Order.cs",
+      "sha256": "a31cb7ba33223a3922e60a339c751c3058cce5e554092c0acb51244f25b1c0d2"
+    },
+    "Common/Orders/OrderJsonConverter.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Orders/OrderJsonConverter.cs",
+      "sha256": "4d42956da1c2eb757c4d2f79d53ba6d14f3deb54c95afbd9982fb771a49ac336"
+    },
+    "Common/Orders/OrderTypes.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Orders/OrderTypes.cs",
+      "sha256": "2f1b64811bfe057bdd73c9516099f947af2b9fe6fa33879c206f119d108b5902"
+    },
+    "Common/Data/InterestRateProvider.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Data/InterestRateProvider.cs",
+      "sha256": "04502c5455e78a5f2bd72cb83fc5bc10f371c00bcfc48b3f28d4c1b4342441e9"
+    },
+    "Common/Data/Market/QuoteBar.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Data/Market/QuoteBar.cs",
+      "sha256": "670d9ad065c32b825bedbaf42ef6d1298a8973e25b1a6316ce6bb0c62f34bd1e"
+    },
+    "Common/Securities/Option/DefaultOptionAssignmentModel.cs": {
+      "url": "https://raw.githubusercontent.com/QuantConnect/Lean/master/Common/Securities/Option/DefaultOptionAssignmentModel.cs",
+      "sha256": "7e7667544c0f7bfb425bb6df8418721f7139177a902bcc567db1066313d53631"
+    }
+  },
+  "completed_at_utc": "2026-09-12T23:12:58.249831+00:00",
+  "optiondesk_revision": "7c4a1eefbb59b0b751b8db86368d61fd991af01f",
+  "tests": {
+    "baseline-unit": [
+      {
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "928",
+        "time": "29.002"
+      }
+    ],
+    "new-tests-before": [
+      {
+        "errors": "1",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1",
+        "time": "0.056"
+      }
+    ],
+    "import-tests-before": [
+      {
+        "errors": "0",
+        "failures": "6",
+        "skipped": "0",
+        "tests": "22",
+        "time": "0.165"
+      }
+    ],
+    "contract-tests-before": [
+      {
+        "errors": "0",
+        "failures": "3",
+        "skipped": "0",
+        "tests": "25",
+        "time": "0.172"
+      }
+    ],
+    "evaluation-tests": [
+      {
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "26",
+        "time": "0.160"
+      }
+    ],
+    "final-unit": [
+      {
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "928",
+        "time": "22.305"
+      }
+    ]
+  },
+  "result_files": {
+    "quantlib-prices.json": "65b761b6e82d68a7603b5216fd9636b2892c59b100358854210dcf4afd1902da",
+    "lean-smoke.json": "1b506925981c6658d63662443941eb0a92376bf2192699069b541f7114cfa42e"
+  },
+  "lean_image_labels": {
+    "lean_version": "18084",
+    "python_version": "3.11",
+    "strict_python_version": "3.11.11",
+    "target_framework": "net10.0"
+  }
+}

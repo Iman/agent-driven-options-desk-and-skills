@@ -2,7 +2,8 @@
 
 Pricing and analytics for the option desk. Licensed under the PolyForm
 Noncommercial License 1.0.0, the same terms as the rest of the project. See
-`LICENSE` for the full text and `../LICENSES.md` for what that permits.
+`LICENSE` for the full text and [LICENSES.md](https://github.com/Iman/agent-driven-options-desk-and-skills/blob/main/LICENSES.md)
+for what that permits.
 
 The default engine uses the standard library and has no data providers.
 The optional `quantlib` extra adds QuantLib 1.43 for explicit American or

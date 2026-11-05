@@ -20,16 +20,18 @@ Two more extras are available:
 
 ## Commands
 
-`optiondesk` has these subcommands: `chain`, `greeks`, `strategy`,
+`optiondesk` has these subcommands: `price`, `lean`, `chain`, `greeks`, `strategy`,
 `exposure`, `plots`, `expiries`, `compare`, `simulate`, `backtest`,
 `forward`, `keys`, `doctor` and `dashboard`. Run `optiondesk <command> --help`
 for the options of each one.
 
-`optiondesk-mcp` starts the MCP server over stdio. It serves 12 tools:
+`optiondesk-mcp` starts the MCP server over stdio. It serves 14 tools:
 `option_snapshot_schema`, `option_chain_snapshot`, `option_greeks_ladder`,
-`option_positioning`, `option_expiries`, `option_strategy_build`,
-`option_strategy_compare`, `option_simulate`, `option_backtest`,
-`option_forward_test`, `option_plots` and `option_desk_status`.
+`option_plots`, `option_expiries`, `option_strategy_build`,
+`option_strategy_compare`, `option_positioning`, `option_simulate`,
+`option_backtest`, `option_forward_test`, `option_desk_status`,
+`option_price` and `option_lean`. `option_price` needs the engine's
+`quantlib` extra: `pip install "optiondesk-engine[quantlib]"`.
 
 ## Data
 

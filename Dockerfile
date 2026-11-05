@@ -31,9 +31,10 @@ WORKDIR /src
 
 # Copy the three packages first so a documentation change does not
 # invalidate the dependency layer.
-COPY shell/pyproject.toml shell/
-COPY engine/pyproject.toml engine/
-COPY agent/pyproject.toml agent/
+# Each pyproject names its README as the package description, so the build needs it.
+COPY shell/pyproject.toml shell/README.md shell/
+COPY engine/pyproject.toml engine/README.md engine/
+COPY agent/pyproject.toml agent/README.md agent/
 COPY shell/src shell/src
 COPY engine/src engine/src
 COPY agent/src agent/src

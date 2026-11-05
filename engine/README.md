@@ -9,7 +9,8 @@ The default engine uses the standard library and has no data providers.
 The optional `quantlib` extra adds QuantLib 1.43 for explicit American or
 European vanilla pricing. Its public request function uses a fresh worker
 process to isolate global settings. Neither pricing path fetches market data.
-See [backend integration](../docs/BACKENDS.md) for the model conventions.
+See [backend integration](https://github.com/Iman/agent-driven-options-desk-and-skills/blob/main/docs/BACKENDS.md)
+for the model conventions.
 
 The shell fetches data and writes artifacts. The engine turns the data
 into analytics. Neither imports the other's internals: the shell reaches the

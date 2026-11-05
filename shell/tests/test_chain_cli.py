@@ -16,6 +16,8 @@ from optiondesk.providers.base import ProviderDataError
 
 from marks import needs_engine
 
+pytestmark = pytest.mark.usefixtures("upload_day")
+
 WIDE = tuple(float(s) for s in range(75, 130, 5))  # 11 strikes, 22 contracts
 
 

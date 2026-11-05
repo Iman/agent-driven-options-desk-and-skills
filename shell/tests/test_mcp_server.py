@@ -84,7 +84,7 @@ def test_snapshot_schema_tells_chat_what_it_can_repair():
     assert "Never invent" in payload["repair_policy"]
 
 
-def test_inline_user_snapshot_reaches_the_local_artifact_desk(desk):
+def test_inline_user_snapshot_reaches_the_local_artifact_desk(desk, upload_day):
     response = call("option_chain_snapshot", {
         "symbol": "SPY",
         "source_data": {

@@ -5,7 +5,24 @@ with no implied volatility and one far out of the money strike, so every test
 exercises the skip paths rather than only the happy path.
 """
 
+from datetime import datetime
+
 import pytest
+
+
+@pytest.fixture
+def upload_day(monkeypatch):
+    """Judge the upload fixtures, which expire 2026-09-18, from their as-of day.
+
+    The uploads refuse an expiry before today, so a fixed fixture date
+    stopped these tests on 19 September 2026. They test normalisation, not
+    the clock.
+    """
+    class AsOf(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 8, 28, tzinfo=tz)
+    monkeypatch.setattr("optiondesk.cli.chain.datetime", AsOf)
 
 from optiondesk import config
 from optiondesk.artifacts import envelope

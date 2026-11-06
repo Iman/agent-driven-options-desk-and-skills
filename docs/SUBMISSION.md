@@ -30,10 +30,12 @@ The existing public listing uses package name
 The generator and Codex marketplace retain that identity on every rebuild.
 The display name is Option Desk (hosted), and its package version remains 0.3.0.
 
-The hosted MCP entry declares `extensions.com.openai.auth.type` as `"none"`.
+The existing app already has authentication configured. The ZIP omits
+`extensions.com.openai.auth` so the update reuses that MCP connection.
+Manage authentication through the existing app in the portal.
 The packager does not copy the private import JSON; refresh its validated `dist/`
-copy separately. Revised terms and browser acknowledgement remain local drafts
-until legal review and deployment. See [validation status](SUBMISSION-VALIDATION.md).
+copy separately. Deployment and legal review are tracked separately from ZIP
+validation. See [validation status](SUBMISSION-VALIDATION.md).
 
 The complete plugin archive and the portal skills attachment serve different
 purposes. Uploading skills alone does not connect the server.

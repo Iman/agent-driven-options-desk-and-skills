@@ -1,6 +1,21 @@
 # Option Desk submission validation
 
-## Current local draft, 6 November 2026
+## Existing MCP connection update, 6 November 2026
+
+The maintainer supplied a portal finding that the existing app already has
+authentication configured and the ZIP must omit its auth override. The generator
+now omits `extensions.com.openai.auth` from the referenced `.mcp.json`.
+The package ID, version and MCP URL remain unchanged. Authentication changes
+belong in the existing app's portal settings. Portal acceptance remains UNKNOWN.
+
+VERIFIED: two packaging regressions failed with the override present. After its
+removal, all 37 packaging and house-rule checks passed. CLOSED for the packaged
+auth override; the server runtime was not changed by this package correction.
+
+## Pre-release validation record, 6 November 2026
+
+This section records the earlier draft before deployment. Its auth declaration
+is superseded by the existing-connection update above.
 
 UNKNOWN: legal enforceability and regulatory applicability remain for qualified
 review. The revised hosted controls have not been deployed. Portal acceptance,

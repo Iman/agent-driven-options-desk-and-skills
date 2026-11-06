@@ -210,9 +210,9 @@ def test_public_archive_connects_only_the_hosted_mcp(dist):
     assert ".mcp.json" in names
     assert manifest["mcpServers"] == "./.mcp.json"
     assert manifest["name"] == "app-6a9928feca1c8191aa083ed88feb1e54"
+    assert "auth" not in manifest.get("extensions", {}).get("com.openai", {})
     assert descriptor == {"mcpServers": {"optiondesk-hosted": {
-        "type": "http", "url": "https://optiondesk.avidquant.com/mcp",
-        "extensions": {"com.openai": {"auth": {"type": "none"}}}}}}
+        "type": "http", "url": "https://optiondesk.avidquant.com/mcp"}}}
 
 
 def test_openai_archive_carries_declared_branding(dist):
@@ -356,8 +356,7 @@ def test_the_hosted_plugin_declares_one_remote_http_server_and_no_command(
 
     assert list(servers) == ["optiondesk-hosted"]
     server = servers["optiondesk-hosted"]
-    assert server == {"type": "http", "url": built.HOSTED_MCP_URL,
-                      "extensions": {"com.openai": {"auth": {"type": "none"}}}}
+    assert server == {"type": "http", "url": built.HOSTED_MCP_URL}
     assert server["url"].startswith("https://")
 
 

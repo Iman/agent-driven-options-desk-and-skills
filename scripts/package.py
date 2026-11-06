@@ -394,12 +394,12 @@ def build_hosted_plugin():
     # "type": "http" plus "url" is the shape both Claude Code and Codex
     # document for a remote Streamable HTTP server, and the one every
     # published Codex plugin with a remote server uses.
+    # Omit auth overrides so updates reuse the existing app connection.
     (HOSTED_PLUGIN / ".mcp.json").write_text(json.dumps({
         "mcpServers": {
             "optiondesk-hosted": {
                 "type": "http",
                 "url": HOSTED_MCP_URL,
-                "extensions": {"com.openai": {"auth": {"type": "none"}}},
             }
         }
     }, indent=2) + "\n", encoding="utf-8")

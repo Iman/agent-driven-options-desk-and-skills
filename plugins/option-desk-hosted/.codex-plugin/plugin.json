@@ -1,6 +1,6 @@
 {
   "name": "app-6a9928feca1c8191aa083ed88feb1e54",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Option analytics over the hosted MCP at optiondesk.avidquant.com: validate a permitted option-chain snapshot, then Greeks, dealer positioning and structure payoffs as charts in the conversation, or the SYNTH sample with no upload. No market data is fetched, no local install is needed. Research software, not investment advice. Model and data errors are possible. Verify material results independently.",
   "author": {
     "name": "Iman Samizadeh"

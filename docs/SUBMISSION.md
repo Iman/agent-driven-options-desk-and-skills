@@ -28,7 +28,8 @@ python3 scripts/package.py
 The existing public listing uses package name
 `app-6a9928feca1c8191aa083ed88feb1e54` in `.codex-plugin/plugin.json`.
 The generator and Codex marketplace retain that identity on every rebuild.
-The display name is Option Desk (hosted), and its package version remains 0.3.0.
+The display name is Option Desk (hosted). Upload package version 0.3.1 to update
+the published 0.3.0 listing.
 
 The existing app already has authentication configured. The ZIP omits
 `extensions.com.openai.auth` so the update reuses that MCP connection.

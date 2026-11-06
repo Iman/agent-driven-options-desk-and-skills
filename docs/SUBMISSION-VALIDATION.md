@@ -1,5 +1,12 @@
 # Option Desk submission validation
 
+## Plugin version update, 6 November 2026
+
+The portal reported version 0.3.0 as already published. The package generator,
+generated manifests and submission import now use 0.3.1. The existing package ID
+and MCP URL remain unchanged, and the ZIP still omits the auth override.
+Portal acceptance of this version remains UNKNOWN.
+
 ## Existing MCP connection update, 6 November 2026
 
 The maintainer supplied a portal finding that the existing app already has

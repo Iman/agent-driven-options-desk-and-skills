@@ -58,7 +58,7 @@ BRANDING = {
 }
 PUBLISH_IGNORES = {".DS_Store", ".installed-by-optiondesk", "__pycache__"}
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 AUTHOR = {"name": "Iman Samizadeh"}
 REPOSITORY = "https://github.com/Iman/agent-driven-options-desk-and-skills"
 DESCRIPTION = (

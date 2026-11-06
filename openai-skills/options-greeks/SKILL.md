@@ -16,3 +16,17 @@ Never ask for credentials, API keys, account numbers, or portfolio positions. Ne
 Explain model inputs and limitations. Do not recommend a contract, entry, exit, order, or position size.
 
 Read numerical Greeks from `diagnostics.greek_ladder`, with its stated units. Raw vega is per +1.00 absolute IV; divide by 100 for +0.01 IV. Do not assume a contract multiplier or currency. Use `option_report_plots` for a combined diagnostic and strategy report in one widget.
+
+## Data and result limits
+
+Set `rights_confirmed=true` only after the user confirms permission for hosted
+processing and output delivery. Existing explicit permission is sufficient.
+Confirmation does not verify a licence or override a provider agreement.
+
+Keep model and data limitations visible. Results can be wrong; reproducibility
+does not establish fitness or regulatory approval. Do not present a ranking or
+comparison as a personal recommendation, executable quote or guaranteed loss
+limit. Independently verify material results before use.
+
+[Terms](https://optiondesk.avidquant.com/legal/terms) and
+[privacy](https://optiondesk.avidquant.com/legal/privacy) explain data handling and legal limits.

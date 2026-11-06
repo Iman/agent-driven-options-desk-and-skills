@@ -86,7 +86,9 @@ MAX_SIGMA = 10.0
 MAX_YEARS = 100.0
 
 
-def _validate(spot, strike, t, sigma, kind):
+def _validate(spot, strike, t, sigma, kind, r=DEFAULT_R, q=DEFAULT_Q):
+    if not all(math.isfinite(v) for v in (spot, strike, t, sigma, r, q)):
+        raise ValueError("spot, strike, t, sigma, r and q must all be finite")
     if kind not in ("call", "put"):
         raise ValueError("kind must be 'call' or 'put', got {!r}".format(kind))
     if spot <= 0 or strike <= 0 or t <= 0 or sigma <= 0:
@@ -117,7 +119,7 @@ def bs_price(spot, strike, t, sigma, kind, r=DEFAULT_R, q=DEFAULT_Q):
     analytic Greeks in greeks_full are checked against this exact
     implementation rather than against a second, subtly different one.
     """
-    _validate(spot, strike, t, sigma, kind)
+    _validate(spot, strike, t, sigma, kind, r, q)
     d1, d2 = d1_d2(spot, strike, t, sigma, r, q)
     disc = math.exp(-r * t)
     carry = math.exp(-q * t)
@@ -135,7 +137,7 @@ def bs_price(spot, strike, t, sigma, kind, r=DEFAULT_R, q=DEFAULT_Q):
 
 def vega_raw(spot, strike, t, sigma, r=DEFAULT_R, q=DEFAULT_Q):
     """dV/dsigma per 1.00 of volatility. Used by the IV solver."""
-    _validate(spot, strike, t, sigma, "call")
+    _validate(spot, strike, t, sigma, "call", r, q)
     d1, _ = d1_d2(spot, strike, t, sigma, r, q)
     return spot * math.exp(-q * t) * _pdf(d1) * math.sqrt(t)
 

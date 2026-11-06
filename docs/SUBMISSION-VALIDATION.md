@@ -1,3 +1,46 @@
+# Option Desk submission validation
+
+## Current local draft, 6 November 2026
+
+UNKNOWN: legal enforceability and regulatory applicability remain for qualified
+review. The revised hosted controls have not been deployed. Portal acceptance,
+review conversations, identity/domain verification and production rendering have
+not been checked for this draft. Repository ownership and upstream licences remain
+unchanged. Do not treat this record as a compliance attestation.
+
+VERIFIED: the hosted suite executed 83 tests and passed. The public
+packaging and house-rule checks executed 37 tests and passed.
+Both browser acknowledgement and data-permission regressions are covered by the
+hosted checks. Synthetic demos remain available.
+
+The rebuilt hosted ZIP has 11 files and 4 skills. Every archived file matches
+its current source, the archive integrity check passes, and the MCP server declares
+`extensions.com.openai.auth.type: "none"`, following the
+[authentication reference](https://developers.openai.com/plugins/build/plugins#configure-mcp-authentication).
+The import JSON matches its canonical private-repository copy and validates against
+the [official schema](https://developers.openai.com/plugins/schemas/chatgpt-app-submission.v1.json).
+All 13 tool names and declared annotation values match the local hosted registry.
+The import contains 5 positive and 5 negative review specifications. These are not
+completed conversation tests.
+
+Artifact digests, byte counts and the check timestamp are in
+`dist/option-desk-openai-validation.json`. The schema copy is
+`dist/chatgpt-app-submission.schema.json`. Upload the import JSON, not the schema.
+No commit, push, deployment or submission accompanies these local changes.
+
+## Existing listing identity correction
+
+The maintainer reported the public listing's package ID as
+`app-6a9928feca1c8191aa083ed88feb1e54`. The generated Codex manifest,
+Codex marketplace and ZIP now use that ID. Three assertions failed before
+the correction and passed afterward. Claude's plugin name remains unchanged.
+Directory acceptance of the rebuilt ZIP remains unverified.
+
+## Historical record, before these draft changes
+
+The dated evidence below describes earlier builds. Its production and test claims
+must not be read as verification of the current working tree.
+
 # Submission validation: hosted service 0.3.1
 
 Validated on 5 September 2026. Technical status: HOLD: ChatGPT template loading remains unresolved.

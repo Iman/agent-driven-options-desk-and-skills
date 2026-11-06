@@ -1,7 +1,7 @@
 {
-  "name": "option-desk-hosted",
+  "name": "app-6a9928feca1c8191aa083ed88feb1e54",
   "version": "0.3.0",
-  "description": "Option analytics over the hosted MCP at optiondesk.avidquant.com: validate a permitted option-chain snapshot, then Greeks, dealer positioning and structure payoffs as charts in the conversation, or the SYNTH sample with no upload. No market data is fetched, no local install is needed. Research software, not investment advice.",
+  "description": "Option analytics over the hosted MCP at optiondesk.avidquant.com: validate a permitted option-chain snapshot, then Greeks, dealer positioning and structure payoffs as charts in the conversation, or the SYNTH sample with no upload. No market data is fetched, no local install is needed. Research software, not investment advice. Model and data errors are possible. Verify material results independently.",
   "author": {
     "name": "Iman Samizadeh"
   },
@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Option Desk (hosted)",
     "shortDescription": "Analyze option-chain data.",
-    "longDescription": "Validate a permitted option-chain snapshot and return Greek, positioning and strategy charts in the conversation through the hosted Option Desk MCP, or explore the SYNTH sample with no upload. Fetches no market data. Research software, not investment advice.",
+    "longDescription": "Validate a permitted option-chain snapshot and return Greek, positioning and strategy charts in the conversation through the hosted Option Desk MCP, or explore the SYNTH sample with no upload. Fetches no market data. Research software, not investment advice. Model and data errors are possible. Verify material results independently.",
     "developerName": "Iman Samizadeh",
     "category": "Finance",
     "capabilities": [
@@ -33,6 +33,9 @@
       "Write"
     ],
     "websiteURL": "https://optiondesk.avidquant.com",
+    "privacyPolicyURL": "https://optiondesk.avidquant.com/legal/privacy",
+    "termsOfServiceURL": "https://optiondesk.avidquant.com/legal/terms",
+    "supportURL": "https://optiondesk.avidquant.com/support",
     "logo": "./assets/openai-directory-icon.png",
     "composerIcon": "./assets/openai-composer-icon.png",
     "brandColor": "#2F6FEB",

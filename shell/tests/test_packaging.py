@@ -209,8 +209,10 @@ def test_public_archive_connects_only_the_hosted_mcp(dist):
         descriptor = json.loads(zipped.read(".mcp.json"))
     assert ".mcp.json" in names
     assert manifest["mcpServers"] == "./.mcp.json"
+    assert manifest["name"] == "app-6a9928feca1c8191aa083ed88feb1e54"
     assert descriptor == {"mcpServers": {"optiondesk-hosted": {
-        "type": "http", "url": "https://optiondesk.avidquant.com/mcp"}}}
+        "type": "http", "url": "https://optiondesk.avidquant.com/mcp",
+        "extensions": {"com.openai": {"auth": {"type": "none"}}}}}}
 
 
 def test_openai_archive_carries_declared_branding(dist):
@@ -354,7 +356,8 @@ def test_the_hosted_plugin_declares_one_remote_http_server_and_no_command(
 
     assert list(servers) == ["optiondesk-hosted"]
     server = servers["optiondesk-hosted"]
-    assert server == {"type": "http", "url": built.HOSTED_MCP_URL}
+    assert server == {"type": "http", "url": built.HOSTED_MCP_URL,
+                      "extensions": {"com.openai": {"auth": {"type": "none"}}}}
     assert server["url"].startswith("https://")
 
 
@@ -374,7 +377,7 @@ def test_the_hosted_plugin_carries_the_hosted_skills_and_nothing_local(
     assert "optiondesk-mcp" not in text
 
 
-def test_the_hosted_manifests_agree_and_name_a_different_plugin(hosted,
+def test_the_hosted_manifests_keep_their_directory_identities(hosted,
                                                                 bundle):
     claude = json.loads(
         (hosted / ".claude-plugin" / "plugin.json").read_text())
@@ -382,7 +385,8 @@ def test_the_hosted_manifests_agree_and_name_a_different_plugin(hosted,
     local = json.loads(
         (bundle / ".claude-plugin" / "plugin.json").read_text())
 
-    assert claude["name"] == codex["name"] == hosted.name
+    assert claude["name"] == hosted.name
+    assert codex["name"] == "app-6a9928feca1c8191aa083ed88feb1e54"
     assert claude["name"] != local["name"]
     assert claude["version"] == codex["version"] == local["version"]
     assert "not investment advice" in claude["description"]
@@ -407,7 +411,7 @@ def test_both_marketplaces_list_both_plugins(built, tmp_path):
     assert [p["name"] for p in claude["plugins"]] == [
         "option-desk", "option-desk-hosted"]
     assert [p["name"] for p in codex["plugins"]] == [
-        "option-desk", "option-desk-hosted"]
+        "option-desk", "app-6a9928feca1c8191aa083ed88feb1e54"]
     assert claude["plugins"][1]["source"] == "./plugins/option-desk-hosted"
     assert codex["plugins"][1]["source"]["path"] == \
         "./plugins/option-desk-hosted"

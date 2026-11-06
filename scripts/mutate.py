@@ -127,8 +127,8 @@ MUTATIONS = [
      "                           reverse=True):",
      "agent/tests/test_artifacts.py"),
     ("archive-skipped", "shell/src/optiondesk/artifacts.py",
-     "    if path.exists() and path.read_bytes() != tmp.read_bytes():\n"
-     "        archive_existing(path)\n",
+     "        if path.exists() and path.read_bytes() != tmp.read_bytes():\n"
+     "            archive_existing(path)\n",
      "",
      "shell/tests/test_artifact_archive.py"),
     ("archive-eats-the-write", "shell/src/optiondesk/artifacts.py",

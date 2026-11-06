@@ -158,11 +158,11 @@ def sync_readme_counts(interpreter):
             lambda m: "{}{}{}".format(m.group(1), total, m.group(3)),
             updated)
 
-        badge = re.compile(r"(tests-)\d+(%20passing)")
+        badge = re.compile(r"(tests-)\d+(%20(?:passing|collected))")
         if badge.search(updated):
             before = badge.search(updated).group(0)
             updated = badge.sub(r"\g<1>{}\g<2>".format(total), updated)
-            if before != "tests-{}%20passing".format(total):
+            if before != badge.search(updated).group(0):
                 changed.append("tests badge to {}".format(total))
 
     mutate = ROOT / "scripts" / "mutate.py"
@@ -192,7 +192,13 @@ def sync_readme_counts(interpreter):
 
 def tracked_text_files():
     """Every text file that belongs to the project, generated ones aside."""
-    for path in sorted(ROOT.rglob("*")):
+    try:
+        files = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+                               cwd=ROOT, capture_output=True, text=True, check=True)
+        paths = {ROOT / name for name in files.stdout.split("\0") if name}
+    except (OSError, subprocess.CalledProcessError):
+        paths = ROOT.rglob("*")  # Source archives have no Git metadata.
+    for path in sorted(paths):
         if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
             continue
         if any(part in SKIP_DIRS for part in path.relative_to(ROOT).parts):

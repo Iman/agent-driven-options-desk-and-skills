@@ -24,6 +24,40 @@ from optiondesk.artifacts import (
     write_json,
 )
 from optiondesk.contracts import CHAIN_SNAPSHOT
+from optiondesk.cli.plots import _write_png
+
+
+@pytest.fixture(params=["json", "png"])
+def writer(request):
+    if request.param == "json":
+        return lambda payload, root: write_json(payload, "chain_TEST.json", root)
+    return lambda payload, root: _write_png(json.dumps(payload).encode(), "plot_TEST.png", root)
+
+
+def test_failed_replacement_preserves_the_live_artifact(tmp_path, monkeypatch, writer):
+    path = writer({"spot": 100}, tmp_path)
+    previous = path.read_bytes()
+    replace = os.replace
+
+    def fail_commit(source, target):
+        if str(source).endswith(".tmp"):
+            raise OSError("injected replacement failure")
+        return replace(source, target)
+
+    monkeypatch.setattr(os, "replace", fail_commit)
+    with pytest.raises(OSError, match="injected"):
+        writer({"spot": 101}, tmp_path)
+    assert path.exists()
+    assert path.read_bytes() == previous
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_same_timestamp_keeps_each_distinct_version(tmp_path, monkeypatch, writer):
+    monkeypatch.setattr("optiondesk.artifacts._archive_stamp", lambda path: "same-time")
+    for spot in (100, 101, 102):
+        path = writer({"spot": spot}, tmp_path)
+    retained = [path] + list((tmp_path / ARCHIVE_DIRNAME).rglob("*" + path.suffix))
+    assert sorted(json.loads(p.read_bytes())["spot"] for p in retained) == [100, 101, 102]
 
 
 def _payload(spot, generated=None):

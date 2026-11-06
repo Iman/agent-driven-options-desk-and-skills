@@ -2,7 +2,14 @@
   "mcpServers": {
     "optiondesk-hosted": {
       "type": "http",
-      "url": "https://optiondesk.avidquant.com/mcp"
+      "url": "https://optiondesk.avidquant.com/mcp",
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "none"
+          }
+        }
+      }
     }
   }
 }

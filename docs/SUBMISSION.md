@@ -19,9 +19,21 @@ python3 scripts/package.py
 | Item | Purpose |
 |---|---|
 | `plugins/option-desk-hosted/` | Public plugin source, with manifests, four skills, images, and remote MCP configuration. |
+| `dist/chatgpt-app-submission.json` | Portal import copied from the private hosted-service repository after schema validation. |
+| `dist/chatgpt-app-submission.schema.json` | Official validation schema; do not upload it as the import file. |
 | `dist/option-desk-hosted.zip` | Complete copy of the public plugin for package review and local testing. |
 | `dist/option-desk-skills.zip` | Four skill directories for the Skills page of the MCP submission. |
 | `https://optiondesk.avidquant.com/mcp` | Production Streamable HTTP MCP URL. Enter this separately in the portal. |
+
+The existing public listing uses package name
+`app-6a9928feca1c8191aa083ed88feb1e54` in `.codex-plugin/plugin.json`.
+The generator and Codex marketplace retain that identity on every rebuild.
+The display name is Option Desk (hosted), and its package version remains 0.3.0.
+
+The hosted MCP entry declares `extensions.com.openai.auth.type` as `"none"`.
+The packager does not copy the private import JSON; refresh its validated `dist/`
+copy separately. Revised terms and browser acknowledgement remain local drafts
+until legal review and deployment. See [validation status](SUBMISSION-VALIDATION.md).
 
 The complete plugin archive and the portal skills attachment serve different
 purposes. Uploading skills alone does not connect the server.
@@ -41,6 +53,7 @@ package. Local archives remain available for local installations.
 > inspect dealer-positioning assumptions, and plot option-strategy payoffs.
 > Explore the SYNTH sample without an upload. The hosted service fetches no
 > market data and places no orders. Research software, not investment advice.
+> Model and data errors are possible. Verify material results independently.
 
 **Category:** Finance.
 
@@ -78,6 +91,8 @@ the data. The service rejects Yahoo, yfinance, and personal Alpha Vantage data.
 User confirmation does not override provider terms.
 
 Dashboard storage requires separate consent for retention of up to one hour.
+Browser uploads additionally require `terms_confirmed=true` after acknowledging
+the linked terms and reading the privacy notice. This is not blanket privacy consent.
 The private dashboard URL is a bearer secret. Users can request early deletion.
 Plot and strategy tools remove temporary files before they respond.
 
@@ -89,7 +104,9 @@ observations. Keep the private-research label and no-trading warning visible.
 
 Run these cases in a new conversation with the hosted MCP and its four skills.
 Record the tool calls, results, and pass/fail outcome for each case.
-The cases below are specifications, not completed test results.
+The cases below are supplemental specifications, not completed test results.
+The canonical import file separately contains five positive and five negative
+review specifications, including data-permission and personal-recommendation refusals.
 
 For P5, prepare a synthetic CSV or JSON fixture using `option_snapshot_schema`.
 Save the exact fixture with the evaluation evidence. Use a valid expiry at

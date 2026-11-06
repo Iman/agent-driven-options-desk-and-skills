@@ -398,3 +398,14 @@ def test_price_never_goes_negative_from_cancellation():
     # difference underflows to a small negative number.
     price = bs_price(100.0, 160.0, 30 / 365, 0.20, "call", 0.04, 0.0)
     assert price >= 0.0
+    assert all_greeks(100.0, 160.0, 30 / 365, 0.20, "call", 0.04, 0.0)["price"] == price
+
+
+@pytest.mark.parametrize("function", [bs_price, all_greeks])
+@pytest.mark.parametrize("index", [0, 1, 2, 3, 5, 6])
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), -float("inf")])
+def test_pricing_refuses_nonfinite_inputs(function, index, bad):
+    args = [100.0, 100.0, 1.0, 0.2, "call", 0.04, 0.0]
+    args[index] = bad
+    with pytest.raises(ValueError, match="finite"):
+        function(*args)

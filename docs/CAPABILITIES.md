@@ -338,7 +338,7 @@ flagged and the flag would stop meaning anything.
 Schemas are self-contained: cross-file references are rejected at load
 time, so an artifact can be validated by anyone holding one file.
 
-An artifact that is replaced moves into `archive/<date>/` first, named for
+An artifact that is replaced is copied into `archive/<date>/` first, named for
 the time it was generated. The live filename never changes, so nothing that
 resolves the newest artifact by name has to know the archive exists.
 Identical bytes are not archived, `OPTIONDESK_ARCHIVE=0` turns it off, and

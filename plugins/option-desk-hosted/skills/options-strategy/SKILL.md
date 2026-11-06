@@ -18,3 +18,17 @@ For a report with diagnostics and several payoffs, call `option_report_plots` on
 Use `strategy_records` for tables and expiration scenarios. These are the engine records used for the charts. Do not reconstruct legs from images. Use the returned units: no currency or contract multiplier is implied. Report `vega_per_vol_point` for a one-percentage-point IV change. Keep the patient-fill friction model separate from `natural_entry_cost`, which estimates full bid/ask crossing. Never claim that a successful tool call proves the images rendered.
 
 Do not select a trade for the user. Do not recommend entry, exit, order, or position size. Option Desk cannot place or route orders.
+
+## Data and result limits
+
+Set `rights_confirmed=true` only after the user confirms permission for hosted
+processing and output delivery. Existing explicit permission is sufficient.
+Confirmation does not verify a licence or override a provider agreement.
+
+Keep model and data limitations visible. Results can be wrong; reproducibility
+does not establish fitness or regulatory approval. Do not present a ranking or
+comparison as a personal recommendation, executable quote or guaranteed loss
+limit. Independently verify material results before use.
+
+[Terms](https://optiondesk.avidquant.com/legal/terms) and
+[privacy](https://optiondesk.avidquant.com/legal/privacy) explain data handling and legal limits.

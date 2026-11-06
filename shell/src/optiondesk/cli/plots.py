@@ -1,6 +1,7 @@
 """Create chat-ready PNG plots from an option-chain snapshot."""
 
 import argparse
+import tempfile
 import json
 import os
 from pathlib import Path
@@ -42,11 +43,16 @@ def _write_png(data, filename, directory=None):
     target_dir = Path(directory) if directory else artifact_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
     path = target_dir / filename
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_bytes(data)
-    if path.exists() and path.read_bytes() != data:
-        archive_existing(path)
-    os.replace(temporary, path)
+    with tempfile.NamedTemporaryFile(dir=target_dir, prefix=path.name + ".",
+                                     suffix=".tmp", delete=False) as handle:
+        temporary = Path(handle.name)
+    try:
+        temporary.write_bytes(data)
+        if path.exists() and path.read_bytes() != data:
+            archive_existing(path)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
     return path
 
 

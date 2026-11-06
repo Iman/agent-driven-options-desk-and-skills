@@ -11,6 +11,8 @@ failed run cannot leave a truncated artifact that looks complete.
 
 import json
 import os
+import shutil
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -104,7 +106,7 @@ def _archive_stamp(path):
 
 
 def archive_existing(path):
-    """Move an artifact about to be replaced into the archive.
+    """Copy an artifact about to be replaced into the archive.
 
     WHY THE LIVE NAME DOES NOT CHANGE. Filenames are keyed by underlying
     and expiry, so re-pulling the same chain replaced the previous one
@@ -130,11 +132,22 @@ def archive_existing(path):
             return None
         archive_dir = path.parent / ARCHIVE_DIRNAME / utc_now()[:10]
         archive_dir.mkdir(parents=True, exist_ok=True)
-        target = archive_dir / "{}_{}{}".format(
-            path.stem, _archive_stamp(path), path.suffix)
-        if target.exists():
-            return None
-        os.replace(path, target)
+        name = "{}_{}".format(path.stem, _archive_stamp(path))
+        number = 0
+        while True:
+            suffix = "" if number == 0 else ".{}".format(number)
+            target = archive_dir / (name + suffix + path.suffix)
+            try:
+                handle = target.open("xb")
+                break
+            except FileExistsError:
+                number += 1
+        try:
+            with handle, path.open("rb") as source:
+                shutil.copyfileobj(source, handle)
+        except OSError:
+            target.unlink(missing_ok=True)
+            raise
         return target
     except OSError:
         return None
@@ -147,28 +160,24 @@ def write_json(payload, filename, directory=None):
     is deliberate: those are not representable in strict JSON, and an
     artifact that only Python can read is not an interchange format.
 
-    An artifact this replaces is moved into `archive/<date>/` first, under
+    An artifact this replaces is copied into `archive/<date>/` first, under
     a name carrying the time it was generated. Set OPTIONDESK_ARCHIVE=0 to
     turn that off.
     """
     target_dir = Path(directory) if directory else artifact_dir()
     target_dir.mkdir(parents=True, exist_ok=True)
     path = target_dir / filename
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    with open(tmp, "w", encoding="utf-8") as handle:
-        # allow_nan is off deliberately. The default writes NaN and
-        # Infinity as bare tokens, which Python reads back and a strict
-        # RFC 8259 parser rejects, so a non-finite number would leave this
-        # process looking healthy and break somewhere else. Failing here
-        # names the field instead.
-        json.dump(payload, handle, indent=1, sort_keys=False,
-                  allow_nan=False)
-        handle.write("\n")
-    # After the temporary file is written, so a serialisation failure
-    # cannot archive the old artifact and then leave nothing in its place.
-    if path.exists() and path.read_bytes() != tmp.read_bytes():
-        archive_existing(path)
-    os.replace(tmp, path)
+    fd, name = tempfile.mkstemp(dir=target_dir, prefix=path.name + ".", suffix=".tmp")
+    tmp = Path(name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=1, sort_keys=False, allow_nan=False)
+            handle.write("\n")
+        if path.exists() and path.read_bytes() != tmp.read_bytes():
+            archive_existing(path)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
     return path
 
 

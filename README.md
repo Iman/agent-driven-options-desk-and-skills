@@ -3,7 +3,7 @@
 Options research with a local dashboard, agent skills, and MCP tools.
 Import a chain, inspect its Greeks and positioning, compare structures, and keep the results as readable files.
 
-[![Checks](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml/badge.svg)](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml) [![Tests](https://img.shields.io/badge/tests-1085%20collected-blue)](docs/TESTING.md) [![Unit coverage gate](https://img.shields.io/badge/unit%20coverage%20gate-80%25%20per%20package-blue)](docs/TESTING.md#run-the-80-unit-coverage-gate) [![Mutation cases](https://img.shields.io/badge/mutation%20cases-99-blue)](scripts/mutate.py) [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
+[![Checks](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml/badge.svg)](https://github.com/Iman/agent-driven-options-desk-and-skills/actions/workflows/refresh.yml) [![Tests](https://img.shields.io/badge/tests-1144%20collected-blue)](docs/TESTING.md) [![Unit coverage gate](https://img.shields.io/badge/unit%20coverage%20gate-80%25%20per%20package-blue)](docs/TESTING.md#run-the-80-unit-coverage-gate) [![Mutation cases](https://img.shields.io/badge/mutation%20cases-99-blue)](scripts/mutate.py) [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](INSTALL.md)
 
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Iman/agent-driven-options-desk-and-skills) [![Local skills](https://img.shields.io/badge/local%20skills-6-blue)](docs/wiki/Skill-Installation.md#choose-the-correct-skill-edition) [![Hosted skills](https://img.shields.io/badge/hosted%20skills-4-blue)](docs/wiki/Skill-Installation.md#prepare-individual-browser-skill-zips) [![Local MCP tools](https://img.shields.io/badge/local%20MCP%20tools-12-blue)](docs/CAPABILITIES.md)
 
@@ -223,10 +223,10 @@ Run from the repository root with the development dependencies installed.
 See [Development](docs/wiki/Development.md) for environment setup and screenshot capture.
 
 ```sh
-python -m pytest engine/tests -q    # 363 tests
-python -m pytest shell/tests -q     # 578 tests
+python -m pytest engine/tests -q    # 399 tests
+python -m pytest shell/tests -q     # 584 tests
 python -m pytest agent/tests -q     # 161 tests
-python -m pytest -q                # 1102 tests
+python -m pytest -q                # 1144 tests
 ```
 
 These are collection counts, not a claim that this documentation edit ran every test.

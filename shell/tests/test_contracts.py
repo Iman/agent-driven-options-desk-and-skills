@@ -63,17 +63,21 @@ def test_ladder_meta_is_actually_validated():
             validate(payload, SCHEMA_FILES[GREEKS_LADDER])
 
 
-def test_cross_file_reference_raises_rather_than_passing_silently():
-    from optiondesk.contracts import validate as validate_module_functions
-    from optiondesk.contracts.validate import SCHEMA_DIR
+@pytest.mark.parametrize("fallback", [False, True])
+def test_cross_file_reference_raises_rather_than_passing_silently(monkeypatch, tmp_path, fallback):
+    import importlib
+    module = importlib.import_module("optiondesk.contracts.validate")
+    monkeypatch.setattr(module, "SCHEMA_DIR", tmp_path)
+    if fallback:
+        monkeypatch.setattr(module, "_jsonschema", None)
 
     schema = {"type": "object",
               "properties": {"meta": {"$ref": "other.schema.json#/$defs/m"}}}
-    path = SCHEMA_DIR / "_probe.schema.json"
+    path = tmp_path / "_probe.schema.json"
     path.write_text(__import__("json").dumps(schema), encoding="utf-8")
     try:
         with pytest.raises(ValidationError) as excinfo:
             validate({"meta": {}}, "_probe.schema.json")
-        assert "cross-file reference" in str(excinfo.value)
+        assert "cross-file reference" in str(excinfo.value) or "could not be evaluated" in str(excinfo.value)
     finally:
         path.unlink()

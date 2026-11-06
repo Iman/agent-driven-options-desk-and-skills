@@ -80,7 +80,7 @@ def all_greeks(spot, strike, t, sigma, kind, r=DEFAULT_R, q=DEFAULT_Q):
     returning zeros, because a zero Greek and an unknown Greek mean very
     different things to a risk gate downstream.
     """
-    _validate(spot, strike, t, sigma, kind)
+    _validate(spot, strike, t, sigma, kind, r, q)
 
     sqt = math.sqrt(t)
     sq = sigma * sqt
@@ -128,6 +128,7 @@ def all_greeks(spot, strike, t, sigma, kind, r=DEFAULT_R, q=DEFAULT_Q):
               * (d1 * d2 * (1.0 - d1 * d2) + d1 * d1 + d2 * d2))
     dual_gamma = disc * _pdf(d2) / (strike * sq)
 
+    price = max(price, 0.0)  # Match bs_price's floor for cancellation noise.
     # Elasticity is undefined for a worthless option. Zero is returned as
     # the neutral value, and the price is carried alongside so a consumer
     # can tell "no leverage" from "no value".

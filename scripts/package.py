@@ -41,12 +41,15 @@ ASSETS = ROOT / "assets"
 # The hosted Streamable HTTP endpoint. It serves the SYNTH sample and
 # privately processes permitted user snapshots; it fetches no market data.
 HOSTED_MCP_URL = "https://optiondesk.avidquant.com/mcp"
+# Keep the existing directory listing's package identity on updates.
+HOSTED_CODEX_NAME = "app-6a9928feca1c8191aa083ed88feb1e54"
 HOSTED_DESCRIPTION = (
     "Option analytics over the hosted MCP at optiondesk.avidquant.com: "
     "validate a permitted option-chain snapshot, then Greeks, dealer "
     "positioning and structure payoffs as charts in the conversation, or "
     "the SYNTH sample with no upload. No market data is fetched, no local "
-    "install is needed. Research software, not investment advice."
+    "install is needed. Research software, not investment advice. "
+    "Model and data errors are possible. Verify material results independently."
 )
 
 BRANDING = {
@@ -337,7 +340,7 @@ def build_hosted_plugin():
         }, indent=2) + "\n", encoding="utf-8")
 
     codex_manifest = {
-        "name": "option-desk-hosted",
+        "name": HOSTED_CODEX_NAME,
         "version": VERSION,
         "description": HOSTED_DESCRIPTION,
         "author": AUTHOR,
@@ -354,11 +357,15 @@ def build_hosted_plugin():
                 "Greek, positioning and strategy charts in the "
                 "conversation through the hosted Option Desk MCP, or "
                 "explore the SYNTH sample with no upload. Fetches no "
-                "market data. Research software, not investment advice."),
+                "market data. Research software, not investment advice. "
+                "Model and data errors are possible. Verify material results independently."),
             "developerName": AUTHOR["name"],
             "category": "Finance",
             "capabilities": ["Read", "Write"],
             "websiteURL": "https://optiondesk.avidquant.com",
+            "privacyPolicyURL": "https://optiondesk.avidquant.com/legal/privacy",
+            "termsOfServiceURL": "https://optiondesk.avidquant.com/legal/terms",
+            "supportURL": "https://optiondesk.avidquant.com/support",
             "logo": "./assets/{}".format(BRANDING["logo"]),
             "composerIcon": "./assets/{}".format(BRANDING["composerIcon"]),
             "brandColor": "#2F6FEB",
@@ -392,6 +399,7 @@ def build_hosted_plugin():
             "optiondesk-hosted": {
                 "type": "http",
                 "url": HOSTED_MCP_URL,
+                "extensions": {"com.openai": {"auth": {"type": "none"}}},
             }
         }
     }, indent=2) + "\n", encoding="utf-8")
@@ -474,7 +482,7 @@ def build_marketplaces():
                 "category": "Finance",
             },
             {
-                "name": "option-desk-hosted",
+                "name": HOSTED_CODEX_NAME,
                 "source": {
                     "source": "local",
                     "path": "./plugins/option-desk-hosted",

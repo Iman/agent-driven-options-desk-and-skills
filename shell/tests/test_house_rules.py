@@ -115,6 +115,17 @@ def test_the_real_tree_is_clean(refresh):
     assert problems == [], "house rules violated: {}".format(problems[:5])
 
 
+def test_repository_scan_uses_git_files_without_private_ignored_drafts(refresh, tmp_path, monkeypatch):
+    import subprocess
+    monkeypatch.setattr(refresh, "ROOT", tmp_path)
+    (tmp_path / "article").mkdir()
+    (tmp_path / "article" / "private.md").write_text("one" + chr(0x2014) + "two")
+    (tmp_path / "new.md").write_text("one" + chr(0x2014) + "two")
+    monkeypatch.setattr(refresh.subprocess, "run", lambda *a, **k:
+                        subprocess.CompletedProcess(a, 0, stdout="new.md\0", stderr=""))
+    assert refresh.check_rules() == ["new.md:1: em dash"]
+
+
 def test_a_compact_timestamp_is_not_mistaken_for_a_key(refresh, tmp_path,
                                                        monkeypatch):
     """Archived artifacts are named with one, and every name tripped it.

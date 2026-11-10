@@ -18,5 +18,12 @@
     "agent-skills",
     "options-pricing"
   ],
-  "license": "PolyForm-Noncommercial-1.0.0"
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "homepage": "https://optiondesk.avidquant.com",
+  "repository": "https://github.com/Iman/agent-driven-options-desk-and-skills",
+  "documentationUrl": "https://github.com/Iman/agent-driven-options-desk-and-skills/blob/main/plugins/option-desk-hosted/README.md",
+  "privacyPolicyUrl": "https://optiondesk.avidquant.com/legal/privacy",
+  "termsOfServiceUrl": "https://optiondesk.avidquant.com/legal/terms",
+  "supportUrl": "https://optiondesk.avidquant.com/support",
+  "icon": "./assets/openai-directory-icon.png"
 }

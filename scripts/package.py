@@ -337,6 +337,14 @@ def build_hosted_plugin():
             "author": AUTHOR,
             "keywords": keywords,
             "license": "PolyForm-Noncommercial-1.0.0",
+            "homepage": "https://optiondesk.avidquant.com",
+            "repository": REPOSITORY,
+            "documentationUrl": REPOSITORY + "/blob/main/plugins/option-desk-hosted/README.md",
+            "privacyPolicyUrl": "https://optiondesk.avidquant.com/legal/privacy",
+            "termsOfServiceUrl": "https://optiondesk.avidquant.com/legal/terms",
+            "supportUrl": "https://optiondesk.avidquant.com/support",
+            # Anthropic's directory takes the listing icon from here, once.
+            "icon": "./assets/{}".format(BRANDING["logo"]),
         }, indent=2) + "\n", encoding="utf-8")
 
     codex_manifest = {
@@ -406,8 +414,6 @@ def build_hosted_plugin():
 
     (HOSTED_PLUGIN / "README.md").write_text(
         "# option-desk-hosted plugin\n\n"
-        "Built by `scripts/package.py` from `openai-skills`. Do not edit "
-        "here: edit the sources and rebuild.\n\n"
         "It declares one remote MCP server, `{}`, and carries the four "
         "skills that match it. The service serves the SYNTH sample and "
         "privately processes option-chain snapshots the user is permitted "
@@ -418,7 +424,12 @@ def build_hosted_plugin():
         "For the local desk, with its own data pulls, simulation, "
         "backtests, commands and agents, install `option-desk` "
         "instead. Do not install both: they expose tools with the same "
-        "names.\n".format(HOSTED_MCP_URL),
+        "names.\n\n"
+        "Install in Claude Code:\n\n"
+        "```\n/plugin install option-desk-hosted --marketplace "
+        "Iman/agent-driven-options-desk-and-skills\n```\n\n"
+        "Built by `scripts/package.py` from `openai-skills`. Do not edit "
+        "here: edit the sources and rebuild.\n".format(HOSTED_MCP_URL),
         encoding="utf-8")
     return HOSTED_PLUGIN
 

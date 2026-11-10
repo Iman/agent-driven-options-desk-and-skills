@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated 2026-09-03.
+Last updated 10 November 2026.
 
 ## The short version
 
@@ -9,13 +9,13 @@ about you anywhere, and runs no server of its own. There is no telemetry,
 no analytics, no crash reporting, no licence check and no phone-home of any
 kind.
 
-That is not a policy promise you have to take on trust. The engine has no
-network access at all, and the only outbound requests the shell makes are
-to the market data provider you asked it to use.
+The source code shows this. The engine has no network access at all, and
+the only outbound requests the shell makes are to the market data provider
+you asked it to use.
 
-There is one thing this document does not cover: the separate hosted
-service at `optiondesk.avidquant.com`, which the README describes and
-which the `option-desk-hosted` plugin connects to. That service has its own
+This document does not cover the separate hosted service at
+`optiondesk.avidquant.com`, which the README describes and which the
+`option-desk-hosted` plugin connects to. That service has its own
 privacy policy, and the section on it below says what it is and where the
 policy is.
 
@@ -29,10 +29,10 @@ request.
 
 ## What leaves your machine
 
-One thing: a request to a market data provider, containing the symbol and
-expiry you asked about. That request goes directly from your machine to
-that provider under their terms and their privacy policy, not through any
-service of ours.
+One request leaves your machine. It goes to a market data provider and
+contains the symbol and expiry you asked about. It goes directly from your
+machine to that provider under their terms and their privacy policy, not
+through any service operated by the author.
 
 By default that provider is Yahoo, and only after you have acknowledged
 its personal-use terms. If you configure another, requests go there
@@ -57,7 +57,7 @@ outside any repository and readable only by you. They are never printed in
 full, never logged, and never written into an artifact. Every release is
 scanned for anything key-shaped and the build fails if something is found.
 
-## What we receive
+## What the author receives
 
 Nothing, from the software in this repository. There is no account, no
 registration, no licence server and no usage reporting. The author has no
@@ -79,7 +79,7 @@ machine, can still use the tools. Nothing in this repository connects to
 it unless you install the `option-desk-hosted` plugin, add its URL as an
 MCP connector yourself, or use a ChatGPT plugin that names it.
 
-What it does with data, in brief: its public page shows a synthetic sample
+In brief, its public page shows a synthetic sample
 and fetches no market data from any provider. If you upload an option-chain
 snapshot for private analysis, that snapshot is processed on the service,
 kept for at most one hour behind an unguessable URL, and can be deleted

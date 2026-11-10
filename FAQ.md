@@ -13,7 +13,7 @@ It needs no provider account after the local packages are installed.
 **Do I need an API key?**
 
 The synthetic sample and permitted file imports need no key.
-Yahoo access needs its optional dependency and a local personal-use acknowledgment.
+Yahoo access needs its optional dependency and a local personal-use acknowledgement.
 Other providers can require credentials.
 Run `optiondesk doctor` to see which sources are available and why others are unavailable.
 
@@ -25,9 +25,9 @@ See [Installation](INSTALL.md) and [Agent workflows](docs/wiki/Agent-Workflows.m
 
 **Can I use it from ChatGPT or another browser agent?**
 
-Use the separate hosted MCP connection if your account and workspace support it.
+Use the separate hosted MCP connection if the account and workspace support it.
 The hosted service provides synthetic examples and permitted snapshot analysis.
-It does not run a local process on your computer.
+It does not run a process on the local computer.
 See [the hosted workflow](docs/wiki/Agent-Workflows.md#browser-agents-and-the-hosted-service).
 
 **Does installing skills also install the engine?**
@@ -39,15 +39,15 @@ Calculations need the local tools or a connected hosted service.
 
 **Why is my dashboard empty?**
 
-The page reads the directory you select. It does not fetch data.
-Use the same `--out-dir` for your calculation commands and the dashboard.
+The page reads the selected directory. It does not fetch data.
+Use the same `--out-dir` for the calculation commands and the dashboard.
 Then select the correct underlying and expiry.
 [The troubleshooting guide](docs/wiki/Troubleshooting.md#empty-dashboard-or-browser-error) gives the exact checks.
 
 **Can I use my own CSV or JSON?**
 
 Yes. Include the underlying, spot, expiry, source, and contract rows.
-The [import guide](docs/wiki/Importing-Data.md) explains the format and acknowledgment.
+The [import guide](docs/wiki/Importing-Data.md) explains the format and acknowledgement.
 Use only data permitted for the chosen local or hosted use.
 
 **Why did some contracts receive no Greeks?**
@@ -86,12 +86,12 @@ A model value or delayed midpoint is not a verified fill.
 **Does a high comparison score identify a good trade?**
 
 The score orders structures under a printed model and assumptions.
-It does not account for your circumstances or establish a trading edge.
+It does not account for personal circumstances or establish a trading edge.
 Inspect the legs, maximum loss, costs, and model limitations.
 
 **Why does maximum loss sometimes say `unlimited`?**
 
-That label means the modeled loss is unbounded.
+That label means the modelled loss is unbounded.
 It is different from an unknown value and cannot be replaced with a finite risk denominator.
 
 **Why do the chain probability and simulation probability disagree?**
@@ -115,7 +115,7 @@ See [Troubleshooting](docs/wiki/Troubleshooting.md#simulation-takes-time).
 
 **Does the backtest use historical option chains?**
 
-It uses historical underlying closes and modeled option premiums.
+It uses historical underlying closes and modelled option premiums.
 Read its honesty statement for omitted spreads, slippage, assignment, and exercise effects.
 Compare it with the benchmark over the same windows.
 
@@ -133,12 +133,12 @@ The [evidence file](docs/evidence.json) records the mean return on capital at ri
 The benchmark returned about 1.6 percent per window in the same recorded example.
 
 The two returns use different capital bases.
-The structure's result used modeled premiums, not historical option fills.
+The structure's result used modelled premiums, not historical option fills.
 These historical figures illustrate interpretation limits. They are not current results or performance claims for the supplied SYNTH example.
 
 ## Scope and policies
 
-**Which underlyings can I analyze?**
+**Which underlyings can I analyse?**
 
 Use a compatible permitted option-chain snapshot or a provider that supports the underlying.
 Availability varies by provider and date.

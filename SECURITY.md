@@ -5,10 +5,10 @@
 Report privately, not as a public issue. Use GitHub's private vulnerability
 reporting on this repository, under Security, Report a vulnerability.
 
-Tell me what you did, what happened, and what you expected. A reproduction
-is worth more than a description. I will confirm receipt, and I will tell
-you plainly if I disagree that something is a vulnerability rather than
-letting the report go quiet.
+State what was done, what happened and what was expected. A reproduction
+is worth more than a description. The maintainer confirms receipt. If the
+maintainer does not consider the report a vulnerability, the reply says so
+plainly, and the report is not left unanswered.
 
 ## What is in scope
 
@@ -17,20 +17,21 @@ writes into your home directory. The MCP server, because it accepts input
 from a model. The provider layer, because it parses third-party responses.
 The artifact writer, because it decides what reaches disk.
 
-Two specific classes I care about, having already fixed one of each:
+Two classes are of particular interest, because one defect of each class
+has already been fixed:
 
 - Anything that makes the installer write outside the directories it
   declares, or delete something it did not create. A bare `owner/name` in
   the repository field once resolved to a local path, so the one-line
   install could be made to install a planted directory instead.
 - Anything that makes a tool call reach outside its advertised arguments.
-  The MCP server whitelists arguments against the schema it publishes for
-  exactly this reason.
+  For this reason the MCP server accepts only the arguments in the schema
+  that it publishes.
 
 ## What is not in scope
 
-Market data being wrong, delayed or missing. That is the provider's, and
-the software reports it rather than hiding it.
+Market data being wrong, delayed or missing. That is the provider's
+responsibility, and the software reports it.
 
 Losing money. This is research software and it places no orders. See
 DISCLAIMER.md.
@@ -41,7 +42,7 @@ that is a decision you have made and its consequences are yours.
 
 ## Reporting without identifying yourself
 
-You do not need to tell me where you are or how you reach the internet to
+You do not need to say where you are or how you reach the internet to
 report a bug or a vulnerability, and you should not be asked. If a
 maintainer asks, point them at the rule in `CODE_OF_CONDUCT.md`.
 

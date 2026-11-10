@@ -3,7 +3,7 @@
 [README](README.md) · [User guide](docs/wiki/Home.md) · [First walkthrough](docs/wiki/Getting-Started.md) · [Troubleshooting](docs/wiki/Troubleshooting.md)
 
 Eight ways in cover local tools, skills, plugins, and hosted connections.
-Choose where you want calculations to run.
+Choose a route by where the calculations run.
 For individual skill installation, use [Install skills in your agent](docs/wiki/Skill-Installation.md):
 [Codex](docs/wiki/Skill-Installation.md#codex), [ChatGPT](docs/wiki/Skill-Installation.md#chatgpt),
 [Claude chat](docs/wiki/Skill-Installation.md#claude-chat), or [Claude Code](docs/wiki/Skill-Installation.md#claude-code).
@@ -17,7 +17,7 @@ The [sample walkthrough](docs/wiki/Getting-Started.md) is the shortest route to 
 | Local plugin | Skills and MCP declaration; Claude Code commands and reviewers where supported | Local tools installed separately |
 | Skills CLI | Skill instructions | A supported agent; tools for calculations |
 | Hosted connection | Remote snapshot analysis and plots | Compatible account and connection configuration |
-| Docker | Containerized CLI and dashboard | Docker and an artifact mount |
+| Docker | Containerised CLI and dashboard | Docker and an artifact mount |
 
 ## 1. Full local installer
 
@@ -65,7 +65,7 @@ Read the installer output for any manual MCP registration step.
 | `--agents-skills-dir DIR` | Choose the shared agent skill directory. |
 | `--no-skills` | Omit skill installation. |
 | `--repo NAME` and `--ref REF` | Choose the source repository and revision. |
-| `--yes` | Disable interactive prompts. This is not a data-rights acknowledgment. |
+| `--yes` | Disable interactive prompts. This is not a data-rights acknowledgement. |
 | `--uninstall` | Remove the installation's recorded files. |
 | `--help` | Show the current controls and terms link. |
 
@@ -100,10 +100,10 @@ optiondesk doctor
 ```
 
 Imported snapshots and the local dashboard need no provider extra.
-For local Yahoo access, install `./shell[yahoo]` and complete the provider acknowledgment.
+For local Yahoo access, install `./shell[yahoo]` and complete the provider acknowledgement.
 For development, use [the development guide](docs/wiki/Development.md).
 
-Next: [run the supplied sample](docs/wiki/Getting-Started.md#2-import-the-sample).
+Next, [run the supplied sample](docs/wiki/Getting-Started.md#2-import-the-sample).
 
 ## 3. Claude Code plugin
 
@@ -114,7 +114,7 @@ Install the local tools first, then run these commands inside Claude Code:
 /plugin install option-desk@option-desk
 ```
 
-The plugin includes six skills, six commands, two reviewer agents, and an MCP declaration.
+The plugin includes eight skills, six commands, two reviewer agents and an MCP declaration.
 The declaration starts `optiondesk-mcp` from PATH.
 The plugin does not run the tool installer.
 See [agent workflows](docs/wiki/Agent-Workflows.md) and the [official Claude Code instructions](https://code.claude.com/docs/en/discover-plugins).
@@ -159,7 +159,7 @@ The separate hosted endpoint is:
 https://optiondesk.avidquant.com/mcp
 ```
 
-Connect it through the custom MCP or plugin setup available to your runtime and workspace.
+Connect it through the custom MCP or plugin setup that the runtime and workspace provide.
 Start with: `Show the SYNTH Greek ladder plot. Identify the data source.`
 
 The hosted service provides a synthetic sample and permitted private snapshot analysis.
@@ -168,7 +168,7 @@ It does not fetch live market data or expose the local history-based workflow.
 Read the [hosted workflow guide](docs/wiki/Agent-Workflows.md#browser-agents-and-the-hosted-service) and [privacy policy](https://optiondesk.avidquant.com/legal/privacy).
 
 For runtimes that support this repository's hosted plugin, select `option-desk-hosted` from the same marketplace.
-Do not enable it beside the local plugin in the same session: they expose overlapping tool names.
+Do not enable it beside the local plugin in the same session, because the two plugins expose overlapping tool names.
 Directory review status is not a guarantee of account-level availability.
 
 Skills ZIP files are instruction packages, not running MCP servers.
@@ -179,6 +179,7 @@ Maintainer upload and directory-submission instructions are in [docs/SUBMISSION.
 
 The installed executable serves the local protocol over stdio.
 Twelve tools expose typed inputs for chain import, analytics, plots, history workflows, and status.
+Two further tools, `option_price` and `option_lean`, serve the optional QuantLib and LEAN backends.
 
 For a full installer setup with the executable on PATH:
 
@@ -226,9 +227,9 @@ To configure an Alpha Vantage key through hidden input:
 optiondesk keys set alphavantage
 ```
 
-Yahoo requires a local personal-use acknowledgment.
+Yahoo requires a local personal-use acknowledgement.
 Read the terms linked by `./install.sh --help` before using `--accept-yahoo-terms`.
-Neither a key nor an acknowledgment grants hosting or redistribution rights.
+Neither a key nor an acknowledgement grants hosting or redistribution rights.
 
 Use `./run.sh --symbols SPY --dry-run` to inspect the complete local provider demo.
 Use [the sample walkthrough](docs/wiki/Getting-Started.md) when no provider is available.
@@ -242,4 +243,4 @@ From a checkout, use the same custom paths as the original installation:
 ```
 
 Review the reported removals.
-Your research artifacts are separate from the installed commands and skills.
+Research artifacts are separate from the installed commands and skills, and the uninstaller leaves them in place.

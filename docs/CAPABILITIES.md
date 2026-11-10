@@ -1,9 +1,8 @@
 # Everything this project can do
 
-The complete catalogue: every surface, every command, every tool, every
-structure, and the things it deliberately refuses to do. If something is
-not listed here it does not exist, and if something here does not work that
-is a bug worth reporting.
+This catalogue lists every surface, command, tool and structure, and the
+actions the project refuses. A feature that is not listed here does not
+exist, and a listed feature that does not work is a defect to report.
 
 Two companion documents are generated rather than written, so they cannot
 go stale: `docs/INVENTORY.md` is the public API read straight out of the
@@ -68,9 +67,9 @@ carries the four hosted-safe skills; both marketplaces list both, and a
 user installs one or the other because the two servers expose tools with
 the same names.
 
-The MCP server is a local stdio process, which Codex on your own machine
-can run and browser ChatGPT cannot, because it has no way to execute a
-binary on your computer. The separate hosted service now provides a
+The MCP server is a local stdio process. Codex on the local machine can
+run it. Browser ChatGPT cannot, because it cannot execute a binary on the
+user's computer. The separate hosted service provides a
 Streamable HTTP endpoint at `https://optiondesk.avidquant.com/mcp`.
 It serves SYNTH and privately processes permitted user snapshots. It does
 not fetch Yahoo, Alpha Vantage, an exchange, or a broker.
@@ -131,14 +130,13 @@ no provider here carries futures or FX option chains, and the module says
 so in its first paragraph. Implied volatility
 is solved by Newton-Raphson with a bisection fallback.
 
-The part that matters is what it refuses. A contract whose price is
+The solver refuses a contract that it cannot identify. A contract whose price is
 dominated by intrinsic value reprices within tolerance at every volatility
 in the range, so its price identifies none of them. Those contracts get
 `iv: null` and are counted in `counts.without_iv` on the chain snapshot, and in
 `skipped.no_iv` on the Greek ladder built from it, rather than being
-filled with a default. A complete Greek ladder built on default volatilities looks
-exactly as authoritative as a real one, which is why the refusal is the
-feature.
+filled with a default. A complete Greek ladder built on default volatilities has the
+same form as a real one, which is the reason for the refusal.
 
 ### 4.2 The sixteen Greeks
 
@@ -174,8 +172,8 @@ volatility is a wrong number rather than a smaller one.
 | straddle | a big move, direction unknown |
 | strangle | cheaper than a straddle, needs a bigger move |
 | iron condor | range bound with volatility expected to fall |
-| iron butterfly | pinned rather than merely range bound |
-| long call butterfly | a cheap bet on pinning near a strike |
+| iron butterfly | settlement expected at a strike, not merely within a range |
+| long call butterfly | a cheap bet on settlement near a strike |
 | calendar spread | sell near, buy far, same strike, collect the decay difference |
 | calendar put spread | the put side of the same trade, where the skew is usually richer |
 | diagonal spread | a calendar with a directional lean |
@@ -236,8 +234,7 @@ than a footnote in the interface.
 A Bayesian GARCH(1,1) with Student-t innovations, fitted by adaptive
 random-walk Metropolis, then simulated forward.
 
-What it reports about itself matters as much as what it reports about the
-market. Split R-hat and effective sample size are computed per parameter,
+The simulation reports its own diagnostics. Split R-hat and effective sample size are computed per parameter,
 and constant chains produce infinite R-hat. A constant chain with at least
 ten retained draws produces ESS of one; shorter chains return their length. Post-burn acceptance rate must be
 above zero. `converged: false` means the quantiles are still written, so
@@ -262,8 +259,8 @@ market disagreeing with that model. That honesty statement is a field in
 the artifact, not a caveat in a readme. It reports win rate, mean return on
 capital at risk, drawdown in risk units, a permutation test, a bootstrap
 interval, and a buy-and-hold benchmark over the same windows, because a
-directional structure amplifies drift and a number without its benchmark is
-a number that flatters itself.
+directional structure amplifies drift and a result without its benchmark
+overstates the structure.
 
 The permutation test and the interval are block based, because the windows
 overlap: a thirty day hold entered every five trading days shares
@@ -292,7 +289,7 @@ marked at its entry price.
 Seven asset classes reach the desk through this one provider: index
 options through `^SPX`, equity and ETF, rates through `TLT`, metals
 through `GLD`, energy through `USO`, crypto through `BITO` and FX through
-`FXE`. All were measured pulling real chains on 2026-08-30. Futures and FX
+`FXE`. All were measured pulling real chains on 30 August 2026. Futures and FX
 spot are the exception and carry no chains at all here, which is why the
 exchange-traded proxies are the route rather than a preference.
 
@@ -342,10 +339,10 @@ An artifact that is replaced is copied into `archive/<date>/` first, named for
 the time it was generated. The live filename never changes, so nothing that
 resolves the newest artifact by name has to know the archive exists.
 Identical bytes are not archived, `OPTIONDESK_ARCHIVE=0` turns it off, and
-nothing prunes: deleting your own measurements is not a decision this
-project makes for you.
+nothing prunes, because deleting a user's measurements is the user's
+decision.
 
-`docs/evidence.json` pins every figure quoted in the documentation to the
+`docs/evidence.json` ties every figure quoted in the documentation to the
 artifact it was read from, with the generation time, the provider and the
 degraded flag. Derived numbers only, a few kilobytes, no provider data, and
 recorded by hand rather than by the refresh. The refresh checks it. This
@@ -357,8 +354,8 @@ The `degraded` flag and its reason appear in the printed summary as well as
 in the artifact, on every path of every command that has an upstream that
 can fail, including the two paths that report a structure could not be
 built at all. Commands with no upstream carry the key set to false rather
-than omitting it, so a consumer can read it unconditionally. That
-is a recent correction: five commands wrote degradation into the envelope
+than omitting it, so a consumer can read it unconditionally. Before
+this correction, five commands wrote degradation into the envelope
 and printed a summary with no trace of it, so an MCP client holding the tool
 result, or anyone reading standard output, could not tell that the numbers
 came from a fallback provider or a stale chain. The reporting rule every
@@ -439,6 +436,8 @@ work needs them.
 | `options-simulation` | what the underlying might do, value at risk, Monte Carlo, MCMC | `reference.md`, `workflows/run-a-projection.md` |
 | `options-backtest` | has this worked historically, is the edge real, paper trade this | `reference.md`, `workflows/evaluate-a-rule.md` |
 | `desk-setup` | installation, PATH faults, missing commands, MCP setup | `SKILL.md` only |
+| `options-pricing` | a vanilla American or European price through the optional QuantLib backend | `SKILL.md` only |
+| `options-lean` | export of fixed legs to a LEAN bundle, import of completed results | `SKILL.md` only |
 
 Every skill carries the same reporting rules: cite the artifact path, never
 re-derive a number in prose, say when something is degraded before quoting
@@ -447,7 +446,7 @@ anything from it, and never recommend a trade.
 They work with no Python installed at all, as domain knowledge rather than
 automation. `./install.sh --skills-only` does exactly that.
 
-Gemini CLI loads no skills, so the six are compiled into `GEMINI.md` in
+Gemini CLI loads no skills, so the eight are compiled into `GEMINI.md` in
 full. Codex discovers them itself in `.agents/skills`, so `AGENTS.md`
 points at them rather than repeating them, which took it from 25,851 bytes
 to 4,366 and restored the progressive disclosure that embedding had
@@ -484,8 +483,8 @@ opposite reason.
 ## 10. Agents
 
 Two, in `.claude/agents/`. An agent gets its own context window and a
-narrower brief, which is what you want when the work would otherwise
-pollute the main thread or when its job is to disagree.
+narrower brief, which suits work that would otherwise fill the main
+thread, or work whose purpose is to disagree.
 
 `options-risk-reviewer` re-derives the risk of a proposed structure
 independently from the artifacts, attacks the assumptions, and states what
@@ -511,6 +510,9 @@ anything else.
 `option_simulate`, `option_backtest`, `option_forward_test`,
 `option_desk_status`.
 
+Two further tools, `option_price` and `option_lean`, serve the optional
+QuantLib and LEAN backends.
+
 Arguments are whitelisted against the advertised schema, so a tool cannot
 be talked into writing outside its output directory, and anything supplied
 but not advertised comes back in `ignored_arguments` instead of
@@ -521,9 +523,8 @@ A malformed request is the caller's error and is reported as one; only a
 genuine server fault is `-32603`.
 
 Notifications, meaning requests with no id, are answered with nothing and,
-more importantly, not executed. Until recently a `tools/call` sent as a
-notification both ran the tool and emitted an unsolicited response with a
-null id. A request carrying id `0`, which is legal and easy to lose to a
+more importantly, not executed. An earlier version ran a `tools/call` sent
+as a notification and emitted an unsolicited response with a null id. A request carrying id `0`, which is legal and easy to lose to a
 truthiness test, is still answered.
 
 Every tool description carries the reporting rule, appended in a loop
@@ -637,19 +638,18 @@ it finds one. It is checked mechanically because a reviewer will not catch
 the four hundredth instance, and a key that reaches a published file cannot
 be unpublished.
 
-The ANSI half of that scan is not hypothetical. On this machine `cat` is
-aliased to `highlight -O ansi --force`, so anything that reads a file
-through the shell and writes the result back embeds colour codes into the
-source. A test file acquired a literal escape at column one of line 286
-during this session and the scan caught it within the minute. Use
-`/bin/cat` when a file's bytes matter.
+The ANSI part of the scan has caught a real fault. Where `cat` is aliased
+to a syntax highlighter, a file read through the shell and written back
+contains colour codes. A test file acquired a literal escape at column one
+of line 286 in this way, and the scan reported it. Use `/bin/cat` when the
+bytes of a file matter.
 
 The scan is itself tested, in `shell/tests/test_house_rules.py`, which
 plants each banned thing in a temporary tree and asserts the scan reports
 it, then plants ordinary prose and asserts it does not. That second half
 matters as much: an early version flagged the word PARAMETERISATION as a
-key, and a scan with false positives is switched off within a day, which
-leaves you with no scan on the day it would have mattered.
+key, and a scan with false positives is soon disabled, which leaves no
+scan when one is needed.
 
 `--fast` skips the suites, `--no-index` skips the index, `--no-package`
 skips the installable forms.
@@ -679,9 +679,8 @@ current figures.
 
 `codegraph install` registers it as an MCP server, so an agent can query the
 index directly rather than through the shell. `codegraph sync -q` in a
-`post-commit` hook keeps it current between refreshes. Neither is done for
-you, because indexing somebody's repository without being asked is not a
-decision this project gets to make.
+`post-commit` hook keeps it current between refreshes. Neither is done
+automatically, because indexing a repository is the owner's decision.
 
 ### The tests
 
@@ -701,7 +700,7 @@ repository could check it, which is the kind of claim this project refuses
 everywhere else. It applies ninety-nine breakages to a copy of
 each file, runs the tests that ought to catch each one, and reports three
 outcomes: killed by the test file named for it, killed elsewhere in the
-suite, or survived. The last full run recorded here, on 2026-08-31 and
+suite, or survived. The last full run recorded here, on 31 August 2026 and
 over fifty-eight of them, was fifty-four, three and zero, plus one
 mutant proven equivalent and recorded as such with the argument for why
 it cannot be killed.
@@ -766,7 +765,7 @@ unable to answer fails rather than substituting.
 
 It does not phone home. The shell fetches market data from whichever
 provider answers, the engine has no network access at all, and nothing
-about you or your usage is sent anywhere.
+about the user or the usage is sent anywhere.
 
 Read `DISCLAIMER.md`. This is research software, the author holds no
 regulated status, and nothing here is a recommendation or a solicitation.
@@ -785,12 +784,12 @@ a continuous yield already, which is most of what a futures or FX option
 needs.
 
 More structures. The payoff engine expresses more than the playbook names.
-Ratio spreads, broken wing butterflies and jade lizards are in as of this
-pass; put ratios, condors with unequal wings and the rest of the
+Ratio spreads, broken wing butterflies and jade lizards are implemented;
+put ratios, condors with unequal wings and the rest of the
 flexible-wing family are not.
 
 More charts still. The surface, the variance risk premium, a condor panel
-and gamma scalping levels shipped in this pass, taking the dashboard from
+and gamma scalping levels are implemented, which raised the dashboard from
 28 canvases to 32. Two of them are narrower than they sound, and the panels
 say so themselves instead of leaving it to be discovered: the condor panel
 plots the condors that exist as artifacts, because nothing in the engine
@@ -808,7 +807,7 @@ The IV tolerance applies before six-decimal rounding. Strategy breakeven roots a
 
 The simulation gate uses a truncated per-chain ESS estimate. Taking the minimum across chains does not guarantee a conservative estimate. Its structure callback applies intrinsic payoff at the requested horizon without aligning plan expiries or preserving far-leg time value. Untruncated Student-t log returns have no finite mean terminal price, so finite sample averages of unbounded payoffs need explicit qualification.
 
-Block sign-flip randomization assumes symmetry under the allowed block flips. Block methods can lose dependence across block boundaries. A bootstrap with one available block returns a zero-width interval without resampling variation. The current even-sample median field selects the upper middle observation. Read these limits before interpreting a result as calibrated uncertainty.
+Block sign-flip randomisation assumes symmetry under the allowed block flips. Block methods can lose dependence across block boundaries. A bootstrap with one available block returns a zero-width interval without resampling variation. The current even-sample median field selects the upper middle observation. Read these limits before interpreting a result as calibrated uncertainty.
 
 ## Optional QuantLib and LEAN backends
 

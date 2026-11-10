@@ -2,44 +2,42 @@
 
 **Looking for something to work on?** [docs/BACKLOG.md](docs/BACKLOG.md) lists what is known, measured and not done, with the evidence for each item and what finished means. Items marked good first issue are self-contained. Everything there came out of adversarial verification of this project's own numbers, so none of it is speculative.
 
-Issues and pull requests are welcome. This file says what makes them
-land quickly, and what will get them sent back.
+Issues and pull requests are welcome. This file states what makes them
+quick to merge and what causes them to be returned.
 
 ## Before you write code
 
-Open an issue first for anything beyond a fix. Not for ceremony: this
-project has a strong opinion about what it refuses to do, and a change that
-crosses one of those lines is better discussed than discovered at review.
+Open an issue first for anything beyond a fix. The project refuses some
+changes by design, and a change that crosses one of those lines is better
+discussed before review.
 
-Read `docs/CAPABILITIES.md` for what exists. It is generated in part and
-complete by construction, so it will not send you looking for something
-that was removed.
+Read `docs/CAPABILITIES.md` for what exists. Tests check its counts
+against the source tree.
 
 ## The rule this project is built on
 
 **Measure before you build, and say what you measured.**
 
-Every change should be able to answer three questions. What did you observe
-that made this worth doing. What number did you get before, and what number
-do you get now. What would have to be true for the change to be wrong.
+Every change must answer three questions. Which observation made the change
+worth doing? Which number was measured before, and which number is measured
+now? What would have to be true for the change to be wrong?
 
 A pull request that says "improves performance" gets asked for the two
 numbers. One that says "deploy time went from 40 minutes to 4, measured
 across five runs, here is the script" gets read immediately.
 
-This is not pedantry. Most of the defects fixed in this repository were
-found because a confident claim collapsed on first contact with data: a
-volatility solver returning its own starting guess, a test suite whose
-tolerances made three Greeks untestable, a documented figure that had gone
-stale within six hours. All of them read as fine.
+Most of the defects fixed in this repository were found when a claim was
+measured. Examples are a volatility solver that returned its own starting
+guess, a test suite whose tolerances made three Greeks untestable, and a
+documented figure that was stale within six hours.
 
 ## Tests
 
 Follow [Testing and coverage](docs/TESTING.md) for the separate test layers,
 success and failure scenarios, and the 80% unit line-coverage gate per package.
 
-Every behavioural change needs a test, and the test must be one you have
-watched fail.
+Every behavioural change needs a test that was observed to fail before the
+change.
 
 ```
 python3 scripts/refresh.py        rebuilds everything generated, then runs
@@ -52,8 +50,8 @@ Write the docstring as what would break, not as a restatement of the
 assert. `test_the_inner_vega_guard_refuses_rather_than_dividing_by_zero` is
 worth more than `test_implied_vol_returns_none`.
 
-If you add a defect fix, add a mutation for it in `scripts/mutate.py`. A
-fix without one is a fix nobody notices being undone.
+For a defect fix, add a mutation in `scripts/mutate.py`. Without a
+mutation, a later reversal of the fix can pass unnoticed.
 
 ## House rules, enforced mechanically
 
@@ -65,10 +63,9 @@ about them in review:
 - no em dashes; plain hyphens or a rewrite
 - nothing shaped like a provider key
 
-A note on the first one. If `cat` on your machine is aliased to a syntax
-highlighter, reading a file through the shell and writing it back embeds
-colour codes into the source. It has happened three times here. Use
-`/bin/cat`.
+If `cat` is aliased to a syntax highlighter, a file read through the shell
+and written back contains colour codes. This fault occurred three times in
+this repository. Use `/bin/cat`.
 
 ## What will be sent back
 
@@ -84,18 +81,17 @@ are all built by scripts. Edit the source and rebuild.
 
 ## Licensing and your rights
 
-Contributions are covered by `CLA.md`. In short: you keep your copyright
+Contributions are covered by `CLA.md`. In short, you keep your copyright
 and stay free to use your own work anywhere, and you grant the copyright
 holder a perpetual licence to use it here.
 
 That grant is what allows the project to be relicensed, which it was on
-2026-08-31. If that is not acceptable to you, please do not contribute
+31 August 2026. If that is not acceptable to you, please do not contribute
 code; issues and reproductions are just as valuable and carry no such
 terms.
 
 The project is under `PolyForm Noncommercial 1.0.0`. It is not open source
-in the OSI sense, and that will matter to some people. Better to know now
-than at review.
+in the OSI sense. Check that this is acceptable before contributing.
 
 ## Privacy
 
